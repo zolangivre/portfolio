@@ -69,6 +69,17 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    projects: Project;
+    experiences: Experience;
+    skills: Skill;
+    technologies: Technology;
+    categories: Category;
+    companies: Company;
+    schools: School;
+    education: Education;
+    testimonials: Testimonial;
+    messages: Message;
+    journal: Journal;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,18 +89,45 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    experiences: ExperiencesSelect<false> | ExperiencesSelect<true>;
+    skills: SkillsSelect<false> | SkillsSelect<true>;
+    technologies: TechnologiesSelect<false> | TechnologiesSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    companies: CompaniesSelect<false> | CompaniesSelect<true>;
+    schools: SchoolsSelect<false> | SchoolsSelect<true>;
+    education: EducationSelect<false> | EducationSelect<true>;
+    testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
+    messages: MessagesSelect<false> | MessagesSelect<true>;
+    journal: JournalSelect<false> | JournalSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
-  fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
-  locale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('fr' | 'en') | ('fr' | 'en')[];
+  globals: {
+    settings: Setting;
+    hero: Hero;
+    about: About;
+    contact: Contact;
+    navigation: Navigation;
+    footer: Footer;
+    'sections-visibility': SectionsVisibility;
+  };
+  globalsSelect: {
+    settings: SettingsSelect<false> | SettingsSelect<true>;
+    hero: HeroSelect<false> | HeroSelect<true>;
+    about: AboutSelect<false> | AboutSelect<true>;
+    contact: ContactSelect<false> | ContactSelect<true>;
+    navigation: NavigationSelect<false> | NavigationSelect<true>;
+    footer: FooterSelect<false> | FooterSelect<true>;
+    'sections-visibility': SectionsVisibilitySelect<false> | SectionsVisibilitySelect<true>;
+  };
+  locale: 'fr' | 'en';
   widgets: {
     collections: CollectionsWidget;
   };
@@ -122,7 +160,7 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -143,11 +181,13 @@ export interface User {
   collection: 'users';
 }
 /**
+ * Reusable images, logos and videos used across the site.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   alt: string;
   updatedAt: string;
   createdAt: string;
@@ -160,13 +200,302 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    hero?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * Portfolio projects shown in the projects section.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects".
+ */
+export interface Project {
+  id: number;
+  title: string;
+  slug: string;
+  shortDescription: string;
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  coverImage?: (number | null) | Media;
+  gallery?: (number | Media)[] | null;
+  technologies?: (number | Technology)[] | null;
+  githubUrl?: string | null;
+  liveUrl?: string | null;
+  featured?: boolean | null;
+  order?: number | null;
+  year?: number | null;
+  status?: ('live' | 'in-progress' | 'archived') | null;
+  category?: (number | null) | Category;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Technology tags referenced by projects and experience entries.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "technologies".
+ */
+export interface Technology {
+  id: number;
+  name: string;
+  slug: string;
+  logo?: (number | null) | Media;
+  website?: string | null;
+  /**
+   * Optional hex color used in UI accents.
+   */
+  color?: string | null;
+  category?: (number | null) | Category;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Shared categories used across Skills, Technologies, Projects and Journal. Grouped by domain so each collection only offers its relevant categories.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  group: 'tech' | 'project' | 'journal';
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Professional experience timeline entries.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "experiences".
+ */
+export interface Experience {
+  id: number;
+  company: number | Company;
+  position: string;
+  employmentType?: string | null;
+  location?: string | null;
+  description: string;
+  technologies?: (number | Technology)[] | null;
+  startDate: string;
+  endDate?: string | null;
+  currentlyWorking?: boolean | null;
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Companies referenced by experience entries.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "companies".
+ */
+export interface Company {
+  id: number;
+  name: string;
+  logo?: (number | null) | Media;
+  website?: string | null;
+  location?: string | null;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Skills grouped by category, shown in the skills section.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skills".
+ */
+export interface Skill {
+  id: number;
+  name: string;
+  category: number | Category;
+  level?: ('advanced' | 'intermediate' | 'beginner') | null;
+  logo?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Schools referenced by education entries.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "schools".
+ */
+export interface School {
+  id: number;
+  name: string;
+  logo?: (number | null) | Media;
+  website?: string | null;
+  location?: string | null;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Education timeline entries.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "education".
+ */
+export interface Education {
+  id: number;
+  school: number | School;
+  degree: string;
+  fieldOfStudy?: string | null;
+  description?: string | null;
+  location?: string | null;
+  startDate: string;
+  endDate?: string | null;
+  currentlyStudying?: boolean | null;
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Client and colleague quotes displayed in the testimonials section.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials".
+ */
+export interface Testimonial {
+  id: number;
+  /**
+   * Full name of the person giving the testimonial.
+   */
+  author: string;
+  /**
+   * Job title, e.g. "Product Manager".
+   */
+  role?: string | null;
+  company?: (number | null) | Company;
+  avatar?: (number | null) | Media;
+  quote: string;
+  featured?: boolean | null;
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Submissions from the public contact form.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "messages".
+ */
+export interface Message {
+  id: number;
+  name: string;
+  email: string;
+  message: string;
+  read?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Personal, non-technical stories — travel, sport, achievements, events, discoveries.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "journal".
+ */
+export interface Journal {
+  id: number;
+  title: string;
+  slug: string;
+  category: number | Category;
+  shortDescription: string;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  coverImage?: (number | null) | Media;
+  gallery?: (number | Media)[] | null;
+  date: string;
+  location?: string | null;
+  tags?:
+    | {
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  featured?: boolean | null;
+  /**
+   * Private entries are kept in the CMS but never rendered on the site.
+   */
+  visibility: 'public' | 'private';
+  order?: number | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -183,20 +512,64 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'projects';
+        value: number | Project;
+      } | null)
+    | ({
+        relationTo: 'experiences';
+        value: number | Experience;
+      } | null)
+    | ({
+        relationTo: 'skills';
+        value: number | Skill;
+      } | null)
+    | ({
+        relationTo: 'technologies';
+        value: number | Technology;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'companies';
+        value: number | Company;
+      } | null)
+    | ({
+        relationTo: 'schools';
+        value: number | School;
+      } | null)
+    | ({
+        relationTo: 'education';
+        value: number | Education;
+      } | null)
+    | ({
+        relationTo: 'testimonials';
+        value: number | Testimonial;
+      } | null)
+    | ({
+        relationTo: 'messages';
+        value: number | Message;
+      } | null)
+    | ({
+        relationTo: 'journal';
+        value: number | Journal;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -206,10 +579,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -229,7 +602,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -274,6 +647,228 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        hero?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects_select".
+ */
+export interface ProjectsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  shortDescription?: T;
+  description?: T;
+  coverImage?: T;
+  gallery?: T;
+  technologies?: T;
+  githubUrl?: T;
+  liveUrl?: T;
+  featured?: T;
+  order?: T;
+  year?: T;
+  status?: T;
+  category?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "experiences_select".
+ */
+export interface ExperiencesSelect<T extends boolean = true> {
+  company?: T;
+  position?: T;
+  employmentType?: T;
+  location?: T;
+  description?: T;
+  technologies?: T;
+  startDate?: T;
+  endDate?: T;
+  currentlyWorking?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skills_select".
+ */
+export interface SkillsSelect<T extends boolean = true> {
+  name?: T;
+  category?: T;
+  level?: T;
+  logo?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "technologies_select".
+ */
+export interface TechnologiesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  logo?: T;
+  website?: T;
+  color?: T;
+  category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  group?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "companies_select".
+ */
+export interface CompaniesSelect<T extends boolean = true> {
+  name?: T;
+  logo?: T;
+  website?: T;
+  location?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "schools_select".
+ */
+export interface SchoolsSelect<T extends boolean = true> {
+  name?: T;
+  logo?: T;
+  website?: T;
+  location?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "education_select".
+ */
+export interface EducationSelect<T extends boolean = true> {
+  school?: T;
+  degree?: T;
+  fieldOfStudy?: T;
+  description?: T;
+  location?: T;
+  startDate?: T;
+  endDate?: T;
+  currentlyStudying?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials_select".
+ */
+export interface TestimonialsSelect<T extends boolean = true> {
+  author?: T;
+  role?: T;
+  company?: T;
+  avatar?: T;
+  quote?: T;
+  featured?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "messages_select".
+ */
+export interface MessagesSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  message?: T;
+  read?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "journal_select".
+ */
+export interface JournalSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  category?: T;
+  shortDescription?: T;
+  content?: T;
+  coverImage?: T;
+  gallery?: T;
+  date?: T;
+  location?: T;
+  tags?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  featured?: T;
+  visibility?: T;
+  order?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -314,6 +909,430 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * Identity, branding, contact, theme and default SEO used across the whole site.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings".
+ */
+export interface Setting {
+  id: number;
+  name: string;
+  profession?: string | null;
+  photo?: (number | null) | Media;
+  logo?: (number | null) | Media;
+  /**
+   * Controls the color used for buttons, links, badges, focus states and accents across the whole site.
+   */
+  theme: {
+    /**
+     * The main accent color, used everywhere across the site.
+     */
+    primaryColor:
+      | 'orange'
+      | 'coral'
+      | 'red'
+      | 'crimson'
+      | 'rose'
+      | 'pink'
+      | 'purple'
+      | 'violet'
+      | 'indigo'
+      | 'blue'
+      | 'sky'
+      | 'cyan'
+      | 'teal'
+      | 'mint'
+      | 'emerald'
+      | 'green'
+      | 'lime'
+      | 'olive'
+      | 'gold'
+      | 'amber'
+      | 'yellow'
+      | 'slate'
+      | 'gray'
+      | 'neutral';
+    /**
+     * Optional secondary color for a subtle two-tone highlight in the background. Falls back to the primary color when left empty.
+     */
+    accentColor?:
+      | (
+          | 'orange'
+          | 'coral'
+          | 'red'
+          | 'crimson'
+          | 'rose'
+          | 'pink'
+          | 'purple'
+          | 'violet'
+          | 'indigo'
+          | 'blue'
+          | 'sky'
+          | 'cyan'
+          | 'teal'
+          | 'mint'
+          | 'emerald'
+          | 'green'
+          | 'lime'
+          | 'olive'
+          | 'gold'
+          | 'amber'
+          | 'yellow'
+          | 'slate'
+          | 'gray'
+          | 'neutral'
+        )
+      | null;
+    defaultTheme?: ('light' | 'dark' | 'system') | null;
+  };
+  contactEmail?: string | null;
+  socialLinks?:
+    | {
+        platform: 'github' | 'linkedin' | 'x' | 'instagram' | 'dribbble' | 'other';
+        url: string;
+        /**
+         * Optional custom icon. Falls back to a built-in icon for the selected platform when left empty.
+         */
+        icon?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Fallback metadata used when a page does not define its own.
+   */
+  seo?: {
+    defaultTitle?: string | null;
+    defaultDescription?: string | null;
+    defaultImage?: (number | null) | Media;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * The homepage hero section.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero".
+ */
+export interface Hero {
+  id: number;
+  eyebrow?: string | null;
+  title: string;
+  description?: string | null;
+  highlights?:
+    | {
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  primaryCta?: {
+    label?: string | null;
+    href?: string | null;
+  };
+  secondaryCta?: {
+    label?: string | null;
+    href?: string | null;
+  };
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * The homepage about section.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about".
+ */
+export interface About {
+  id: number;
+  title: string;
+  description?: string | null;
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  points?:
+    | {
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  portrait?: (number | null) | Media;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * The homepage contact section.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact".
+ */
+export interface Contact {
+  id: number;
+  title: string;
+  description?: string | null;
+  successMessage?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Primary header navigation links.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation".
+ */
+export interface Navigation {
+  id: number;
+  items?:
+    | {
+        label: string;
+        href: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Footer text and links.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer".
+ */
+export interface Footer {
+  id: number;
+  text?: string | null;
+  links?:
+    | {
+        label: string;
+        href: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Toggle which sections of the site are shown. Disabled sections are hidden from the homepage, the navigation, and (for Journal) its dedicated pages.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sections-visibility".
+ */
+export interface SectionsVisibility {
+  id: number;
+  /**
+   * Show or hide the Hero section across the site.
+   */
+  hero?: boolean | null;
+  /**
+   * Show or hide the About section across the site.
+   */
+  about?: boolean | null;
+  /**
+   * Show or hide the Projects section across the site.
+   */
+  projects?: boolean | null;
+  /**
+   * Show or hide the Experience section across the site.
+   */
+  experience?: boolean | null;
+  /**
+   * Show or hide the Education section across the site.
+   */
+  education?: boolean | null;
+  /**
+   * Show or hide the Skills section across the site.
+   */
+  skills?: boolean | null;
+  /**
+   * Show or hide the Testimonials section across the site.
+   */
+  testimonials?: boolean | null;
+  /**
+   * Show or hide the Contact section across the site.
+   */
+  contact?: boolean | null;
+  /**
+   * Show or hide the Journal section across the site.
+   */
+  journal?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings_select".
+ */
+export interface SettingsSelect<T extends boolean = true> {
+  name?: T;
+  profession?: T;
+  photo?: T;
+  logo?: T;
+  theme?:
+    | T
+    | {
+        primaryColor?: T;
+        accentColor?: T;
+        defaultTheme?: T;
+      };
+  contactEmail?: T;
+  socialLinks?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        icon?: T;
+        id?: T;
+      };
+  seo?:
+    | T
+    | {
+        defaultTitle?: T;
+        defaultDescription?: T;
+        defaultImage?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero_select".
+ */
+export interface HeroSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  description?: T;
+  highlights?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  primaryCta?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  secondaryCta?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+      };
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about_select".
+ */
+export interface AboutSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  body?: T;
+  points?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  portrait?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact_select".
+ */
+export interface ContactSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  successMessage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation_select".
+ */
+export interface NavigationSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer_select".
+ */
+export interface FooterSelect<T extends boolean = true> {
+  text?: T;
+  links?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sections-visibility_select".
+ */
+export interface SectionsVisibilitySelect<T extends boolean = true> {
+  hero?: T;
+  about?: T;
+  projects?: T;
+  experience?: T;
+  education?: T;
+  skills?: T;
+  testimonials?: T;
+  contact?: T;
+  journal?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

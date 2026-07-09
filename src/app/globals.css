@@ -1,0 +1,93 @@
+@import 'tailwindcss';
+
+:root {
+  color-scheme: light;
+
+  --bg: #faf9f6;
+  --bg-elevated: #ffffff;
+  --surface: #f1efe8;
+  --surface-hover: #e9e6dc;
+  --border: rgba(23, 20, 15, 0.1);
+  --border-strong: rgba(23, 20, 15, 0.18);
+  --fg: #16140f;
+  --fg-muted: #56504a;
+  --fg-subtle: #767166;
+  --shadow-color: 23 20 15;
+
+  /*
+   * --accent, --accent-fg and --accent-2 are overridden per request by an
+   * inline <style> tag in [locale]/layout.tsx, resolved from the color
+   * chosen in Payload → Global Settings → Theme. The values below are only
+   * a fallback (same as the "orange" palette entry). Every other accent
+   * token is derived from these via color-mix(), so a new color never needs
+   * changes here — see src/lib/theme/palette.ts to add one.
+   */
+  --accent: #a1490c;
+  --accent-fg: #fff8f0;
+  --accent-2: var(--accent);
+
+  --accent-strong: color-mix(in srgb, var(--accent) 82%, black);
+  --accent-soft: color-mix(in srgb, var(--accent) 10%, transparent);
+  --accent-soft-border: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+:root.dark {
+  color-scheme: dark;
+
+  --bg: #0c0b09;
+  --bg-elevated: #17150f;
+  --surface: #1d1a14;
+  --surface-hover: #262218;
+  --border: rgba(250, 247, 240, 0.1);
+  --border-strong: rgba(250, 247, 240, 0.18);
+  --fg: #f5f1e8;
+  --fg-muted: #b2ab9b;
+  --fg-subtle: #807a6c;
+  --shadow-color: 0 0 0;
+
+  --accent: #ff8a3d;
+  --accent-fg: #1a0f04;
+  --accent-2: var(--accent);
+
+  --accent-strong: color-mix(in srgb, var(--accent) 78%, white);
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
+  --accent-soft-border: color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+@theme inline {
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-inter);
+
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-soft-border: var(--accent-soft-border);
+  --color-accent-2: var(--accent-2);
+}
+
+body {
+  @apply bg-bg text-fg antialiased;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  transition:
+    background-color 220ms ease,
+    color 220ms ease;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: var(--color-accent-soft-border);
+  color: var(--color-fg);
+}

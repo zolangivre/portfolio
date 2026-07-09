@@ -1,0 +1,54 @@
+import type { CollectionConfig } from 'payload'
+
+export const Categories: CollectionConfig = {
+  slug: 'categories',
+  labels: {
+    singular: 'Category',
+    plural: 'Categories',
+  },
+  admin: {
+    group: 'Taxonomy',
+    description:
+      'Shared categories used across Skills, Technologies, Projects and Journal. Grouped by domain so each collection only offers its relevant categories.',
+    defaultColumns: ['name', 'group', 'order'],
+    useAsTitle: 'name',
+  },
+  access: {
+    read: () => true,
+  },
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+      localized: true,
+    },
+    {
+      name: 'slug',
+      type: 'text',
+      required: true,
+      unique: true,
+      index: true,
+    },
+    {
+      name: 'group',
+      type: 'select',
+      required: true,
+      index: true,
+      options: [
+        { label: 'Tech (Skills & Technologies)', value: 'tech' },
+        { label: 'Projects', value: 'project' },
+        { label: 'Journal', value: 'journal' },
+      ],
+    },
+    {
+      name: 'order',
+      type: 'number',
+      defaultValue: 0,
+      admin: {
+        step: 1,
+      },
+    },
+  ],
+  timestamps: true,
+}

@@ -1,4 +1,5 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { seoPlugin } from '@payloadcms/plugin-seo'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -7,6 +8,24 @@ import sharp from 'sharp'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
+import { Experiences } from './collections/Experience'
+import { Projects } from './collections/Projects'
+import { Skills } from './collections/Skills'
+import { Technologies } from './collections/Technologies'
+import { Companies } from './collections/Companies'
+import { Categories } from './collections/Categories'
+import { Schools } from './collections/Schools'
+import { Education } from './collections/Education'
+import { Testimonials } from './collections/Testimonials'
+import { Messages } from './collections/Messages'
+import { Journal } from './collections/Journal'
+import { GlobalSettings } from './globals/GlobalSettings'
+import { Hero } from './globals/Hero'
+import { About } from './globals/About'
+import { Contact } from './globals/Contact'
+import { Navigation } from './globals/Navigation'
+import { Footer } from './globals/Footer'
+import { SectionsVisibility } from './globals/SectionsVisibility'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -18,11 +37,34 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media],
+  collections: [
+    Users,
+    Media,
+    Projects,
+    Experiences,
+    Skills,
+    Technologies,
+    Categories,
+    Companies,
+    Schools,
+    Education,
+    Testimonials,
+    Messages,
+    Journal,
+  ],
+  globals: [GlobalSettings, Hero, About, Contact, Navigation, Footer, SectionsVisibility],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
+  localization: {
+    locales: [
+      { label: 'Français', code: 'fr' },
+      { label: 'English', code: 'en' },
+    ],
+    defaultLocale: 'fr',
+    fallback: true,
   },
   db: postgresAdapter({
     pool: {
@@ -30,5 +72,19 @@ export default buildConfig({
     },
   }),
   sharp,
-  plugins: [],
+  plugins: [
+    seoPlugin({
+      collections: ['projects', 'journal'],
+      globals: ['hero'],
+      uploadsCollection: 'media',
+      generateTitle: ({ doc }) => {
+        const title = (doc as { title?: string })?.title
+        return title ? `${title} | Developer Portfolio` : 'Developer Portfolio'
+      },
+      generateDescription: ({ doc }) => {
+        const shortDescription = (doc as { shortDescription?: string })?.shortDescription
+        return shortDescription ?? ''
+      },
+    }),
+  ],
 })

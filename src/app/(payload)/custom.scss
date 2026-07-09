@@ -1,0 +1,36 @@
+.color-swatch-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.color-swatch-select__item {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.color-swatch-select__item:hover {
+  transform: scale(1.08);
+}
+
+.color-swatch-select__item[data-active='true'] {
+  box-shadow:
+    0 0 0 2px var(--theme-bg, #fff),
+    0 0 0 4px var(--theme-elevation-800, #111);
+}
+
+.color-swatch-select__item--empty {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+}
