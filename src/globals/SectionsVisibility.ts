@@ -1,5 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
+import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+
 const sectionField = (name: string, label: string) => ({
   name,
   type: 'checkbox' as const,
@@ -20,6 +22,9 @@ export const SectionsVisibility: GlobalConfig = {
   },
   access: {
     read: () => true,
+  },
+  hooks: {
+    afterChange: [revalidateGlobalAfterChange],
   },
   fields: [
     sectionField('hero', 'Hero'),

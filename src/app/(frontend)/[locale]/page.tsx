@@ -24,6 +24,8 @@ import {
 
 import './styles.css'
 
+export const revalidate = 60
+
 type PageParams = { locale: string }
 
 export default async function HomePage({ params }: { params: Promise<PageParams> }) {

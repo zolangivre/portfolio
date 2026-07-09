@@ -18,6 +18,8 @@ import { buildThemeStyle } from '@/lib/theme/palette'
 import '../../globals.css'
 import './styles.css'
 
+export const revalidate = 60
+
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
 const fraunces = Fraunces({

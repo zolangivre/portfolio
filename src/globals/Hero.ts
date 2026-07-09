@@ -1,5 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
+import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+
 export const Hero: GlobalConfig = {
   slug: 'hero',
   label: 'Hero',
@@ -9,6 +11,9 @@ export const Hero: GlobalConfig = {
   },
   access: {
     read: () => true,
+  },
+  hooks: {
+    afterChange: [revalidateGlobalAfterChange],
   },
   fields: [
     {

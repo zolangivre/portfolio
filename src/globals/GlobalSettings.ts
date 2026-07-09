@@ -1,5 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
+import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+
 import { palette } from '../lib/theme/palette'
 
 const colorOptions = palette.map((color) => ({ label: color.label, value: color.key }))
@@ -13,6 +15,9 @@ export const GlobalSettings: GlobalConfig = {
   },
   access: {
     read: () => true,
+  },
+  hooks: {
+    afterChange: [revalidateGlobalAfterChange],
   },
   fields: [
     {

@@ -1,5 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
+import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+
 export const Navigation: GlobalConfig = {
   slug: 'navigation',
   label: 'Navigation',
@@ -9,6 +11,9 @@ export const Navigation: GlobalConfig = {
   },
   access: {
     read: () => true,
+  },
+  hooks: {
+    afterChange: [revalidateGlobalAfterChange],
   },
   fields: [
     {
