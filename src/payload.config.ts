@@ -1,5 +1,6 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { seoPlugin } from '@payloadcms/plugin-seo'
+import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -85,6 +86,12 @@ export default buildConfig({
         const shortDescription = (doc as { shortDescription?: string })?.shortDescription
         return shortDescription ?? ''
       },
+    }),
+    // Falls back to local disk storage when BLOB_READ_WRITE_TOKEN is unset
+    // (local dev), and uploads to Vercel Blob when it's set (production).
+    vercelBlobStorage({
+      collections: { media: true },
+      token: process.env.BLOB_READ_WRITE_TOKEN,
     }),
   ],
 })
