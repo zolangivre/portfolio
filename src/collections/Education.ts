@@ -54,10 +54,20 @@ export const Education: CollectionConfig = {
       name: 'startDate',
       type: 'date',
       required: true,
+      admin: {
+        date: {
+          pickerAppearance: 'monthOnly',
+        },
+      },
     },
     {
       name: 'endDate',
       type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'monthOnly',
+        },
+      },
     },
     {
       name: 'currentlyStudying',

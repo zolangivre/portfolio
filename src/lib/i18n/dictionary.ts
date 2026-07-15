@@ -65,10 +65,10 @@ export interface Dictionary {
     reachOut: string
     formNameLabel: string
     formEmailLabel: string
-    formProjectLabel: string
+    formMessageLabel: string
     formNamePlaceholder: string
     formEmailPlaceholder: string
-    formProjectPlaceholder: string
+    formMessagePlaceholder: string
     submitLabel: string
     sendingLabel: string
     errors: Record<string, string>
@@ -167,10 +167,10 @@ const dictionaries: Record<Locale, Dictionary> = {
       reachOut: 'Me contacter',
       formNameLabel: 'Nom',
       formEmailLabel: 'Email',
-      formProjectLabel: 'Projet',
+      formMessageLabel: 'Message',
       formNamePlaceholder: 'Votre nom',
       formEmailPlaceholder: 'vous@exemple.com',
-      formProjectPlaceholder: 'Parlez-moi de votre projet...',
+      formMessagePlaceholder: 'Votre message...',
       submitLabel: 'Envoyer',
       sendingLabel: 'Envoi en cours...',
       errors: {
@@ -271,10 +271,10 @@ const dictionaries: Record<Locale, Dictionary> = {
       reachOut: 'Reach out',
       formNameLabel: 'Name',
       formEmailLabel: 'Email',
-      formProjectLabel: 'Project',
+      formMessageLabel: 'Message',
       formNamePlaceholder: 'Your name',
       formEmailPlaceholder: 'you@example.com',
-      formProjectPlaceholder: 'Tell me about your idea...',
+      formMessagePlaceholder: 'Your message...',
       submitLabel: 'Send inquiry',
       sendingLabel: 'Sending...',
       errors: {

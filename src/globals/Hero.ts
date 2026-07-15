@@ -88,5 +88,29 @@ export const Hero: GlobalConfig = {
         },
       ],
     },
+    {
+      name: 'resumeCta',
+      type: 'group',
+      label: 'Resume / CV button',
+      admin: {
+        description:
+          'Upload one file per language. The button only appears once a file is set for the current language, and links directly to it.',
+      },
+      fields: [
+        {
+          name: 'label',
+          type: 'text',
+          localized: true,
+          defaultValue: 'Download CV',
+        },
+        {
+          name: 'file',
+          type: 'upload',
+          relationTo: 'media',
+          localized: true,
+          label: 'CV file',
+        },
+      ],
+    },
   ],
 }

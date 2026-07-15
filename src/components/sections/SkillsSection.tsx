@@ -3,11 +3,13 @@ import Image from 'next/image'
 import { Container } from '@/components/ui/Container'
 import { getMediaUrl } from '@/lib/media'
 import type { Dictionary } from '@/lib/i18n/dictionary'
+import type { SectionCopy } from '@/lib/sectionCopy'
 import type { Category, Skill } from '@/payload-types'
 
 import { SectionHeader } from '../ui/SectionHeader'
 
 type SkillsSectionProps = {
+  content: SectionCopy
   dictionary: Dictionary
   skills: Skill[]
 }
@@ -23,7 +25,7 @@ type SkillGroup = {
   skills: Skill[]
 }
 
-export function SkillsSection({ dictionary, skills }: SkillsSectionProps) {
+export function SkillsSection({ content, dictionary, skills }: SkillsSectionProps) {
   const groupsById = new Map<number | string, SkillGroup>()
 
   for (const skill of skills) {
@@ -42,10 +44,10 @@ export function SkillsSection({ dictionary, skills }: SkillsSectionProps) {
     <section aria-labelledby="skills-title" className="content-section" id="skills">
       <Container>
         <SectionHeader
-          description={dictionary.skills.description}
-          eyebrow={dictionary.skills.eyebrow}
+          description={content.description}
+          eyebrow={content.eyebrow}
           id="skills-title"
-          title={dictionary.skills.title}
+          title={content.title}
         />
 
         {skills.length > 0 ? (

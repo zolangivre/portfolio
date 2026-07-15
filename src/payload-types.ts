@@ -117,6 +117,7 @@ export interface Config {
     navigation: Navigation;
     footer: Footer;
     'sections-visibility': SectionsVisibility;
+    'sections-content': SectionsContent;
   };
   globalsSelect: {
     settings: SettingsSelect<false> | SettingsSelect<true>;
@@ -126,6 +127,7 @@ export interface Config {
     navigation: NavigationSelect<false> | NavigationSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     'sections-visibility': SectionsVisibilitySelect<false> | SectionsVisibilitySelect<true>;
+    'sections-content': SectionsContentSelect<false> | SectionsContentSelect<true>;
   };
   locale: 'fr' | 'en';
   widgets: {
@@ -1035,6 +1037,13 @@ export interface Hero {
     label?: string | null;
     href?: string | null;
   };
+  /**
+   * Upload one file per language. The button only appears once a file is set for the current language, and links directly to it.
+   */
+  resumeCta?: {
+    label?: string | null;
+    file?: (number | null) | Media;
+  };
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -1180,6 +1189,47 @@ export interface SectionsVisibility {
   createdAt?: string | null;
 }
 /**
+ * Eyebrow, title and description text shown above the Projects, Experience, Education, Skills, Testimonials and Journal sections.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sections-content".
+ */
+export interface SectionsContent {
+  id: number;
+  projects: {
+    eyebrow?: string | null;
+    title: string;
+    description?: string | null;
+  };
+  experience: {
+    eyebrow?: string | null;
+    title: string;
+    description?: string | null;
+  };
+  education: {
+    eyebrow?: string | null;
+    title: string;
+    description?: string | null;
+  };
+  skills: {
+    eyebrow?: string | null;
+    title: string;
+    description?: string | null;
+  };
+  testimonials: {
+    eyebrow?: string | null;
+    title: string;
+    description?: string | null;
+  };
+  journal: {
+    eyebrow?: string | null;
+    title: string;
+    description?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "settings_select".
  */
@@ -1240,6 +1290,12 @@ export interface HeroSelect<T extends boolean = true> {
     | {
         label?: T;
         href?: T;
+      };
+  resumeCta?:
+    | T
+    | {
+        label?: T;
+        file?: T;
       };
   meta?:
     | T
@@ -1330,6 +1386,57 @@ export interface SectionsVisibilitySelect<T extends boolean = true> {
   testimonials?: T;
   contact?: T;
   journal?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sections-content_select".
+ */
+export interface SectionsContentSelect<T extends boolean = true> {
+  projects?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        description?: T;
+      };
+  experience?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        description?: T;
+      };
+  education?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        description?: T;
+      };
+  skills?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        description?: T;
+      };
+  testimonials?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        description?: T;
+      };
+  journal?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        description?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

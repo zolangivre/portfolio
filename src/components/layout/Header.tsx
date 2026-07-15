@@ -39,7 +39,7 @@ export function Header({ dictionary, locale, navigation, sections, settings }: H
           {logoUrl ? (
             <Image
               alt=""
-              className="site-logo-mark object-contain"
+              className="site-logo-mark object-cover"
               height={32}
               src={logoUrl}
               width={32}

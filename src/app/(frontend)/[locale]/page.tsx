@@ -17,10 +17,12 @@ import {
   getFeaturedProjects,
   getGlobalSettings,
   getHero,
+  getSectionsContent,
   getSectionsVisibility,
   getSkills,
   getTestimonials,
 } from '@/lib/queries'
+import { resolveSectionCopy } from '@/lib/sectionCopy'
 
 import './styles.css'
 
@@ -41,6 +43,7 @@ export default async function HomePage({ params }: { params: Promise<PageParams>
     contact,
     settings,
     sections,
+    sectionsContent,
     projects,
     experiences,
     skills,
@@ -52,6 +55,7 @@ export default async function HomePage({ params }: { params: Promise<PageParams>
     getContact(locale),
     getGlobalSettings(locale),
     getSectionsVisibility(locale),
+    getSectionsContent(locale),
     getFeaturedProjects(locale),
     getExperiences(locale),
     getSkills(locale),
@@ -68,22 +72,41 @@ export default async function HomePage({ params }: { params: Promise<PageParams>
       ) : null}
       {sections?.projects !== false ? (
         <Reveal>
-          <ProjectsSection dictionary={dictionary} locale={locale} projects={projects} />
+          <ProjectsSection
+            content={resolveSectionCopy(sectionsContent?.projects, dictionary.projects)}
+            dictionary={dictionary}
+            locale={locale}
+            projects={projects}
+          />
         </Reveal>
       ) : null}
       {sections?.experience !== false ? (
         <Reveal>
-          <ExperienceSection dictionary={dictionary} experiences={experiences} locale={locale} />
+          <ExperienceSection
+            content={resolveSectionCopy(sectionsContent?.experience, dictionary.experience)}
+            dictionary={dictionary}
+            experiences={experiences}
+            locale={locale}
+          />
         </Reveal>
       ) : null}
       {sections?.education !== false ? (
         <Reveal>
-          <EducationSection dictionary={dictionary} education={education} locale={locale} />
+          <EducationSection
+            content={resolveSectionCopy(sectionsContent?.education, dictionary.education)}
+            dictionary={dictionary}
+            education={education}
+            locale={locale}
+          />
         </Reveal>
       ) : null}
       {sections?.skills !== false ? (
         <Reveal>
-          <SkillsSection dictionary={dictionary} skills={skills} />
+          <SkillsSection
+            content={resolveSectionCopy(sectionsContent?.skills, dictionary.skills)}
+            dictionary={dictionary}
+            skills={skills}
+          />
         </Reveal>
       ) : null}
       {sections?.about !== false ? (
@@ -93,7 +116,11 @@ export default async function HomePage({ params }: { params: Promise<PageParams>
       ) : null}
       {sections?.testimonials !== false ? (
         <Reveal>
-          <TestimonialsSection dictionary={dictionary} testimonials={testimonials} />
+          <TestimonialsSection
+            content={resolveSectionCopy(sectionsContent?.testimonials, dictionary.testimonials)}
+            dictionary={dictionary}
+            testimonials={testimonials}
+          />
         </Reveal>
       ) : null}
       {sections?.contact !== false ? (

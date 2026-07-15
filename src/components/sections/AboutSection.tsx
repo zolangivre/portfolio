@@ -16,7 +16,10 @@ type AboutSectionProps = {
 export function AboutSection({ about, dictionary }: AboutSectionProps) {
   const title = about?.title ?? 'Designing thoughtful products with engineering depth.'
   const points = about?.points ?? []
-  const portraitUrl = getMediaUrl(about?.portrait)
+  const portrait = about?.portrait
+  const portraitUrl = getMediaUrl(portrait)
+  const portraitWidth = (typeof portrait === 'object' && portrait?.width) || 800
+  const portraitHeight = (typeof portrait === 'object' && portrait?.height) || 1000
 
   return (
     <section aria-labelledby="about-title" className="content-section" id="about">
@@ -29,16 +32,21 @@ export function AboutSection({ about, dictionary }: AboutSectionProps) {
         />
 
         {about?.body ? (
-          <div className="mb-8 max-w-2xl">
+          <div className="mb-8 text-justify">
             <RichText content={about.body} />
           </div>
         ) : null}
 
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
           {portraitUrl ? (
-            <div className="relative aspect-4/5 w-full max-w-xs shrink-0 overflow-hidden rounded-[28px] border border-border bg-surface shadow-lg shadow-black/5">
-              <Image alt="" className="object-contain" fill sizes="320px" src={portraitUrl} />
-            </div>
+            <Image
+              alt=""
+              className="h-auto w-full max-w-sm rounded-4xl border border-border shadow-xl shadow-black/10 lg:w-80 lg:shrink-0"
+              height={portraitHeight}
+              sizes="(min-width: 1024px) 320px, 100vw"
+              src={portraitUrl}
+              width={portraitWidth}
+            />
           ) : null}
 
           {points.length > 0 ? (

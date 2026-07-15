@@ -5,11 +5,13 @@ import { TechChip } from '@/components/ui/TechChip'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
 import { getMediaUrl } from '@/lib/media'
+import type { SectionCopy } from '@/lib/sectionCopy'
 import type { Experience } from '@/payload-types'
 
 import { SectionHeader } from '../ui/SectionHeader'
 
 type ExperienceSectionProps = {
+  content: SectionCopy
   dictionary: Dictionary
   experiences: Experience[]
   locale: Locale
@@ -25,15 +27,20 @@ function formatDate(value: string | null | undefined, locale: Locale, present: s
   )
 }
 
-export function ExperienceSection({ dictionary, experiences, locale }: ExperienceSectionProps) {
+export function ExperienceSection({
+  content,
+  dictionary,
+  experiences,
+  locale,
+}: ExperienceSectionProps) {
   return (
     <section aria-labelledby="experience-title" className="content-section" id="experience">
       <Container>
         <SectionHeader
-          description={dictionary.experience.description}
-          eyebrow={dictionary.experience.eyebrow}
+          description={content.description}
+          eyebrow={content.eyebrow}
           id="experience-title"
-          title={dictionary.experience.title}
+          title={content.title}
         />
 
         {experiences.length > 0 ? (
@@ -88,7 +95,7 @@ export function ExperienceSection({ dictionary, experiences, locale }: Experienc
                     ) : null}
                   </div>
                   <div>
-                    <p className="text-fg-muted">{experience.description}</p>
+                    <p className="text-fg-muted text-justify">{experience.description}</p>
                     {technologies.length > 0 ? (
                       <ul
                         aria-label={`${experience.position} ${dictionary.projects.technologiesAriaLabelSuffix}`}
