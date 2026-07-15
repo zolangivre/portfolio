@@ -1,26 +1,28 @@
 import { Container } from '@/components/ui/Container'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
+import type { SectionCopy } from '@/lib/sectionCopy'
 import type { Project } from '@/payload-types'
 
 import { ProjectCard } from '../cards/ProjectCard'
 import { SectionHeader } from '../ui/SectionHeader'
 
 type ProjectsSectionProps = {
+  content: SectionCopy
   dictionary: Dictionary
   locale: Locale
   projects: Project[]
 }
 
-export function ProjectsSection({ dictionary, locale, projects }: ProjectsSectionProps) {
+export function ProjectsSection({ content, dictionary, locale, projects }: ProjectsSectionProps) {
   return (
     <section aria-labelledby="projects-title" className="content-section" id="projects">
       <Container>
         <SectionHeader
-          description={dictionary.projects.description}
-          eyebrow={dictionary.projects.eyebrow}
+          description={content.description}
+          eyebrow={content.eyebrow}
           id="projects-title"
-          title={dictionary.projects.title}
+          title={content.title}
         />
 
         {projects.length > 0 ? (

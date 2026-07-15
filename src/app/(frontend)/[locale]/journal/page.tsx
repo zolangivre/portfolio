@@ -7,7 +7,8 @@ import { Reveal } from '@/components/ui/Reveal'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { getDictionary } from '@/lib/i18n/dictionary'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
-import { getJournalEntries, getSectionsVisibility } from '@/lib/queries'
+import { getJournalEntries, getSectionsContent, getSectionsVisibility } from '@/lib/queries'
+import { resolveSectionCopy } from '@/lib/sectionCopy'
 
 export const revalidate = 60
 
@@ -21,10 +22,12 @@ export async function generateMetadata({
   const { locale: rawLocale } = await params
   const locale: Locale = locales.includes(rawLocale as Locale) ? (rawLocale as Locale) : defaultLocale
   const dictionary = getDictionary(locale)
+  const sectionsContent = await getSectionsContent(locale)
+  const content = resolveSectionCopy(sectionsContent?.journal, dictionary.journal)
 
   return {
-    title: dictionary.journal.title,
-    description: dictionary.journal.description,
+    title: content.title,
+    description: content.description,
   }
 }
 
@@ -39,17 +42,21 @@ export default async function JournalPage({ params }: { params: Promise<PagePara
     notFound()
   }
 
-  const entries = await getJournalEntries(locale)
+  const [entries, sectionsContent] = await Promise.all([
+    getJournalEntries(locale),
+    getSectionsContent(locale),
+  ])
+  const content = resolveSectionCopy(sectionsContent?.journal, dictionary.journal)
 
   return (
     <section aria-labelledby="journal-title" className="content-section">
       <Container>
         <Reveal>
           <SectionHeader
-            description={dictionary.journal.description}
-            eyebrow={dictionary.journal.eyebrow}
+            description={content.description}
+            eyebrow={content.eyebrow}
             id="journal-title"
-            title={dictionary.journal.title}
+            title={content.title}
           />
           <JournalGrid dictionary={dictionary} entries={entries} locale={locale} />
         </Reveal>

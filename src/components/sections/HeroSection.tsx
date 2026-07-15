@@ -14,7 +14,12 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
   const highlights = (hero?.highlights ?? []).filter((item) => item.value.trim().length > 0)
   const primaryCta = hero?.primaryCta
   const secondaryCta = hero?.secondaryCta
-  const photoUrl = getMediaUrl(settings?.photo)
+  const resumeCta = hero?.resumeCta
+  const resumeUrl = getMediaUrl(resumeCta?.file)
+  const photo = settings?.photo
+  const photoUrl = getMediaUrl(photo)
+  const photoWidth = (typeof photo === 'object' && photo?.width) || 800
+  const photoHeight = (typeof photo === 'object' && photo?.height) || 1000
 
   return (
     <section className="hero-section" aria-labelledby="hero-title">
@@ -24,7 +29,7 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
         <div className="hero-copy">
           {hero?.eyebrow ? <p className="eyebrow">{hero.eyebrow}</p> : null}
           <h1 id="hero-title">{title}</h1>
-          {hero?.description ? <p>{hero.description}</p> : null}
+          {hero?.description ? <p className="text-lg text-fg-muted text-justify">{hero.description}</p> : null}
           <div className="mt-8 flex flex-wrap gap-3">
             {primaryCta?.label && primaryCta?.href ? (
               <a
@@ -42,6 +47,15 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
                 {secondaryCta.label}
               </a>
             ) : null}
+            {resumeCta?.label && resumeUrl ? (
+              <a
+                className="rounded-full border border-border-strong bg-surface px-5 py-3 text-sm font-semibold text-fg transition hover:border-accent-soft-border hover:text-accent"
+                download
+                href={resumeUrl}
+              >
+                {resumeCta.label}
+              </a>
+            ) : null}
           </div>
           {highlights.length > 0 ? (
             <div className="mt-8 flex flex-wrap gap-4 text-sm text-fg-muted">
@@ -55,16 +69,15 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
           ) : null}
         </div>
         {photoUrl ? (
-          <div className="relative mt-10 aspect-4/5 w-full max-w-sm overflow-hidden rounded-4xl border border-border bg-surface shadow-xl shadow-black/10 lg:mt-0 lg:w-80 lg:shrink-0">
-            <Image
-              alt=""
-              className="object-contain"
-              fill
-              priority
-              sizes="(min-width: 1024px) 320px, 100vw"
-              src={photoUrl}
-            />
-          </div>
+          <Image
+            alt=""
+            className="mt-10 h-auto w-full max-w-sm rounded-4xl border border-border shadow-xl shadow-black/10 lg:mt-0 lg:w-80 lg:shrink-0"
+            height={photoHeight}
+            priority
+            sizes="(min-width: 1024px) 320px, 100vw"
+            src={photoUrl}
+            width={photoWidth}
+          />
         ) : null}
       </Container>
     </section>

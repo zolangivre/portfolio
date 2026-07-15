@@ -4,11 +4,13 @@ import { Container } from '@/components/ui/Container'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
 import { getMediaUrl } from '@/lib/media'
+import type { SectionCopy } from '@/lib/sectionCopy'
 import type { Education } from '@/payload-types'
 
 import { SectionHeader } from '../ui/SectionHeader'
 
 type EducationSectionProps = {
+  content: SectionCopy
   dictionary: Dictionary
   education: Education[]
   locale: Locale
@@ -24,22 +26,26 @@ function formatDate(value: string | null | undefined, locale: Locale, present: s
   )
 }
 
-export function EducationSection({ dictionary, education, locale }: EducationSectionProps) {
+export function EducationSection({
+  content,
+  dictionary,
+  education,
+  locale,
+}: EducationSectionProps) {
   return (
     <section aria-labelledby="education-title" className="content-section" id="education">
       <Container>
         <SectionHeader
-          description={dictionary.education.description}
-          eyebrow={dictionary.education.eyebrow}
+          description={content.description}
+          eyebrow={content.eyebrow}
           id="education-title"
-          title={dictionary.education.title}
+          title={content.title}
         />
 
         {education.length > 0 ? (
           <div className="timeline">
             {education.map((entry) => {
-              const school =
-                typeof entry.school === 'object' && entry.school ? entry.school : null
+              const school = typeof entry.school === 'object' && entry.school ? entry.school : null
               const schoolLogoUrl = getMediaUrl(school?.logo)
 
               return (
@@ -81,8 +87,10 @@ export function EducationSection({ dictionary, education, locale }: EducationSec
                     ) : null}
                   </div>
                   <div className="text-fg-muted">
-                    {entry.fieldOfStudy ? <p className="mb-2">{entry.fieldOfStudy}</p> : null}
-                    {entry.description ? <p>{entry.description}</p> : null}
+                    <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
+                      {entry.fieldOfStudy ? <h3>{entry.fieldOfStudy}</h3> : null}
+                    </div>
+                    {entry.description ? <p className="text-justify">{entry.description}</p> : null}
                   </div>
                 </article>
               )

@@ -55,11 +55,11 @@ export function ContactForm({ dictionary, successMessage }: ContactFormProps) {
         </label>
       </div>
       <label className="block text-sm text-fg-muted">
-        <span className="mb-2 block">{dictionary.contact.formProjectLabel}</span>
+        <span className="mb-2 block">{dictionary.contact.formMessageLabel}</span>
         <textarea
           className="min-h-36 w-full rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-fg outline-none transition focus:border-accent-soft-border"
           name="message"
-          placeholder={dictionary.contact.formProjectPlaceholder}
+          placeholder={dictionary.contact.formMessagePlaceholder}
           required
         />
       </label>
