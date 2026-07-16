@@ -1,6 +1,7 @@
 import Image from 'next/image'
 
 import { Container } from '@/components/ui/Container'
+import { RichText } from '@/components/ui/RichText'
 import { getMediaUrl } from '@/lib/media'
 import type { Hero, Setting } from '@/payload-types'
 
@@ -29,7 +30,7 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
         <div className="hero-copy">
           {hero?.eyebrow ? <p className="eyebrow">{hero.eyebrow}</p> : null}
           <h1 id="hero-title">{title}</h1>
-          {hero?.description ? <p className="text-lg text-fg-muted text-justify">{hero.description}</p> : null}
+          {hero?.description ? <RichText content={hero.description} /> : null}
           <div className="mt-8 flex flex-wrap gap-3">
             {primaryCta?.label && primaryCta?.href ? (
               <a

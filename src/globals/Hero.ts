@@ -33,11 +33,9 @@ export const Hero: GlobalConfig = {
     },
     {
       name: 'description',
-      type: 'textarea',
+      type: 'richText',
       label: 'Description',
       localized: true,
-      defaultValue:
-        'I design and ship fast, reliable experiences for ambitious teams — from product strategy to production-ready code.',
     },
     {
       name: 'highlights',

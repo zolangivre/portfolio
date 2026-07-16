@@ -6,6 +6,7 @@ import * as migration_20260708_173629_add_social_link_icon from './20260708_1736
 import * as migration_20260716_103500_add_project_cover_image_dark from './20260716_103500_add_project_cover_image_dark';
 import * as migration_20260716_110000_order_ascending_semantics from './20260716_110000_order_ascending_semantics';
 import * as migration_20260716_120000_add_invert_logo_in_dark_mode from './20260716_120000_add_invert_logo_in_dark_mode';
+import * as migration_20260716_130000_hero_description_rich_text from './20260716_130000_hero_description_rich_text';
 
 export const migrations = [
   {
@@ -47,5 +48,10 @@ export const migrations = [
     up: migration_20260716_120000_add_invert_logo_in_dark_mode.up,
     down: migration_20260716_120000_add_invert_logo_in_dark_mode.down,
     name: '20260716_120000_add_invert_logo_in_dark_mode'
+  },
+  {
+    up: migration_20260716_130000_hero_description_rich_text.up,
+    down: migration_20260716_130000_hero_description_rich_text.down,
+    name: '20260716_130000_hero_description_rich_text'
   },
 ];
