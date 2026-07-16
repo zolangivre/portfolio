@@ -7,7 +7,7 @@ export const Education: CollectionConfig = {
   admin: {
     group: 'Portfolio',
     description: 'Education timeline entries.',
-    defaultColumns: ['school', 'degree', 'startDate', 'endDate'],
+    defaultColumns: ['school','location', 'degree', 'startDate', 'endDate'],
     useAsTitle: 'degree',
   },
   access: {

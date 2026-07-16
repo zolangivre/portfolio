@@ -11,7 +11,7 @@ export const Experiences: CollectionConfig = {
   admin: {
     group: 'Portfolio',
     description: 'Professional experience timeline entries.',
-    defaultColumns: ['company', 'position', 'startDate', 'endDate'],
+    defaultColumns: ['company', 'location', 'position', 'startDate', 'endDate'],
     useAsTitle: 'position',
   },
   access: {

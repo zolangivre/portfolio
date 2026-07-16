@@ -15,7 +15,7 @@ type AboutSectionProps = {
 
 export function AboutSection({ about, dictionary }: AboutSectionProps) {
   const title = about?.title ?? 'Designing thoughtful products with engineering depth.'
-  const points = about?.points ?? []
+  const pointGroups = about?.pointGroups ?? []
   const portrait = about?.portrait
   const portraitUrl = getMediaUrl(portrait)
   const portraitWidth = (typeof portrait === 'object' && portrait?.width) || 800
@@ -26,7 +26,7 @@ export function AboutSection({ about, dictionary }: AboutSectionProps) {
       <Container>
         <SectionHeader
           description={about?.description ?? undefined}
-          eyebrow={dictionary.about.eyebrow}
+          eyebrow={about?.eyebrow || dictionary.about.eyebrow}
           id="about-title"
           title={title}
         />
@@ -49,16 +49,23 @@ export function AboutSection({ about, dictionary }: AboutSectionProps) {
             />
           ) : null}
 
-          {points.length > 0 ? (
-            <div className="rounded-[28px] border border-accent-soft-border bg-accent-soft p-8 lg:max-w-md">
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-accent">
-                {dictionary.about.approachLabel}
-              </p>
-              <ul className="mt-5 space-y-4 text-sm leading-7 text-fg">
-                {points.map((point, index) => (
-                  <li key={`${point.value}-${index}`}>• {point.value}</li>
-                ))}
-              </ul>
+          {pointGroups.length > 0 ? (
+            <div className="grid flex-1 gap-4 sm:grid-cols-2">
+              {pointGroups.map((group, groupIndex) => (
+                <div
+                  className="rounded-[28px] border border-accent-soft-border bg-accent-soft p-8"
+                  key={`${group.title}-${groupIndex}`}
+                >
+                  <p className="text-sm font-semibold uppercase tracking-[0.3em] text-accent">
+                    {group.title}
+                  </p>
+                  <ul className="mt-5 space-y-4 text-sm leading-7 text-fg">
+                    {(group.points ?? []).map((point, index) => (
+                      <li key={`${point.value}-${index}`}>• {point.value}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
           ) : null}
         </div>

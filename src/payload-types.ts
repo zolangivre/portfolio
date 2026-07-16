@@ -1063,6 +1063,7 @@ export interface Hero {
  */
 export interface About {
   id: number;
+  eyebrow?: string | null;
   title: string;
   description?: string | null;
   body?: {
@@ -1080,9 +1081,18 @@ export interface About {
     };
     [k: string]: unknown;
   } | null;
-  points?:
+  /**
+   * Titled lists shown next to the portrait — e.g. Soft skills, Interests, Travels, Sports background.
+   */
+  pointGroups?:
     | {
-        value: string;
+        title: string;
+        points?:
+          | {
+              value: string;
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -1098,6 +1108,7 @@ export interface About {
  */
 export interface Contact {
   id: number;
+  eyebrow?: string | null;
   title: string;
   description?: string | null;
   successMessage?: string | null;
@@ -1313,13 +1324,20 @@ export interface HeroSelect<T extends boolean = true> {
  * via the `definition` "about_select".
  */
 export interface AboutSelect<T extends boolean = true> {
+  eyebrow?: T;
   title?: T;
   description?: T;
   body?: T;
-  points?:
+  pointGroups?:
     | T
     | {
-        value?: T;
+        title?: T;
+        points?:
+          | T
+          | {
+              value?: T;
+              id?: T;
+            };
         id?: T;
       };
   portrait?: T;
@@ -1332,6 +1350,7 @@ export interface AboutSelect<T extends boolean = true> {
  * via the `definition` "contact_select".
  */
 export interface ContactSelect<T extends boolean = true> {
+  eyebrow?: T;
   title?: T;
   description?: T;
   successMessage?: T;
