@@ -37,6 +37,15 @@ export const Technologies: CollectionConfig = {
       relationTo: 'media',
     },
     {
+      name: 'invertLogoInDarkMode',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description:
+          'Invert the logo colors when the site is in dark mode. Enable for black/dark logos so they stay visible on the dark theme.',
+      },
+    },
+    {
       name: 'website',
       type: 'text',
     },

@@ -28,7 +28,14 @@ export function JournalGrid({ dictionary, entries, locale }: JournalGridProps) {
       }
     }
 
-    return Array.from(seen.values()).sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    return Array.from(seen.values()).sort((a, b) => {
+      const orderA = a.order ?? Number.MAX_SAFE_INTEGER
+      const orderB = b.order ?? Number.MAX_SAFE_INTEGER
+      if (orderA !== orderB) {
+        return orderA - orderB
+      }
+      return a.name.localeCompare(b.name)
+    })
   }, [entries])
 
   const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null)

@@ -294,6 +294,10 @@ export interface Technology {
   name: string;
   slug: string;
   logo?: (number | null) | Media;
+  /**
+   * Invert the logo colors when the site is in dark mode. Enable for black/dark logos so they stay visible on the dark theme.
+   */
+  invertLogoInDarkMode?: boolean | null;
   website?: string | null;
   /**
    * Optional hex color shown as a small dot on the tech chips, e.g. #4287F5 (the # is added automatically if missing).
@@ -314,6 +318,9 @@ export interface Category {
   name: string;
   slug: string;
   group: 'tech' | 'project' | 'journal';
+  /**
+   * Display order within the group: 1 shows first, 2 second, etc. Categories without a value come last, sorted by name.
+   */
   order?: number | null;
   updatedAt: string;
   createdAt: string;
@@ -370,6 +377,10 @@ export interface Skill {
   category: number | Category;
   level?: ('advanced' | 'intermediate' | 'beginner') | null;
   logo?: (number | null) | Media;
+  /**
+   * Invert the logo colors when the site is in dark mode. Enable for black/dark logos so they stay visible on the dark theme.
+   */
+  invertLogoInDarkMode?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -757,6 +768,7 @@ export interface SkillsSelect<T extends boolean = true> {
   category?: T;
   level?: T;
   logo?: T;
+  invertLogoInDarkMode?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -768,6 +780,7 @@ export interface TechnologiesSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   logo?: T;
+  invertLogoInDarkMode?: T;
   website?: T;
   color?: T;
   category?: T;

@@ -111,6 +111,11 @@ After any schema change: write/generate the matching migration, then run `pnpm g
 pnpm test
 ```
 
+## CI/CD
+
+- **GitHub Actions** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs on every push to `main`/`develop` and on pull requests: lint + typecheck, then integration and e2e tests against a fresh PostgreSQL built from the migrations (`PAYLOAD_DB_PUSH=false` disables dev push so the schema comes exclusively from migrations).
+- **Vercel** builds with `pnpm run ci` ([`vercel.json`](vercel.json)), which applies pending migrations to the production database before `next build` — the schema can never lag behind the deployed code.
+
 ## Deployment
 
 Designed for [Vercel](https://vercel.com) with a [Neon](https://neon.tech) database (or any managed Postgres):
@@ -118,7 +123,8 @@ Designed for [Vercel](https://vercel.com) with a [Neon](https://neon.tech) datab
 1. Create the Vercel project and connect the repo
 2. Set `DATABASE_URL`, `PAYLOAD_SECRET` and `NEXT_PUBLIC_SITE_URL`
 3. Connect a Vercel Blob store (adds `BLOB_READ_WRITE_TOKEN` automatically)
-4. Apply migrations to the production database: `pnpm payload migrate`
+
+Migrations run automatically during each deploy (`pnpm run ci`). Never point `pnpm dev` at the production database — dev push mode would bypass the migration history.
 
 ## Project structure
 
