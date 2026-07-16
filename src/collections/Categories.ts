@@ -15,6 +15,7 @@ export const Categories: CollectionConfig = {
     defaultColumns: ['name', 'group', 'order'],
     useAsTitle: 'name',
   },
+  defaultSort: 'order',
   access: {
     read: () => true,
   },
@@ -50,9 +51,10 @@ export const Categories: CollectionConfig = {
     {
       name: 'order',
       type: 'number',
-      defaultValue: 0,
       admin: {
         step: 1,
+        description:
+          'Display order within the group: 1 shows first, 2 second, etc. Categories without a value come last, sorted by name.',
       },
     },
   ],

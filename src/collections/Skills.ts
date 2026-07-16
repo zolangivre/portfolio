@@ -46,6 +46,15 @@ export const Skills: CollectionConfig = {
       type: 'upload',
       relationTo: 'media',
     },
+    {
+      name: 'invertLogoInDarkMode',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description:
+          'Invert the logo colors when the site is in dark mode. Enable for black/dark logos so they stay visible on the dark theme.',
+      },
+    },
   ],
   timestamps: true,
 }

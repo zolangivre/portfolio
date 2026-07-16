@@ -36,9 +36,14 @@ export function SkillsSection({ content, dictionary, skills }: SkillsSectionProp
     groupsById.set(key, group)
   }
 
-  const skillGroups = Array.from(groupsById.values()).sort(
-    (a, b) => (a.category?.order ?? 0) - (b.category?.order ?? 0),
-  )
+  const skillGroups = Array.from(groupsById.values()).sort((a, b) => {
+    const orderA = a.category?.order ?? Number.MAX_SAFE_INTEGER
+    const orderB = b.category?.order ?? Number.MAX_SAFE_INTEGER
+    if (orderA !== orderB) {
+      return orderA - orderB
+    }
+    return (a.category?.name ?? '').localeCompare(b.category?.name ?? '')
+  })
 
   return (
     <section aria-labelledby="skills-title" className="content-section" id="skills">
@@ -71,7 +76,7 @@ export function SkillsSection({ content, dictionary, skills }: SkillsSectionProp
                         {logoUrl ? (
                           <Image
                             alt={skill.name}
-                            className="h-4 w-4 rounded-full object-contain"
+                            className={`h-4 w-4 shrink-0 rounded-full object-contain${skill.invertLogoInDarkMode ? ' dark:invert' : ''}`}
                             height={16}
                             src={logoUrl}
                             width={16}
