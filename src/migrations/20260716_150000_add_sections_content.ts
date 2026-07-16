@@ -32,7 +32,10 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
    	"_parent_id" integer NOT NULL
    );
 
-  ALTER TABLE "sections_content_locales" ADD CONSTRAINT "sections_content_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."sections_content"("id") ON DELETE cascade ON UPDATE no action;
+  DO $$ BEGIN
+    ALTER TABLE "sections_content_locales" ADD CONSTRAINT "sections_content_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."sections_content"("id") ON DELETE cascade ON UPDATE no action;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END $$;
 
   CREATE UNIQUE INDEX IF NOT EXISTS "sections_content_locales_locale_parent_id_unique" ON "sections_content_locales" USING btree ("_locale","_parent_id");`)
 }

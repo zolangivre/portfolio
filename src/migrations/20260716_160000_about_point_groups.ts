@@ -23,8 +23,14 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
    	"_locale" "_locales" NOT NULL
    );
 
-  ALTER TABLE "about_point_groups" ADD CONSTRAINT "about_point_groups_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."about"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "about_point_groups_points" ADD CONSTRAINT "about_point_groups_points_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."about_point_groups"("id") ON DELETE cascade ON UPDATE no action;
+  DO $$ BEGIN
+    ALTER TABLE "about_point_groups" ADD CONSTRAINT "about_point_groups_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."about"("id") ON DELETE cascade ON UPDATE no action;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END $$;
+  DO $$ BEGIN
+    ALTER TABLE "about_point_groups_points" ADD CONSTRAINT "about_point_groups_points_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."about_point_groups"("id") ON DELETE cascade ON UPDATE no action;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END $$;
 
   CREATE INDEX IF NOT EXISTS "about_point_groups_order_idx" ON "about_point_groups" USING btree ("_order");
   CREATE INDEX IF NOT EXISTS "about_point_groups_parent_id_idx" ON "about_point_groups" USING btree ("_parent_id");
@@ -70,7 +76,10 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
    	"id" varchar PRIMARY KEY NOT NULL,
    	"value" varchar NOT NULL
    );
-  ALTER TABLE "about_points" ADD CONSTRAINT "about_points_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."about"("id") ON DELETE cascade ON UPDATE no action;
+  DO $$ BEGIN
+    ALTER TABLE "about_points" ADD CONSTRAINT "about_points_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."about"("id") ON DELETE cascade ON UPDATE no action;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END $$;
   CREATE INDEX IF NOT EXISTS "about_points_order_idx" ON "about_points" USING btree ("_order");
   CREATE INDEX IF NOT EXISTS "about_points_parent_id_idx" ON "about_points" USING btree ("_parent_id");
   CREATE INDEX IF NOT EXISTS "about_points_locale_idx" ON "about_points" USING btree ("_locale");
