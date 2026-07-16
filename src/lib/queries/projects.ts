@@ -14,7 +14,7 @@ export async function getFeaturedProjects(locale: Locale = defaultLocale): Promi
       depth: 2,
       limit: DEFAULT_LIMIT,
       locale,
-      sort: '-featured,-order,-createdAt',
+      sort: ['-featured', 'order', '-year', '-createdAt'],
       where: {
         featured: {
           equals: true,
@@ -39,7 +39,7 @@ export async function getAllProjects(locale: Locale = defaultLocale): Promise<Pr
       depth: 2,
       limit: DEFAULT_LIMIT,
       locale,
-      sort: '-featured,-order,-createdAt',
+      sort: ['-featured', 'order', '-year', '-createdAt'],
     })
 
     return projects.docs

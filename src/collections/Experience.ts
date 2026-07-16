@@ -11,9 +11,10 @@ export const Experiences: CollectionConfig = {
   admin: {
     group: 'Portfolio',
     description: 'Professional experience timeline entries.',
-    defaultColumns: ['company', 'position', 'startDate', 'endDate'],
+    defaultColumns: ['company', 'location', 'position', 'startDate', 'endDate', 'order'],
     useAsTitle: 'position',
   },
+  defaultSort: 'order',
   access: {
     read: () => true,
   },
@@ -88,9 +89,10 @@ export const Experiences: CollectionConfig = {
     {
       name: 'order',
       type: 'number',
-      defaultValue: 0,
       admin: {
         step: 1,
+        description:
+          'Display order: 1 shows first, 2 second, etc. Leave empty to fall back to most recent start date after ordered entries.',
       },
     },
   ],

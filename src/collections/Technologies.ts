@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { revalidateCollectionAfterChange, revalidateCollectionAfterDelete } from '@/hooks/revalidateSite'
+import { isValidHexColor } from '@/lib/color'
 
 export const Technologies: CollectionConfig = {
   slug: 'technologies',
@@ -43,10 +44,27 @@ export const Technologies: CollectionConfig = {
       name: 'color',
       type: 'text',
       admin: {
-        description: 'Optional hex color used in UI accents.',
+        description:
+          'Optional hex color shown as a small dot on the tech chips, e.g. #4287F5 (the # is added automatically if missing).',
         components: {
           Cell: '/components/admin/TechColorSwatchCell#TechColorSwatchCell',
         },
+      },
+      hooks: {
+        beforeValidate: [
+          ({ value }) => {
+            if (typeof value !== 'string') return value
+            const trimmed = value.trim()
+            if (!trimmed) return null
+            return trimmed.startsWith('#') ? trimmed : `#${trimmed}`
+          },
+        ],
+      },
+      validate: (value: string | null | undefined) => {
+        if (value == null || value === '') return true
+        return (
+          isValidHexColor(value) || 'Enter a hex color like #4287F5 (3, 4, 6 or 8 hex digits).'
+        )
       },
     },
     {

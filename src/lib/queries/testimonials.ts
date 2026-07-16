@@ -12,7 +12,7 @@ export async function getTestimonials(locale: Locale = defaultLocale): Promise<T
       depth: 2,
       limit: 20,
       locale,
-      sort: '-featured,-order,-createdAt',
+      sort: ['-featured', '-order', '-createdAt'],
     })
 
     return testimonials.docs

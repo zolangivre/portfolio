@@ -12,7 +12,7 @@ export async function getSkills(locale: Locale = defaultLocale): Promise<Skill[]
       depth: 1,
       limit: 100,
       locale,
-      sort: 'category,name',
+      sort: ['category', 'name'],
     })
 
     return skills.docs

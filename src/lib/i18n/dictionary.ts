@@ -15,7 +15,6 @@ export interface Dictionary {
   }
   about: {
     eyebrow: string
-    approachLabel: string
   }
   projects: {
     eyebrow: string
@@ -106,7 +105,6 @@ const dictionaries: Record<Locale, Dictionary> = {
     },
     about: {
       eyebrow: 'À propos',
-      approachLabel: 'Approche',
     },
     projects: {
       eyebrow: 'Travaux sélectionnés',
@@ -211,7 +209,6 @@ const dictionaries: Record<Locale, Dictionary> = {
     },
     about: {
       eyebrow: 'About',
-      approachLabel: 'Approach',
     },
     projects: {
       eyebrow: 'Selected work',

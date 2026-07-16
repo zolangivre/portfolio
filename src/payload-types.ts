@@ -256,11 +256,18 @@ export interface Project {
     [k: string]: unknown;
   };
   coverImage?: (number | null) | Media;
+  /**
+   * Optional dark-mode variant of the cover image. Shown instead of the cover image when the site is in dark mode.
+   */
+  coverImageDark?: (number | null) | Media;
   gallery?: (number | Media)[] | null;
   technologies?: (number | Technology)[] | null;
   githubUrl?: string | null;
   liveUrl?: string | null;
   featured?: boolean | null;
+  /**
+   * Display order: 1 shows first, 2 second, etc. Leave empty to fall back to newest-first after ordered projects.
+   */
   order?: number | null;
   year?: number | null;
   status?: ('live' | 'in-progress' | 'archived') | null;
@@ -289,7 +296,7 @@ export interface Technology {
   logo?: (number | null) | Media;
   website?: string | null;
   /**
-   * Optional hex color used in UI accents.
+   * Optional hex color shown as a small dot on the tech chips, e.g. #4287F5 (the # is added automatically if missing).
    */
   color?: string | null;
   category?: (number | null) | Category;
@@ -328,6 +335,9 @@ export interface Experience {
   startDate: string;
   endDate?: string | null;
   currentlyWorking?: boolean | null;
+  /**
+   * Display order: 1 shows first, 2 second, etc. Leave empty to fall back to most recent start date after ordered entries.
+   */
   order?: number | null;
   updatedAt: string;
   createdAt: string;
@@ -395,6 +405,9 @@ export interface Education {
   startDate: string;
   endDate?: string | null;
   currentlyStudying?: boolean | null;
+  /**
+   * Display order: 1 shows first, 2 second, etc. Leave empty to fall back to most recent start date after ordered entries.
+   */
   order?: number | null;
   updatedAt: string;
   createdAt: string;
@@ -480,6 +493,9 @@ export interface Journal {
    * Private entries are kept in the CMS but never rendered on the site.
    */
   visibility: 'public' | 'private';
+  /**
+   * Display order: 1 shows first, 2 second, etc. Leave empty to fall back to most recent date after ordered entries.
+   */
   order?: number | null;
   meta?: {
     title?: string | null;
@@ -694,6 +710,7 @@ export interface ProjectsSelect<T extends boolean = true> {
   shortDescription?: T;
   description?: T;
   coverImage?: T;
+  coverImageDark?: T;
   gallery?: T;
   technologies?: T;
   githubUrl?: T;
@@ -1063,6 +1080,7 @@ export interface Hero {
  */
 export interface About {
   id: number;
+  eyebrow?: string | null;
   title: string;
   description?: string | null;
   body?: {
@@ -1080,9 +1098,18 @@ export interface About {
     };
     [k: string]: unknown;
   } | null;
-  points?:
+  /**
+   * Titled lists shown next to the portrait — e.g. Soft skills, Interests, Travels, Sports background.
+   */
+  pointGroups?:
     | {
-        value: string;
+        title: string;
+        points?:
+          | {
+              value: string;
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -1098,6 +1125,7 @@ export interface About {
  */
 export interface Contact {
   id: number;
+  eyebrow?: string | null;
   title: string;
   description?: string | null;
   successMessage?: string | null;
@@ -1313,13 +1341,20 @@ export interface HeroSelect<T extends boolean = true> {
  * via the `definition` "about_select".
  */
 export interface AboutSelect<T extends boolean = true> {
+  eyebrow?: T;
   title?: T;
   description?: T;
   body?: T;
-  points?:
+  pointGroups?:
     | T
     | {
-        value?: T;
+        title?: T;
+        points?:
+          | T
+          | {
+              value?: T;
+              id?: T;
+            };
         id?: T;
       };
   portrait?: T;
@@ -1332,6 +1367,7 @@ export interface AboutSelect<T extends boolean = true> {
  * via the `definition` "contact_select".
  */
 export interface ContactSelect<T extends boolean = true> {
+  eyebrow?: T;
   title?: T;
   description?: T;
   successMessage?: T;

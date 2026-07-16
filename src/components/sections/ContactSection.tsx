@@ -27,7 +27,7 @@ export function ContactSection({ contact, dictionary, settings }: ContactSection
       <Container>
         <SectionHeader
           description={contact?.description ?? undefined}
-          eyebrow={dictionary.contact.eyebrow}
+          eyebrow={contact?.eyebrow || dictionary.contact.eyebrow}
           id="contact-title"
           title={title}
         />

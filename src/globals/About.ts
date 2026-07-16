@@ -17,6 +17,13 @@ export const About: GlobalConfig = {
   },
   fields: [
     {
+      name: 'eyebrow',
+      type: 'text',
+      label: 'Eyebrow',
+      localized: true,
+      defaultValue: 'About',
+    },
+    {
       name: 'title',
       type: 'text',
       label: 'Title',
@@ -39,15 +46,36 @@ export const About: GlobalConfig = {
       localized: true,
     },
     {
-      name: 'points',
+      name: 'pointGroups',
       type: 'array',
-      label: 'Points',
+      label: 'Point groups',
+      labels: {
+        singular: 'Point group',
+        plural: 'Point groups',
+      },
       localized: true,
+      admin: {
+        description:
+          'Titled lists shown next to the portrait — e.g. Soft skills, Interests, Travels, Sports background.',
+      },
       fields: [
         {
-          name: 'value',
+          name: 'title',
           type: 'text',
+          label: 'Title',
           required: true,
+        },
+        {
+          name: 'points',
+          type: 'array',
+          label: 'Points',
+          fields: [
+            {
+              name: 'value',
+              type: 'text',
+              required: true,
+            },
+          ],
         },
       ],
     },

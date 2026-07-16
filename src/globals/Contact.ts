@@ -17,6 +17,13 @@ export const Contact: GlobalConfig = {
   },
   fields: [
     {
+      name: 'eyebrow',
+      type: 'text',
+      label: 'Eyebrow',
+      localized: true,
+      defaultValue: 'Contact',
+    },
+    {
       name: 'title',
       type: 'text',
       label: 'Title',

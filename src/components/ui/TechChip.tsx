@@ -35,13 +35,15 @@ export function TechChip({ technology }: TechChipProps) {
         />
       ) : null}
       {logoUrl ? (
-        <Image
-          alt=""
-          className="h-3.5 w-3.5 rounded-full object-contain"
-          height={14}
-          src={logoUrl}
-          width={14}
-        />
+        <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full dark:bg-[#f5f1e8] dark:p-0.5">
+          <Image
+            alt=""
+            className="h-3.5 w-3.5 rounded-full object-contain"
+            height={14}
+            src={logoUrl}
+            width={14}
+          />
+        </span>
       ) : null}
       <span>{technology.name}</span>
     </>

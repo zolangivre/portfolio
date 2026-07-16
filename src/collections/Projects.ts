@@ -18,10 +18,12 @@ export const Projects: CollectionConfig = {
       'technologies',
       'category',
       'featured',
+      'order',
       'year',
     ],
     useAsTitle: 'title',
   },
+  defaultSort: 'order',
   access: {
     read: () => true,
   },
@@ -61,6 +63,15 @@ export const Projects: CollectionConfig = {
       relationTo: 'media',
     },
     {
+      name: 'coverImageDark',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        description:
+          'Optional dark-mode variant of the cover image. Shown instead of the cover image when the site is in dark mode.',
+      },
+    },
+    {
       name: 'gallery',
       type: 'relationship',
       relationTo: 'media',
@@ -95,9 +106,10 @@ export const Projects: CollectionConfig = {
     {
       name: 'order',
       type: 'number',
-      defaultValue: 0,
       admin: {
         step: 1,
+        description:
+          'Display order: 1 shows first, 2 second, etc. Leave empty to fall back to newest-first after ordered projects.',
       },
     },
     {

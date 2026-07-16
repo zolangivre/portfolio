@@ -7,9 +7,10 @@ export const Education: CollectionConfig = {
   admin: {
     group: 'Portfolio',
     description: 'Education timeline entries.',
-    defaultColumns: ['school', 'degree', 'startDate', 'endDate'],
+    defaultColumns: ['school', 'location', 'degree', 'startDate', 'endDate', 'order'],
     useAsTitle: 'degree',
   },
+  defaultSort: 'order',
   access: {
     read: () => true,
   },
@@ -77,9 +78,10 @@ export const Education: CollectionConfig = {
     {
       name: 'order',
       type: 'number',
-      defaultValue: 0,
       admin: {
         step: 1,
+        description:
+          'Display order: 1 shows first, 2 second, etc. Leave empty to fall back to most recent start date after ordered entries.',
       },
     },
   ],

@@ -12,7 +12,7 @@ export async function getEducation(locale: Locale = defaultLocale): Promise<Educ
       depth: 2,
       limit: 50,
       locale,
-      sort: '-order,-startDate',
+      sort: ['order', '-startDate'],
     })
 
     return education.docs

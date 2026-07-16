@@ -12,9 +12,10 @@ export const Journal: CollectionConfig = {
     group: 'Journal',
     description:
       'Personal, non-technical stories — travel, sport, achievements, events, discoveries.',
-    defaultColumns: ['coverImage', 'title', 'category', 'visibility', 'date', 'featured'],
+    defaultColumns: ['coverImage', 'title', 'category', 'visibility', 'date', 'featured', 'order'],
     useAsTitle: 'title',
   },
+  defaultSort: 'order',
   access: {
     read: () => true,
   },
@@ -116,9 +117,10 @@ export const Journal: CollectionConfig = {
     {
       name: 'order',
       type: 'number',
-      defaultValue: 0,
       admin: {
         step: 1,
+        description:
+          'Display order: 1 shows first, 2 second, etc. Leave empty to fall back to most recent date after ordered entries.',
       },
     },
   ],

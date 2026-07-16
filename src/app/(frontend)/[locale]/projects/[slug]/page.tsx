@@ -74,6 +74,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
   }
 
   const imageUrl = getMediaUrl(project.coverImage)
+  const darkImageUrl = getMediaUrl(project.coverImageDark)
   const imageAlt =
     typeof project.coverImage === 'object' && project.coverImage
       ? project.coverImage.alt
@@ -111,16 +112,28 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
             </p>
           ) : null}
 
-          {imageUrl ? (
+          {imageUrl || darkImageUrl ? (
             <div className="relative mt-8 aspect-video overflow-hidden rounded-[28px] bg-surface">
-              <Image
-                alt={imageAlt}
-                className="h-full w-full object-contain"
-                height={900}
-                priority
-                src={imageUrl}
-                width={1600}
-              />
+              {imageUrl ? (
+                <Image
+                  alt={imageAlt}
+                  className={`h-full w-full object-contain${darkImageUrl ? ' dark:hidden' : ''}`}
+                  height={900}
+                  priority
+                  src={imageUrl}
+                  width={1600}
+                />
+              ) : null}
+              {darkImageUrl ? (
+                <Image
+                  alt={imageAlt}
+                  className="hidden h-full w-full object-contain dark:block"
+                  height={900}
+                  priority
+                  src={darkImageUrl}
+                  width={1600}
+                />
+              ) : null}
             </div>
           ) : null}
 
