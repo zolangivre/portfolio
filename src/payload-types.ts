@@ -265,6 +265,9 @@ export interface Project {
   githubUrl?: string | null;
   liveUrl?: string | null;
   featured?: boolean | null;
+  /**
+   * Display order: 1 shows first, 2 second, etc. Leave empty to fall back to newest-first after ordered projects.
+   */
   order?: number | null;
   year?: number | null;
   status?: ('live' | 'in-progress' | 'archived') | null;
@@ -332,6 +335,9 @@ export interface Experience {
   startDate: string;
   endDate?: string | null;
   currentlyWorking?: boolean | null;
+  /**
+   * Display order: 1 shows first, 2 second, etc. Leave empty to fall back to most recent start date after ordered entries.
+   */
   order?: number | null;
   updatedAt: string;
   createdAt: string;
@@ -399,6 +405,9 @@ export interface Education {
   startDate: string;
   endDate?: string | null;
   currentlyStudying?: boolean | null;
+  /**
+   * Display order: 1 shows first, 2 second, etc. Leave empty to fall back to most recent start date after ordered entries.
+   */
   order?: number | null;
   updatedAt: string;
   createdAt: string;
@@ -484,6 +493,9 @@ export interface Journal {
    * Private entries are kept in the CMS but never rendered on the site.
    */
   visibility: 'public' | 'private';
+  /**
+   * Display order: 1 shows first, 2 second, etc. Leave empty to fall back to most recent date after ordered entries.
+   */
   order?: number | null;
   meta?: {
     title?: string | null;

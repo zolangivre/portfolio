@@ -17,7 +17,7 @@ export async function getJournalEntries(
       depth: 2,
       limit: DEFAULT_LIMIT,
       locale,
-      sort: '-featured,-date',
+      sort: ['-featured', 'order', '-date'],
       where: {
         visibility: { equals: 'public' },
         ...(category ? { category: { equals: category } } : {}),

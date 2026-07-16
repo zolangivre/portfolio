@@ -14,7 +14,7 @@ export async function getExperiences(locale: Locale = defaultLocale): Promise<Ex
       depth: 2,
       limit: DEFAULT_LIMIT,
       locale,
-      sort: '-order,-startDate',
+      sort: ['order', '-startDate'],
     })
 
     return experiences.docs

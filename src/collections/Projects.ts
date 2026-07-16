@@ -18,10 +18,12 @@ export const Projects: CollectionConfig = {
       'technologies',
       'category',
       'featured',
+      'order',
       'year',
     ],
     useAsTitle: 'title',
   },
+  defaultSort: 'order',
   access: {
     read: () => true,
   },
@@ -104,9 +106,10 @@ export const Projects: CollectionConfig = {
     {
       name: 'order',
       type: 'number',
-      defaultValue: 0,
       admin: {
         step: 1,
+        description:
+          'Display order: 1 shows first, 2 second, etc. Leave empty to fall back to newest-first after ordered projects.',
       },
     },
     {
