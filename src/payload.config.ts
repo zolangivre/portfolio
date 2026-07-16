@@ -78,6 +78,10 @@ export default buildConfig({
     fallback: true,
   },
   db: postgresAdapter({
+    // Dev push keeps the local database in sync automatically. CI builds its
+    // database from migrations instead — PAYLOAD_DB_PUSH=false prevents push
+    // from detecting a schema drift and hanging on an interactive prompt.
+    push: process.env.PAYLOAD_DB_PUSH !== 'false',
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
