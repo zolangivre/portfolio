@@ -15,6 +15,7 @@ type ProjectCardProps = {
 
 export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
   const imageUrl = getMediaUrl(project.coverImage)
+  const darkImageUrl = getMediaUrl(project.coverImageDark)
   const imageAlt =
     typeof project.coverImage === 'object' && project.coverImage
       ? project.coverImage.alt
@@ -33,9 +34,18 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
           {imageUrl ? (
             <Image
               alt={imageAlt}
-              className="h-full w-full object-contain transition duration-500 group-hover:scale-[1.03]"
+              className={`h-full w-full object-contain transition duration-500 group-hover:scale-[1.03]${darkImageUrl ? ' dark:hidden' : ''}`}
               height={640}
               src={imageUrl}
+              width={960}
+            />
+          ) : null}
+          {darkImageUrl ? (
+            <Image
+              alt={imageAlt}
+              className="hidden h-full w-full object-contain transition duration-500 group-hover:scale-[1.03] dark:block"
+              height={640}
+              src={darkImageUrl}
               width={960}
             />
           ) : null}

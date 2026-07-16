@@ -256,6 +256,10 @@ export interface Project {
     [k: string]: unknown;
   };
   coverImage?: (number | null) | Media;
+  /**
+   * Optional dark-mode variant of the cover image. Shown instead of the cover image when the site is in dark mode.
+   */
+  coverImageDark?: (number | null) | Media;
   gallery?: (number | Media)[] | null;
   technologies?: (number | Technology)[] | null;
   githubUrl?: string | null;
@@ -694,6 +698,7 @@ export interface ProjectsSelect<T extends boolean = true> {
   shortDescription?: T;
   description?: T;
   coverImage?: T;
+  coverImageDark?: T;
   gallery?: T;
   technologies?: T;
   githubUrl?: T;

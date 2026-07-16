@@ -61,6 +61,15 @@ export const Projects: CollectionConfig = {
       relationTo: 'media',
     },
     {
+      name: 'coverImageDark',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        description:
+          'Optional dark-mode variant of the cover image. Shown instead of the cover image when the site is in dark mode.',
+      },
+    },
+    {
       name: 'gallery',
       type: 'relationship',
       relationTo: 'media',
