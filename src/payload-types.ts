@@ -296,7 +296,7 @@ export interface Technology {
   logo?: (number | null) | Media;
   website?: string | null;
   /**
-   * Optional hex color used in UI accents.
+   * Optional hex color shown as a small dot on the tech chips, e.g. #4287F5 (the # is added automatically if missing).
    */
   color?: string | null;
   category?: (number | null) | Category;
