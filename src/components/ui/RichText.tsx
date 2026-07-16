@@ -7,5 +7,5 @@ type RichTextProps = {
 }
 
 export function RichText({ content }: RichTextProps) {
-  return <PayloadRichText className="rich-text" data={content} />
+  return <PayloadRichText className="rich-text text-justify" data={content} />
 }
