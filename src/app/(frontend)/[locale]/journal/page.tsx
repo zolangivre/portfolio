@@ -8,6 +8,7 @@ import { SectionHeader } from '@/components/ui/SectionHeader'
 import { getDictionary } from '@/lib/i18n/dictionary'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
 import { getJournalEntries, getSectionsContent, getSectionsVisibility } from '@/lib/queries'
+import { lexicalToPlainText } from '@/lib/richText'
 import { resolveSectionCopy } from '@/lib/sectionCopy'
 
 export const revalidate = 60
@@ -27,7 +28,7 @@ export async function generateMetadata({
 
   return {
     title: content.title,
-    description: content.description,
+    description: lexicalToPlainText(content.description),
   }
 }
 

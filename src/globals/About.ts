@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { textToLexicalParagraphs } from '@/lib/richText'
 
 export const About: GlobalConfig = {
   slug: 'about',
@@ -33,11 +34,12 @@ export const About: GlobalConfig = {
     },
     {
       name: 'description',
-      type: 'textarea',
+      type: 'richText',
       label: 'Description',
       localized: true,
-      defaultValue:
+      defaultValue: textToLexicalParagraphs(
         'A product-minded engineer focused on building fast, reliable experiences from concept to launch.',
+      ),
     },
     {
       name: 'body',

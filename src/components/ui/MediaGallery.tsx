@@ -42,15 +42,14 @@ export function MediaGallery({
             onClick={() => setIndex(imageIndex)}
             type="button"
           >
-            <div className="relative aspect-4/3 overflow-hidden rounded-[20px] bg-surface">
-              <Image
-                alt={image.alt}
-                className="object-contain"
-                fill
-                sizes="(min-width: 720px) 33vw, 50vw"
-                src={image.src}
-              />
-            </div>
+            <Image
+              alt={image.alt}
+              className="rounded-[20px] bg-surface"
+              height={image.height ?? 1200}
+              sizes="(min-width: 720px) 33vw, 50vw"
+              src={image.src}
+              width={image.width ?? 1600}
+            />
           </button>
         ))}
       </div>

@@ -7,6 +7,7 @@ import { getMediaUrl } from '@/lib/media'
 import type { SectionCopy } from '@/lib/sectionCopy'
 import type { Education } from '@/payload-types'
 
+import { RichText } from '../ui/RichText'
 import { SectionHeader } from '../ui/SectionHeader'
 
 type EducationSectionProps = {
@@ -90,7 +91,7 @@ export function EducationSection({
                     <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
                       {entry.fieldOfStudy ? <h3>{entry.fieldOfStudy}</h3> : null}
                     </div>
-                    {entry.description ? <p className="text-justify">{entry.description}</p> : null}
+                    {entry.description ? <RichText content={entry.description} /> : null}
                   </div>
                 </article>
               )

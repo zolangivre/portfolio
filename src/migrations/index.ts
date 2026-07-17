@@ -11,6 +11,7 @@ import * as migration_20260716_140000_add_about_contact_eyebrow from './20260716
 import * as migration_20260716_150000_add_sections_content from './20260716_150000_add_sections_content';
 import * as migration_20260716_160000_about_point_groups from './20260716_160000_about_point_groups';
 import * as migration_20260717_115341_about_point_groups_content from './20260717_115341_about_point_groups_content';
+import * as migration_20260717_195308_description_fields_rich_text from './20260717_195308_description_fields_rich_text';
 
 export const migrations = [
   {
@@ -77,5 +78,10 @@ export const migrations = [
     up: migration_20260717_115341_about_point_groups_content.up,
     down: migration_20260717_115341_about_point_groups_content.down,
     name: '20260717_115341_about_point_groups_content'
+  },
+  {
+    up: migration_20260717_195308_description_fields_rich_text.up,
+    down: migration_20260717_195308_description_fields_rich_text.down,
+    name: '20260717_195308_description_fields_rich_text'
   },
 ];

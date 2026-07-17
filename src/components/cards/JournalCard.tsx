@@ -35,7 +35,7 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
         {imageUrl ? (
           <Image
             alt={imageAlt}
-            className="h-full w-full object-contain transition duration-500 group-hover:scale-[1.03]"
+            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
             height={640}
             src={imageUrl}
             width={960}
