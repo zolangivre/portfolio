@@ -10,6 +10,7 @@ import * as migration_20260716_130000_hero_description_rich_text from './2026071
 import * as migration_20260716_140000_add_about_contact_eyebrow from './20260716_140000_add_about_contact_eyebrow';
 import * as migration_20260716_150000_add_sections_content from './20260716_150000_add_sections_content';
 import * as migration_20260716_160000_about_point_groups from './20260716_160000_about_point_groups';
+import * as migration_20260717_115341_about_point_groups_content from './20260717_115341_about_point_groups_content';
 
 export const migrations = [
   {
@@ -71,5 +72,10 @@ export const migrations = [
     up: migration_20260716_160000_about_point_groups.up,
     down: migration_20260716_160000_about_point_groups.down,
     name: '20260716_160000_about_point_groups'
+  },
+  {
+    up: migration_20260717_115341_about_point_groups_content.up,
+    down: migration_20260717_115341_about_point_groups_content.down,
+    name: '20260717_115341_about_point_groups_content'
   },
 ];

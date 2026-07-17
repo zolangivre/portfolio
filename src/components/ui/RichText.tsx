@@ -8,6 +8,7 @@ type RichTextProps = {
     | NonNullable<Project['description']>
     | NonNullable<About['body']>
     | NonNullable<Hero['description']>
+    | NonNullable<NonNullable<About['pointGroups']>[number]['content']>
 }
 
 export function RichText({ content }: RichTextProps) {

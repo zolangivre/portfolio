@@ -1131,12 +1131,21 @@ export interface About {
   pointGroups?:
     | {
         title: string;
-        points?:
-          | {
-              value: string;
-              id?: string | null;
-            }[]
-          | null;
+        content?: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
         id?: string | null;
       }[]
     | null;
@@ -1376,12 +1385,7 @@ export interface AboutSelect<T extends boolean = true> {
     | T
     | {
         title?: T;
-        points?:
-          | T
-          | {
-              value?: T;
-              id?: T;
-            };
+        content?: T;
         id?: T;
       };
   portrait?: T;

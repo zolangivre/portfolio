@@ -59,11 +59,11 @@ export function AboutSection({ about, dictionary }: AboutSectionProps) {
                   <p className="text-sm font-semibold uppercase tracking-[0.3em] text-accent">
                     {group.title}
                   </p>
-                  <ul className="mt-5 space-y-4 text-sm leading-7 text-fg">
-                    {(group.points ?? []).map((point, index) => (
-                      <li key={`${point.value}-${index}`}>• {point.value}</li>
-                    ))}
-                  </ul>
+                  {group.content ? (
+                    <div className="mt-5 text-sm leading-7 text-fg">
+                      <RichText content={group.content} />
+                    </div>
+                  ) : null}
                 </div>
               ))}
             </div>
