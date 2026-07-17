@@ -1,6 +1,6 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { seoPlugin } from '@payloadcms/plugin-seo'
-import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
+import { s3Storage } from '@payloadcms/storage-s3'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -101,12 +101,26 @@ export default buildConfig({
         return shortDescription ?? ''
       },
     }),
-    // Falls back to local disk storage when BLOB_READ_WRITE_TOKEN is unset
-    // (local dev), and uploads to Vercel Blob when it's set (production).
-    vercelBlobStorage({
+    // Falls back to local disk storage when R2 credentials are unset (local
+    // dev), and uploads to Cloudflare R2 when they're set (production).
+    s3Storage({
       collections: { media: true },
-      token: process.env.BLOB_READ_WRITE_TOKEN,
+      bucket: process.env.R2_BUCKET || '',
+      enabled: Boolean(process.env.R2_ACCESS_KEY_ID),
+      // Uploads go straight from the browser to R2, bypassing the server so
+      // large files aren't capped by the platform's request body size limit.
       clientUploads: true,
+      config: {
+        region: 'auto',
+        endpoint: process.env.R2_ACCOUNT_ID
+          ? `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`
+          : undefined,
+        credentials: {
+          accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+        },
+        forcePathStyle: true,
+      },
     }),
   ],
 })
