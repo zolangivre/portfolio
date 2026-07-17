@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { textToLexicalParagraphs } from '@/lib/richText'
 
 export const Contact: GlobalConfig = {
   slug: 'contact',
@@ -33,11 +34,12 @@ export const Contact: GlobalConfig = {
     },
     {
       name: 'description',
-      type: 'textarea',
+      type: 'richText',
       label: 'Description',
       localized: true,
-      defaultValue:
+      defaultValue: textToLexicalParagraphs(
         'Available for select freelance work, product collaborations, and full-stack product builds.',
+      ),
     },
     {
       name: 'successMessage',

@@ -1,6 +1,7 @@
 import type { Field, GlobalConfig } from 'payload'
 
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { textToLexicalParagraphs } from '@/lib/richText'
 
 const sectionIntroFields = ({
   eyebrow,
@@ -28,10 +29,10 @@ const sectionIntroFields = ({
   },
   {
     name: 'description',
-    type: 'textarea',
+    type: 'richText',
     label: 'Description',
     localized: true,
-    defaultValue: description,
+    defaultValue: textToLexicalParagraphs(description),
   },
 ]
 

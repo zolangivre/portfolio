@@ -1,25 +1,31 @@
+import { textToLexicalParagraphs, type LexicalContent } from '@/lib/richText'
+
 export type SectionCopy = {
+  eyebrow: string
+  title: string
+  description: LexicalContent
+}
+
+type SectionCopyFallback = {
   eyebrow: string
   title: string
   description: string
 }
 
-type SectionCopyField = string | null | undefined
-
 export function resolveSectionCopy(
   payloadGroup:
     | {
-        eyebrow?: SectionCopyField
-        title?: SectionCopyField
-        description?: SectionCopyField
+        eyebrow?: string | null
+        title?: string | null
+        description?: LexicalContent | null
       }
     | null
     | undefined,
-  fallback: SectionCopy,
+  fallback: SectionCopyFallback,
 ): SectionCopy {
   return {
     eyebrow: payloadGroup?.eyebrow || fallback.eyebrow,
     title: payloadGroup?.title || fallback.title,
-    description: payloadGroup?.description || fallback.description,
+    description: payloadGroup?.description ?? textToLexicalParagraphs(fallback.description),
   }
 }

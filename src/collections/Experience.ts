@@ -52,7 +52,7 @@ export const Experiences: CollectionConfig = {
     },
     {
       name: 'description',
-      type: 'textarea',
+      type: 'richText',
       required: true,
       localized: true,
     },

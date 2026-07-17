@@ -8,6 +8,7 @@ import { getMediaUrl } from '@/lib/media'
 import type { SectionCopy } from '@/lib/sectionCopy'
 import type { Experience } from '@/payload-types'
 
+import { RichText } from '../ui/RichText'
 import { SectionHeader } from '../ui/SectionHeader'
 
 type ExperienceSectionProps = {
@@ -95,7 +96,7 @@ export function ExperienceSection({
                     ) : null}
                   </div>
                   <div>
-                    <p className="text-fg-muted text-justify">{experience.description}</p>
+                    <RichText content={experience.description} />
                     {technologies.length > 0 ? (
                       <ul
                         aria-label={`${experience.position} ${dictionary.projects.technologiesAriaLabelSuffix}`}

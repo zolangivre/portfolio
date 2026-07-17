@@ -43,7 +43,7 @@ export const Education: CollectionConfig = {
     },
     {
       name: 'description',
-      type: 'textarea',
+      type: 'richText',
       localized: true,
     },
     {
