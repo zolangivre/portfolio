@@ -32,7 +32,7 @@ export function AboutSection({ about, dictionary }: AboutSectionProps) {
         />
 
         {about?.body ? (
-          <div className="mb-8 text-justify">
+          <div className="mb-8">
             <RichText content={about.body} />
           </div>
         ) : null}
