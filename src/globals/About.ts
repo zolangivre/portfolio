@@ -66,16 +66,9 @@ export const About: GlobalConfig = {
           required: true,
         },
         {
-          name: 'points',
-          type: 'array',
-          label: 'Points',
-          fields: [
-            {
-              name: 'value',
-              type: 'text',
-              required: true,
-            },
-          ],
+          name: 'content',
+          type: 'richText',
+          label: 'Content',
         },
       ],
     },
