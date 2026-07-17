@@ -78,8 +78,8 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
   }
 
   const imageUrl = getMediaUrl(entry.coverImage)
-  const imageAlt =
-    typeof entry.coverImage === 'object' && entry.coverImage ? entry.coverImage.alt : entry.title
+  const coverImage = typeof entry.coverImage === 'object' ? entry.coverImage : null
+  const imageAlt = coverImage ? coverImage.alt : entry.title
   const categoryLabel =
     typeof entry.category === 'object' && entry.category ? entry.category.name : null
   const formattedDate = dateFormatters[locale].format(new Date(entry.date))
@@ -106,16 +106,14 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
           </p>
 
           {imageUrl ? (
-            <div className="relative mt-8 aspect-video overflow-hidden rounded-[28px] bg-surface">
-              <Image
-                alt={imageAlt}
-                className="h-full w-full object-contain"
-                height={900}
-                priority
-                src={imageUrl}
-                width={1600}
-              />
-            </div>
+            <Image
+              alt={imageAlt}
+              className="mt-8 block h-auto w-full rounded-[28px] bg-surface"
+              height={coverImage?.height ?? 900}
+              priority
+              src={imageUrl}
+              width={coverImage?.width ?? 1600}
+            />
           ) : null}
 
           <div className="mt-10">
