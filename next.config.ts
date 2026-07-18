@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
         pathname: '/api/media/file/**',
       },
     ],
+    qualities: [75, 90],
   },
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {

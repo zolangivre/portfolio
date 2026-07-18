@@ -42,9 +42,10 @@ export function Header({ dictionary, locale, navigation, sections, settings }: H
             <Image
               alt=""
               className="site-logo-mark object-cover"
-              height={32}
+              height={128}
+              quality={90}
               src={logoUrl}
-              width={32}
+              width={128}
             />
           ) : (
             <span className="site-logo-mark">{name.charAt(0).toUpperCase()}</span>
