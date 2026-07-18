@@ -771,7 +771,8 @@ h3 {
   width: 100%;
 }
 
-.media-gallery-item img {
+.media-gallery-item img,
+.media-gallery-item video {
   display: block;
   height: auto;
   width: 100%;
