@@ -10,6 +10,7 @@ import type { Navigation, SectionsVisibility, Setting } from '@/payload-types'
 
 import { HeaderScrollWatcher } from './HeaderScrollWatcher'
 import { LanguageSwitcher } from './LanguageSwitcher'
+import { NavScrollSpy } from './NavScrollSpy'
 import { MobileNavToggle } from './MobileNavToggle'
 import { ThemeToggle } from './ThemeToggle'
 
@@ -34,6 +35,7 @@ export function Header({ dictionary, locale, navigation, sections, settings }: H
   return (
     <header className="site-header p-2" data-scrolled="false">
       <HeaderScrollWatcher />
+      <NavScrollSpy />
       <Container className="site-header-inner">
         <Link className="site-logo" href={`/${locale}`}>
           {logoUrl ? (
