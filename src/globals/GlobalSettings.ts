@@ -93,6 +93,20 @@ export const GlobalSettings: GlobalConfig = {
             { label: 'Follow system', value: 'system' },
           ],
         },
+        {
+          name: 'cursorEffect',
+          type: 'select',
+          label: 'Cursor effect',
+          defaultValue: 'ring',
+          options: [
+            { label: 'Ring (dot + trailing ring)', value: 'ring' },
+            { label: 'Trail (comet of fading dots)', value: 'trail' },
+          ],
+          admin: {
+            description:
+              'Custom cursor shown on desktop. Automatically disabled on touch devices and for users who prefer reduced motion.',
+          },
+        },
       ],
     },
     {

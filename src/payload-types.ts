@@ -1046,6 +1046,10 @@ export interface Setting {
         )
       | null;
     defaultTheme?: ('light' | 'dark' | 'system') | null;
+    /**
+     * Custom cursor shown on desktop. Automatically disabled on touch devices and for users who prefer reduced motion.
+     */
+    cursorEffect?: ('ring' | 'trail') | null;
   };
   contactEmail?: string | null;
   socialLinks?:
@@ -1448,6 +1452,7 @@ export interface SettingsSelect<T extends boolean = true> {
         primaryColor?: T;
         accentColor?: T;
         defaultTheme?: T;
+        cursorEffect?: T;
       };
   contactEmail?: T;
   socialLinks?:
