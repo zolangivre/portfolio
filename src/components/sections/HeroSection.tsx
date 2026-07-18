@@ -75,7 +75,8 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
             className="mt-10 h-auto w-full max-w-sm rounded-4xl border border-border shadow-xl shadow-black/10 lg:mt-0 lg:w-80 lg:shrink-0"
             height={photoHeight}
             priority
-            sizes="(min-width: 1024px) 320px, 100vw"
+            quality={90}
+            sizes="(min-width: 1024px) 480px, 100vw"
             src={photoUrl}
             width={photoWidth}
           />
