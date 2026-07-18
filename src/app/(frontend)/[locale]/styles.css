@@ -138,6 +138,7 @@ a {
   cursor: none;
 }
 
+/* Above the lightbox portal, which sits at z-index 9999. */
 .cursor-dot,
 .cursor-ring {
   left: 0;
@@ -145,7 +146,7 @@ a {
   pointer-events: none;
   position: fixed;
   top: 0;
-  z-index: 9999;
+  z-index: 10000;
 }
 
 .cursor-dot.is-visible,
@@ -211,7 +212,7 @@ a {
   pointer-events: none;
   position: fixed;
   top: 0;
-  z-index: 9999;
+  z-index: 10000;
 }
 
 
@@ -869,11 +870,13 @@ h3 {
   transform: scale(1.015);
 }
 
+/* The lightbox backdrop is near-black in both themes, so its buttons must
+   always be light — var(--fg) would turn them dark in light mode. */
 :root {
   --yarl__color_backdrop: color-mix(in srgb, var(--bg) 4%, black 96%);
-  --yarl__color_button: var(--fg);
+  --yarl__color_button: rgba(255, 255, 255, 0.85);
   --yarl__color_button_active: var(--accent);
-  --yarl__color_button_disabled: var(--fg-subtle);
+  --yarl__color_button_disabled: rgba(255, 255, 255, 0.35);
   --yarl__button_filter: none;
 }
 
