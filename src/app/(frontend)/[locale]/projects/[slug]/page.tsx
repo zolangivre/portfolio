@@ -188,6 +188,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                 id: media.id,
                 src: getMediaUrl(media) ?? '',
                 alt: media.alt,
+                mimeType: media.mimeType,
                 width: media.width ?? undefined,
                 height: media.height ?? undefined,
               }))}

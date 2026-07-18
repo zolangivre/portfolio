@@ -140,6 +140,7 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
                 id: media.id,
                 src: getMediaUrl(media) ?? '',
                 alt: media.alt,
+                mimeType: media.mimeType,
                 width: media.width ?? undefined,
                 height: media.height ?? undefined,
               }))}

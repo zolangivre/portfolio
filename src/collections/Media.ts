@@ -45,6 +45,6 @@ export const Media: CollectionConfig = {
         position: 'centre',
       },
     ],
-    mimeTypes: ['image/*', 'video/*', 'application/pdf'],
+    mimeTypes: ['image/*', 'video/mp4', 'video/webm', 'application/pdf'],
   },
 }
