@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { Fraunces, Inter } from 'next/font/google'
 import Script from 'next/script'
 import React from 'react'
+import { Analytics } from '@vercel/analytics/next'
 
 import { Footer } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'
@@ -162,6 +163,7 @@ export default async function LocaleLayout(props: {
             </div>
           </MotionProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )
