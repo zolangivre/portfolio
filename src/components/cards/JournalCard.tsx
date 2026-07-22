@@ -37,7 +37,7 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
             alt={imageAlt}
             className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
             height={640}
-            sizes="(min-width: 1024px) 33vw, (min-width: 720px) 50vw, 100vw"
+            sizes="(min-width: 1024px) min(33vw, 375px), (min-width: 720px) 50vw, 100vw"
             src={imageUrl}
             width={960}
           />

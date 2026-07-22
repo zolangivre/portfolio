@@ -36,7 +36,7 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
               alt={imageAlt}
               className={`h-full w-full object-contain transition duration-500 group-hover:scale-[1.03]${darkImageUrl ? ' dark:hidden' : ''}`}
               height={640}
-              sizes="(min-width: 1024px) 33vw, (min-width: 720px) 50vw, 100vw"
+              sizes="(min-width: 1024px) min(33vw, 375px), (min-width: 720px) 50vw, 100vw"
               src={imageUrl}
               width={960}
             />
@@ -46,7 +46,7 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
               alt={imageAlt}
               className="hidden h-full w-full object-contain transition duration-500 group-hover:scale-[1.03] dark:block"
               height={640}
-              sizes="(min-width: 1024px) 33vw, (min-width: 720px) 50vw, 100vw"
+              sizes="(min-width: 1024px) min(33vw, 375px), (min-width: 720px) 50vw, 100vw"
               src={darkImageUrl}
               width={960}
             />
@@ -57,9 +57,11 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
         <div className="flex flex-1 flex-col p-6 sm:p-7">
           <div className="mb-2 flex items-start justify-between gap-3">
             <h3 className="text-xl font-semibold text-fg">{project.title}</h3>
-            <span className="shrink-0 rounded-full border border-accent-soft-border bg-accent-soft px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.28em] text-accent">
-              {dictionary.projects.featuredBadge}
-            </span>
+            {project.featured ? (
+              <span className="shrink-0 rounded-full border border-accent-soft-border bg-accent-soft px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.28em] text-accent">
+                {dictionary.projects.featuredBadge}
+              </span>
+            ) : null}
           </div>
 
           {categoryLabel || project.year || statusLabel ? (

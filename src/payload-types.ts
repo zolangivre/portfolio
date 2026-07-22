@@ -266,6 +266,10 @@ export interface Project {
   liveUrl?: string | null;
   featured?: boolean | null;
   /**
+   * Private projects are kept in the CMS but never rendered on the site.
+   */
+  visibility: 'public' | 'private';
+  /**
    * Display order: 1 shows first, 2 second, etc. Leave empty to fall back to newest-first after ordered projects.
    */
   order?: number | null;
@@ -755,6 +759,7 @@ export interface ProjectsSelect<T extends boolean = true> {
   githubUrl?: T;
   liveUrl?: T;
   featured?: T;
+  visibility?: T;
   order?: T;
   year?: T;
   status?: T;

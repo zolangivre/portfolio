@@ -7,33 +7,6 @@ import { getPayloadClient } from '../payload'
 
 const DEFAULT_LIMIT = 12
 
-export const getFeaturedProjects = cache(
-  async (locale: Locale = defaultLocale): Promise<Project[]> => {
-    try {
-      const payload = await getPayloadClient()
-
-      const projects = await payload.find({
-        collection: 'projects',
-        depth: 2,
-        limit: DEFAULT_LIMIT,
-        locale,
-        sort: ['-featured', 'order', '-year', '-createdAt'],
-        where: {
-          featured: {
-            equals: true,
-          },
-        },
-      })
-
-      return projects.docs
-    } catch (error) {
-      console.error('Failed to load featured projects from Payload.', error)
-
-      return []
-    }
-  },
-)
-
 export const getAllProjects = cache(async (locale: Locale = defaultLocale): Promise<Project[]> => {
   try {
     const payload = await getPayloadClient()
@@ -44,6 +17,9 @@ export const getAllProjects = cache(async (locale: Locale = defaultLocale): Prom
       limit: DEFAULT_LIMIT,
       locale,
       sort: ['-featured', 'order', '-year', '-createdAt'],
+      where: {
+        visibility: { equals: 'public' },
+      },
     })
 
     return projects.docs
@@ -66,6 +42,7 @@ export const getProject = cache(
         locale,
         where: {
           slug: { equals: slug },
+          visibility: { equals: 'public' },
         },
       })
 

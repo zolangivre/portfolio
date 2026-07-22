@@ -17,6 +17,7 @@ export const Projects: CollectionConfig = {
       'status',
       'technologies',
       'category',
+      'visibility',
       'featured',
       'order',
       'year',
@@ -102,6 +103,19 @@ export const Projects: CollectionConfig = {
       type: 'checkbox',
       defaultValue: false,
       index: true,
+    },
+    {
+      name: 'visibility',
+      type: 'select',
+      required: true,
+      defaultValue: 'public',
+      options: [
+        { label: 'Public', value: 'public' },
+        { label: 'Private (hidden from the site)', value: 'private' },
+      ],
+      admin: {
+        description: 'Private projects are kept in the CMS but never rendered on the site.',
+      },
     },
     {
       name: 'order',

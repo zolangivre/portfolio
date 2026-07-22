@@ -13,6 +13,7 @@ import * as migration_20260716_160000_about_point_groups from './20260716_160000
 import * as migration_20260717_115341_about_point_groups_content from './20260717_115341_about_point_groups_content';
 import * as migration_20260717_195308_description_fields_rich_text from './20260717_195308_description_fields_rich_text';
 import * as migration_20260718_161700_add_cursor_effect from './20260718_161700_add_cursor_effect';
+import * as migration_20260722_150000_add_project_visibility from './20260722_150000_add_project_visibility';
 
 export const migrations = [
   {
@@ -89,5 +90,10 @@ export const migrations = [
     up: migration_20260718_161700_add_cursor_effect.up,
     down: migration_20260718_161700_add_cursor_effect.down,
     name: '20260718_161700_add_cursor_effect'
+  },
+  {
+    up: migration_20260722_150000_add_project_visibility.up,
+    down: migration_20260722_150000_add_project_visibility.down,
+    name: '20260722_150000_add_project_visibility'
   },
 ];
