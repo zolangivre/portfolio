@@ -10,7 +10,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname()
 
   return (
-    <AnimatePresence initial={false} mode="wait">
+    <AnimatePresence mode="wait">
       <motion.div
         key={pathname}
         animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
