@@ -7,6 +7,7 @@ import { getMediaUrl } from '@/lib/media'
 import type { SectionCopy } from '@/lib/sectionCopy'
 import type { Education } from '@/payload-types'
 
+import { Reveal } from '../ui/Reveal'
 import { RichText } from '../ui/RichText'
 import { SectionHeader } from '../ui/SectionHeader'
 
@@ -45,55 +46,57 @@ export function EducationSection({
 
         {education.length > 0 ? (
           <div className="timeline">
-            {education.map((entry) => {
+            {education.map((entry, index) => {
               const school = typeof entry.school === 'object' && entry.school ? entry.school : null
               const schoolLogoUrl = getMediaUrl(school?.logo)
 
               return (
-                <article className="timeline-item" key={entry.id}>
-                  <div>
-                    <p className="timeline-date">
-                      {formatDate(entry.startDate, locale, dictionary.experience.present)} -{' '}
-                      {formatDate(entry.endDate, locale, dictionary.experience.present)}
-                    </p>
-                    <h3>{entry.degree}</h3>
-                    <div className="timeline-company flex flex-wrap items-center gap-2">
-                      {schoolLogoUrl ? (
-                        <Image
-                          alt=""
-                          className="h-5 w-5 shrink-0 object-contain"
-                          height={20}
-                          src={schoolLogoUrl}
-                          width={20}
-                        />
+                <Reveal delay={Math.min(index, 5) * 0.08} key={entry.id}>
+                  <article className="timeline-item">
+                    <div>
+                      <p className="timeline-date">
+                        {formatDate(entry.startDate, locale, dictionary.experience.present)} -{' '}
+                        {formatDate(entry.endDate, locale, dictionary.experience.present)}
+                      </p>
+                      <h3>{entry.degree}</h3>
+                      <div className="timeline-company flex flex-wrap items-center gap-2">
+                        {schoolLogoUrl ? (
+                          <Image
+                            alt=""
+                            className="h-5 w-5 shrink-0 object-contain"
+                            height={20}
+                            src={schoolLogoUrl}
+                            width={20}
+                          />
+                        ) : null}
+                        {school?.website ? (
+                          <a
+                            className="transition hover:text-accent"
+                            href={school.website}
+                            rel="noreferrer"
+                            target="_blank"
+                            title={school.description ?? undefined}
+                          >
+                            {school.name}
+                          </a>
+                        ) : (
+                          <span title={school?.description ?? undefined}>
+                            {school?.name ?? dictionary.education.fallbackSchool}
+                          </span>
+                        )}
+                      </div>
+                      {entry.location ? (
+                        <p className="timeline-company mt-1 text-xs">{entry.location}</p>
                       ) : null}
-                      {school?.website ? (
-                        <a
-                          className="transition hover:text-accent"
-                          href={school.website}
-                          rel="noreferrer"
-                          target="_blank"
-                          title={school.description ?? undefined}
-                        >
-                          {school.name}
-                        </a>
-                      ) : (
-                        <span title={school?.description ?? undefined}>
-                          {school?.name ?? dictionary.education.fallbackSchool}
-                        </span>
-                      )}
                     </div>
-                    {entry.location ? (
-                      <p className="timeline-company mt-1 text-xs">{entry.location}</p>
-                    ) : null}
-                  </div>
-                  <div className="text-fg-muted">
-                    <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
-                      {entry.fieldOfStudy ? <h3>{entry.fieldOfStudy}</h3> : null}
+                    <div className="text-fg-muted">
+                      <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
+                        {entry.fieldOfStudy ? <h3>{entry.fieldOfStudy}</h3> : null}
+                      </div>
+                      {entry.description ? <RichText content={entry.description} /> : null}
                     </div>
-                    {entry.description ? <RichText content={entry.description} /> : null}
-                  </div>
-                </article>
+                  </article>
+                </Reveal>
               )
             })}
           </div>

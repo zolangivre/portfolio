@@ -6,6 +6,7 @@ import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { SectionCopy } from '@/lib/sectionCopy'
 import type { Category, Skill } from '@/payload-types'
 
+import { Reveal } from '../ui/Reveal'
 import { SectionHeader } from '../ui/SectionHeader'
 
 type SkillsSectionProps = {
@@ -57,48 +58,50 @@ export function SkillsSection({ content, dictionary, skills }: SkillsSectionProp
 
         {skills.length > 0 ? (
           <div className="skills-grid">
-            {skillGroups.map(({ category, skills: categorySkills }) => (
-              <article className="skill-group" key={category?.id ?? 'uncategorized'}>
-                <h3 className="text-fg">{category?.name ?? dictionary.skills.eyebrow}</h3>
-                <ul className="mt-4 flex flex-wrap gap-2">
-                  {categorySkills.map((skill) => {
-                    const logoUrl = getMediaUrl(skill.logo)
-                    const levelRank = skill.level ? LEVEL_RANK[skill.level] : undefined
-                    const levelLabel = skill.level
-                      ? (dictionary.skills.levelLabels[skill.level] ?? skill.level)
-                      : null
+            {skillGroups.map(({ category, skills: categorySkills }, groupIndex) => (
+              <Reveal delay={Math.min(groupIndex, 5) * 0.08} key={category?.id ?? 'uncategorized'}>
+                <article className="skill-group">
+                  <h3 className="text-fg">{category?.name ?? dictionary.skills.eyebrow}</h3>
+                  <ul className="mt-4 flex flex-wrap gap-2">
+                    {categorySkills.map((skill) => {
+                      const logoUrl = getMediaUrl(skill.logo)
+                      const levelRank = skill.level ? LEVEL_RANK[skill.level] : undefined
+                      const levelLabel = skill.level
+                        ? (dictionary.skills.levelLabels[skill.level] ?? skill.level)
+                        : null
 
-                    return (
-                      <li
-                        className="flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-2 text-sm text-fg-muted"
-                        key={skill.id}
-                      >
-                        {logoUrl ? (
-                          <Image
-                            alt={skill.name}
-                            className={`h-4 w-4 shrink-0 rounded-full object-contain${skill.invertLogoInDarkMode ? ' dark:invert' : ''}`}
-                            height={16}
-                            src={logoUrl}
-                            width={16}
-                          />
-                        ) : null}
-                        <span>{skill.name}</span>
-                        {levelRank ? (
-                          <span aria-label={levelLabel ?? undefined} className="skill-level">
-                            {[1, 2, 3].map((dot) => (
-                              <span
-                                className="skill-level-dot"
-                                data-filled={dot <= levelRank}
-                                key={dot}
-                              />
-                            ))}
-                          </span>
-                        ) : null}
-                      </li>
-                    )
-                  })}
-                </ul>
-              </article>
+                      return (
+                        <li
+                          className="flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-2 text-sm text-fg-muted"
+                          key={skill.id}
+                        >
+                          {logoUrl ? (
+                            <Image
+                              alt={skill.name}
+                              className={`h-4 w-4 shrink-0 rounded-full object-contain${skill.invertLogoInDarkMode ? ' dark:invert' : ''}`}
+                              height={16}
+                              src={logoUrl}
+                              width={16}
+                            />
+                          ) : null}
+                          <span>{skill.name}</span>
+                          {levelRank ? (
+                            <span aria-label={levelLabel ?? undefined} className="skill-level">
+                              {[1, 2, 3].map((dot) => (
+                                <span
+                                  className="skill-level-dot"
+                                  data-filled={dot <= levelRank}
+                                  key={dot}
+                                />
+                              ))}
+                            </span>
+                          ) : null}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </article>
+              </Reveal>
             ))}
           </div>
         ) : (

@@ -1,5 +1,6 @@
 import type { LexicalContent } from '@/lib/richText'
 
+import { Reveal } from './Reveal'
 import { RichText } from './RichText'
 
 type SectionHeaderProps = {
@@ -11,10 +12,12 @@ type SectionHeaderProps = {
 
 export function SectionHeader({ description, eyebrow, id, title }: SectionHeaderProps) {
   return (
-    <div className="section-header">
-      {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
-      <h2 id={id}>{title}</h2>
-      {description ? <RichText content={description} /> : null}
-    </div>
+    <Reveal>
+      <div className="section-header">
+        {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
+        <h2 id={id}>{title}</h2>
+        {description ? <RichText content={description} /> : null}
+      </div>
+    </Reveal>
   )
 }

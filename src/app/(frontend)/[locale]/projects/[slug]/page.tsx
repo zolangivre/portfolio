@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { TechChip } from '@/components/ui/TechChip'
 import { Container } from '@/components/ui/Container'
+import { Divider } from '@/components/ui/Divider'
+import { FadeImage } from '@/components/ui/FadeImage'
 import { MediaGallery } from '@/components/ui/MediaGallery'
 import { Reveal } from '@/components/ui/Reveal'
 import { RichText } from '@/components/ui/RichText'
@@ -94,28 +95,34 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
       <Container>
         <Reveal>
           <Link
-            className="text-sm font-medium text-fg-muted transition hover:text-accent"
+            className="link-underline text-sm font-medium text-fg-muted transition hover:text-accent"
             href={`/${locale}#projects`}
           >
             {dictionary.projects.backLabel}
           </Link>
+        </Reveal>
 
-          {categoryLabel || project.year || statusLabel ? (
-            <p className="eyebrow mt-6">
-              {[categoryLabel, project.year, statusLabel].filter(Boolean).join(' · ')}
-            </p>
-          ) : null}
-          <h1>{project.title}</h1>
-          {project.shortDescription ? (
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-fg-subtle">
-              {project.shortDescription}
-            </p>
-          ) : null}
+        <Reveal delay={0.08}>
+          <div>
+            {categoryLabel || project.year || statusLabel ? (
+              <p className="eyebrow mt-6">
+                {[categoryLabel, project.year, statusLabel].filter(Boolean).join(' · ')}
+              </p>
+            ) : null}
+            <h1>{project.title}</h1>
+            {project.shortDescription ? (
+              <p className="text-sm font-medium uppercase tracking-[0.18em] text-fg-subtle">
+                {project.shortDescription}
+              </p>
+            ) : null}
+          </div>
+        </Reveal>
 
-          {imageUrl || darkImageUrl ? (
+        {imageUrl || darkImageUrl ? (
+          <Reveal delay={0.16}>
             <div className="relative mt-8 aspect-video overflow-hidden rounded-[28px] bg-surface">
               {imageUrl ? (
-                <Image
+                <FadeImage
                   alt={imageAlt}
                   className={`h-full w-full object-contain${darkImageUrl ? ' dark:hidden' : ''}`}
                   height={900}
@@ -125,7 +132,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                 />
               ) : null}
               {darkImageUrl ? (
-                <Image
+                <FadeImage
                   alt={imageAlt}
                   className="hidden h-full w-full object-contain dark:block"
                   height={900}
@@ -135,13 +142,17 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                 />
               ) : null}
             </div>
-          ) : null}
+          </Reveal>
+        ) : null}
 
-          <div className="mt-10">
-            <RichText content={project.description} />
-          </div>
+        <Divider />
 
-          {technologies.length > 0 ? (
+        <Reveal>
+          <RichText content={project.description} />
+        </Reveal>
+
+        {technologies.length > 0 ? (
+          <Reveal>
             <ul
               aria-label={`${project.title} ${dictionary.projects.technologiesAriaLabelSuffix}`}
               className="mt-8 flex flex-wrap gap-2"
@@ -153,13 +164,15 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                 />
               ))}
             </ul>
-          ) : null}
+          </Reveal>
+        ) : null}
 
-          {project.githubUrl || project.liveUrl ? (
+        {project.githubUrl || project.liveUrl ? (
+          <Reveal>
             <div className="mt-8 flex flex-wrap gap-4">
               {project.githubUrl ? (
                 <a
-                  className="text-sm font-medium text-fg transition hover:text-accent"
+                  className="link-underline text-sm font-medium text-fg transition hover:text-accent"
                   href={project.githubUrl}
                   rel="noreferrer"
                   target="_blank"
@@ -169,7 +182,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
               ) : null}
               {project.liveUrl ? (
                 <a
-                  className="text-sm font-medium text-fg transition hover:text-accent"
+                  className="link-underline text-sm font-medium text-fg transition hover:text-accent"
                   href={project.liveUrl}
                   rel="noreferrer"
                   target="_blank"
@@ -178,25 +191,30 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                 </a>
               ) : null}
             </div>
-          ) : null}
+          </Reveal>
+        ) : null}
 
-          {gallery.length > 0 ? (
-            <MediaGallery
-              ariaLabel={`${project.title} ${dictionary.projects.galleryAriaLabelSuffix}`}
-              closeLabel={dictionary.lightbox.closeLabel}
-              images={gallery.map((media) => ({
-                id: media.id,
-                src: getMediaUrl(media) ?? '',
-                alt: media.alt,
-                mimeType: media.mimeType,
-                width: media.width ?? undefined,
-                height: media.height ?? undefined,
-              }))}
-              nextLabel={dictionary.lightbox.nextLabel}
-              previousLabel={dictionary.lightbox.previousLabel}
-            />
-          ) : null}
-        </Reveal>
+        {gallery.length > 0 ? (
+          <>
+            <Divider />
+            <Reveal>
+              <MediaGallery
+                ariaLabel={`${project.title} ${dictionary.projects.galleryAriaLabelSuffix}`}
+                closeLabel={dictionary.lightbox.closeLabel}
+                images={gallery.map((media) => ({
+                  id: media.id,
+                  src: getMediaUrl(media) ?? '',
+                  alt: media.alt,
+                  mimeType: media.mimeType,
+                  width: media.width ?? undefined,
+                  height: media.height ?? undefined,
+                }))}
+                nextLabel={dictionary.lightbox.nextLabel}
+                previousLabel={dictionary.lightbox.previousLabel}
+              />
+            </Reveal>
+          </>
+        ) : null}
       </Container>
     </article>
   )

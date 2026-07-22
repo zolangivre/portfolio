@@ -28,14 +28,15 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
 
   return (
     <Link
-      className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-bg-elevated shadow-lg shadow-black/5 transition duration-300 hover:-translate-y-1 hover:border-accent-soft-border hover:shadow-xl"
+      className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-bg-elevated shadow-lg shadow-black/5 transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-accent-soft-border hover:shadow-[0_25px_60px_-15px_var(--accent-soft-border)]"
+      data-cursor="pointer"
       href={`/${locale}/journal/${entry.slug}`}
     >
       <div className="relative aspect-16/10 overflow-hidden bg-surface">
         {imageUrl ? (
           <Image
             alt={imageAlt}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+            className="h-full w-full object-cover"
             height={640}
             sizes="(min-width: 1024px) min(33vw, 375px), (min-width: 720px) 50vw, 100vw"
             src={imageUrl}

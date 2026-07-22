@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 
 import { JournalCard } from '@/components/cards/JournalCard'
+import { Reveal } from '@/components/ui/Reveal'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
 import type { Category, Journal } from '@/payload-types'
@@ -72,8 +73,10 @@ export function JournalGrid({ dictionary, entries, locale }: JournalGridProps) {
 
       {visibleEntries.length > 0 ? (
         <div className="project-grid">
-          {visibleEntries.map((entry) => (
-            <JournalCard dictionary={dictionary} entry={entry} key={entry.id} locale={locale} />
+          {visibleEntries.map((entry, index) => (
+            <Reveal delay={Math.min(index, 5) * 0.08} key={entry.id}>
+              <JournalCard dictionary={dictionary} entry={entry} locale={locale} />
+            </Reveal>
           ))}
         </div>
       ) : (

@@ -1,3 +1,6 @@
+'use client'
+
+import { motion } from 'motion/react'
 import Image from 'next/image'
 
 import { Container } from '@/components/ui/Container'
@@ -8,6 +11,20 @@ import type { Hero, Setting } from '@/payload-types'
 type HeroSectionProps = {
   hero: Hero | null
   settings: Setting | null
+}
+
+const heroContainerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+}
+
+const heroItemVariants = {
+  hidden: { opacity: 0, y: 18 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+  },
 }
 
 export function HeroSection({ hero, settings }: HeroSectionProps) {
@@ -27,14 +44,29 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
       <Container
         className={photoUrl ? 'lg:flex lg:items-center lg:justify-between lg:gap-12' : undefined}
       >
-        <div className="hero-copy">
-          {hero?.eyebrow ? <p className="eyebrow">{hero.eyebrow}</p> : null}
-          <h1 id="hero-title">{title}</h1>
-          {hero?.description ? <RichText content={hero.description} /> : null}
-          <div className="mt-8 flex flex-wrap gap-3">
+        <motion.div
+          animate="visible"
+          className="hero-copy"
+          initial="hidden"
+          variants={heroContainerVariants}
+        >
+          {hero?.eyebrow ? (
+            <motion.p className="eyebrow" variants={heroItemVariants}>
+              {hero.eyebrow}
+            </motion.p>
+          ) : null}
+          <motion.h1 id="hero-title" variants={heroItemVariants}>
+            {title}
+          </motion.h1>
+          {hero?.description ? (
+            <motion.div variants={heroItemVariants}>
+              <RichText content={hero.description} />
+            </motion.div>
+          ) : null}
+          <motion.div className="mt-8 flex flex-wrap gap-3" variants={heroItemVariants}>
             {primaryCta?.label && primaryCta?.href ? (
               <a
-                className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-fg transition hover:bg-accent-strong"
+                className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-fg transition active:scale-[0.97] hover:bg-accent-strong"
                 href={primaryCta.href}
               >
                 {primaryCta.label}
@@ -42,7 +74,7 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
             ) : null}
             {secondaryCta?.label && secondaryCta?.href ? (
               <a
-                className="rounded-full border border-border-strong bg-surface px-5 py-3 text-sm font-semibold text-fg transition hover:border-accent-soft-border hover:text-accent"
+                className="rounded-full border border-border-strong bg-surface px-5 py-3 text-sm font-semibold text-fg transition active:scale-[0.97] hover:border-accent-soft-border hover:text-accent"
                 href={secondaryCta.href}
               >
                 {secondaryCta.label}
@@ -50,36 +82,46 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
             ) : null}
             {resumeCta?.label && resumeUrl ? (
               <a
-                className="rounded-full border border-border-strong bg-surface px-5 py-3 text-sm font-semibold text-fg transition hover:border-accent-soft-border hover:text-accent"
+                className="rounded-full border border-border-strong bg-surface px-5 py-3 text-sm font-semibold text-fg transition active:scale-[0.97] hover:border-accent-soft-border hover:text-accent"
                 download
                 href={resumeUrl}
               >
                 {resumeCta.label}
               </a>
             ) : null}
-          </div>
+          </motion.div>
           {highlights.length > 0 ? (
-            <div className="mt-8 flex flex-wrap gap-4 text-sm text-fg-muted">
+            <motion.div
+              className="mt-8 flex flex-wrap gap-4 text-sm text-fg-muted"
+              variants={heroItemVariants}
+            >
               {highlights.map((item, index) => (
                 <span key={`${item.value}-${index}`}>
                   {item.value}
                   {index < highlights.length - 1 ? <span className="mx-2">•</span> : null}
                 </span>
               ))}
-            </div>
+            </motion.div>
           ) : null}
-        </div>
+        </motion.div>
         {photoUrl ? (
-          <Image
-            alt=""
-            className="mt-10 h-auto w-full max-w-sm rounded-4xl border border-border shadow-xl shadow-black/10 lg:mt-0 lg:w-80 lg:shrink-0"
-            height={photoHeight}
-            priority
-            quality={90}
-            sizes="(min-width: 1024px) 480px, 100vw"
-            src={photoUrl}
-            width={photoWidth}
-          />
+          <motion.div
+            animate={{ opacity: 1, scale: 1 }}
+            className="mt-10 lg:mt-0"
+            initial={{ opacity: 0, scale: 0.96 }}
+            transition={{ delay: 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Image
+              alt=""
+              className="h-auto w-full max-w-sm rounded-4xl border border-border shadow-xl shadow-black/10 lg:w-80 lg:shrink-0"
+              height={photoHeight}
+              priority
+              quality={90}
+              sizes="(min-width: 1024px) 480px, 100vw"
+              src={photoUrl}
+              width={photoWidth}
+            />
+          </motion.div>
         ) : null}
       </Container>
     </section>
