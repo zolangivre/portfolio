@@ -11,10 +11,10 @@ import { getDictionary } from '@/lib/i18n/dictionary'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
 import {
   getAbout,
+  getAllProjects,
   getContact,
   getEducation,
   getExperiences,
-  getFeaturedProjects,
   getGlobalSettings,
   getHero,
   getSectionsContent,
@@ -56,7 +56,7 @@ export default async function HomePage({ params }: { params: Promise<PageParams>
     getGlobalSettings(locale),
     getSectionsVisibility(locale),
     getSectionsContent(locale),
-    getFeaturedProjects(locale),
+    getAllProjects(locale),
     getExperiences(locale),
     getSkills(locale),
     getEducation(locale),

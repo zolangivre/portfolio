@@ -1,17 +1,17 @@
-import Image from 'next/image'
 import Link from 'next/link'
 
 import { Container } from '@/components/ui/Container'
-import { getMediaUrl } from '@/lib/media'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
 import { extractSectionKey, resolveNavHref } from '@/lib/nav'
 import type { Navigation, SectionsVisibility, Setting } from '@/payload-types'
 
+import { HashScrollHandler } from './HashScrollHandler'
 import { HeaderScrollWatcher } from './HeaderScrollWatcher'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { NavScrollSpy } from './NavScrollSpy'
 import { MobileNavToggle } from './MobileNavToggle'
+import { RouteScrollManager } from './RouteScrollManager'
 import { ThemeToggle } from './ThemeToggle'
 
 type HeaderProps = {
@@ -24,7 +24,12 @@ type HeaderProps = {
 
 export function Header({ dictionary, locale, navigation, sections, settings }: HeaderProps) {
   const name = settings?.name ?? 'Portfolio'
-  const logoUrl = getMediaUrl(settings?.logo)
+  const initials = name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('')
   const items = (navigation?.items ?? []).filter((item) => {
     const key = extractSectionKey(item.href)
 
@@ -36,21 +41,11 @@ export function Header({ dictionary, locale, navigation, sections, settings }: H
     <header className="site-header p-2" data-scrolled="false">
       <HeaderScrollWatcher />
       <NavScrollSpy />
+      <RouteScrollManager />
+      <HashScrollHandler />
       <Container className="site-header-inner">
-        <Link className="site-logo" href={`/${locale}`}>
-          {logoUrl ? (
-            <Image
-              alt=""
-              className="site-logo-mark object-cover"
-              height={128}
-              quality={90}
-              src={logoUrl}
-              width={128}
-            />
-          ) : (
-            <span className="site-logo-mark">{name.charAt(0).toUpperCase()}</span>
-          )}
-          <span>{name}</span>
+        <Link aria-label={name} className="site-logo" href={`/${locale}`}>
+          <span className="site-logo-initials">{initials}</span>
         </Link>
         <MobileNavToggle
           closeLabel={dictionary.nav.closeMenuLabel}

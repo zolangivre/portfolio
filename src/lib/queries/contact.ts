@@ -1,9 +1,11 @@
+import { cache } from 'react'
+
 import type { Contact } from '@/payload-types'
 
 import { defaultLocale, type Locale } from '../locale'
 import { getPayloadClient } from '../payload'
 
-export async function getContact(locale: Locale = defaultLocale): Promise<Contact | null> {
+export const getContact = cache(async (locale: Locale = defaultLocale): Promise<Contact | null> => {
   try {
     const payload = await getPayloadClient()
 
@@ -16,4 +18,4 @@ export async function getContact(locale: Locale = defaultLocale): Promise<Contac
 
     return null
   }
-}
+})

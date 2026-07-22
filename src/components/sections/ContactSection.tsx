@@ -50,23 +50,25 @@ export function ContactSection({ contact, dictionary, settings }: ContactSection
 
                   return (
                     <a
-                      className="inline-flex items-center gap-2 capitalize transition hover:text-accent"
+                      className="group inline-flex items-center gap-2 capitalize transition hover:text-accent"
                       href={link.url}
                       key={link.id ?? link.url}
                       rel="noreferrer"
                       target="_blank"
                     >
-                      {iconUrl ? (
-                        <Image
-                          alt=""
-                          className="h-4 w-4 object-contain"
-                          height={16}
-                          src={iconUrl}
-                          width={16}
-                        />
-                      ) : (
-                        <BuiltInSocialIcon platform={link.platform} />
-                      )}
+                      <span className="inline-flex transition duration-200 group-hover:-translate-y-0.5 group-hover:scale-110">
+                        {iconUrl ? (
+                          <Image
+                            alt=""
+                            className="h-4 w-4 object-contain"
+                            height={16}
+                            src={iconUrl}
+                            width={16}
+                          />
+                        ) : (
+                          <BuiltInSocialIcon platform={link.platform} />
+                        )}
+                      </span>
                       {link.platform}
                     </a>
                   )

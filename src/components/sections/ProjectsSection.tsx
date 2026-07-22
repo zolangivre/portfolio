@@ -5,6 +5,7 @@ import type { SectionCopy } from '@/lib/sectionCopy'
 import type { Project } from '@/payload-types'
 
 import { ProjectCard } from '../cards/ProjectCard'
+import { Reveal } from '../ui/Reveal'
 import { SectionHeader } from '../ui/SectionHeader'
 
 type ProjectsSectionProps = {
@@ -27,8 +28,10 @@ export function ProjectsSection({ content, dictionary, locale, projects }: Proje
 
         {projects.length > 0 ? (
           <div className="project-grid">
-            {projects.map((project) => (
-              <ProjectCard dictionary={dictionary} key={project.id} locale={locale} project={project} />
+            {projects.map((project, index) => (
+              <Reveal delay={Math.min(index, 5) * 0.08} key={project.id}>
+                <ProjectCard dictionary={dictionary} locale={locale} project={project} />
+              </Reveal>
             ))}
           </div>
         ) : (

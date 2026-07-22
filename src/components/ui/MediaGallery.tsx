@@ -1,11 +1,13 @@
 'use client'
 
-import Image from 'next/image'
 import { useState } from 'react'
 import Lightbox from 'yet-another-react-lightbox'
 import Video from 'yet-another-react-lightbox/plugins/video'
 import Zoom from 'yet-another-react-lightbox/plugins/zoom'
 import 'yet-another-react-lightbox/styles.css'
+
+import { FadeImage } from './FadeImage'
+import { Reveal } from './Reveal'
 
 type GalleryImage = {
   id: number
@@ -39,50 +41,69 @@ export function MediaGallery({
     <>
       <div aria-label={ariaLabel} className="media-gallery">
         {images.map((image, imageIndex) => (
-          <button
-            aria-label={image.alt}
-            className="media-gallery-item relative"
-            key={image.id}
-            onClick={() => setIndex(imageIndex)}
-            type="button"
-          >
-            {isVideo(image.mimeType) ? (
-              <>
-                <video
-                  className="rounded-[20px] bg-surface"
-                  muted
-                  playsInline
-                  preload="metadata"
-                  src={image.src}
-                />
-                <span className="absolute inset-0 flex items-center justify-center">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white">
-                    <svg fill="currentColor" height="20" viewBox="0 0 24 24" width="20">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
+          <Reveal delay={Math.min(imageIndex, 5) * 0.08} key={image.id}>
+            <button
+              aria-label={image.alt}
+              className="media-gallery-item relative"
+              onClick={() => setIndex(imageIndex)}
+              type="button"
+            >
+              {isVideo(image.mimeType) ? (
+                <>
+                  <video
+                    className="rounded-[20px] bg-surface"
+                    height={image.height ?? 1200}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    src={image.src}
+                    width={image.width ?? 1600}
+                  />
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <span className="media-gallery-play-badge flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white">
+                      <svg fill="currentColor" height="20" viewBox="0 0 24 24" width="20">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </span>
                   </span>
-                </span>
-              </>
-            ) : (
-              <Image
-                alt={image.alt}
-                className="rounded-[20px] bg-surface"
-                height={image.height ?? 1200}
-                sizes="(min-width: 720px) 33vw, 50vw"
-                src={image.src}
-                width={image.width ?? 1600}
-              />
-            )}
-          </button>
+                </>
+              ) : (
+                <FadeImage
+                  alt={image.alt}
+                  className="rounded-[20px] bg-surface"
+                  height={image.height ?? 1200}
+                  sizes="(min-width: 720px) 33vw, 50vw"
+                  src={image.src}
+                  width={image.width ?? 1600}
+                />
+              )}
+              <span aria-hidden="true" className="media-gallery-overlay rounded-[20px]" />
+            </button>
+          </Reveal>
         ))}
       </div>
 
       <Lightbox
+        animation={{
+          easing: {
+            fade: 'cubic-bezier(0.22,1,0.36,1)',
+            navigation: 'cubic-bezier(0.22,1,0.36,1)',
+            swipe: 'cubic-bezier(0.22,1,0.36,1)',
+          },
+          fade: 350,
+          swipe: 450,
+        }}
         close={() => setIndex(-1)}
         index={index}
         labels={{ Close: closeLabel, Next: nextLabel, Previous: previousLabel }}
         open={index >= 0}
         plugins={[Zoom, Video]}
+        styles={{
+          container: {
+            backdropFilter: 'blur(20px)',
+            backgroundColor: 'color-mix(in srgb, var(--yarl__color_backdrop) 82%, transparent)',
+          },
+        }}
         slides={images.map((image) =>
           isVideo(image.mimeType)
             ? {

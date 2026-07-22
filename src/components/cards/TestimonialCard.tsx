@@ -1,5 +1,4 @@
-import Image from 'next/image'
-
+import { FadeImage } from '@/components/ui/FadeImage'
 import { getMediaUrl } from '@/lib/media'
 import type { Testimonial } from '@/payload-types'
 
@@ -13,11 +12,14 @@ export function TestimonialCard({ testimonial }: TestimonialCardProps) {
     typeof testimonial.company === 'object' && testimonial.company ? testimonial.company.name : null
 
   return (
-    <article className="flex h-full flex-col justify-between rounded-[28px] border border-border bg-bg-elevated p-7 shadow-lg shadow-black/5">
+    <article
+      className="flex h-full flex-col justify-between rounded-[28px] border border-border bg-bg-elevated p-7 shadow-lg shadow-black/5 transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-accent-soft-border hover:shadow-[0_25px_60px_-15px_var(--accent-soft-border)]"
+      data-cursor="pointer"
+    >
       <p className="text-base leading-7 text-fg-muted">“{testimonial.quote}”</p>
       <div className="mt-6 flex items-center gap-3">
         {avatarUrl ? (
-          <Image
+          <FadeImage
             alt={testimonial.author}
             className="h-10 w-10 rounded-full bg-surface object-contain"
             height={40}

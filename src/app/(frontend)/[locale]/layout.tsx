@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { Fraunces, Inter } from 'next/font/google'
+import { Bagel_Fat_One, Fraunces, Inter } from 'next/font/google'
 import Script from 'next/script'
 import React from 'react'
 import { Analytics } from '@vercel/analytics/next'
@@ -8,6 +8,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { Footer } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'
 import { MotionProvider } from '@/components/providers/MotionProvider'
+import { PageTransition } from '@/components/providers/PageTransition'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { AmbientBackground } from '@/components/ui/AmbientBackground'
 import { CursorEffects } from '@/components/ui/CursorEffects'
@@ -34,6 +35,13 @@ const inter = Inter({
   display: 'swap',
   subsets: ['latin'],
   variable: '--font-inter',
+})
+
+const bagelFatOne = Bagel_Fat_One({
+  display: 'swap',
+  subsets: ['latin'],
+  variable: '--font-bagel-fat-one',
+  weight: '400',
 })
 
 type LayoutParams = { locale: string }
@@ -126,7 +134,7 @@ export default async function LocaleLayout(props: {
 
   return (
     <html
-      className={`${fraunces.variable} ${inter.variable}`}
+      className={`${fraunces.variable} ${inter.variable} ${bagelFatOne.variable}`}
       data-scroll-behavior="smooth"
       lang={locale}
       suppressHydrationWarning
@@ -158,7 +166,9 @@ export default async function LocaleLayout(props: {
                 sections={sections}
                 settings={settings}
               />
-              <main id="main-content">{children}</main>
+              <main id="main-content">
+                <PageTransition>{children}</PageTransition>
+              </main>
               <Footer dictionary={dictionary} footer={footer} locale={locale} />
             </div>
           </MotionProvider>

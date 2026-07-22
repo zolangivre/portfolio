@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { Container } from '@/components/ui/Container'
+import { Divider } from '@/components/ui/Divider'
+import { FadeImage } from '@/components/ui/FadeImage'
 import { MediaGallery } from '@/components/ui/MediaGallery'
+import { ReadingProgress } from '@/components/ui/ReadingProgress'
 import { Reveal } from '@/components/ui/Reveal'
 import { RichText } from '@/components/ui/RichText'
 import { getDictionary } from '@/lib/i18n/dictionary'
@@ -89,24 +91,31 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
 
   return (
     <article className="content-section">
+      <ReadingProgress />
       <Container>
         <Reveal>
           <Link
-            className="text-sm font-medium text-fg-muted transition hover:text-accent"
+            className="link-underline text-sm font-medium text-fg-muted transition hover:text-accent"
             href={`/${locale}/journal`}
           >
             {dictionary.journal.backLabel}
           </Link>
+        </Reveal>
 
-          {categoryLabel ? <p className="eyebrow mt-6">{categoryLabel}</p> : null}
-          <h1>{entry.title}</h1>
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-fg-subtle">
-            {formattedDate}
-            {entry.location ? ` · ${entry.location}` : null}
-          </p>
+        <Reveal delay={0.08}>
+          <div>
+            {categoryLabel ? <p className="eyebrow mt-6">{categoryLabel}</p> : null}
+            <h1>{entry.title}</h1>
+            <p className="text-sm font-medium uppercase tracking-[0.18em] text-fg-subtle">
+              {formattedDate}
+              {entry.location ? ` · ${entry.location}` : null}
+            </p>
+          </div>
+        </Reveal>
 
-          {imageUrl ? (
-            <Image
+        {imageUrl ? (
+          <Reveal delay={0.16}>
+            <FadeImage
               alt={imageAlt}
               className="mt-8 block h-auto w-full rounded-[28px] bg-surface"
               height={coverImage?.height ?? 900}
@@ -114,41 +123,50 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
               src={imageUrl}
               width={coverImage?.width ?? 1600}
             />
-          ) : null}
+          </Reveal>
+        ) : null}
 
-          <div className="mt-10">
-            <RichText content={entry.content} />
-          </div>
+        <Divider />
 
-          {entry.tags && entry.tags.length > 0 ? (
+        <Reveal>
+          <RichText content={entry.content} />
+        </Reveal>
+
+        {entry.tags && entry.tags.length > 0 ? (
+          <Reveal>
             <ul className="mt-8 flex flex-wrap gap-2" aria-label="tags">
               {entry.tags.map((tag, index) => (
                 <li
-                  className="rounded-full border border-border bg-surface px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-fg-muted"
+                  className="rounded-full border border-border bg-surface px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-fg-muted transition hover:scale-105 hover:border-accent-soft-border hover:text-fg"
                   key={`${tag.value}-${index}`}
                 >
                   {tag.value}
                 </li>
               ))}
             </ul>
-          ) : null}
+          </Reveal>
+        ) : null}
 
-          {gallery.length > 0 ? (
-            <MediaGallery
-              closeLabel={dictionary.lightbox.closeLabel}
-              images={gallery.map((media) => ({
-                id: media.id,
-                src: getMediaUrl(media) ?? '',
-                alt: media.alt,
-                mimeType: media.mimeType,
-                width: media.width ?? undefined,
-                height: media.height ?? undefined,
-              }))}
-              nextLabel={dictionary.lightbox.nextLabel}
-              previousLabel={dictionary.lightbox.previousLabel}
-            />
-          ) : null}
-        </Reveal>
+        {gallery.length > 0 ? (
+          <>
+            <Divider />
+            <Reveal>
+              <MediaGallery
+                closeLabel={dictionary.lightbox.closeLabel}
+                images={gallery.map((media) => ({
+                  id: media.id,
+                  src: getMediaUrl(media) ?? '',
+                  alt: media.alt,
+                  mimeType: media.mimeType,
+                  width: media.width ?? undefined,
+                  height: media.height ?? undefined,
+                }))}
+                nextLabel={dictionary.lightbox.nextLabel}
+                previousLabel={dictionary.lightbox.previousLabel}
+              />
+            </Reveal>
+          </>
+        ) : null}
       </Container>
     </article>
   )
