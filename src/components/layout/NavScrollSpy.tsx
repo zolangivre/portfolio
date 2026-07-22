@@ -20,7 +20,7 @@ const RETRY_DELAY = 150
 
 type SpyEntry = {
   link: HTMLAnchorElement
-  section: HTMLElement
+  id: string
 }
 
 /**
@@ -59,20 +59,35 @@ export function NavScrollSpy() {
 
     const hashLinks = links.filter((link) => new URL(link.href, window.location.href).hash !== '')
 
+    // Resolves the section by id on every call rather than caching the
+    // element: Next.js can silently swap in a fresh render of the same route
+    // (router cache revalidation) without this component's pathname ever
+    // changing, which replaces the section nodes already on the page. A
+    // cached reference would go stale and permanently disconnected, leaving
+    // the nav stuck with no active link until a hard refresh.
     function buildEntries(): SpyEntry[] {
       return hashLinks
         .map((link): SpyEntry | null => {
           const hash = new URL(link.href, window.location.href).hash
-          const section = document.getElementById(hash.slice(1))
+          const id = hash.slice(1)
 
-          return section ? { link, section } : null
+          return document.getElementById(id) ? { link, id } : null
         })
         .filter((entry): entry is SpyEntry => entry !== null)
         // Nav order is CMS-authored and may differ from the page's section
         // order; the "last section past the line" walk needs document order.
-        .sort((a, b) =>
-          a.section.compareDocumentPosition(b.section) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1,
-        )
+        .sort((a, b) => {
+          const sectionA = document.getElementById(a.id)
+          const sectionB = document.getElementById(b.id)
+
+          if (!sectionA || !sectionB) {
+            return 0
+          }
+
+          return sectionA.compareDocumentPosition(sectionB) & Node.DOCUMENT_POSITION_FOLLOWING
+            ? -1
+            : 1
+        })
     }
 
     function clear() {
@@ -93,12 +108,10 @@ export function NavScrollSpy() {
         const line = window.innerHeight * ACTIVE_LINE
         let active: HTMLAnchorElement | null = null
 
-        for (const { link, section } of entries) {
-          if (!section.isConnected) {
-            continue
-          }
+        for (const { link, id } of entries) {
+          const section = document.getElementById(id)
 
-          if (section.getBoundingClientRect().top <= line) {
+          if (section && section.getBoundingClientRect().top <= line) {
             active = link
           }
         }
@@ -112,10 +125,11 @@ export function NavScrollSpy() {
         // last section (e.g. Contact) before the user has scrolled at all.
         const scrollBottom = window.innerHeight + window.scrollY
         const lastEntry = entries[entries.length - 1]
+        const lastSection = document.getElementById(lastEntry.id)
 
         if (
           window.scrollY > 0 &&
-          lastEntry.section.isConnected &&
+          lastSection &&
           scrollBottom >= document.documentElement.scrollHeight - 2
         ) {
           active = lastEntry.link
