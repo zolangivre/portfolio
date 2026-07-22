@@ -87,6 +87,9 @@ body {
 
 html {
   scroll-behavior: smooth;
+  /* Keeps hash-linked sections clear of the sticky header instead of
+     landing flush under it — matches .site-header's rendered height. */
+  scroll-padding-top: 5rem;
 }
 
 ::selection {

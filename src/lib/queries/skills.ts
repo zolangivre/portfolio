@@ -1,9 +1,11 @@
+import { cache } from 'react'
+
 import type { Skill } from '@/payload-types'
 
 import { defaultLocale, type Locale } from '../locale'
 import { getPayloadClient } from '../payload'
 
-export async function getSkills(locale: Locale = defaultLocale): Promise<Skill[]> {
+export const getSkills = cache(async (locale: Locale = defaultLocale): Promise<Skill[]> => {
   try {
     const payload = await getPayloadClient()
 
@@ -21,4 +23,4 @@ export async function getSkills(locale: Locale = defaultLocale): Promise<Skill[]
 
     return []
   }
-}
+})

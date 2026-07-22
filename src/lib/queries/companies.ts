@@ -1,9 +1,11 @@
+import { cache } from 'react'
+
 import type { Company } from '@/payload-types'
 
 import { defaultLocale, type Locale } from '../locale'
 import { getPayloadClient } from '../payload'
 
-export async function getCompanies(locale: Locale = defaultLocale): Promise<Company[]> {
+export const getCompanies = cache(async (locale: Locale = defaultLocale): Promise<Company[]> => {
   try {
     const payload = await getPayloadClient()
 
@@ -21,4 +23,4 @@ export async function getCompanies(locale: Locale = defaultLocale): Promise<Comp
 
     return []
   }
-}
+})

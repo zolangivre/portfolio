@@ -64,11 +64,13 @@ export function ContactForm({ dictionary, successMessage }: ContactFormProps) {
         />
       </label>
 
-      {state.error ? (
-        <p className="text-sm font-medium text-red-500" role="alert">
-          {dictionary.contact.errors[state.error] ?? dictionary.contact.errors['server-error']}
-        </p>
-      ) : null}
+      <div className="min-h-5">
+        {state.error ? (
+          <p className="text-sm font-medium text-red-500" role="alert">
+            {dictionary.contact.errors[state.error] ?? dictionary.contact.errors['server-error']}
+          </p>
+        ) : null}
+      </div>
 
       <button
         className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-fg transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"

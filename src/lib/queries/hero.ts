@@ -1,9 +1,11 @@
+import { cache } from 'react'
+
 import type { Hero } from '@/payload-types'
 
 import { defaultLocale, type Locale } from '../locale'
 import { getPayloadClient } from '../payload'
 
-export async function getHero(locale: Locale = defaultLocale): Promise<Hero | null> {
+export const getHero = cache(async (locale: Locale = defaultLocale): Promise<Hero | null> => {
   try {
     const payload = await getPayloadClient()
 
@@ -16,4 +18,4 @@ export async function getHero(locale: Locale = defaultLocale): Promise<Hero | nu
 
     return null
   }
-}
+})

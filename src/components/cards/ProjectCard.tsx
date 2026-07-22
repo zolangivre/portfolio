@@ -36,6 +36,7 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
               alt={imageAlt}
               className={`h-full w-full object-contain transition duration-500 group-hover:scale-[1.03]${darkImageUrl ? ' dark:hidden' : ''}`}
               height={640}
+              sizes="(min-width: 1024px) 33vw, (min-width: 720px) 50vw, 100vw"
               src={imageUrl}
               width={960}
             />
@@ -45,6 +46,7 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
               alt={imageAlt}
               className="hidden h-full w-full object-contain transition duration-500 group-hover:scale-[1.03] dark:block"
               height={640}
+              sizes="(min-width: 1024px) 33vw, (min-width: 720px) 50vw, 100vw"
               src={darkImageUrl}
               width={960}
             />

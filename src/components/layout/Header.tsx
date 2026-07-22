@@ -8,10 +8,12 @@ import type { Locale } from '@/lib/locale'
 import { extractSectionKey, resolveNavHref } from '@/lib/nav'
 import type { Navigation, SectionsVisibility, Setting } from '@/payload-types'
 
+import { HashScrollHandler } from './HashScrollHandler'
 import { HeaderScrollWatcher } from './HeaderScrollWatcher'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { NavScrollSpy } from './NavScrollSpy'
 import { MobileNavToggle } from './MobileNavToggle'
+import { RouteScrollManager } from './RouteScrollManager'
 import { ThemeToggle } from './ThemeToggle'
 
 type HeaderProps = {
@@ -36,6 +38,8 @@ export function Header({ dictionary, locale, navigation, sections, settings }: H
     <header className="site-header p-2" data-scrolled="false">
       <HeaderScrollWatcher />
       <NavScrollSpy />
+      <RouteScrollManager />
+      <HashScrollHandler />
       <Container className="site-header-inner">
         <Link className="site-logo" href={`/${locale}`}>
           {logoUrl ? (

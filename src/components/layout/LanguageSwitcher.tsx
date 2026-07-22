@@ -1,3 +1,7 @@
+'use client'
+
+import { usePathname } from 'next/navigation'
+
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import { locales, type Locale } from '@/lib/locale'
 
@@ -12,6 +16,10 @@ const localeLabels: Record<Locale, string> = {
 }
 
 export function LanguageSwitcher({ dictionary, locale }: LanguageSwitcherProps) {
+  const pathname = usePathname()
+  const localePrefix = `/${locale}`
+  const suffix = pathname.startsWith(localePrefix) ? pathname.slice(localePrefix.length) : ''
+
   return (
     <div aria-label={dictionary.nav.languageSwitcherLabel} className="language-switcher" role="group">
       {locales.map((entry) => (
@@ -24,7 +32,7 @@ export function LanguageSwitcher({ dictionary, locale }: LanguageSwitcherProps) 
           aria-current={entry === locale ? 'true' : undefined}
           className="language-switcher-item"
           data-active={entry === locale}
-          href={`/${entry}`}
+          href={`/${entry}${suffix}`}
           key={entry}
         >
           {localeLabels[entry]}

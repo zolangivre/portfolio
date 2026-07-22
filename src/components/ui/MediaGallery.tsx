@@ -50,10 +50,12 @@ export function MediaGallery({
               <>
                 <video
                   className="rounded-[20px] bg-surface"
+                  height={image.height ?? 1200}
                   muted
                   playsInline
                   preload="metadata"
                   src={image.src}
+                  width={image.width ?? 1600}
                 />
                 <span className="absolute inset-0 flex items-center justify-center">
                   <span className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white">

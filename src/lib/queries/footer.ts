@@ -1,9 +1,11 @@
+import { cache } from 'react'
+
 import type { Footer } from '@/payload-types'
 
 import { defaultLocale, type Locale } from '../locale'
 import { getPayloadClient } from '../payload'
 
-export async function getFooter(locale: Locale = defaultLocale): Promise<Footer | null> {
+export const getFooter = cache(async (locale: Locale = defaultLocale): Promise<Footer | null> => {
   try {
     const payload = await getPayloadClient()
 
@@ -16,4 +18,4 @@ export async function getFooter(locale: Locale = defaultLocale): Promise<Footer 
 
     return null
   }
-}
+})
