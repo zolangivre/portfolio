@@ -393,7 +393,10 @@ export interface Skill {
   id: number;
   name: string;
   category: number | Category;
-  level?: ('advanced' | 'intermediate' | 'beginner') | null;
+  /**
+   * Optional link to the official documentation or website. Makes the whole card clickable.
+   */
+  url?: string | null;
   logo?: (number | null) | Media;
   /**
    * Invert the logo colors when the site is in dark mode. Enable for black/dark logos so they stay visible on the dark theme.
@@ -799,7 +802,7 @@ export interface ExperiencesSelect<T extends boolean = true> {
 export interface SkillsSelect<T extends boolean = true> {
   name?: T;
   category?: T;
-  level?: T;
+  url?: T;
   logo?: T;
   invertLogoInDarkMode?: T;
   updatedAt?: T;
