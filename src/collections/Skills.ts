@@ -7,7 +7,7 @@ export const Skills: CollectionConfig = {
   admin: {
     group: 'Taxonomy',
     description: 'Skills grouped by category, shown in the skills section.',
-    defaultColumns: ['logo', 'name', 'category', 'level'],
+    defaultColumns: ['logo', 'name', 'category', 'url'],
     useAsTitle: 'name',
   },
   access: {
@@ -33,13 +33,21 @@ export const Skills: CollectionConfig = {
       },
     },
     {
-      name: 'level',
-      type: 'select',
-      options: [
-        { label: 'Advanced', value: 'advanced' },
-        { label: 'Intermediate', value: 'intermediate' },
-        { label: 'Beginner', value: 'beginner' },
-      ],
+      name: 'url',
+      type: 'text',
+      admin: {
+        description:
+          'Optional link to the official documentation or website. Makes the whole card clickable.',
+      },
+      validate: (value: string | null | undefined) => {
+        if (value == null || value === '') return true
+        try {
+          new URL(value)
+          return true
+        } catch {
+          return 'Enter a valid URL, including the protocol (e.g. https://example.com).'
+        }
+      },
     },
     {
       name: 'logo',

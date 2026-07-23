@@ -51,7 +51,7 @@ export interface Dictionary {
     title: string
     description: string
     emptyState: string
-    levelLabels: Record<string, string>
+    visitAriaLabelSuffix: string
   }
   testimonials: {
     eyebrow: string
@@ -148,11 +148,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       description:
         'Une palette d’outils affûtée pour le développement produit moderne, du frontend au delivery.',
       emptyState: 'Aucune compétence n’a encore été publiée.',
-      levelLabels: {
-        advanced: 'Avancé',
-        intermediate: 'Intermédiaire',
-        beginner: 'Débutant',
-      },
+      visitAriaLabelSuffix: '(ouvre un nouvel onglet)',
     },
     testimonials: {
       eyebrow: 'Témoignages',
@@ -251,11 +247,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       description:
         'A toolkit refined for modern product development across frontend, backend, and delivery.',
       emptyState: 'No skills have been published yet.',
-      levelLabels: {
-        advanced: 'Advanced',
-        intermediate: 'Intermediate',
-        beginner: 'Beginner',
-      },
+      visitAriaLabelSuffix: '(opens in a new tab)',
     },
     testimonials: {
       eyebrow: 'Testimonials',

@@ -14,6 +14,7 @@ import * as migration_20260717_115341_about_point_groups_content from './2026071
 import * as migration_20260717_195308_description_fields_rich_text from './20260717_195308_description_fields_rich_text';
 import * as migration_20260718_161700_add_cursor_effect from './20260718_161700_add_cursor_effect';
 import * as migration_20260722_150000_add_project_visibility from './20260722_150000_add_project_visibility';
+import * as migration_20260723_120000_skills_remove_level_add_url from './20260723_120000_skills_remove_level_add_url';
 
 export const migrations = [
   {
@@ -95,5 +96,10 @@ export const migrations = [
     up: migration_20260722_150000_add_project_visibility.up,
     down: migration_20260722_150000_add_project_visibility.down,
     name: '20260722_150000_add_project_visibility'
+  },
+  {
+    up: migration_20260723_120000_skills_remove_level_add_url.up,
+    down: migration_20260723_120000_skills_remove_level_add_url.down,
+    name: '20260723_120000_skills_remove_level_add_url'
   },
 ];
