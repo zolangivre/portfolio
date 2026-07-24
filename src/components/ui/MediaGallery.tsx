@@ -41,10 +41,17 @@ export function MediaGallery({
     <>
       <div aria-label={ariaLabel} className="media-gallery">
         {images.map((image, imageIndex) => (
-          <Reveal delay={Math.min(imageIndex, 5) * 0.08} key={image.id}>
+          <Reveal
+            blur={8}
+            delay={Math.min(imageIndex, 5) * 0.08}
+            key={image.id}
+            scale={0.92}
+          >
             <button
               aria-label={image.alt}
               className="media-gallery-item relative"
+              data-cursor="pointer"
+              data-cursor-scale="2.1"
               onClick={() => setIndex(imageIndex)}
               type="button"
             >

@@ -45,7 +45,9 @@ export function Header({ dictionary, locale, navigation, sections, settings }: H
       <HashScrollHandler />
       <Container className="site-header-inner">
         <Link aria-label={name} className="site-logo" href={`/${locale}`}>
-          <span className="site-logo-initials">{initials}</span>
+          <span className="site-logo-initials">
+            {initials}
+          </span>
         </Link>
         <MobileNavToggle
           closeLabel={dictionary.nav.closeMenuLabel}

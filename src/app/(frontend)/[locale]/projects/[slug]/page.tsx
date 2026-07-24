@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { AnimatedTitle } from '@/components/ui/AnimatedTitle'
 import { TechChip } from '@/components/ui/TechChip'
 import { Container } from '@/components/ui/Container'
 import { Divider } from '@/components/ui/Divider'
@@ -109,7 +110,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                 {[categoryLabel, project.year, statusLabel].filter(Boolean).join(' · ')}
               </p>
             ) : null}
-            <h1>{project.title}</h1>
+            <AnimatedTitle title={project.title} />
             {project.shortDescription ? (
               <p className="text-sm font-medium uppercase tracking-[0.18em] text-fg-subtle">
                 {project.shortDescription}

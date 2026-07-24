@@ -13,7 +13,7 @@ export function TestimonialCard({ testimonial }: TestimonialCardProps) {
 
   return (
     <article
-      className="flex h-full flex-col justify-between rounded-[28px] border border-border bg-bg-elevated p-7 shadow-lg shadow-black/5 transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-accent-soft-border hover:shadow-[0_25px_60px_-15px_var(--accent-soft-border)]"
+      className="flex h-full flex-col justify-between rounded-[28px] border border-border bg-bg-elevated p-7 shadow-lg shadow-black/5 transition duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-1.5 hover:border-accent-soft-border hover:shadow-[0_25px_60px_-15px_var(--accent-soft-border)]"
       data-cursor="pointer"
     >
       <p className="text-base leading-7 text-fg-muted">“{testimonial.quote}”</p>

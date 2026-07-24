@@ -29,7 +29,7 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
 
   return (
     <article
-      className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-bg-elevated shadow-lg shadow-black/5 transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-accent-soft-border hover:shadow-[0_25px_60px_-15px_var(--accent-soft-border)]"
+      className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-bg-elevated shadow-lg shadow-black/5 transition duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-1.5 hover:border-accent-soft-border hover:shadow-[0_25px_60px_-15px_var(--accent-soft-border)]"
       data-cursor="pointer"
     >
       <Link className="flex flex-1 flex-col" href={detailHref}>
@@ -61,14 +61,14 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
           <div className="mb-2 flex items-start justify-between gap-3">
             <h3 className="text-xl font-semibold text-fg">{project.title}</h3>
             {project.featured ? (
-              <span className="shrink-0 rounded-full border border-accent-soft-border bg-accent-soft px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.28em] text-accent">
+              <span className="shrink-0 rounded-full border border-accent-soft-border bg-accent-soft px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-accent">
                 {dictionary.projects.featuredBadge}
               </span>
             ) : null}
           </div>
 
           {categoryLabel || project.year || statusLabel ? (
-            <p className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium uppercase tracking-[0.14em] text-fg-subtle">
+            <p className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium uppercase tracking-widest text-fg-subtle">
               {categoryLabel ? <span>{categoryLabel}</span> : null}
               {categoryLabel && project.year ? <span aria-hidden="true">·</span> : null}
               {project.year ? <span>{project.year}</span> : null}
@@ -116,7 +116,7 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
           ) : null}
           {project.liveUrl ? (
             <a
-              className="text-sm font-medium text-fg transition hover:text-accent"
+              className="link-underline text-sm font-medium text-fg transition hover:text-accent"
               href={project.liveUrl}
               rel="noreferrer"
               target="_blank"
@@ -125,7 +125,7 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
             </a>
           ) : null}
           <Link
-            className="text-sm font-medium text-fg transition hover:text-accent"
+            className="link-underline text-sm font-medium text-fg transition hover:text-accent"
             href={detailHref}
           >
             {dictionary.projects.viewDetailsLabel}

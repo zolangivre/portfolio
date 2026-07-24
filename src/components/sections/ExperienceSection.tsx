@@ -11,6 +11,7 @@ import type { Experience } from '@/payload-types'
 import { Reveal } from '../ui/Reveal'
 import { RichText } from '../ui/RichText'
 import { SectionHeader } from '../ui/SectionHeader'
+import { TimelineRail } from '../ui/TimelineRail'
 
 type ExperienceSectionProps = {
   content: SectionCopy
@@ -47,6 +48,7 @@ export function ExperienceSection({
 
         {experiences.length > 0 ? (
           <div className="timeline">
+            <TimelineRail />
             {experiences.map((experience, index) => {
               const company =
                 typeof experience.company === 'object' && experience.company
@@ -56,48 +58,54 @@ export function ExperienceSection({
               const technologies = experience.technologies ?? []
 
               return (
-                <Reveal delay={Math.min(index, 5) * 0.08} key={experience.id}>
+                <Reveal
+                  className="timeline-row"
+                  delay={Math.min(index, 5) * 0.08}
+                  key={experience.id}
+                >
                   <article className="timeline-item">
-                    <div>
-                      <p className="timeline-date">
-                        {formatDate(experience.startDate, locale, dictionary.experience.present)} -{' '}
+                    <div className="timeline-meta">
+                      <span className="timeline-date">
+                        {formatDate(experience.startDate, locale, dictionary.experience.present)} –{' '}
                         {formatDate(experience.endDate, locale, dictionary.experience.present)}
-                      </p>
-                      <h3>{experience.position}</h3>
-                      <div className="timeline-company flex flex-wrap items-center gap-2">
-                        {companyLogoUrl ? (
-                          <Image
-                            alt=""
-                            className="h-5 w-5 shrink-0 object-contain"
-                            height={20}
-                            src={companyLogoUrl}
-                            width={20}
-                          />
-                        ) : null}
-                        {company?.website ? (
-                          <a
-                            className="transition hover:text-accent"
-                            href={company.website}
-                            rel="noreferrer"
-                            target="_blank"
-                            title={company.description ?? undefined}
-                          >
-                            {company.name}
-                          </a>
-                        ) : (
-                          <span title={company?.description ?? undefined}>
-                            {company?.name ?? dictionary.experience.fallbackCompany}
-                          </span>
-                        )}
-                        {experience.employmentType ? (
-                          <span aria-hidden="true">· {experience.employmentType}</span>
-                        ) : null}
-                      </div>
-                      {experience.location ? (
-                        <p className="timeline-company mt-1 text-xs">{experience.location}</p>
+                      </span>
+                      {experience.employmentType ? (
+                        <span className="text-xs font-medium uppercase tracking-widest text-fg-subtle">
+                          {experience.employmentType}
+                        </span>
                       ) : null}
                     </div>
-                    <div>
+                    <h3>{experience.position}</h3>
+                    <div className="timeline-company flex flex-wrap items-center gap-2">
+                      {companyLogoUrl ? (
+                        <Image
+                          alt=""
+                          className="h-5 w-5 shrink-0 object-contain"
+                          height={20}
+                          src={companyLogoUrl}
+                          width={20}
+                        />
+                      ) : null}
+                      {company?.website ? (
+                        <a
+                          className="transition hover:text-accent"
+                          href={company.website}
+                          rel="noreferrer"
+                          target="_blank"
+                          title={company.description ?? undefined}
+                        >
+                          {company.name}
+                        </a>
+                      ) : (
+                        <span title={company?.description ?? undefined}>
+                          {company?.name ?? dictionary.experience.fallbackCompany}
+                        </span>
+                      )}
+                    </div>
+                    {experience.location ? (
+                      <p className="timeline-company mt-1 text-xs">{experience.location}</p>
+                    ) : null}
+                    <div className="timeline-body">
                       <RichText content={experience.description} />
                       {technologies.length > 0 ? (
                         <ul

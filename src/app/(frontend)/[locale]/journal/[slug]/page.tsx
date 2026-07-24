@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { AnimatedTitle } from '@/components/ui/AnimatedTitle'
 import { Container } from '@/components/ui/Container'
 import { Divider } from '@/components/ui/Divider'
 import { FadeImage } from '@/components/ui/FadeImage'
@@ -105,7 +106,7 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
         <Reveal delay={0.08}>
           <div>
             {categoryLabel ? <p className="eyebrow mt-6">{categoryLabel}</p> : null}
-            <h1>{entry.title}</h1>
+            <AnimatedTitle title={entry.title} />
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-fg-subtle">
               {formattedDate}
               {entry.location ? ` · ${entry.location}` : null}
@@ -137,7 +138,7 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
             <ul className="mt-8 flex flex-wrap gap-2" aria-label="tags">
               {entry.tags.map((tag, index) => (
                 <li
-                  className="rounded-full border border-border bg-surface px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-fg-muted transition hover:scale-105 hover:border-accent-soft-border hover:text-fg"
+                  className="rounded-full border border-border bg-surface px-3 py-1 text-[11px] font-medium uppercase tracking-[0.15em] text-fg-muted transition hover:scale-105 hover:border-accent-soft-border hover:text-fg"
                   key={`${tag.value}-${index}`}
                 >
                   {tag.value}

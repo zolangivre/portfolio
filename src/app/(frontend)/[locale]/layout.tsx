@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { Bagel_Fat_One, Fraunces, Inter } from 'next/font/google'
+import { Baloo_2, Bagel_Fat_One, Inter } from 'next/font/google'
 import Script from 'next/script'
 import React from 'react'
 import { Analytics } from '@vercel/analytics/next'
 
 import { Footer } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'
+import { IndexRail } from '@/components/layout/IndexRail'
 import { MotionProvider } from '@/components/providers/MotionProvider'
 import { PageTransition } from '@/components/providers/PageTransition'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
@@ -25,10 +26,10 @@ export const revalidate = 60
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
-const fraunces = Fraunces({
+const baloo2 = Baloo_2({
   display: 'swap',
   subsets: ['latin'],
-  variable: '--font-fraunces',
+  variable: '--font-baloo-2',
 })
 
 const inter = Inter({
@@ -134,7 +135,7 @@ export default async function LocaleLayout(props: {
 
   return (
     <html
-      className={`${fraunces.variable} ${inter.variable} ${bagelFatOne.variable}`}
+      className={`${baloo2.variable} ${inter.variable} ${bagelFatOne.variable}`}
       data-scroll-behavior="smooth"
       lang={locale}
       suppressHydrationWarning
@@ -158,6 +159,12 @@ export default async function LocaleLayout(props: {
           <MotionProvider>
             <AmbientBackground />
             <CursorEffects effect={settings?.theme?.cursorEffect} />
+            <IndexRail
+              dictionary={dictionary}
+              locale={locale}
+              navigation={navigation}
+              sections={sections}
+            />
             <div className="site-shell">
               <Header
                 dictionary={dictionary}

@@ -9,7 +9,7 @@ type TechChipProps = {
 }
 
 const CHIP_CLASSNAME =
-  'flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-fg-muted transition hover:scale-105 hover:border-accent-soft-border hover:text-fg'
+  'flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-[11px] font-medium uppercase tracking-[0.15em] text-fg-muted transition hover:scale-105 hover:border-accent-soft-border hover:text-fg'
 
 export function TechChip({ technology }: TechChipProps) {
   const isResolved = typeof technology === 'object' && technology !== null
