@@ -12,10 +12,11 @@ type PointGroupCardProps = {
 }
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 18 },
+  hidden: { opacity: 0, y: 18, scale: 0.97 },
   visible: (delay: number) => ({
     opacity: 1,
     y: 0,
+    scale: 1,
     transition: {
       delay,
       delayChildren: delay + 0.1,
@@ -34,7 +35,7 @@ const itemVariants = {
 export function PointGroupCard({ content, delay, title }: PointGroupCardProps) {
   return (
     <motion.div
-      className="rounded-[28px] border border-accent-soft-border bg-accent-soft p-8 transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-accent-strong hover:shadow-[0_25px_60px_-15px_var(--accent-soft-border)]"
+      className="rounded-[28px] border border-accent-soft-border bg-accent-soft p-8 transition duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-1.5 hover:border-accent-strong hover:shadow-[0_25px_60px_-15px_var(--accent-soft-border)]"
       custom={delay}
       initial="hidden"
       variants={cardVariants}
@@ -42,7 +43,7 @@ export function PointGroupCard({ content, delay, title }: PointGroupCardProps) {
       whileInView="visible"
     >
       <motion.p
-        className="text-sm font-semibold uppercase tracking-[0.3em] text-accent"
+        className="text-sm font-semibold uppercase tracking-[0.2em] text-accent"
         variants={itemVariants}
       >
         {title}

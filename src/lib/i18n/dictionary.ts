@@ -12,6 +12,7 @@ export interface Dictionary {
     journalLabel: string
     openMenuLabel: string
     closeMenuLabel: string
+    sectionIndexLabel: string
   }
   about: {
     eyebrow: string
@@ -102,6 +103,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       journalLabel: 'Journal',
       openMenuLabel: 'Ouvrir le menu',
       closeMenuLabel: 'Fermer le menu',
+      sectionIndexLabel: 'Index des sections',
     },
     about: {
       eyebrow: 'À propos',
@@ -202,6 +204,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       journalLabel: 'Journal',
       openMenuLabel: 'Open menu',
       closeMenuLabel: 'Close menu',
+      sectionIndexLabel: 'Section index',
     },
     about: {
       eyebrow: 'About',

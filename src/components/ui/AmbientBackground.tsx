@@ -47,6 +47,7 @@ export function AmbientBackground() {
 
   return (
     <div aria-hidden="true" className="ambient-background" ref={containerRef}>
+      <div className="ambient-mesh" />
       <div className="ambient-parallax ambient-parallax-a">
         <div className="ambient-blob ambient-blob-a" />
       </div>

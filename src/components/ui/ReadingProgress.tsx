@@ -8,7 +8,7 @@ export function ReadingProgress() {
   return (
     <motion.div
       aria-hidden="true"
-      className="fixed inset-x-0 top-0 z-50 h-[3px] origin-left bg-accent"
+      className="fixed inset-x-0 top-0 z-50 h-0.75 origin-left bg-accent"
       style={{ scaleX: scrollYProgress }}
     />
   )

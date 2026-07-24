@@ -5,16 +5,16 @@
 :root {
   color-scheme: light;
 
-  --bg: #faf9f6;
+  --bg: #f4f5f2;
   --bg-elevated: #ffffff;
-  --surface: #f1efe8;
-  --surface-hover: #e9e6dc;
-  --border: rgba(23, 20, 15, 0.1);
-  --border-strong: rgba(23, 20, 15, 0.18);
-  --fg: #16140f;
-  --fg-muted: #56504a;
-  --fg-subtle: #767166;
-  --shadow-color: 23 20 15;
+  --surface: #e9ebe6;
+  --surface-hover: #dfe2db;
+  --border: rgba(16, 20, 23, 0.1);
+  --border-strong: rgba(16, 20, 23, 0.2);
+  --fg: #12151a;
+  --fg-muted: #4b5563;
+  --fg-subtle: #6b7280;
+  --shadow-color: 16 20 23;
 
   /*
    * --accent, --accent-fg and --accent-2 are overridden per request by an
@@ -31,20 +31,33 @@
   --accent-strong: color-mix(in srgb, var(--accent) 82%, black);
   --accent-soft: color-mix(in srgb, var(--accent) 10%, transparent);
   --accent-soft-border: color-mix(in srgb, var(--accent) 22%, transparent);
+
+  /*
+   * Shared motion vocabulary. Every hand-written CSS transition/animation
+   * in this project should reach for one of these instead of a new literal
+   * bezier/duration, so the whole site moves with one consistent voice.
+   * TS equivalents live in src/lib/motion/tokens.ts for `motion` props.
+   */
+  --ease-out-premium: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out-premium: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 200ms;
+  --duration-base: 400ms;
+  --duration-slow: 700ms;
 }
 
 :root.dark {
   color-scheme: dark;
 
-  --bg: #0c0b09;
-  --bg-elevated: #17150f;
-  --surface: #1d1a14;
-  --surface-hover: #262218;
-  --border: rgba(250, 247, 240, 0.1);
-  --border-strong: rgba(250, 247, 240, 0.18);
-  --fg: #f5f1e8;
-  --fg-muted: #b2ab9b;
-  --fg-subtle: #807a6c;
+  --bg: #0a0d11;
+  --bg-elevated: #12161c;
+  --surface: #181d24;
+  --surface-hover: #20262f;
+  --border: rgba(238, 241, 244, 0.1);
+  --border-strong: rgba(238, 241, 244, 0.2);
+  --fg: #eef1f4;
+  --fg-muted: #9aa4b2;
+  --fg-subtle: #6b7684;
   --shadow-color: 0 0 0;
 
   --accent: #ff8a3d;
@@ -57,7 +70,7 @@
 }
 
 @theme inline {
-  --font-display: var(--font-fraunces);
+  --font-display: var(--font-baloo-2);
   --font-sans: var(--font-inter);
 
   --color-bg: var(--bg);
@@ -95,4 +108,73 @@ html {
 ::selection {
   background: var(--color-accent-soft-border);
   color: var(--color-fg);
+}
+
+/*
+ * Global safety net: every component below is expected to add its own
+ * explicit prefers-reduced-motion block when it needs a genuinely different
+ * (not just faster) reduced state. This is the belt-and-suspenders fallback
+ * so nothing new can slip through with a full-speed animation.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/*
+ * Theme-change "moment": an expanding circle revealing the new theme from
+ * the toggle button's click position. --theme-x/--theme-y are set on
+ * <html> by ThemeToggle.tsx right before document.startViewTransition().
+ * Browsers without View Transitions support simply keep the instant swap.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-group(root) {
+    animation-duration: var(--duration-slow);
+  }
+
+  ::view-transition-old(root) {
+    animation: none;
+    z-index: 1;
+  }
+
+  ::view-transition-new(root) {
+    animation: theme-reveal var(--duration-slow) var(--ease-in-out-premium) forwards;
+    z-index: 2;
+  }
+
+  @keyframes theme-reveal {
+    from {
+      clip-path: circle(0% at var(--theme-x, 50%) var(--theme-y, 50%));
+    }
+    to {
+      clip-path: circle(150% at var(--theme-x, 50%) var(--theme-y, 50%));
+    }
+  }
+
+  /*
+   * The sticky, `backdrop-filter`-using header (view-transition-name:
+   * site-header, set in styles.css) gets its own transition group so it's
+   * captured/composited independently of the root page snapshot. Safari has
+   * shipped bugs where `position: sticky` + `backdrop-filter` elements
+   * flattened into a view-transition root capture flicker or ghost during
+   * the animation; giving the header its own group and disabling that
+   * group's default cross-fade means it simply carries over instantly while
+   * the circular reveal plays around it — which is the intended look on
+   * every browser, not just a Safari workaround.
+   */
+  ::view-transition-group(site-header) {
+    animation: none;
+  }
+
+  ::view-transition-old(site-header),
+  ::view-transition-new(site-header) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
 }

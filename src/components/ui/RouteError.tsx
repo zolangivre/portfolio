@@ -40,7 +40,7 @@ export function RouteError({ error, reset }: RouteErrorProps) {
           <h1>{copy.title}</h1>
           <p className="mt-3 text-sm text-fg-muted">{copy.description}</p>
           <button
-            className="mt-8 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-fg transition hover:bg-accent-strong"
+            className="mt-8 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-fg transition duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.04] hover:bg-accent-strong active:scale-[0.97]"
             onClick={reset}
             type="button"
           >

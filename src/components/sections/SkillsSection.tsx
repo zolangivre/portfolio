@@ -4,7 +4,7 @@ import type { SectionCopy } from '@/lib/sectionCopy'
 import type { Category, Skill } from '@/payload-types'
 
 import { SkillCard } from '../cards/SkillCard'
-import { Reveal } from '../ui/Reveal'
+import { RevealGroup } from '../ui/RevealGroup'
 import { SectionHeader } from '../ui/SectionHeader'
 
 type SkillsSectionProps = {
@@ -49,22 +49,24 @@ export function SkillsSection({ content, dictionary, skills }: SkillsSectionProp
         />
 
         {skills.length > 0 ? (
-          <div className="skills-grid">
-            {skillGroups.map(({ category, skills: categorySkills }, groupIndex) => (
-              <Reveal delay={Math.min(groupIndex, 5) * 0.08} key={category?.id ?? 'uncategorized'}>
-                <article className="skill-group">
-                  <h3 className="text-fg">{category?.name ?? dictionary.skills.eyebrow}</h3>
-                  <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    {categorySkills.map((skill) => (
-                      <li key={skill.id}>
-                        <SkillCard dictionary={dictionary} skill={skill} />
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-              </Reveal>
+          <RevealGroup className="skills-grid">
+            {skillGroups.map(({ category, skills: categorySkills }) => (
+              <article className="skill-group" key={category?.id ?? 'uncategorized'}>
+                <h3 className="text-fg">{category?.name ?? dictionary.skills.eyebrow}</h3>
+                <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {categorySkills.map((skill, skillIndex) => (
+                    <li
+                      className="skill-card-float"
+                      key={skill.id}
+                      style={{ animationDelay: `${(skillIndex % 5) * 0.4}s` }}
+                    >
+                      <SkillCard dictionary={dictionary} skill={skill} />
+                    </li>
+                  ))}
+                </ul>
+              </article>
             ))}
-          </div>
+          </RevealGroup>
         ) : (
           <p className="empty-state">{dictionary.skills.emptyState}</p>
         )}

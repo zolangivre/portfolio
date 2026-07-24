@@ -3,18 +3,34 @@
 import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
 
+import { EASE_OUT_PREMIUM } from '@/lib/motion/tokens'
+
 type RevealProps = {
+  blur?: number
   children: ReactNode
+  className?: string
   delay?: number
+  once?: boolean
+  scale?: number
+  y?: number
 }
 
-export function Reveal({ children, delay = 0 }: RevealProps) {
+export function Reveal({
+  blur = 0,
+  children,
+  className,
+  delay = 0,
+  once = true,
+  scale,
+  y = 18,
+}: RevealProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 18 }}
-      transition={{ delay, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      viewport={{ margin: '-80px', once: true }}
-      whileInView={{ opacity: 1, y: 0 }}
+      className={className}
+      initial={{ opacity: 0, y, scale, filter: blur ? `blur(${blur}px)` : undefined }}
+      transition={{ delay, duration: 0.6, ease: EASE_OUT_PREMIUM }}
+      viewport={{ margin: '-80px', once }}
+      whileInView={{ opacity: 1, y: 0, scale: scale !== undefined ? 1 : undefined, filter: blur ? 'blur(0px)' : undefined }}
     >
       {children}
     </motion.div>

@@ -28,7 +28,7 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
 
   return (
     <Link
-      className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-bg-elevated shadow-lg shadow-black/5 transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-accent-soft-border hover:shadow-[0_25px_60px_-15px_var(--accent-soft-border)]"
+      className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-bg-elevated shadow-lg shadow-black/5 transition duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-1.5 hover:border-accent-soft-border hover:shadow-[0_25px_60px_-15px_var(--accent-soft-border)]"
       data-cursor="pointer"
       href={`/${locale}/journal/${entry.slug}`}
     >
@@ -50,7 +50,7 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
           </span>
         ) : null}
         {entry.featured ? (
-          <span className="absolute right-4 top-4 rounded-full border border-accent-soft-border bg-accent-soft px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.28em] text-accent backdrop-blur-sm">
+          <span className="absolute right-4 top-4 rounded-full border border-accent-soft-border bg-accent-soft px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-accent backdrop-blur-sm">
             {dictionary.journal.featuredBadge}
           </span>
         ) : null}
@@ -62,7 +62,9 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
           {entry.location ? ` · ${entry.location}` : null}
         </p>
         <h3 className="mt-2 text-xl font-semibold text-fg">{entry.title}</h3>
-        <p className="mt-3 flex-1 text-justify text-sm leading-7 text-fg-muted">{entry.shortDescription}</p>
+        <p className="mt-3 flex-1 text-justify text-sm leading-7 text-fg-muted">
+          {entry.shortDescription}
+        </p>
 
         {tags.length > 0 ? (
           <ul className="mt-5 flex flex-wrap gap-2" aria-label="tags">

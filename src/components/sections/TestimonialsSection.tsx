@@ -4,7 +4,7 @@ import type { SectionCopy } from '@/lib/sectionCopy'
 import type { Testimonial } from '@/payload-types'
 
 import { TestimonialCard } from '../cards/TestimonialCard'
-import { Reveal } from '../ui/Reveal'
+import { RevealGroup } from '../ui/RevealGroup'
 import { SectionHeader } from '../ui/SectionHeader'
 
 type TestimonialsSectionProps = {
@@ -29,13 +29,11 @@ export function TestimonialsSection({
         />
 
         {testimonials.length > 0 ? (
-          <div className="project-grid">
-            {testimonials.map((testimonial, index) => (
-              <Reveal delay={Math.min(index, 5) * 0.08} key={testimonial.id}>
-                <TestimonialCard testimonial={testimonial} />
-              </Reveal>
+          <RevealGroup className="project-grid" scale={0.96}>
+            {testimonials.map((testimonial) => (
+              <TestimonialCard key={testimonial.id} testimonial={testimonial} />
             ))}
-          </div>
+          </RevealGroup>
         ) : (
           <p className="empty-state">{dictionary.testimonials.emptyState}</p>
         )}

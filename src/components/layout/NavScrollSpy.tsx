@@ -106,13 +106,13 @@ export function NavScrollSpy() {
         frame = 0
 
         const line = window.innerHeight * ACTIVE_LINE
-        let active: HTMLAnchorElement | null = null
+        let activeId: string | null = null
 
-        for (const { link, id } of entries) {
+        for (const { id } of entries) {
           const section = document.getElementById(id)
 
           if (section && section.getBoundingClientRect().top <= line) {
-            active = link
+            activeId = id
           }
         }
 
@@ -132,11 +132,14 @@ export function NavScrollSpy() {
           lastSection &&
           scrollBottom >= document.documentElement.scrollHeight - 2
         ) {
-          active = lastEntry.link
+          activeId = lastEntry.id
         }
 
-        for (const { link } of entries) {
-          if (link === active) {
+        // Every link pointing at the same section id is marked together —
+        // the page can render more than one nav for the same sections (e.g.
+        // the header nav and the desktop index rail).
+        for (const { link, id } of entries) {
+          if (id === activeId) {
             link.setAttribute('aria-current', 'location')
           } else {
             link.removeAttribute('aria-current')

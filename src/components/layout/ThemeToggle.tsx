@@ -3,6 +3,7 @@
 import { useTheme } from 'next-themes'
 import { motion } from 'motion/react'
 import { useSyncExternalStore } from 'react'
+import { flushSync } from 'react-dom'
 
 import type { Dictionary } from '@/lib/i18n/dictionary'
 
@@ -49,6 +50,39 @@ function MoonIcon() {
   )
 }
 
+/**
+ * Turns a theme switch into the site's signature "moment": an expanding
+ * circle sweeps out from the clicked button revealing the new theme,
+ * powered by the native View Transitions API. --theme-x/--theme-y feed the
+ * clip-path keyframe defined in globals.css. flushSync is required so
+ * next-themes' `.dark` class mutation happens synchronously inside the
+ * transition callback — otherwise the "before" snapshot captured by the
+ * browser would already show the new theme.
+ */
+function setThemeWithTransition(
+  event: { currentTarget: HTMLElement },
+  option: 'light' | 'dark',
+  setTheme: (theme: string) => void,
+) {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const supportsViewTransition =
+    typeof document !== 'undefined' && 'startViewTransition' in document
+
+  if (prefersReducedMotion || !supportsViewTransition) {
+    setTheme(option)
+    return
+  }
+
+  const rect = event.currentTarget.getBoundingClientRect()
+  document.documentElement.style.setProperty('--theme-x', `${rect.left + rect.width / 2}px`)
+  document.documentElement.style.setProperty('--theme-y', `${rect.top + rect.height / 2}px`)
+  ;(document as Document & { startViewTransition: (callback: () => void) => void }).startViewTransition(
+    () => {
+      flushSync(() => setTheme(option))
+    },
+  )
+}
+
 export function ThemeToggle({ dictionary }: ThemeToggleProps) {
   const { theme, resolvedTheme, setTheme } = useTheme()
   const mounted = useMounted()
@@ -64,7 +98,7 @@ export function ThemeToggle({ dictionary }: ThemeToggleProps) {
           className="theme-toggle-item"
           data-active={active === option}
           key={option}
-          onClick={() => setTheme(option)}
+          onClick={(event) => setThemeWithTransition(event, option, setTheme)}
           type="button"
         >
           {active === option ? (
@@ -74,9 +108,13 @@ export function ThemeToggle({ dictionary }: ThemeToggleProps) {
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             />
           ) : null}
-          <span className="theme-toggle-icon">
+          <motion.span
+            className="theme-toggle-icon"
+            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+            whileHover={{ rotate: 14, scale: 1.12 }}
+          >
             {option === 'light' ? <SunIcon /> : <MoonIcon />}
-          </span>
+          </motion.span>
         </button>
       ))}
     </div>

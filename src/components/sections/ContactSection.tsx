@@ -7,6 +7,7 @@ import type { Contact, Setting } from '@/payload-types'
 
 import { ContactForm } from './ContactForm'
 import { BuiltInSocialIcon } from '../ui/SocialIcons'
+import { Reveal } from '../ui/Reveal'
 import { SectionHeader } from '../ui/SectionHeader'
 
 type ContactSectionProps = {
@@ -33,8 +34,8 @@ export function ContactSection({ contact, dictionary, settings }: ContactSection
         />
 
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-[28px] border border-border bg-bg-elevated p-8 shadow-lg shadow-black/5">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-accent">
+          <Reveal className="rounded-[28px] border border-border bg-bg-elevated p-8 shadow-lg shadow-black/5">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">
               {dictionary.contact.reachOut}
             </p>
             <a
@@ -75,11 +76,14 @@ export function ContactSection({ contact, dictionary, settings }: ContactSection
                 })}
               </div>
             ) : null}
-          </div>
+          </Reveal>
 
-          <div className="rounded-[28px] border border-border bg-bg-elevated p-8 shadow-lg shadow-black/5">
+          <Reveal
+            className="rounded-[28px] border border-border bg-bg-elevated p-8 shadow-lg shadow-black/5"
+            delay={0.1}
+          >
             <ContactForm dictionary={dictionary} successMessage={successMessage} />
-          </div>
+          </Reveal>
         </div>
       </Container>
     </section>
