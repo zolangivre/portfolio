@@ -352,10 +352,24 @@ a {
   view-transition-name: site-header;
   width: 100%;
   z-index: 10;
+  /* backdrop-filter depends on GPU compositing; Chrome's GPU process can
+     drop or fail to promote it intermittently (hybrid-graphics laptops,
+     memory pressure, a stalled GPU process) with no error — the element
+     just renders as if backdrop-filter were `none`, while everything else
+     (background-color, border) still paints fine via software. WebKit's
+     macOS compositor doesn't share this failure mode. Promoting the header
+     to its own persistent layer reduces how often Chrome has to
+     re-negotiate that promotion mid-scroll. It's not a full fix (nothing
+     app-side can force Chrome's GPU path to behave), so the background
+     alpha below is deliberately high enough that the header still reads as
+     solid even on the frames where the blur silently no-ops. */
+  isolation: isolate;
+  transform: translateZ(0);
+  will-change: backdrop-filter;
 }
 
 .site-header[data-scrolled='true'] {
-  background: color-mix(in srgb, var(--bg) 32%, transparent);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   border-bottom-color: var(--border);
