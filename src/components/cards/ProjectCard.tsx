@@ -106,7 +106,7 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
         <div className="flex flex-wrap items-center gap-3">
           {project.githubUrl ? (
             <a
-              className="text-sm font-medium text-fg transition hover:text-accent"
+              className="link-underline text-sm font-medium text-fg transition hover:text-accent"
               href={project.githubUrl}
               rel="noreferrer"
               target="_blank"
