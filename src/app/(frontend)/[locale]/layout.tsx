@@ -9,7 +9,6 @@ import { Footer } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'
 import { IndexRail } from '@/components/layout/IndexRail'
 import { MotionProvider } from '@/components/providers/MotionProvider'
-import { PageTransition } from '@/components/providers/PageTransition'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { AmbientBackground } from '@/components/ui/AmbientBackground'
 import { CursorEffects } from '@/components/ui/CursorEffects'
@@ -174,7 +173,7 @@ export default async function LocaleLayout(props: {
                 settings={settings}
               />
               <main id="main-content">
-                <PageTransition>{children}</PageTransition>
+                {children}
               </main>
               <Footer dictionary={dictionary} footer={footer} locale={locale} />
             </div>
