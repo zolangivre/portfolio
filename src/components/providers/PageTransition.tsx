@@ -9,10 +9,15 @@ import { LANG_TRANSITION_FLAG, LANG_TRANSITION_SCROLL_KEY } from '@/lib/motion/l
 const routeTransition = { duration: 0.2, ease: [0.4, 0, 0.2, 1] as const }
 const languageTransition = { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }
 
+// No `filter` here (unlike languageVariants below): this variant plays on
+// every in-app navigation, and animating `filter: blur()` forces a repaint
+// of the whole page-sized layer on every frame of the transition — cheap
+// enough on Chrome's compositor, but a real source of per-navigation jank
+// on Safari/WebKit. opacity + y stay fully GPU-composited.
 const routeVariants = {
-  initial: { opacity: 0, y: 8, filter: 'blur(4px)', scale: 1 },
-  animate: { opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 },
-  exit: { opacity: 0, y: -8, filter: 'blur(4px)', scale: 1 },
+  initial: { opacity: 0, y: 8, scale: 1 },
+  animate: { opacity: 1, y: 0, scale: 1 },
+  exit: { opacity: 0, y: -8, scale: 1 },
 }
 
 const languageVariants = {
