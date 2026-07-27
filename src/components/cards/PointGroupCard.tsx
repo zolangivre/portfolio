@@ -35,7 +35,7 @@ const itemVariants = {
 export function PointGroupCard({ content, delay, title }: PointGroupCardProps) {
   return (
     <motion.div
-      className="rounded-[28px] border border-accent-soft-border bg-accent-soft p-8 transition duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-1.5 hover:border-accent-strong hover:shadow-[0_25px_60px_-15px_var(--accent-soft-border)]"
+      className="card-glow rounded-[28px] border border-accent-soft-border bg-accent-soft p-8 transition duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-1.5 hover:border-accent-strong"
       custom={delay}
       initial="hidden"
       variants={cardVariants}

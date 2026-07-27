@@ -27,58 +27,63 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
   const tags = entry.tags ?? []
 
   return (
-    <Link
-      className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-bg-elevated shadow-lg shadow-black/5 transition duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-1.5 hover:border-accent-soft-border hover:shadow-[0_25px_60px_-15px_var(--accent-soft-border)]"
-      data-cursor="pointer"
-      href={`/${locale}/journal/${entry.slug}`}
-    >
-      <div className="relative aspect-16/10 overflow-hidden bg-surface">
-        {imageUrl ? (
-          <Image
-            alt={imageAlt}
-            className="h-full w-full object-cover"
-            height={640}
-            sizes="(min-width: 1024px) min(33vw, 375px), (min-width: 720px) 50vw, 100vw"
-            src={imageUrl}
-            width={960}
-          />
-        ) : null}
-        <div className="absolute inset-0 bg-linear-to-t from-bg/70 via-bg/5 to-transparent" />
-        {categoryLabel ? (
-          <span className="absolute left-4 top-4 rounded-full border border-accent-soft-border bg-bg-elevated/90 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-accent backdrop-blur-sm">
-            {categoryLabel}
-          </span>
-        ) : null}
-        {entry.featured ? (
-          <span className="absolute right-4 top-4 rounded-full border border-accent-soft-border bg-accent-soft px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-accent backdrop-blur-sm">
-            {dictionary.journal.featuredBadge}
-          </span>
-        ) : null}
-      </div>
+    // .card-glow's hover glow lives on an ::after — it needs an ancestor
+    // without overflow-hidden (the Link below clips the cover image to its
+    // rounded corners, which would clip the glow's shadow too).
+    <div className="card-glow h-full rounded-[28px]">
+      <Link
+        className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-bg-elevated shadow-lg shadow-black/5 transition duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-1.5 hover:border-accent-soft-border"
+        data-cursor="pointer"
+        href={`/${locale}/journal/${entry.slug}`}
+      >
+        <div className="relative aspect-16/10 overflow-hidden bg-surface">
+          {imageUrl ? (
+            <Image
+              alt={imageAlt}
+              className="h-full w-full object-cover"
+              height={640}
+              sizes="(min-width: 1024px) min(33vw, 375px), (min-width: 720px) 50vw, 100vw"
+              src={imageUrl}
+              width={960}
+            />
+          ) : null}
+          <div className="absolute inset-0 bg-linear-to-t from-bg/70 via-bg/5 to-transparent" />
+          {categoryLabel ? (
+            <span className="absolute left-4 top-4 rounded-full border border-accent-soft-border bg-bg-elevated/90 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-accent backdrop-blur-sm">
+              {categoryLabel}
+            </span>
+          ) : null}
+          {entry.featured ? (
+            <span className="absolute right-4 top-4 rounded-full border border-accent-soft-border bg-accent-soft px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-accent backdrop-blur-sm">
+              {dictionary.journal.featuredBadge}
+            </span>
+          ) : null}
+        </div>
 
-      <div className="flex flex-1 flex-col p-6 sm:p-7">
-        <p className="text-xs font-medium uppercase tracking-[0.18em] text-fg-subtle">
-          {formattedDate}
-          {entry.location ? ` · ${entry.location}` : null}
-        </p>
-        <h3 className="mt-2 text-xl font-semibold text-fg">{entry.title}</h3>
-        <p className="mt-3 flex-1 text-justify text-sm leading-7 text-fg-muted">
-          {entry.shortDescription}
-        </p>
+        <div className="flex flex-1 flex-col p-6 sm:p-7">
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-fg-subtle">
+            {formattedDate}
+            {entry.location ? ` · ${entry.location}` : null}
+          </p>
+          <h3 className="mt-2 text-xl font-semibold text-fg">{entry.title}</h3>
+          <p className="mt-3 flex-1 text-justify text-sm leading-7 text-fg-muted">
+            {entry.shortDescription}
+          </p>
 
-        {tags.length > 0 ? (
-          <ul className="mt-5 flex flex-wrap gap-2" aria-label="tags">
-            {tags.slice(0, 4).map((tag, index) => (
-              <li
-                className="rounded-full border border-border bg-surface px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-fg-muted"
-                key={`${tag.value}-${index}`}
-              >
-                {tag.value}
-              </li>
-            ))}
-          </ul>
-        ) : null}
-      </div>
-    </Link>
+          {tags.length > 0 ? (
+            <ul className="mt-5 flex flex-wrap gap-2" aria-label="tags">
+              {tags.slice(0, 4).map((tag, index) => (
+                <li
+                  className="rounded-full border border-border bg-surface px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-fg-muted"
+                  key={`${tag.value}-${index}`}
+                >
+                  {tag.value}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      </Link>
+    </div>
   )
 }

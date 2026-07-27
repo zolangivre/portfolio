@@ -108,6 +108,7 @@ export function MediaGallery({
         styles={{
           container: {
             backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
             backgroundColor: 'color-mix(in srgb, var(--yarl__color_backdrop) 82%, transparent)',
           },
         }}
