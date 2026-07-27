@@ -1211,12 +1211,10 @@ h3 {
 }
 
 /*
- * Timeline (Experience/Education): a central rail with `.timeline-row`
- * entries alternating left/right at desktop widths, collapsing to a single
- * left-aligned rail below 1024px where there isn't room for two columns.
- * `.timeline-row` (the Reveal wrapper) owns alternation/positioning so the
- * node (`::before`) has a stable, single sibling-count context regardless of
- * `.timeline-rail`'s own presence as a non-.timeline-row child.
+ * Timeline (Experience/Education): a single left-aligned rail at every
+ * width, with `.timeline-row` entries stacked full-width beside it — no
+ * alternating left/right columns, so there's no half-empty gap next to each
+ * card.
  */
 .timeline {
   display: flex;
@@ -1361,39 +1359,6 @@ h3 {
 
 .timeline-body {
   margin-top: 1.1rem;
-}
-
-@media (min-width: 1024px) {
-  .timeline {
-    gap: 3rem;
-    padding-left: 0;
-  }
-
-  .timeline-rail {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .timeline-row {
-    width: calc(50% - 2.75rem);
-  }
-
-  .timeline-row:nth-of-type(odd) {
-    margin-right: auto;
-  }
-
-  .timeline-row:nth-of-type(even) {
-    margin-left: auto;
-  }
-
-  .timeline-row:nth-of-type(odd)::before {
-    left: auto;
-    right: calc(-2.75rem - 6px);
-  }
-
-  .timeline-row:nth-of-type(even)::before {
-    left: calc(-2.75rem - 6px);
-  }
 }
 
 .empty-state {
