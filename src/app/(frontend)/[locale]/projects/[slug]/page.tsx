@@ -128,6 +128,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                   className={`h-full w-full object-contain${darkImageUrl ? ' dark:hidden' : ''}`}
                   height={900}
                   priority
+                  sizes="(min-width: 1200px) 1160px, 100vw"
                   src={imageUrl}
                   width={1600}
                 />
@@ -138,6 +139,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                   className="hidden h-full w-full object-contain dark:block"
                   height={900}
                   priority
+                  sizes="(min-width: 1200px) 1160px, 100vw"
                   src={darkImageUrl}
                   width={1600}
                 />
