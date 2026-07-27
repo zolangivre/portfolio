@@ -38,6 +38,11 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      graphics: {
+        Logo: '/components/admin/graphics/AdminLogo#AdminLogo',
+      },
+    },
   },
   collections: [
     Users,
