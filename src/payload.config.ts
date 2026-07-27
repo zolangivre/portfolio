@@ -38,6 +38,11 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      graphics: {
+        Logo: '/components/admin/graphics/AdminLogo#AdminLogo',
+      },
+    },
   },
   collections: [
     Users,
@@ -104,7 +109,20 @@ export default buildConfig({
     // Falls back to local disk storage when R2 credentials are unset (local
     // dev), and uploads to Cloudflare R2 when they're set (production).
     s3Storage({
-      collections: { media: true },
+      collections: {
+        media: {
+          // Serve files straight from the R2 custom domain instead of
+          // proxying every read through Payload's /api/media/file route —
+          // that route runs as a Vercel function, so every image request
+          // was counting against Fast Origin Transfer. Inert in local dev
+          // (falls back to disk storage below, since `enabled` is false).
+          disablePayloadAccessControl: true,
+          generateFileURL: ({ filename, prefix }) => {
+            const base = (process.env.R2_PUBLIC_URL || '').replace(/\/+$/, '')
+            return `${base}/${prefix ? `${prefix}/` : ''}${filename}`
+          },
+        },
+      },
       bucket: process.env.R2_BUCKET || '',
       enabled: Boolean(process.env.R2_ACCESS_KEY_ID),
       // Uploads go straight from the browser to R2, bypassing the server so

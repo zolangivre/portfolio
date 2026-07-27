@@ -8,6 +8,7 @@ export const Media: CollectionConfig = {
     group: 'Site',
     description: 'Reusable images, logos and videos used across the site.',
     useAsTitle: 'alt',
+    defaultColumns: ['preview', 'filename', 'alt', 'updatedAt'],
   },
   access: {
     read: () => true,
@@ -25,26 +26,22 @@ export const Media: CollectionConfig = {
   ],
   upload: {
     focalPoint: true,
-    imageSizes: [
-      {
-        name: 'thumbnail',
-        width: 400,
-        height: 300,
-        position: 'centre',
-      },
-      {
-        name: 'card',
-        width: 960,
-        height: 640,
-        position: 'centre',
-      },
-      {
-        name: 'hero',
-        width: 1600,
-        height: 900,
-        position: 'centre',
-      },
-    ],
+    // Applies to the main uploaded file (not just the named sizes below).
+    // Payload only runs this for raster formats it can resize (jpeg/png/gif/
+    // webp/tiff/avif) — SVGs, PDFs and videos pass through untouched, so logos
+    // stay vector and the résumé PDF is unaffected.
+    resizeOptions: {
+      width: 1920,
+      withoutEnlargement: true,
+    },
+    formatOptions: {
+      format: 'webp',
+      options: { quality: 80 },
+    },
+    // No named imageSizes: getMediaUrl() (src/lib/media.ts) only ever reads
+    // the main file's url, so thumbnail/card/hero derivatives were generated
+    // and stored in R2 on every upload without a single component reading
+    // them back.
     mimeTypes: ['image/*', 'video/*', 'application/pdf'],
   },
 }
