@@ -8,6 +8,7 @@ export const Media: CollectionConfig = {
     group: 'Site',
     description: 'Reusable images, logos and videos used across the site.',
     useAsTitle: 'alt',
+    defaultColumns: ['preview', 'filename', 'alt', 'updatedAt'],
   },
   access: {
     read: () => true,
