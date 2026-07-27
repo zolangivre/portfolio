@@ -121,6 +121,7 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
               className="mt-8 block h-auto w-full rounded-[28px] bg-surface"
               height={coverImage?.height ?? 900}
               priority
+              sizes="(min-width: 1200px) 1160px, 100vw"
               src={imageUrl}
               width={coverImage?.width ?? 1600}
             />
