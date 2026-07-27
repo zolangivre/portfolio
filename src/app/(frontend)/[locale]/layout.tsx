@@ -174,7 +174,7 @@ export default async function LocaleLayout(props: {
                 settings={settings}
               />
               <main id="main-content">
-                <PageTransition>{children}</PageTransition>
+                {children}
               </main>
               <Footer dictionary={dictionary} footer={footer} locale={locale} />
             </div>
