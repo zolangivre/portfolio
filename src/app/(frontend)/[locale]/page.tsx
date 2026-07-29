@@ -25,6 +25,7 @@ import {
 import { resolveSectionCopy } from '@/lib/sectionCopy'
 
 import './styles.css'
+import { ReadingProgress } from '@/components/ui/ReadingProgress'
 
 export const revalidate = 60
 
@@ -65,6 +66,7 @@ export default async function HomePage({ params }: { params: Promise<PageParams>
 
   return (
     <>
+      <ReadingProgress />
       {sections?.hero !== false ? (
         <Reveal>
           <HeroSection hero={hero} settings={settings} />

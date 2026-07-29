@@ -10,6 +10,7 @@ import { defaultLocale, locales, type Locale } from '@/lib/locale'
 import { getJournalEntries, getSectionsContent, getSectionsVisibility } from '@/lib/queries'
 import { lexicalToPlainText } from '@/lib/richText'
 import { resolveSectionCopy } from '@/lib/sectionCopy'
+import { ReadingProgress } from '@/components/ui/ReadingProgress'
 
 export const revalidate = 60
 
@@ -21,7 +22,9 @@ export async function generateMetadata({
   params: Promise<PageParams>
 }): Promise<Metadata> {
   const { locale: rawLocale } = await params
-  const locale: Locale = locales.includes(rawLocale as Locale) ? (rawLocale as Locale) : defaultLocale
+  const locale: Locale = locales.includes(rawLocale as Locale)
+    ? (rawLocale as Locale)
+    : defaultLocale
   const dictionary = getDictionary(locale)
   const sectionsContent = await getSectionsContent(locale)
   const content = resolveSectionCopy(sectionsContent?.journal, dictionary.journal)
@@ -34,7 +37,9 @@ export async function generateMetadata({
 
 export default async function JournalPage({ params }: { params: Promise<PageParams> }) {
   const { locale: rawLocale } = await params
-  const locale: Locale = locales.includes(rawLocale as Locale) ? (rawLocale as Locale) : defaultLocale
+  const locale: Locale = locales.includes(rawLocale as Locale)
+    ? (rawLocale as Locale)
+    : defaultLocale
   const dictionary = getDictionary(locale)
 
   const sections = await getSectionsVisibility(locale)
@@ -51,6 +56,7 @@ export default async function JournalPage({ params }: { params: Promise<PagePara
 
   return (
     <section aria-labelledby="journal-title" className="content-section">
+      <ReadingProgress />
       <Container>
         <Reveal>
           <SectionHeader

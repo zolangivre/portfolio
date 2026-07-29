@@ -15,6 +15,7 @@ import { defaultLocale, locales, type Locale } from '@/lib/locale'
 import { getMediaUrl } from '@/lib/media'
 import { getAllProjects, getProject, getSectionsVisibility } from '@/lib/queries'
 import type { Media } from '@/payload-types'
+import { ReadingProgress } from '@/components/ui/ReadingProgress'
 
 export const revalidate = 60
 
@@ -93,6 +94,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
 
   return (
     <article className="content-section">
+      <ReadingProgress />
       <Container>
         <Reveal>
           <Link
