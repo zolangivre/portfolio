@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 
 import { JournalGrid } from '@/components/sections/JournalGrid'
@@ -48,8 +49,10 @@ export default async function JournalPage({ params }: { params: Promise<PagePara
     notFound()
   }
 
+  const { isEnabled: draft } = await draftMode()
+
   const [entries, sectionsContent] = await Promise.all([
-    getJournalEntries(locale),
+    getJournalEntries(locale, undefined, draft),
     getSectionsContent(locale),
   ])
   const content = resolveSectionCopy(sectionsContent?.journal, dictionary.journal)

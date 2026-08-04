@@ -88,6 +88,12 @@ export interface Dictionary {
     nextLabel: string
     previousLabel: string
   }
+  notFound: {
+    eyebrow: string
+    title: string
+    description: string
+    homeLabel: string
+  }
 }
 
 const dictionaries: Record<Locale, Dictionary> = {
@@ -191,6 +197,13 @@ const dictionaries: Record<Locale, Dictionary> = {
       nextLabel: 'Image suivante',
       previousLabel: 'Image précédente',
     },
+    notFound: {
+      eyebrow: 'Erreur 404',
+      title: 'Cette page n’existe pas',
+      description:
+        'Le lien est peut-être incorrect, ou la page a été déplacée depuis que vous l’avez enregistrée.',
+      homeLabel: 'Retour à l’accueil',
+    },
   },
   en: {
     nav: {
@@ -290,6 +303,13 @@ const dictionaries: Record<Locale, Dictionary> = {
       closeLabel: 'Close',
       nextLabel: 'Next image',
       previousLabel: 'Previous image',
+    },
+    notFound: {
+      eyebrow: 'Error 404',
+      title: 'This page doesn’t exist',
+      description:
+        'The link may be wrong, or the page may have moved since you saved it.',
+      homeLabel: 'Back to home',
     },
   },
 }

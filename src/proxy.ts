@@ -38,6 +38,9 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!admin|api|my-route|_next|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map)$).*)',
+    // `next/` covers the draft-mode preview routes: they carry the locale in a
+    // query param and redirect to the localized page themselves, so prefixing
+    // them here would send the request to a route that doesn't exist.
+    '/((?!admin|api|my-route|next/|_next|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map)$).*)',
   ],
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
+import { draftMode } from 'next/headers'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect, redirect } from 'next/navigation'
 
 import { AnimatedTitle } from '@/components/ui/AnimatedTitle'
 import { TechChip } from '@/components/ui/TechChip'
@@ -12,8 +13,8 @@ import { Reveal } from '@/components/ui/Reveal'
 import { RichText } from '@/components/ui/RichText'
 import { getDictionary } from '@/lib/i18n/dictionary'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
-import { getMediaUrl } from '@/lib/media'
-import { getAllProjects, getProject, getSectionsVisibility } from '@/lib/queries'
+import { getMediaSrcSet, getMediaUrl } from '@/lib/media'
+import { getAllProjects, getProject, getRedirect, getSectionsVisibility } from '@/lib/queries'
 import type { Media } from '@/payload-types'
 import { ReadingProgress } from '@/components/ui/ReadingProgress'
 
@@ -45,7 +46,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: rawLocale, slug } = await params
   const locale = resolveLocale(rawLocale)
-  const project = await getProject(slug, locale)
+  const { isEnabled: draft } = await draftMode()
+  const project = await getProject(slug, locale, draft)
 
   if (!project) {
     return {}
@@ -64,20 +66,35 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
   const { locale: rawLocale, slug } = await params
   const locale = resolveLocale(rawLocale)
   const dictionary = getDictionary(locale)
+  const { isEnabled: draft } = await draftMode()
   const sections = await getSectionsVisibility(locale)
 
   if (sections?.projects === false) {
     notFound()
   }
 
-  const project = await getProject(slug, locale)
+  const project = await getProject(slug, locale, draft)
 
   if (!project) {
+    // The slug may have been renamed — fall back to a configured redirect
+    // before giving up, so old links and search results keep working.
+    const redirectTarget = await getRedirect(`/${locale}/projects/${slug}`)
+
+    if (redirectTarget) {
+      if (redirectTarget.permanent) {
+        permanentRedirect(redirectTarget.destination)
+      }
+
+      redirect(redirectTarget.destination)
+    }
+
     notFound()
   }
 
   const imageUrl = getMediaUrl(project.coverImage)
+  const imageSrcSet = getMediaSrcSet(project.coverImage)
   const darkImageUrl = getMediaUrl(project.coverImageDark)
+  const darkImageSrcSet = getMediaSrcSet(project.coverImageDark)
   const imageAlt =
     typeof project.coverImage === 'object' && project.coverImage
       ? project.coverImage.alt
@@ -132,6 +149,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                   priority
                   sizes="(min-width: 1200px) 1160px, 100vw"
                   src={imageUrl}
+                  srcSet={imageSrcSet}
                   width={1600}
                 />
               ) : null}
@@ -143,6 +161,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                   priority
                   sizes="(min-width: 1200px) 1160px, 100vw"
                   src={darkImageUrl}
+                  srcSet={darkImageSrcSet}
                   width={1600}
                 />
               ) : null}
@@ -209,10 +228,12 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                 images={gallery.map((media) => ({
                   id: media.id,
                   src: getMediaUrl(media) ?? '',
+                  srcSet: getMediaSrcSet(media),
                   alt: media.alt,
                   mimeType: media.mimeType,
                   width: media.width ?? undefined,
                   height: media.height ?? undefined,
+                  poster: getMediaUrl(media.poster),
                 }))}
                 nextLabel={dictionary.lightbox.nextLabel}
                 previousLabel={dictionary.lightbox.previousLabel}

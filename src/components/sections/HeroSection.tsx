@@ -1,13 +1,13 @@
 'use client'
 
 import { motion } from 'motion/react'
-import Image from 'next/image'
 
 import { Container } from '@/components/ui/Container'
 import { RichText } from '@/components/ui/RichText'
 import { useMagneticHover } from '@/hooks/useMagneticHover'
 import { useTypewriter } from '@/hooks/useTypewriter'
-import { getMediaUrl } from '@/lib/media'
+import { FadeImage } from '@/components/ui/FadeImage'
+import { getMediaSrcSet, getMediaUrl } from '@/lib/media'
 import type { Hero, Setting } from '@/payload-types'
 
 type HeroSectionProps = {
@@ -42,6 +42,7 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
   const resumeUrl = getMediaUrl(resumeCta?.file)
   const photo = settings?.photo
   const photoUrl = getMediaUrl(photo)
+  const photoSrcSet = getMediaSrcSet(photo)
   const photoWidth = (typeof photo === 'object' && photo?.width) || 800
   const photoHeight = (typeof photo === 'object' && photo?.height) || 1000
 
@@ -128,14 +129,14 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
               className="absolute -inset-6 -z-10 rounded-[36px] bg-accent-soft opacity-0 blur-3xl"
               style={{ animation: 'hero-photo-glow 6s ease-in-out 0.8s infinite' }}
             />
-            <Image
+            <FadeImage
               alt=""
               className="h-auto w-full max-w-sm rounded-[28px] border border-border shadow-xl shadow-black/10 lg:w-80 lg:shrink-0"
               height={photoHeight}
               priority
-              quality={90}
               sizes="(min-width: 1024px) 480px, 100vw"
               src={photoUrl}
+              srcSet={photoSrcSet}
               width={photoWidth}
             />
           </motion.div>

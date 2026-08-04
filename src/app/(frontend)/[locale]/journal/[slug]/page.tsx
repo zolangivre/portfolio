@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
+import { draftMode } from 'next/headers'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect, redirect } from 'next/navigation'
 
 import { AnimatedTitle } from '@/components/ui/AnimatedTitle'
 import { Container } from '@/components/ui/Container'
@@ -12,8 +13,13 @@ import { Reveal } from '@/components/ui/Reveal'
 import { RichText } from '@/components/ui/RichText'
 import { getDictionary } from '@/lib/i18n/dictionary'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
-import { getMediaUrl } from '@/lib/media'
-import { getJournalEntries, getJournalEntry, getSectionsVisibility } from '@/lib/queries'
+import { getMediaSrcSet, getMediaUrl } from '@/lib/media'
+import {
+  getJournalEntries,
+  getJournalEntry,
+  getRedirect,
+  getSectionsVisibility,
+} from '@/lib/queries'
 import type { Media } from '@/payload-types'
 
 export const revalidate = 60
@@ -49,7 +55,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: rawLocale, slug } = await params
   const locale = resolveLocale(rawLocale)
-  const entry = await getJournalEntry(slug, locale)
+  const { isEnabled: draft } = await draftMode()
+  const entry = await getJournalEntry(slug, locale, draft)
 
   if (!entry) {
     return {}
@@ -68,15 +75,28 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
   const { locale: rawLocale, slug } = await params
   const locale = resolveLocale(rawLocale)
   const dictionary = getDictionary(locale)
+  const { isEnabled: draft } = await draftMode()
   const sections = await getSectionsVisibility(locale)
 
   if (sections?.journal === false) {
     notFound()
   }
 
-  const entry = await getJournalEntry(slug, locale)
+  const entry = await getJournalEntry(slug, locale, draft)
 
   if (!entry) {
+    // The slug may have been renamed — fall back to a configured redirect
+    // before giving up, so old links and search results keep working.
+    const redirectTarget = await getRedirect(`/${locale}/journal/${slug}`)
+
+    if (redirectTarget) {
+      if (redirectTarget.permanent) {
+        permanentRedirect(redirectTarget.destination)
+      }
+
+      redirect(redirectTarget.destination)
+    }
+
     notFound()
   }
 
@@ -123,6 +143,7 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
               priority
               sizes="(min-width: 1200px) 1160px, 100vw"
               src={imageUrl}
+              srcSet={getMediaSrcSet(entry.coverImage)}
               width={coverImage?.width ?? 1600}
             />
           </Reveal>
@@ -158,10 +179,12 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
                 images={gallery.map((media) => ({
                   id: media.id,
                   src: getMediaUrl(media) ?? '',
+                  srcSet: getMediaSrcSet(media),
                   alt: media.alt,
                   mimeType: media.mimeType,
                   width: media.width ?? undefined,
                   height: media.height ?? undefined,
+                  poster: getMediaUrl(media.poster),
                 }))}
                 nextLabel={dictionary.lightbox.nextLabel}
                 previousLabel={dictionary.lightbox.previousLabel}

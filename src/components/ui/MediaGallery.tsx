@@ -12,10 +12,14 @@ import { Reveal } from './Reveal'
 type GalleryImage = {
   id: number
   src: string
+  /** Responsive candidates from getMediaSrcSet(); absent for videos. */
+  srcSet?: string
   alt: string
   mimeType?: string | null
   width?: number
   height?: number
+  /** Still shown before a video is played, so the file isn't fetched to paint a frame. */
+  poster?: string | null
 }
 
 type MediaGalleryProps = {
@@ -62,7 +66,11 @@ export function MediaGallery({
                     height={image.height ?? 1200}
                     muted
                     playsInline
-                    preload="metadata"
+                    // With a poster there's nothing to fetch until the visitor
+                    // plays it; without one the browser must pull part of the
+                    // file just to paint the first frame.
+                    poster={image.poster ?? undefined}
+                    preload={image.poster ? 'none' : 'metadata'}
                     src={image.src}
                     width={image.width ?? 1600}
                   />
@@ -81,6 +89,7 @@ export function MediaGallery({
                   height={image.height ?? 1200}
                   sizes="(min-width: 720px) 33vw, 50vw"
                   src={image.src}
+                  srcSet={image.srcSet}
                   width={image.width ?? 1600}
                 />
               )}

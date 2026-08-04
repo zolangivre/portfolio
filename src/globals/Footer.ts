@@ -9,6 +9,15 @@ export const Footer: GlobalConfig = {
     group: 'Site',
     description: 'Footer text and links.',
   },
+  // Versioned like the content collections: edits autosave as a draft and only
+  // reach the site once published, so the homepage can't change mid-edit.
+  versions: {
+    drafts: {
+      autosave: { interval: 800 },
+      schedulePublish: true,
+    },
+    max: 20,
+  },
   access: {
     read: () => true,
   },

@@ -1,4 +1,5 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { s3Storage } from '@payloadcms/storage-s3'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -59,6 +60,17 @@ export default buildConfig({
     Messages,
     Journal,
   ],
+  // Folder organisation for collections that opt in with `folders: true`
+  // (currently only Media). Payload auto-creates the `payload-folders`
+  // collection that stores the tree.
+  folders: {
+    browseByFolder: true,
+    // Media is the only folder-enabled collection, so scoping each folder to a
+    // set of collections would just add a mandatory picker with one choice.
+    // Turning it off means folders are global — flip back to true (the default)
+    // if another collection ever opts in and needs its own separate tree.
+    collectionSpecific: false,
+  },
   globals: [
     GlobalSettings,
     Hero,
@@ -81,6 +93,34 @@ export default buildConfig({
     ],
     defaultLocale: 'fr',
     fallback: true,
+    // With drafts enabled, the Publish button offers "publish all locales" or
+    // "publish only the locale I'm editing". 'active' makes the latter the
+    // default, so translating the English copy can't accidentally push
+    // half-finished French edits live.
+    defaultLocalePublishOption: 'active',
+  },
+  // Scheduled publish/unpublish runs through Payload's jobs queue. Payload
+  // registers the `schedulePublish` task automatically for every collection and
+  // global that enables it; this section only controls who may run the queue.
+  jobs: {
+    access: {
+      // The /api/payload-jobs/run endpoint defaults to PUBLIC. Without this,
+      // anyone could trigger the queue. Vercel Cron sends the project's
+      // CRON_SECRET as a bearer token; a logged-in admin can also run it.
+      run: ({ req }) => {
+        if (req.user) {
+          return true
+        }
+
+        const secret = process.env.CRON_SECRET
+
+        if (!secret) {
+          return false
+        }
+
+        return req.headers.get('authorization') === `Bearer ${secret}`
+      },
+    },
   },
   db: postgresAdapter({
     // Dev push keeps the local database in sync automatically. CI builds its
@@ -93,6 +133,18 @@ export default buildConfig({
   }),
   sharp,
   plugins: [
+    // 301s for renamed slugs, so old links and search results keep working.
+    // Consumed by getRedirect() at the 404 boundary of the detail pages.
+    redirectsPlugin({
+      collections: ['projects', 'journal'],
+      redirectTypes: ['301', '302'],
+      overrides: {
+        admin: {
+          group: 'Site',
+          description: 'Send old URLs to their new home after renaming a slug.',
+        },
+      },
+    }),
     seoPlugin({
       collections: ['projects', 'journal'],
       globals: ['hero'],

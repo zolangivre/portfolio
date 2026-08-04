@@ -1,6 +1,6 @@
 import { FadeImage } from '@/components/ui/FadeImage'
 import { Container } from '@/components/ui/Container'
-import { getMediaUrl } from '@/lib/media'
+import { getMediaSrcSet, getMediaUrl } from '@/lib/media'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { About } from '@/payload-types'
 
@@ -19,6 +19,7 @@ export function AboutSection({ about, dictionary }: AboutSectionProps) {
   const pointGroups = about?.pointGroups ?? []
   const portrait = about?.portrait
   const portraitUrl = getMediaUrl(portrait)
+  const portraitSrcSet = getMediaSrcSet(portrait)
 
   return (
     <section aria-labelledby="about-title" className="content-section" id="about">
@@ -46,6 +47,7 @@ export function AboutSection({ about, dictionary }: AboutSectionProps) {
                   fill
                   sizes="(min-width: 1024px) 320px, 100vw"
                   src={portraitUrl}
+                  srcSet={portraitSrcSet}
                 />
               </div>
             </Reveal>

@@ -20,6 +20,15 @@ export const SectionsVisibility: GlobalConfig = {
     description:
       'Toggle which sections of the site are shown. Disabled sections are hidden from the homepage, the navigation, and (for Journal) its dedicated pages.',
   },
+  // Versioned like the content collections: edits autosave as a draft and only
+  // reach the site once published, so the homepage can't change mid-edit.
+  versions: {
+    drafts: {
+      autosave: { interval: 800 },
+      schedulePublish: true,
+    },
+    max: 20,
+  },
   access: {
     read: () => true,
   },
