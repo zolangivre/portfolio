@@ -51,3 +51,8 @@ node_modules/
 /playwright/.cache/
 
 scripts
+
+.codex
+.agents
+
+AGENTS.md
