@@ -125,9 +125,13 @@ export default buildConfig({
       },
       bucket: process.env.R2_BUCKET || '',
       enabled: Boolean(process.env.R2_ACCESS_KEY_ID),
-      // Uploads go straight from the browser to R2, bypassing the server so
-      // large files aren't capped by the platform's request body size limit.
-      clientUploads: true,
+      // Uploads go through the server (Vercel Functions now accept request
+      // bodies up to 100MB, so the old body-size justification for client
+      // uploads no longer applies). This also means sharp's resize/webp
+      // conversion (see Media.ts formatOptions) reliably runs on every
+      // upload instead of depending on a client-side PUT to R2 that could
+      // silently fail without Payload noticing.
+      clientUploads: false,
       config: {
         region: 'auto',
         endpoint: process.env.R2_ACCOUNT_ID
