@@ -1,8 +1,8 @@
-import Image from 'next/image'
 import Link from 'next/link'
 
+import { FadeImage } from '@/components/ui/FadeImage'
 import { TechChip } from '@/components/ui/TechChip'
-import { getMediaUrl } from '@/lib/media'
+import { getMediaSrcSet, getMediaUrl } from '@/lib/media'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
 import type { Project } from '@/payload-types'
@@ -15,7 +15,9 @@ type ProjectCardProps = {
 
 export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
   const imageUrl = getMediaUrl(project.coverImage)
+  const imageSrcSet = getMediaSrcSet(project.coverImage)
   const darkImageUrl = getMediaUrl(project.coverImageDark)
+  const darkImageSrcSet = getMediaSrcSet(project.coverImageDark)
   const imageAlt =
     typeof project.coverImage === 'object' && project.coverImage
       ? project.coverImage.alt
@@ -39,22 +41,24 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
         <Link className="flex flex-1 flex-col" href={detailHref}>
           <div className="relative aspect-16/10 overflow-hidden bg-surface">
             {imageUrl ? (
-              <Image
+              <FadeImage
                 alt={imageAlt}
                 className={`h-full w-full object-contain ${darkImageUrl ? ' dark:hidden' : ''}`}
                 height={640}
                 sizes="(min-width: 1024px) min(33vw, 375px), (min-width: 720px) 50vw, 100vw"
                 src={imageUrl}
+                srcSet={imageSrcSet}
                 width={960}
               />
             ) : null}
             {darkImageUrl ? (
-              <Image
+              <FadeImage
                 alt={imageAlt}
                 className="hidden h-full w-full object-contain dark:block"
                 height={640}
                 sizes="(min-width: 1024px) min(33vw, 375px), (min-width: 720px) 50vw, 100vw"
                 src={darkImageUrl}
+                srcSet={darkImageSrcSet}
                 width={960}
               />
             ) : null}

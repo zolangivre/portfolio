@@ -15,8 +15,28 @@ function revalidateSite() {
   }
 }
 
-export const revalidateCollectionAfterChange: CollectionAfterChangeHook = ({ doc }) => {
-  revalidateSite()
+/**
+ * Drafts never appear on the public site, so busting the route cache for them
+ * is pointless work. It matters because autosave fires afterChange roughly
+ * every 800ms while typing — without this guard, editing one paragraph would
+ * blow away the whole site's cache dozens of times.
+ *
+ * A doc going from published back to draft still needs a revalidation (it has
+ * to disappear from the site), so this only skips when the *previous* version
+ * was already a draft too.
+ */
+function shouldSkipRevalidation(doc: unknown, previousDoc: unknown): boolean {
+  const status = (doc as { _status?: string } | null)?._status
+  const previousStatus = (previousDoc as { _status?: string } | null)?._status
+
+  return status === 'draft' && previousStatus !== 'published'
+}
+
+export const revalidateCollectionAfterChange: CollectionAfterChangeHook = ({ doc, previousDoc }) => {
+  if (!shouldSkipRevalidation(doc, previousDoc)) {
+    revalidateSite()
+  }
+
   return doc
 }
 
@@ -25,7 +45,10 @@ export const revalidateCollectionAfterDelete: CollectionAfterDeleteHook = ({ doc
   return doc
 }
 
-export const revalidateGlobalAfterChange: GlobalAfterChangeHook = ({ doc }) => {
-  revalidateSite()
+export const revalidateGlobalAfterChange: GlobalAfterChangeHook = ({ doc, previousDoc }) => {
+  if (!shouldSkipRevalidation(doc, previousDoc)) {
+    revalidateSite()
+  }
+
   return doc
 }

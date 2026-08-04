@@ -1,9 +1,9 @@
-import Image from 'next/image'
 import Link from 'next/link'
 
+import { FadeImage } from '@/components/ui/FadeImage'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
-import { getMediaUrl } from '@/lib/media'
+import { getMediaSrcSet, getMediaUrl } from '@/lib/media'
 import type { Journal } from '@/payload-types'
 
 type JournalCardProps = {
@@ -38,12 +38,13 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
       >
         <div className="relative aspect-16/10 overflow-hidden bg-surface">
           {imageUrl ? (
-            <Image
+            <FadeImage
               alt={imageAlt}
               className="h-full w-full object-cover"
               height={640}
               sizes="(min-width: 1024px) min(33vw, 375px), (min-width: 720px) 50vw, 100vw"
               src={imageUrl}
+              srcSet={getMediaSrcSet(entry.coverImage)}
               width={960}
             />
           ) : null}

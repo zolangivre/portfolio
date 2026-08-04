@@ -4,45 +4,48 @@ import type { Project } from '@/payload-types'
 
 import { defaultLocale, type Locale } from '../locale'
 import { getPayloadClient } from '../payload'
+import { statusWhere } from './status'
 
 const DEFAULT_LIMIT = 12
 
-export const getAllProjects = cache(async (locale: Locale = defaultLocale): Promise<Project[]> => {
-  try {
-    const payload = await getPayloadClient()
-
-    const projects = await payload.find({
-      collection: 'projects',
-      depth: 2,
-      limit: DEFAULT_LIMIT,
-      locale,
-      sort: ['-featured', 'order', '-year', '-createdAt'],
-      where: {
-        visibility: { equals: 'public' },
-      },
-    })
-
-    return projects.docs
-  } catch (error) {
-    console.error('Failed to load projects from Payload.', error)
-
-    return []
-  }
-})
-
-export const getProject = cache(
-  async (slug: string, locale: Locale = defaultLocale): Promise<Project | null> => {
+export const getAllProjects = cache(
+  async (locale: Locale = defaultLocale, draft = false): Promise<Project[]> => {
     try {
       const payload = await getPayloadClient()
 
       const projects = await payload.find({
         collection: 'projects',
         depth: 2,
+        draft,
+        limit: DEFAULT_LIMIT,
+        locale,
+        sort: ['-featured', 'order', '-year', '-createdAt'],
+        where: statusWhere(draft),
+      })
+
+      return projects.docs
+    } catch (error) {
+      console.error('Failed to load projects from Payload.', error)
+
+      return []
+    }
+  },
+)
+
+export const getProject = cache(
+  async (slug: string, locale: Locale = defaultLocale, draft = false): Promise<Project | null> => {
+    try {
+      const payload = await getPayloadClient()
+
+      const projects = await payload.find({
+        collection: 'projects',
+        depth: 2,
+        draft,
         limit: 1,
         locale,
         where: {
           slug: { equals: slug },
-          visibility: { equals: 'public' },
+          ...statusWhere(draft),
         },
       })
 

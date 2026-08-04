@@ -1,3 +1,5 @@
+import { draftMode } from 'next/headers'
+
 import { AboutSection } from '@/components/sections/AboutSection'
 import { ContactSection } from '@/components/sections/ContactSection'
 import { EducationSection } from '@/components/sections/EducationSection'
@@ -37,6 +39,7 @@ export default async function HomePage({ params }: { params: Promise<PageParams>
     ? (rawLocale as Locale)
     : defaultLocale
   const dictionary = getDictionary(locale)
+  const { isEnabled: draft } = await draftMode()
 
   const [
     hero,
@@ -57,7 +60,7 @@ export default async function HomePage({ params }: { params: Promise<PageParams>
     getGlobalSettings(locale),
     getSectionsVisibility(locale),
     getSectionsContent(locale),
-    getAllProjects(locale),
+    getAllProjects(locale, draft),
     getExperiences(locale),
     getSkills(locale),
     getEducation(locale),

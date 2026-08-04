@@ -10,6 +10,15 @@ export const Contact: GlobalConfig = {
     group: 'Content',
     description: 'The homepage contact section.',
   },
+  // Versioned like the content collections: edits autosave as a draft and only
+  // reach the site once published, so the homepage can't change mid-edit.
+  versions: {
+    drafts: {
+      autosave: { interval: 800 },
+      schedulePublish: true,
+    },
+    max: 20,
+  },
   access: {
     read: () => true,
   },

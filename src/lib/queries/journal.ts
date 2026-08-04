@@ -4,22 +4,28 @@ import type { Journal } from '@/payload-types'
 
 import { defaultLocale, type Locale } from '../locale'
 import { getPayloadClient } from '../payload'
+import { statusWhere } from './status'
 
 const DEFAULT_LIMIT = 100
 
 export const getJournalEntries = cache(
-  async (locale: Locale = defaultLocale, category?: string): Promise<Journal[]> => {
+  async (
+    locale: Locale = defaultLocale,
+    category?: string,
+    draft = false,
+  ): Promise<Journal[]> => {
     try {
       const payload = await getPayloadClient()
 
       const entries = await payload.find({
         collection: 'journal',
         depth: 2,
+        draft,
         limit: DEFAULT_LIMIT,
         locale,
         sort: ['-featured', 'order', '-date'],
         where: {
-          visibility: { equals: 'public' },
+          ...statusWhere(draft),
           ...(category ? { category: { equals: category } } : {}),
         },
       })
@@ -34,18 +40,19 @@ export const getJournalEntries = cache(
 )
 
 export const getJournalEntry = cache(
-  async (slug: string, locale: Locale = defaultLocale): Promise<Journal | null> => {
+  async (slug: string, locale: Locale = defaultLocale, draft = false): Promise<Journal | null> => {
     try {
       const payload = await getPayloadClient()
 
       const entries = await payload.find({
         collection: 'journal',
         depth: 2,
+        draft,
         limit: 1,
         locale,
         where: {
           slug: { equals: slug },
-          visibility: { equals: 'public' },
+          ...statusWhere(draft),
         },
       })
 
