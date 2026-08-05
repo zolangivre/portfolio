@@ -17,7 +17,9 @@ import { getAllProjects, getProject, getSectionsVisibility } from '@/lib/queries
 import type { Media } from '@/payload-types'
 import { ReadingProgress } from '@/components/ui/ReadingProgress'
 
-export const revalidate = 60
+// Safety net only — see the note in the locale layout. Freshness comes from
+// the tag-based revalidation in Payload's afterChange hooks.
+export const revalidate = 86400
 
 type PageParams = { locale: string; slug: string }
 
