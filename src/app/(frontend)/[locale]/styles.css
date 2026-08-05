@@ -412,8 +412,10 @@ a {
  */
 .site-header::before {
   background: color-mix(in srgb, var(--bg) 100%, transparent);
+  /* Pas de `-webkit-backdrop-filter` manuel ici non plus — voir .yarl__portal :
+     la déclaration préfixée écrasait la standard et le flou ne s'appliquait
+     plus du tout dans Chrome. Lightning CSS préfixe selon les cibles. */
   backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
   content: '';
   inset: 0;
   opacity: 0;
@@ -1558,27 +1560,58 @@ h3 {
   opacity: 1;
 }
 
+/*
+ * The tint and blur belong on the portal — the element that fades — not on
+ * .yarl__container inside it. An ancestor with opacity < 1 (or a transform)
+ * becomes the backdrop root, so a backdrop-filter below it samples an empty
+ * backdrop and blurs nothing; the page only snaps into focus once the fade
+ * lands on opacity 1 and the root collapses. That read as the background
+ * arriving late. On the fading element itself the blur is sampled from the
+ * page throughout, so tint and blur come up together with the opacity.
+ *
+ * For the same reason the portal no longer carries the opening scale — a
+ * transform here would keep it a backdrop root permanently. The scale moved
+ * onto the slide, which sits above the blur.
+ */
 .yarl__portal {
-  transform: scale(0.96) !important;
-  transition:
-    opacity var(--yarl__fade_animation_duration, 0.25s)
-      var(--yarl__fade_animation_timing_function, ease),
-    transform var(--yarl__fade_animation_duration, 0.25s)
-      var(--yarl__fade_animation_timing_function, ease) !important;
+  /* Deux réglages liés : le rayon fait le flou, l'alpha de la teinte décide
+     de combien on en voit. À 82% il ne restait que 18% de la page visible et
+     le flou ne se lisait pas ; à 66% l'arrière-plan devient un vrai verre
+     dépoli tout en restant assez sombre pour que la photo passe devant. */
+  /* Surtout ne pas ajouter `-webkit-backdrop-filter` à la main : Lightning CSS
+     considère les deux comme la même propriété, la dernière écrase l'autre, et
+     on se retrouve avec la seule version préfixée — que Chrome ignore. Il
+     ajoute le préfixe tout seul selon les cibles browserslist. */
+  backdrop-filter: blur(28px) saturate(140%);
+  background-color: color-mix(in srgb, var(--yarl__color_backdrop) 66%, transparent);
+  transition: opacity var(--yarl__fade_animation_duration, 0.25s)
+    var(--yarl__fade_animation_timing_function, ease) !important;
+  /* Promoted once and never toggled, so the blur is captured a single time
+     (see .site-header::before for why that matters on this page). */
+  transform: translateZ(0);
 }
 
-.yarl__portal_open {
-  transform: scale(1) !important;
+.yarl__slide {
+  transform: scale(0.94);
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.yarl__portal_open .yarl__slide {
+  transform: scale(1);
 }
 
 /* The lightbox backdrop is near-black in both themes, so its buttons must
    always be light — var(--fg) would turn them dark in light mode. */
 :root {
   --yarl__color_backdrop: color-mix(in srgb, var(--bg) 4%, black 96%);
+  /* The tint lives on .yarl__portal instead — see above. */
+  --yarl__container_background_color: transparent;
   --yarl__color_button: rgba(255, 255, 255, 0.85);
   --yarl__color_button_active: var(--accent);
   --yarl__color_button_disabled: rgba(255, 255, 255, 0.35);
-  --yarl__button_filter: none;
+  /* Le fond laisse passer la page floutée, qui peut être claire par endroits :
+     une ombre douce garde les boutons blancs lisibles partout. */
+  --yarl__button_filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.55));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1586,11 +1619,10 @@ h3 {
     transition: none;
   }
 
-  .yarl__portal,
-  .yarl__portal_open {
-    transform: none !important;
-    transition: opacity var(--yarl__fade_animation_duration, 0.25s)
-      var(--yarl__fade_animation_timing_function, ease) !important;
+  .yarl__slide,
+  .yarl__portal_open .yarl__slide {
+    transform: none;
+    transition: none;
   }
 }
 }

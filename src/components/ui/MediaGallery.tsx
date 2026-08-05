@@ -91,13 +91,28 @@ export function MediaGallery({
       </div>
 
       <Lightbox
+        carousel={{
+          // Without intrinsic width/height on the <img>, the browser has no
+          // aspect ratio to reserve until the file loads, so it briefly sizes
+          // the slide to the default replaced-element box (~2:1, landscape).
+          // Landscape images barely move when the real size lands; portrait
+          // images snap from wide to tall, reading as a jump behind the
+          // opening animation instead of a smooth reveal.
+          imageProps: (slide) =>
+            slide.width && slide.height
+              ? { height: slide.height, width: slide.width }
+              : {},
+        }}
         animation={{
           easing: {
             fade: 'cubic-bezier(0.22,1,0.36,1)',
             navigation: 'cubic-bezier(0.22,1,0.36,1)',
             swipe: 'cubic-bezier(0.22,1,0.36,1)',
           },
-          fade: 350,
+          // The fade covers the backdrop, so keep it short — a long one reads
+          // as the background being late. The slower part of the opening is
+          // the slide's scale (see .yarl__slide), which happens over the top.
+          fade: 200,
           swipe: 450,
         }}
         close={() => setIndex(-1)}
@@ -105,13 +120,6 @@ export function MediaGallery({
         labels={{ Close: closeLabel, Next: nextLabel, Previous: previousLabel }}
         open={index >= 0}
         plugins={[Zoom, Video]}
-        styles={{
-          container: {
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            backgroundColor: 'color-mix(in srgb, var(--yarl__color_backdrop) 82%, transparent)',
-          },
-        }}
         slides={images.map((image) =>
           isVideo(image.mimeType)
             ? {
