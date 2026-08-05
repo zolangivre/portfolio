@@ -21,7 +21,11 @@ import { buildThemeStyle } from '@/lib/theme/palette'
 import '../../globals.css'
 import './styles.css'
 
-export const revalidate = 60
+// Payload's afterChange hooks revalidate by tag the moment content is saved,
+// so this interval is only a safety net for edits that bypass them (scripts,
+// `payload migrate`). It must stay a literal — Next requires the value to be
+// statically analyzable — and mirrors FALLBACK_REVALIDATE in `@/lib/cache`.
+export const revalidate = 86400
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 

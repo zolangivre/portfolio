@@ -12,7 +12,9 @@ import { lexicalToPlainText } from '@/lib/richText'
 import { resolveSectionCopy } from '@/lib/sectionCopy'
 import { ReadingProgress } from '@/components/ui/ReadingProgress'
 
-export const revalidate = 60
+// Safety net only — see the note in the locale layout. Freshness comes from
+// the tag-based revalidation in Payload's afterChange hooks.
+export const revalidate = 86400
 
 type PageParams = { locale: string }
 
