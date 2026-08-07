@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { revalidateCollectionAfterChange, revalidateCollectionAfterDelete } from '@/hooks/revalidateSite'
+import { withUniqueSuffix } from '@/lib/uploadFilename'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -14,6 +15,18 @@ export const Media: CollectionConfig = {
     read: () => true,
   },
   hooks: {
+    // Runs before Payload reads/resizes the incoming file, so the renamed
+    // file is what gets written to R2 *and* what ends up in `doc.filename` /
+    // `doc.url`. sharp's webp conversion still rewrites the extension after
+    // this, so the suffix sits on the base name where we want it.
+    beforeOperation: [
+      ({ operation, req }) => {
+        if (operation !== 'create' && operation !== 'update') return
+        if (!req.file?.name) return
+
+        req.file.name = withUniqueSuffix(req.file.name)
+      },
+    ],
     afterChange: [revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },
