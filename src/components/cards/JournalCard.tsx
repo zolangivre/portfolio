@@ -66,7 +66,7 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
             {entry.location ? ` · ${entry.location}` : null}
           </p>
           <h3 className="mt-2 text-xl font-semibold text-fg">{entry.title}</h3>
-          <p className="mt-3 flex-1 text-justify text-sm leading-7 text-fg-muted">
+          <p className="mt-3 flex-1 text-sm leading-7 text-fg-muted">
             {entry.shortDescription}
           </p>
 
