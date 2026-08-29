@@ -347,8 +347,13 @@ a {
 }
 
 
+/* `overflow-x: clip` plutôt que `hidden` : `hidden` créerait un conteneur de
+   défilement et casserait le `position: sticky` du header. `clip` se contente
+   de rogner, donc les débordements purement décoratifs (halos floutés, blobs)
+   ne peuvent plus créer de scroll horizontal / marge à droite sur mobile. */
 .site-shell {
   min-height: 100vh;
+  overflow-x: clip;
 }
 
 /*
@@ -1275,6 +1280,20 @@ h3 {
 
   .timeline-row::before {
     transition: none;
+  }
+}
+
+/* Sur mobile la colonne est trop étroite pour "payer" les 2.25rem réservés au
+   rail : on retire le fil et ses pastilles (orphelines sans le fil) et on rend
+   la largeur aux cartes. */
+@media (max-width: 720px) {
+  .timeline {
+    padding-left: 0;
+  }
+
+  .timeline-rail,
+  .timeline-row::before {
+    display: none;
   }
 }
 

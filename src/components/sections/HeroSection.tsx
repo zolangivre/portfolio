@@ -125,7 +125,7 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
           >
             <div
               aria-hidden="true"
-              className="absolute -inset-6 -z-10 rounded-[36px] bg-accent-soft opacity-0 blur-3xl"
+              className="absolute inset-x-0 -inset-y-6 -z-10 rounded-[36px] bg-accent-soft opacity-0 blur-3xl lg:-inset-6"
               style={{ animation: 'hero-photo-glow 6s ease-in-out 0.8s infinite' }}
             />
             <Image
