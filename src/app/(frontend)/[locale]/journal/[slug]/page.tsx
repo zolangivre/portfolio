@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { AdjacentNav } from '@/components/ui/AdjacentNav'
 import { AnimatedTitle } from '@/components/ui/AnimatedTitle'
 import { Container } from '@/components/ui/Container'
 import { Divider } from '@/components/ui/Divider'
@@ -10,6 +11,7 @@ import { MediaGallery } from '@/components/ui/MediaGallery'
 import { ReadingProgress } from '@/components/ui/ReadingProgress'
 import { Reveal } from '@/components/ui/Reveal'
 import { RichText } from '@/components/ui/RichText'
+import { getAdjacentBySlug } from '@/lib/adjacent'
 import { getDictionary } from '@/lib/i18n/dictionary'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
 import { getMediaUrl } from '@/lib/media'
@@ -92,6 +94,23 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
     (item): item is Media => typeof item === 'object' && item !== null,
   )
 
+  // Same query — and so the same order — as the journal index, so "previous"
+  // and "next" match the list the visitor came from.
+  const { previous, next } = getAdjacentBySlug(await getJournalEntries(locale), entry.slug)
+  const toAdjacentItem = (adjacent: typeof previous) =>
+    adjacent
+      ? {
+          href: `/${locale}/journal/${adjacent.slug}`,
+          imageAlt:
+            typeof adjacent.coverImage === 'object' && adjacent.coverImage
+              ? adjacent.coverImage.alt
+              : adjacent.title,
+          imageUrl: getMediaUrl(adjacent.coverImage),
+          meta: dateFormatters[locale].format(new Date(adjacent.date)),
+          title: adjacent.title,
+        }
+      : null
+
   return (
     <article className="content-section">
       <ReadingProgress />
@@ -167,6 +186,21 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
                 }))}
                 nextLabel={dictionary.lightbox.nextLabel}
                 previousLabel={dictionary.lightbox.previousLabel}
+              />
+            </Reveal>
+          </>
+        ) : null}
+
+        {previous || next ? (
+          <>
+            <Divider />
+            <Reveal>
+              <AdjacentNav
+                ariaLabel={dictionary.journal.adjacentNavAriaLabel}
+                next={toAdjacentItem(next)}
+                nextLabel={dictionary.journal.nextEntryLabel}
+                previous={toAdjacentItem(previous)}
+                previousLabel={dictionary.journal.previousEntryLabel}
               />
             </Reveal>
           </>

@@ -50,6 +50,14 @@ export function CustomCursor() {
     let frame = 0
     let lastTime = 0
     let hoverTarget: Element | null = null
+    // The magnet aims at the hovered element's centre. Reading that rect
+    // inside the loop meant a forced style recalculation + layout on every
+    // single frame the pointer sat on a link, button, input or card — which,
+    // given INTERACTIVE_SELECTOR, is most of this site. It's cached on
+    // pointerover instead and refreshed only when the geometry can actually
+    // have moved (scroll, resize). The loop below now only reads numbers.
+    let hoverRect: { centerX: number; centerY: number } | null = null
+    let rectFrame = 0
 
     // The loop only runs while the ring is still catching up to the pointer;
     // it is idle (no rAF scheduled) the rest of the time, so a stationary
@@ -61,14 +69,15 @@ export function CustomCursor() {
       let aimX = pointerX
       let aimY = pointerY
 
-      if (hoverTarget) {
-        const rect = hoverTarget.getBoundingClientRect()
-        const centerX = rect.left + rect.width / 2
-        const centerY = rect.top + rect.height / 2
-        aimX +=
-          Math.max(-MAGNET_MAX_PULL, Math.min(MAGNET_MAX_PULL, (centerX - pointerX) * MAGNET_STRENGTH))
-        aimY +=
-          Math.max(-MAGNET_MAX_PULL, Math.min(MAGNET_MAX_PULL, (centerY - pointerY) * MAGNET_STRENGTH))
+      if (hoverRect) {
+        aimX += Math.max(
+          -MAGNET_MAX_PULL,
+          Math.min(MAGNET_MAX_PULL, (hoverRect.centerX - pointerX) * MAGNET_STRENGTH),
+        )
+        aimY += Math.max(
+          -MAGNET_MAX_PULL,
+          Math.min(MAGNET_MAX_PULL, (hoverRect.centerY - pointerY) * MAGNET_STRENGTH),
+        )
       }
 
       const ease = 1 - Math.exp(-RING_SPEED * dt)
@@ -113,6 +122,34 @@ export function CustomCursor() {
       }
     }
 
+    // The one place that touches layout. Called on pointerover, and at most
+    // once per frame while scrolling/resizing with something hovered.
+    function measureHoverTarget() {
+      if (!hoverTarget) {
+        hoverRect = null
+
+        return
+      }
+
+      const rect = hoverTarget.getBoundingClientRect()
+      hoverRect = {
+        centerX: rect.left + rect.width / 2,
+        centerY: rect.top + rect.height / 2,
+      }
+    }
+
+    function requestMeasure() {
+      if (hoverTarget === null || rectFrame !== 0) {
+        return
+      }
+
+      rectFrame = requestAnimationFrame(() => {
+        rectFrame = 0
+        measureHoverTarget()
+        requestRender()
+      })
+    }
+
     function show() {
       if (!visible) {
         visible = true
@@ -140,6 +177,7 @@ export function CustomCursor() {
         const interactive = target.closest(INTERACTIVE_SELECTOR)
         if (interactive) {
           hoverTarget = interactive
+          measureHoverTarget()
           ring!.classList.add('is-hovering')
           dot!.classList.add('is-hovering')
 
@@ -159,6 +197,7 @@ export function CustomCursor() {
       const target = event.target
       if (target instanceof Element && target.closest(INTERACTIVE_SELECTOR)) {
         hoverTarget = null
+        hoverRect = null
         ring!.classList.remove('is-hovering')
         dot!.classList.remove('is-hovering')
         ring!.style.removeProperty('--cursor-hover-scale')
@@ -190,6 +229,8 @@ export function CustomCursor() {
     window.addEventListener('pointerout', handlePointerOut, { passive: true })
     window.addEventListener('pointerdown', handlePointerDown, { passive: true })
     window.addEventListener('pointerup', handlePointerUp, { passive: true })
+    window.addEventListener('scroll', requestMeasure, { passive: true })
+    window.addEventListener('resize', requestMeasure, { passive: true })
     document.addEventListener('mouseout', handleLeaveWindow)
 
     return () => {
@@ -197,11 +238,16 @@ export function CustomCursor() {
       if (frame !== 0) {
         cancelAnimationFrame(frame)
       }
+      if (rectFrame !== 0) {
+        cancelAnimationFrame(rectFrame)
+      }
       window.removeEventListener('pointermove', handlePointerMove)
       window.removeEventListener('pointerover', handlePointerOver)
       window.removeEventListener('pointerout', handlePointerOut)
       window.removeEventListener('pointerdown', handlePointerDown)
       window.removeEventListener('pointerup', handlePointerUp)
+      window.removeEventListener('scroll', requestMeasure)
+      window.removeEventListener('resize', requestMeasure)
       document.removeEventListener('mouseout', handleLeaveWindow)
     }
   }, [])

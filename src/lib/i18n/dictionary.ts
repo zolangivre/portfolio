@@ -31,6 +31,9 @@ export interface Dictionary {
     viewDetailsLabel: string
     galleryAriaLabelSuffix: string
     backLabel: string
+    adjacentNavAriaLabel: string
+    previousProjectLabel: string
+    nextProjectLabel: string
   }
   experience: {
     eyebrow: string
@@ -82,6 +85,9 @@ export interface Dictionary {
     allCategoriesLabel: string
     readMoreLabel: string
     backLabel: string
+    adjacentNavAriaLabel: string
+    previousEntryLabel: string
+    nextEntryLabel: string
   }
   lightbox: {
     closeLabel: string
@@ -127,6 +133,9 @@ const dictionaries: Record<Locale, Dictionary> = {
       viewDetailsLabel: 'Voir le projet →',
       galleryAriaLabelSuffix: 'galerie',
       backLabel: '← Retour aux projets',
+      adjacentNavAriaLabel: 'Navigation entre les projets',
+      previousProjectLabel: 'Projet précédent',
+      nextProjectLabel: 'Projet suivant',
     },
     experience: {
       eyebrow: 'Parcours',
@@ -185,6 +194,9 @@ const dictionaries: Record<Locale, Dictionary> = {
       allCategoriesLabel: 'Tout',
       readMoreLabel: 'Lire l’article',
       backLabel: '← Retour au journal',
+      adjacentNavAriaLabel: 'Navigation entre les entrées du journal',
+      previousEntryLabel: 'Entrée précédente',
+      nextEntryLabel: 'Entrée suivante',
     },
     lightbox: {
       closeLabel: 'Fermer',
@@ -228,6 +240,9 @@ const dictionaries: Record<Locale, Dictionary> = {
       viewDetailsLabel: 'View project →',
       galleryAriaLabelSuffix: 'gallery',
       backLabel: '← Back to projects',
+      adjacentNavAriaLabel: 'Project navigation',
+      previousProjectLabel: 'Previous project',
+      nextProjectLabel: 'Next project',
     },
     experience: {
       eyebrow: 'Background',
@@ -285,6 +300,9 @@ const dictionaries: Record<Locale, Dictionary> = {
       allCategoriesLabel: 'All',
       readMoreLabel: 'Read entry',
       backLabel: '← Back to journal',
+      adjacentNavAriaLabel: 'Journal navigation',
+      previousEntryLabel: 'Previous entry',
+      nextEntryLabel: 'Next entry',
     },
     lightbox: {
       closeLabel: 'Close',

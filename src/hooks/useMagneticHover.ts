@@ -30,6 +30,34 @@ export function useMagneticHover<T extends HTMLElement>(strength = 0.35, maxOffs
     let currentX = 0
     let currentY = 0
     let frame = 0
+    // This used to call getBoundingClientRect() inside the pointermove
+    // handler, i.e. a forced layout per pointer event — and pointermove
+    // fires well above the frame rate on a trackpad or a high-Hz mouse, so
+    // it was several forced layouts per frame on the hero's CTAs. The
+    // element's own transform never changes its layout box, so the centre
+    // only has to be measured when the pointer arrives, and re-measured if
+    // the page scrolls or resizes while it's still hovered.
+    let centerX = 0
+    let centerY = 0
+    let hovered = false
+    let measureFrame = 0
+
+    function measure() {
+      const rect = el!.getBoundingClientRect()
+      centerX = rect.left + rect.width / 2
+      centerY = rect.top + rect.height / 2
+    }
+
+    function requestMeasure() {
+      if (!hovered || measureFrame !== 0) {
+        return
+      }
+
+      measureFrame = requestAnimationFrame(() => {
+        measureFrame = 0
+        measure()
+      })
+    }
 
     function tick() {
       currentX += (targetX - currentX) * 0.2
@@ -43,13 +71,23 @@ export function useMagneticHover<T extends HTMLElement>(strength = 0.35, maxOffs
       }
     }
 
-    function handlePointerMove(event: PointerEvent) {
-      const rect = el!.getBoundingClientRect()
-      const relX = event.clientX - (rect.left + rect.width / 2)
-      const relY = event.clientY - (rect.top + rect.height / 2)
+    function handlePointerEnter() {
+      hovered = true
+      measure()
+    }
 
-      targetX = Math.max(-maxOffset, Math.min(maxOffset, relX * strength))
-      targetY = Math.max(-maxOffset, Math.min(maxOffset, relY * strength))
+    function handlePointerMove(event: PointerEvent) {
+      // pointerenter normally runs first, so this handler is pure
+      // arithmetic. The exception is a pointer already sitting on the
+      // element when the effect mounts, which gets no enter event — without
+      // this the first move would measure against (0, 0) and snap the
+      // button straight to maxOffset.
+      if (!hovered) {
+        handlePointerEnter()
+      }
+
+      targetX = Math.max(-maxOffset, Math.min(maxOffset, (event.clientX - centerX) * strength))
+      targetY = Math.max(-maxOffset, Math.min(maxOffset, (event.clientY - centerY) * strength))
 
       if (frame === 0) {
         frame = requestAnimationFrame(tick)
@@ -57,6 +95,7 @@ export function useMagneticHover<T extends HTMLElement>(strength = 0.35, maxOffs
     }
 
     function handlePointerLeave() {
+      hovered = false
       targetX = 0
       targetY = 0
 
@@ -66,15 +105,24 @@ export function useMagneticHover<T extends HTMLElement>(strength = 0.35, maxOffs
     }
 
     el.style.willChange = 'transform'
-    el.addEventListener('pointermove', handlePointerMove)
-    el.addEventListener('pointerleave', handlePointerLeave)
+    el.addEventListener('pointerenter', handlePointerEnter, { passive: true })
+    el.addEventListener('pointermove', handlePointerMove, { passive: true })
+    el.addEventListener('pointerleave', handlePointerLeave, { passive: true })
+    window.addEventListener('scroll', requestMeasure, { passive: true })
+    window.addEventListener('resize', requestMeasure, { passive: true })
 
     return () => {
+      el.removeEventListener('pointerenter', handlePointerEnter)
       el.removeEventListener('pointermove', handlePointerMove)
       el.removeEventListener('pointerleave', handlePointerLeave)
+      window.removeEventListener('scroll', requestMeasure)
+      window.removeEventListener('resize', requestMeasure)
 
       if (frame !== 0) {
         cancelAnimationFrame(frame)
+      }
+      if (measureFrame !== 0) {
+        cancelAnimationFrame(measureFrame)
       }
 
       el.style.transform = ''

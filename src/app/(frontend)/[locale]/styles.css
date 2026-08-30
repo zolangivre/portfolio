@@ -125,7 +125,11 @@ a {
   filter: blur(90px);
   opacity: 0.34;
   position: absolute;
-  will-change: transform, border-radius;
+  /* transform only — border-radius is static since the "breathing shape"
+     was removed (see the keyframes note below). A will-change on a
+     property that neither animates nor composites is a permanent hint the
+     compositor has to honour for nothing. */
+  will-change: transform;
 }
 
 :root.dark .ambient-blob {
@@ -223,14 +227,70 @@ a {
   opacity: 0.09;
 }
 
+/*
+ * Touch devices get the still version of the decor.
+ *
+ * Only the pointer parallax was gated on `(pointer: fine)` (in
+ * AmbientBackground.tsx) — these CSS animations kept running on phones,
+ * where they dominate the scroll frame budget. Measured while scrolling the
+ * home page at 20x CPU throttling on a 412px viewport: median frame 24.2ms
+ * as-is, 17.6ms with the grain removed, 16.5ms with the whole layer gone.
+ *
+ * The grain is almost all of it: `mix-blend-mode` over the full viewport
+ * makes the compositor re-blend everything underneath on every frame
+ * anything below it repaints. The mesh is the thing that keeps making it
+ * repaint — `background-position` can't be composited, so each step of its
+ * 90s loop repaints a full-viewport, three-gradient layer, forever, on
+ * every page.
+ *
+ * `(pointer: coarse), (pointer: none)` rather than `not (pointer: fine)`:
+ * the comma form is the plainly-supported spelling everywhere `pointer`
+ * exists, and a browser that doesn't know the feature at all just keeps
+ * today's behaviour instead of dropping the block.
+ */
+@media (pointer: coarse), (pointer: none) {
+  .ambient-grain {
+    display: none;
+  }
+
+  .ambient-mesh {
+    animation: none;
+  }
+
+  /* The blobs stay — they're the signature of this background, and at phone
+     widths they're cheap (46vw is ~190px there). Only the blur radius comes
+     down: a 90px blur is far wider than the shape it's softening at that
+     size, so 55px looks the same and rasterizes a much smaller kernel. */
+  .ambient-blob {
+    filter: blur(55px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ambient-parallax {
     transition: none;
   }
 }
 
+/*
+ * `cursor` is an inherited property, so setting it once on the root hides
+ * the OS cursor for the whole document. This used to be `:root * {}`, whose
+ * universal rightmost selector has to be evaluated against every element on
+ * every style recalculation — and with the custom cursor on, recalcs happen
+ * constantly. Only the elements that set a cursor of their own need to be
+ * named: the UA stylesheet's (links, form controls, summary) and ours,
+ * which are all <button> (.language-switcher-item, .theme-toggle-item,
+ * .nav-toggle, .category-filter-item, .media-gallery-item) plus Tailwind's
+ * disabled:cursor-not-allowed on the contact form's submit button.
+ */
 :root.has-custom-cursor,
-:root.has-custom-cursor * {
+:root.has-custom-cursor a,
+:root.has-custom-cursor button,
+:root.has-custom-cursor input,
+:root.has-custom-cursor textarea,
+:root.has-custom-cursor select,
+:root.has-custom-cursor summary,
+:root.has-custom-cursor [contenteditable] {
   cursor: none;
 }
 
@@ -648,7 +708,10 @@ a {
   padding: 0.3rem 0.65rem;
   position: relative;
   text-decoration: none;
-  transition: all 180ms ease;
+  /* `color` is the only thing these ever change (see :hover and
+     [data-active] below) — `all` made the engine watch every animatable
+     property, filters and box-shadows included, for nothing. */
+  transition: color 180ms ease;
 }
 
 .theme-toggle-item {
@@ -1448,7 +1511,12 @@ h3 {
   font-weight: 600;
   letter-spacing: 0.04em;
   padding: 0.5rem 1.1rem;
-  transition: all 180ms ease;
+  /* Same as the language/theme items: list what :hover and [data-active]
+     below actually change rather than transitioning `all`. */
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
 }
 
 .category-filter-item:hover {
