@@ -16,6 +16,7 @@ import * as migration_20260718_161700_add_cursor_effect from './20260718_161700_
 import * as migration_20260722_150000_add_project_visibility from './20260722_150000_add_project_visibility';
 import * as migration_20260723_120000_skills_remove_level_add_url from './20260723_120000_skills_remove_level_add_url';
 import * as migration_20260727_180000_remove_media_sizes from './20260727_180000_remove_media_sizes';
+import * as migration_20260829_120000_add_hero_resume_cta from './20260829_120000_add_hero_resume_cta';
 
 export const migrations = [
   {
@@ -107,5 +108,10 @@ export const migrations = [
     up: migration_20260727_180000_remove_media_sizes.up,
     down: migration_20260727_180000_remove_media_sizes.down,
     name: '20260727_180000_remove_media_sizes'
+  },
+  {
+    up: migration_20260829_120000_add_hero_resume_cta.up,
+    down: migration_20260829_120000_add_hero_resume_cta.down,
+    name: '20260829_120000_add_hero_resume_cta'
   },
 ];

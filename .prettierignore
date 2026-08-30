@@ -1,0 +1,4 @@
+# Rewritten by `payload migrate:create` in its own style (semicolons, no
+# trailing commas). Formatting it to the repo's Prettier style just gets
+# reverted by the next generated migration.
+src/migrations/index.ts

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { AdjacentNav } from '@/components/ui/AdjacentNav'
 import { AnimatedTitle } from '@/components/ui/AnimatedTitle'
 import { TechChip } from '@/components/ui/TechChip'
 import { Container } from '@/components/ui/Container'
@@ -10,6 +11,7 @@ import { FadeImage } from '@/components/ui/FadeImage'
 import { MediaGallery } from '@/components/ui/MediaGallery'
 import { Reveal } from '@/components/ui/Reveal'
 import { RichText } from '@/components/ui/RichText'
+import { getAdjacentBySlug } from '@/lib/adjacent'
 import { getDictionary } from '@/lib/i18n/dictionary'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
 import { getMediaUrl } from '@/lib/media'
@@ -93,6 +95,29 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
   const gallery = (project.gallery ?? []).filter(
     (item): item is Media => typeof item === 'object' && item !== null,
   )
+
+  // Same query — and so the same order — as the projects section, so
+  // "previous" and "next" match the list the visitor came from.
+  const { previous, next } = getAdjacentBySlug(await getAllProjects(locale), project.slug)
+  const toAdjacentItem = (adjacent: typeof previous) => {
+    if (!adjacent) {
+      return null
+    }
+
+    const adjacentCategory =
+      typeof adjacent.category === 'object' && adjacent.category ? adjacent.category.name : null
+
+    return {
+      href: `/${locale}/projects/${adjacent.slug}`,
+      imageAlt:
+        typeof adjacent.coverImage === 'object' && adjacent.coverImage
+          ? adjacent.coverImage.alt
+          : adjacent.title,
+      imageUrl: getMediaUrl(adjacent.coverImage) ?? getMediaUrl(adjacent.coverImageDark),
+      meta: [adjacentCategory, adjacent.year].filter(Boolean).join(' · ') || null,
+      title: adjacent.title,
+    }
+  }
 
   return (
     <article className="content-section">
@@ -218,6 +243,22 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                 }))}
                 nextLabel={dictionary.lightbox.nextLabel}
                 previousLabel={dictionary.lightbox.previousLabel}
+              />
+            </Reveal>
+          </>
+        ) : null}
+
+        {previous || next ? (
+          <>
+            <Divider />
+            <Reveal>
+              <AdjacentNav
+                ariaLabel={dictionary.projects.adjacentNavAriaLabel}
+                imageFit="contain"
+                next={toAdjacentItem(next)}
+                nextLabel={dictionary.projects.nextProjectLabel}
+                previous={toAdjacentItem(previous)}
+                previousLabel={dictionary.projects.previousProjectLabel}
               />
             </Reveal>
           </>
