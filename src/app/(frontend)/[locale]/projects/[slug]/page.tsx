@@ -113,7 +113,8 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
         typeof adjacent.coverImage === 'object' && adjacent.coverImage
           ? adjacent.coverImage.alt
           : adjacent.title,
-      imageUrl: getMediaUrl(adjacent.coverImage) ?? getMediaUrl(adjacent.coverImageDark),
+      imageUrl: getMediaUrl(adjacent.coverImage) ?? null,
+      darkImageUrl: getMediaUrl(adjacent.coverImageDark) ?? null,
       meta: [adjacentCategory, adjacent.year].filter(Boolean).join(' · ') || null,
       title: adjacent.title,
     }

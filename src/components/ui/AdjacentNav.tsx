@@ -5,6 +5,7 @@ export type AdjacentItem = {
   href: string
   imageAlt?: string
   imageUrl?: string | null
+  darkImageUrl?: string | null
   meta?: string | null
   title: string
 }
@@ -49,14 +50,26 @@ function AdjacentLink({ direction, imageFit, item, label }: AdjacentLinkProps) {
               imageFit === 'contain' ? ' p-2' : ''
             }`}
           >
-            <Image
-              alt={item.imageAlt ?? ''}
-              className={`h-full w-full ${imageFit === 'contain' ? 'object-contain' : 'object-cover'}`}
-              height={128}
-              sizes="64px"
-              src={item.imageUrl}
-              width={128}
-            />
+            {item.imageUrl && (
+              <Image
+                alt={item.imageAlt ?? ''}
+                className={`h-full w-full ${imageFit === 'contain' ? 'object-contain' : 'object-cover'} ${item.darkImageUrl ? ' dark:hidden' : ''}`}
+                height={128}
+                sizes="64px"
+                src={item.imageUrl}
+                width={128}
+              />
+            )}
+            {item.darkImageUrl && (
+              <Image
+                alt={item.imageAlt ?? ''}
+                className={`h-full w-full ${imageFit === 'contain' ? 'object-contain' : 'object-cover'} dark:block`}
+                height={128}
+                sizes="64px"
+                src={item.darkImageUrl}
+                width={128}
+              />
+            )}
           </span>
         ) : null}
 
