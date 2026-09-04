@@ -67,6 +67,7 @@ export function ContactForm({ dictionary, successMessage }: ContactFormProps) {
               <span className="mb-2 block">{dictionary.contact.formNameLabel}</span>
               <input
                 className="w-full rounded-full border border-border bg-surface px-4 py-3 text-sm text-fg outline-none transition focus:border-accent-soft-border"
+                maxLength={120}
                 name="name"
                 placeholder={dictionary.contact.formNamePlaceholder}
                 required
@@ -76,6 +77,7 @@ export function ContactForm({ dictionary, successMessage }: ContactFormProps) {
               <span className="mb-2 block">{dictionary.contact.formEmailLabel}</span>
               <input
                 className="w-full rounded-full border border-border bg-surface px-4 py-3 text-sm text-fg outline-none transition focus:border-accent-soft-border"
+                maxLength={254}
                 name="email"
                 placeholder={dictionary.contact.formEmailPlaceholder}
                 required
@@ -87,6 +89,7 @@ export function ContactForm({ dictionary, successMessage }: ContactFormProps) {
             <span className="mb-2 block">{dictionary.contact.formMessageLabel}</span>
             <textarea
               className="min-h-36 w-full rounded-4xl border border-border bg-surface px-4 py-3 text-sm text-fg outline-none transition focus:border-accent-soft-border"
+              maxLength={5000}
               name="message"
               placeholder={dictionary.contact.formMessagePlaceholder}
               required

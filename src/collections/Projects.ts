@@ -5,6 +5,7 @@ import {
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
+import { readPublicOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 
 export const Projects: CollectionConfig = {
@@ -31,7 +32,7 @@ export const Projects: CollectionConfig = {
   },
   defaultSort: 'order',
   access: {
-    read: () => true,
+    read: readPublicOrAuthenticated,
   },
   hooks: {
     afterChange: [revalidateCollectionAfterChange],

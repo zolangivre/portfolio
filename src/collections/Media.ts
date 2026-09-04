@@ -20,7 +20,12 @@ export const Media: CollectionConfig = {
     defaultColumns: ['preview', 'filename', 'alt', 'updatedAt'],
   },
   access: {
-    read: () => true,
+    // The files themselves are served straight from the R2 custom domain and
+    // stay publicly fetchable — this only closes `/api/media`, which otherwise
+    // enumerates every upload (including the images attached to private
+    // projects) to anyone who asks. The site reads media through the Local
+    // API, which bypasses access control, so pages are unaffected.
+    read: ({ req }) => Boolean(req.user),
   },
   hooks: {
     // Runs before Payload reads/resizes the incoming file, so the renamed
