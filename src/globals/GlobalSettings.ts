@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { adminGroups } from '@/lib/adminLabels'
 
 import { palette } from '../lib/theme/palette'
 
@@ -8,10 +9,11 @@ const colorOptions = palette.map((color) => ({ label: color.label, value: color.
 
 export const GlobalSettings: GlobalConfig = {
   slug: 'settings',
-  label: 'Global settings',
+  label: 'Réglages généraux',
   admin: {
-    group: 'Site',
-    description: 'Identity, branding, contact, theme and default SEO used across the whole site.',
+    group: adminGroups.site,
+    description:
+      'Identité, image de marque, contact, thème et SEO par défaut, utilisés sur tout le site.',
   },
   access: {
     read: () => true,
@@ -23,14 +25,14 @@ export const GlobalSettings: GlobalConfig = {
     {
       name: 'name',
       type: 'text',
-      label: 'Name',
+      label: 'Nom',
       required: true,
       defaultValue: 'Alex Porter',
     },
     {
       name: 'profession',
       type: 'text',
-      label: 'Profession',
+      label: 'Métier',
       localized: true,
       defaultValue: 'Full-stack developer',
     },
@@ -38,32 +40,32 @@ export const GlobalSettings: GlobalConfig = {
       name: 'photo',
       type: 'upload',
       relationTo: 'media',
-      label: 'Profile photo',
+      label: 'Photo de profil',
     },
     {
       name: 'logo',
       type: 'upload',
       relationTo: 'media',
-      label: 'Site logo',
+      label: 'Logo du site',
     },
     {
       name: 'theme',
       type: 'group',
-      label: 'Theme',
+      label: 'Thème',
       admin: {
         description:
-          'Controls the color used for buttons, links, badges, focus states and accents across the whole site.',
+          'Définit la couleur utilisée pour les boutons, les liens, les badges, les états de focus et les accents sur tout le site.',
       },
       fields: [
         {
           name: 'primaryColor',
           type: 'select',
-          label: 'Primary color',
+          label: 'Couleur principale',
           required: true,
           defaultValue: 'orange',
           options: colorOptions,
           admin: {
-            description: 'The main accent color, used everywhere across the site.',
+            description: 'La couleur d’accent principale, utilisée partout sur le site.',
             components: {
               Field: '/components/admin/ColorSwatchSelect#ColorSwatchSelect',
             },
@@ -72,11 +74,11 @@ export const GlobalSettings: GlobalConfig = {
         {
           name: 'accentColor',
           type: 'select',
-          label: 'Accent color (optional)',
+          label: 'Couleur secondaire (facultative)',
           options: colorOptions,
           admin: {
             description:
-              'Optional secondary color for a subtle two-tone highlight in the background. Falls back to the primary color when left empty.',
+              'Couleur secondaire facultative, pour un léger dégradé bicolore en arrière-plan. Si elle est vide, la couleur principale est utilisée.',
             components: {
               Field: '/components/admin/ColorSwatchSelect#ColorSwatchSelect',
             },
@@ -85,26 +87,32 @@ export const GlobalSettings: GlobalConfig = {
         {
           name: 'defaultTheme',
           type: 'select',
-          label: 'Default theme',
+          label: 'Thème par défaut',
           defaultValue: 'system',
           options: [
-            { label: 'Light', value: 'light' },
-            { label: 'Dark', value: 'dark' },
-            { label: 'Follow system', value: 'system' },
+            { label: 'Clair', value: 'light' },
+            { label: 'Sombre', value: 'dark' },
+            { label: 'Suivre le système', value: 'system' },
           ],
         },
         {
           name: 'cursorEffect',
           type: 'select',
-          label: 'Cursor effect',
+          label: 'Effet de curseur',
           defaultValue: 'ring',
           options: [
-            { label: 'Ring (dot + trailing ring)', value: 'ring' },
-            { label: 'Trail (comet of fading dots)', value: 'trail' },
+            {
+              label: 'Anneau (point + anneau qui suit)',
+              value: 'ring',
+            },
+            {
+              label: 'Traînée (comète de points qui s’estompent)',
+              value: 'trail',
+            },
           ],
           admin: {
             description:
-              'Custom cursor shown on desktop. Automatically disabled on touch devices and for users who prefer reduced motion.',
+              'Curseur personnalisé affiché sur ordinateur. Automatiquement désactivé sur les écrans tactiles et pour les personnes qui préfèrent réduire les animations.',
           },
         },
       ],
@@ -112,17 +120,22 @@ export const GlobalSettings: GlobalConfig = {
     {
       name: 'contactEmail',
       type: 'email',
-      label: 'Contact email',
+      label: 'E-mail de contact',
       defaultValue: 'hello@yourdomain.com',
     },
     {
       name: 'socialLinks',
       type: 'array',
-      label: 'Social links',
+      label: 'Réseaux sociaux',
+      labels: {
+        singular: 'Réseau social',
+        plural: 'Réseaux sociaux',
+      },
       fields: [
         {
           name: 'platform',
           type: 'select',
+          label: 'Plateforme',
           required: true,
           options: [
             { label: 'GitHub', value: 'github' },
@@ -130,22 +143,24 @@ export const GlobalSettings: GlobalConfig = {
             { label: 'X / Twitter', value: 'x' },
             { label: 'Instagram', value: 'instagram' },
             { label: 'Dribbble', value: 'dribbble' },
-            { label: 'Other', value: 'other' },
+            { label: 'Autre', value: 'other' },
           ],
         },
         {
           name: 'url',
           type: 'text',
+          label: 'Lien',
           required: true,
         },
         {
           name: 'icon',
           type: 'upload',
           relationTo: 'media',
+          label: 'Icône',
           required: false,
           admin: {
             description:
-              'Optional custom icon. Falls back to a built-in icon for the selected platform when left empty.',
+              'Icône personnalisée facultative. Si elle est vide, l’icône intégrée de la plateforme choisie est utilisée.',
           },
         },
       ],
@@ -153,21 +168,21 @@ export const GlobalSettings: GlobalConfig = {
     {
       name: 'seo',
       type: 'group',
-      label: 'Default SEO',
+      label: 'SEO par défaut',
       admin: {
-        description: 'Fallback metadata used when a page does not define its own.',
+        description: 'Métadonnées de secours, utilisées quand une page ne définit pas les siennes.',
       },
       fields: [
         {
           name: 'defaultTitle',
           type: 'text',
-          label: 'Default title',
+          label: 'Titre par défaut',
           defaultValue: 'Developer Portfolio',
         },
         {
           name: 'defaultDescription',
           type: 'textarea',
-          label: 'Default description',
+          label: 'Description par défaut',
           localized: true,
           defaultValue: 'Professional developer portfolio powered by Payload CMS and Next.js.',
         },
@@ -175,7 +190,7 @@ export const GlobalSettings: GlobalConfig = {
           name: 'defaultImage',
           type: 'upload',
           relationTo: 'media',
-          label: 'Default OG image',
+          label: 'Image OG par défaut',
         },
       ],
     },

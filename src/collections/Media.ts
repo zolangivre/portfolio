@@ -1,13 +1,21 @@
 import type { CollectionConfig } from 'payload'
 
-import { revalidateCollectionAfterChange, revalidateCollectionAfterDelete } from '@/hooks/revalidateSite'
+import {
+  revalidateCollectionAfterChange,
+  revalidateCollectionAfterDelete,
+} from '@/hooks/revalidateSite'
+import { adminGroups } from '@/lib/adminLabels'
 import { withUniqueSuffix } from '@/lib/uploadFilename'
 
 export const Media: CollectionConfig = {
   slug: 'media',
+  labels: {
+    singular: 'Média',
+    plural: 'Médias',
+  },
   admin: {
-    group: 'Site',
-    description: 'Reusable images, logos and videos used across the site.',
+    group: adminGroups.site,
+    description: 'Images, logos et vidéos réutilisables un peu partout sur le site.',
     useAsTitle: 'alt',
     defaultColumns: ['preview', 'filename', 'alt', 'updatedAt'],
   },
@@ -34,6 +42,7 @@ export const Media: CollectionConfig = {
     {
       name: 'alt',
       type: 'text',
+      label: 'Texte alternatif',
       required: true,
     },
   ],

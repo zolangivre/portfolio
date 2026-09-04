@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { adminGroups } from '@/lib/adminLabels'
+
 export const Messages: CollectionConfig = {
   slug: 'messages',
   labels: {
@@ -7,8 +9,8 @@ export const Messages: CollectionConfig = {
     plural: 'Messages',
   },
   admin: {
-    group: 'Contact',
-    description: 'Submissions from the public contact form.',
+    group: adminGroups.contact,
+    description: 'Messages envoyés depuis le formulaire de contact du site.',
     defaultColumns: ['name', 'email', 'read', 'createdAt'],
     useAsTitle: 'name',
   },
@@ -22,21 +24,25 @@ export const Messages: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
+      label: 'Nom',
       required: true,
     },
     {
       name: 'email',
       type: 'email',
+      label: 'E-mail',
       required: true,
     },
     {
       name: 'message',
       type: 'textarea',
+      label: 'Message',
       required: true,
     },
     {
       name: 'read',
       type: 'checkbox',
+      label: 'Lu',
       defaultValue: false,
       index: true,
     },

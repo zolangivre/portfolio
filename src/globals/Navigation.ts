@@ -1,13 +1,14 @@
 import type { GlobalConfig } from 'payload'
 
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { adminGroups } from '@/lib/adminLabels'
 
 export const Navigation: GlobalConfig = {
   slug: 'navigation',
   label: 'Navigation',
   admin: {
-    group: 'Site',
-    description: 'Primary header navigation links.',
+    group: adminGroups.site,
+    description: 'Liens de navigation principaux, dans l’en-tête.',
   },
   access: {
     read: () => true,
@@ -19,17 +20,23 @@ export const Navigation: GlobalConfig = {
     {
       name: 'items',
       type: 'array',
-      label: 'Links',
+      label: 'Liens',
+      labels: {
+        singular: 'Lien',
+        plural: 'Liens',
+      },
       fields: [
         {
           name: 'label',
           type: 'text',
+          label: 'Libellé',
           required: true,
           localized: true,
         },
         {
           name: 'href',
           type: 'text',
+          label: 'Lien',
           required: true,
           admin: {
             placeholder: '#projects',

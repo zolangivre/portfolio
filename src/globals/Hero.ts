@@ -1,13 +1,14 @@
 import type { GlobalConfig } from 'payload'
 
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { adminGroups } from '@/lib/adminLabels'
 
 export const Hero: GlobalConfig = {
   slug: 'hero',
-  label: 'Hero',
+  label: 'Bannière (hero)',
   admin: {
-    group: 'Content',
-    description: 'The homepage hero section.',
+    group: adminGroups.content,
+    description: 'La bannière d’accueil, en haut de la page d’accueil.',
   },
   access: {
     read: () => true,
@@ -19,14 +20,14 @@ export const Hero: GlobalConfig = {
     {
       name: 'eyebrow',
       type: 'text',
-      label: 'Eyebrow / role',
+      label: 'Surtitre / rôle',
       localized: true,
       defaultValue: 'Full-stack developer',
     },
     {
       name: 'title',
       type: 'text',
-      label: 'Title',
+      label: 'Titre',
       required: true,
       localized: true,
       defaultValue: 'Building polished digital products with calm, modern engineering.',
@@ -40,12 +41,17 @@ export const Hero: GlobalConfig = {
     {
       name: 'highlights',
       type: 'array',
-      label: 'Highlights',
+      label: 'Points forts',
+      labels: {
+        singular: 'Point fort',
+        plural: 'Points forts',
+      },
       localized: true,
       fields: [
         {
           name: 'value',
           type: 'text',
+          label: 'Texte',
           required: true,
         },
       ],
@@ -53,17 +59,19 @@ export const Hero: GlobalConfig = {
     {
       name: 'primaryCta',
       type: 'group',
-      label: 'Primary call to action',
+      label: 'Bouton d’action principal',
       fields: [
         {
           name: 'label',
           type: 'text',
+          label: 'Libellé',
           localized: true,
           defaultValue: 'View projects',
         },
         {
           name: 'href',
           type: 'text',
+          label: 'Lien',
           defaultValue: '#projects',
         },
       ],
@@ -71,17 +79,19 @@ export const Hero: GlobalConfig = {
     {
       name: 'secondaryCta',
       type: 'group',
-      label: 'Secondary call to action',
+      label: 'Bouton d’action secondaire',
       fields: [
         {
           name: 'label',
           type: 'text',
+          label: 'Libellé',
           localized: true,
           defaultValue: 'Let’s talk',
         },
         {
           name: 'href',
           type: 'text',
+          label: 'Lien',
           defaultValue: '#contact',
         },
       ],
@@ -89,15 +99,16 @@ export const Hero: GlobalConfig = {
     {
       name: 'resumeCta',
       type: 'group',
-      label: 'Resume / CV button',
+      label: 'Bouton CV',
       admin: {
         description:
-          'Upload one file per language. The button only appears once a file is set for the current language, and links directly to it.',
+          'Ajoutez un fichier par langue. Le bouton n’apparaît que lorsqu’un fichier est défini pour la langue affichée, et pointe directement dessus.',
       },
       fields: [
         {
           name: 'label',
           type: 'text',
+          label: 'Libellé',
           localized: true,
           defaultValue: 'Download CV',
         },
@@ -106,7 +117,7 @@ export const Hero: GlobalConfig = {
           type: 'upload',
           relationTo: 'media',
           localized: true,
-          label: 'CV file',
+          label: 'Fichier CV',
         },
       ],
     },

@@ -1,12 +1,21 @@
 import type { CollectionConfig } from 'payload'
 
-import { revalidateCollectionAfterChange, revalidateCollectionAfterDelete } from '@/hooks/revalidateSite'
+import { orderField } from '@/fields/shared'
+import {
+  revalidateCollectionAfterChange,
+  revalidateCollectionAfterDelete,
+} from '@/hooks/revalidateSite'
+import { adminGroups } from '@/lib/adminLabels'
 
 export const Education: CollectionConfig = {
   slug: 'education',
+  labels: {
+    singular: 'Formation',
+    plural: 'Formations',
+  },
   admin: {
-    group: 'Portfolio',
-    description: 'Education timeline entries.',
+    group: adminGroups.portfolio,
+    description: 'Entrées de la frise des formations.',
     defaultColumns: ['school', 'location', 'degree', 'startDate', 'endDate', 'order'],
     useAsTitle: 'degree',
   },
@@ -22,6 +31,7 @@ export const Education: CollectionConfig = {
     {
       name: 'school',
       type: 'relationship',
+      label: 'École',
       relationTo: 'schools',
       required: true,
       admin: {
@@ -33,27 +43,32 @@ export const Education: CollectionConfig = {
     {
       name: 'degree',
       type: 'text',
+      label: 'Diplôme',
       required: true,
       localized: true,
     },
     {
       name: 'fieldOfStudy',
       type: 'text',
+      label: 'Domaine d’études',
       localized: true,
     },
     {
       name: 'description',
       type: 'richText',
+      label: 'Description',
       localized: true,
     },
     {
       name: 'location',
       type: 'text',
+      label: 'Lieu',
       localized: true,
     },
     {
       name: 'startDate',
       type: 'date',
+      label: 'Date de début',
       required: true,
       admin: {
         date: {
@@ -64,6 +79,7 @@ export const Education: CollectionConfig = {
     {
       name: 'endDate',
       type: 'date',
+      label: 'Date de fin',
       admin: {
         date: {
           pickerAppearance: 'monthOnly',
@@ -73,17 +89,12 @@ export const Education: CollectionConfig = {
     {
       name: 'currentlyStudying',
       type: 'checkbox',
+      label: 'Formation en cours',
       defaultValue: false,
     },
-    {
-      name: 'order',
-      type: 'number',
-      admin: {
-        step: 1,
-        description:
-          'Display order: 1 shows first, 2 second, etc. Leave empty to fall back to most recent start date after ordered entries.',
-      },
-    },
+    orderField(
+      'l’entrée après celles qui sont ordonnées, de la date de début la plus récente à la plus ancienne',
+    ),
   ],
   timestamps: true,
 }

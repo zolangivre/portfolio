@@ -158,6 +158,8 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Comptes autorisés à se connecter à cet espace d’administration.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -183,7 +185,7 @@ export interface User {
   collection: 'users';
 }
 /**
- * Reusable images, logos and videos used across the site.
+ * Images, logos et vidéos réutilisables un peu partout sur le site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
@@ -204,7 +206,7 @@ export interface Media {
   focalY?: number | null;
 }
 /**
- * Portfolio projects shown in the projects section.
+ * Projets du portfolio affichés dans la section projets.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "projects".
@@ -231,7 +233,7 @@ export interface Project {
   };
   coverImage?: (number | null) | Media;
   /**
-   * Optional dark-mode variant of the cover image. Shown instead of the cover image when the site is in dark mode.
+   * Variante facultative de l’image de couverture pour le mode sombre. Elle remplace l’image de couverture quand le site est en mode sombre.
    */
   coverImageDark?: (number | null) | Media;
   gallery?: (number | Media)[] | null;
@@ -240,11 +242,11 @@ export interface Project {
   liveUrl?: string | null;
   featured?: boolean | null;
   /**
-   * Private projects are kept in the CMS but never rendered on the site.
+   * Les projets privés restent dans le CMS mais ne sont jamais affichés sur le site.
    */
   visibility: 'public' | 'private';
   /**
-   * Display order: 1 shows first, 2 second, etc. Leave empty to fall back to newest-first after ordered projects.
+   * Ordre d’affichage : 1 s’affiche en premier, 2 en deuxième, etc. Laissez vide pour classer le projet après ceux qui sont ordonnés, du plus récent au plus ancien.
    */
   order?: number | null;
   year?: number | null;
@@ -254,7 +256,7 @@ export interface Project {
     title?: string | null;
     description?: string | null;
     /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     * Taille maximale : 12 Mo. Idéalement moins de 500 Ko par image.
      */
     image?: (number | null) | Media;
   };
@@ -262,7 +264,7 @@ export interface Project {
   createdAt: string;
 }
 /**
- * Technology tags referenced by projects and experience entries.
+ * Étiquettes de technologies utilisées par les projets et les expériences.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "technologies".
@@ -273,12 +275,12 @@ export interface Technology {
   slug: string;
   logo?: (number | null) | Media;
   /**
-   * Invert the logo colors when the site is in dark mode. Enable for black/dark logos so they stay visible on the dark theme.
+   * Inverse les couleurs du logo quand le site est en mode sombre. À activer pour les logos noirs ou foncés, afin qu’ils restent visibles sur le thème sombre.
    */
   invertLogoInDarkMode?: boolean | null;
   website?: string | null;
   /**
-   * Optional hex color shown as a small dot on the tech chips, e.g. #4287F5 (the # is added automatically if missing).
+   * Couleur hexadécimale facultative, affichée en petit point sur les puces de technologies, par exemple #4287F5 (le # est ajouté automatiquement s’il manque).
    */
   color?: string | null;
   category?: (number | null) | Category;
@@ -286,7 +288,7 @@ export interface Technology {
   createdAt: string;
 }
 /**
- * Shared categories used across Skills, Technologies, Projects and Journal. Grouped by domain so each collection only offers its relevant categories.
+ * Catégories partagées par les compétences, les technologies, les projets et le journal. Regroupées par domaine pour que chaque collection ne propose que les catégories qui la concernent.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
@@ -297,14 +299,14 @@ export interface Category {
   slug: string;
   group: 'tech' | 'project' | 'journal';
   /**
-   * Display order within the group: 1 shows first, 2 second, etc. Categories without a value come last, sorted by name.
+   * Ordre d’affichage au sein du groupe : 1 s’affiche en premier, 2 en deuxième, etc. Les catégories sans valeur passent en dernier, triées par nom.
    */
   order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
- * Professional experience timeline entries.
+ * Entrées de la frise des expériences professionnelles.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "experiences".
@@ -335,14 +337,14 @@ export interface Experience {
   endDate?: string | null;
   currentlyWorking?: boolean | null;
   /**
-   * Display order: 1 shows first, 2 second, etc. Leave empty to fall back to most recent start date after ordered entries.
+   * Ordre d’affichage : 1 s’affiche en premier, 2 en deuxième, etc. Laissez vide pour classer l’entrée après celles qui sont ordonnées, de la date de début la plus récente à la plus ancienne.
    */
   order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
- * Companies referenced by experience entries.
+ * Entreprises référencées par les expériences professionnelles.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "companies".
@@ -358,7 +360,7 @@ export interface Company {
   createdAt: string;
 }
 /**
- * Skills grouped by category, shown in the skills section.
+ * Compétences regroupées par catégorie, affichées dans la section compétences.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "skills".
@@ -368,19 +370,19 @@ export interface Skill {
   name: string;
   category: number | Category;
   /**
-   * Optional link to the official documentation or website. Makes the whole card clickable.
+   * Lien facultatif vers la documentation ou le site officiel. Rend toute la carte cliquable.
    */
   url?: string | null;
   logo?: (number | null) | Media;
   /**
-   * Invert the logo colors when the site is in dark mode. Enable for black/dark logos so they stay visible on the dark theme.
+   * Inverse les couleurs du logo quand le site est en mode sombre. À activer pour les logos noirs ou foncés, afin qu’ils restent visibles sur le thème sombre.
    */
   invertLogoInDarkMode?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
- * Schools referenced by education entries.
+ * Écoles référencées par les entrées de formation.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "schools".
@@ -396,7 +398,7 @@ export interface School {
   createdAt: string;
 }
 /**
- * Education timeline entries.
+ * Entrées de la frise des formations.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "education".
@@ -426,14 +428,14 @@ export interface Education {
   endDate?: string | null;
   currentlyStudying?: boolean | null;
   /**
-   * Display order: 1 shows first, 2 second, etc. Leave empty to fall back to most recent start date after ordered entries.
+   * Ordre d’affichage : 1 s’affiche en premier, 2 en deuxième, etc. Laissez vide pour classer l’entrée après celles qui sont ordonnées, de la date de début la plus récente à la plus ancienne.
    */
   order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
- * Client and colleague quotes displayed in the testimonials section.
+ * Citations de clients et de collègues affichées dans la section témoignages.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "testimonials".
@@ -441,11 +443,11 @@ export interface Education {
 export interface Testimonial {
   id: number;
   /**
-   * Full name of the person giving the testimonial.
+   * Nom complet de la personne qui témoigne.
    */
   author: string;
   /**
-   * Job title, e.g. "Product Manager".
+   * Intitulé du poste, par exemple « Product Manager ».
    */
   role?: string | null;
   company?: (number | null) | Company;
@@ -457,7 +459,7 @@ export interface Testimonial {
   createdAt: string;
 }
 /**
- * Submissions from the public contact form.
+ * Messages envoyés depuis le formulaire de contact du site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "messages".
@@ -472,7 +474,7 @@ export interface Message {
   createdAt: string;
 }
 /**
- * Personal, non-technical stories — travel, sport, achievements, events, discoveries.
+ * Récits personnels, hors technique : voyages, sport, réussites, événements, découvertes.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "journal".
@@ -510,18 +512,18 @@ export interface Journal {
     | null;
   featured?: boolean | null;
   /**
-   * Private entries are kept in the CMS but never rendered on the site.
+   * Les entrées privées restent dans le CMS mais ne sont jamais affichées sur le site.
    */
   visibility: 'public' | 'private';
   /**
-   * Display order: 1 shows first, 2 second, etc. Leave empty to fall back to most recent date after ordered entries.
+   * Ordre d’affichage : 1 s’affiche en premier, 2 en deuxième, etc. Laissez vide pour classer l’entrée après celles qui sont ordonnées, de la date la plus récente à la plus ancienne.
    */
   order?: number | null;
   meta?: {
     title?: string | null;
     description?: string | null;
     /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     * Taille maximale : 12 Mo. Idéalement moins de 500 Ko par image.
      */
     image?: (number | null) | Media;
   };
@@ -919,7 +921,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
- * Identity, branding, contact, theme and default SEO used across the whole site.
+ * Identité, image de marque, contact, thème et SEO par défaut, utilisés sur tout le site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "settings".
@@ -931,11 +933,11 @@ export interface Setting {
   photo?: (number | null) | Media;
   logo?: (number | null) | Media;
   /**
-   * Controls the color used for buttons, links, badges, focus states and accents across the whole site.
+   * Définit la couleur utilisée pour les boutons, les liens, les badges, les états de focus et les accents sur tout le site.
    */
   theme: {
     /**
-     * The main accent color, used everywhere across the site.
+     * La couleur d’accent principale, utilisée partout sur le site.
      */
     primaryColor:
       | 'orange'
@@ -963,7 +965,7 @@ export interface Setting {
       | 'gray'
       | 'neutral';
     /**
-     * Optional secondary color for a subtle two-tone highlight in the background. Falls back to the primary color when left empty.
+     * Couleur secondaire facultative, pour un léger dégradé bicolore en arrière-plan. Si elle est vide, la couleur principale est utilisée.
      */
     accentColor?:
       | (
@@ -995,7 +997,7 @@ export interface Setting {
       | null;
     defaultTheme?: ('light' | 'dark' | 'system') | null;
     /**
-     * Custom cursor shown on desktop. Automatically disabled on touch devices and for users who prefer reduced motion.
+     * Curseur personnalisé affiché sur ordinateur. Automatiquement désactivé sur les écrans tactiles et pour les personnes qui préfèrent réduire les animations.
      */
     cursorEffect?: ('ring' | 'trail') | null;
   };
@@ -1005,14 +1007,14 @@ export interface Setting {
         platform: 'github' | 'linkedin' | 'x' | 'instagram' | 'dribbble' | 'other';
         url: string;
         /**
-         * Optional custom icon. Falls back to a built-in icon for the selected platform when left empty.
+         * Icône personnalisée facultative. Si elle est vide, l’icône intégrée de la plateforme choisie est utilisée.
          */
         icon?: (number | null) | Media;
         id?: string | null;
       }[]
     | null;
   /**
-   * Fallback metadata used when a page does not define its own.
+   * Métadonnées de secours, utilisées quand une page ne définit pas les siennes.
    */
   seo?: {
     defaultTitle?: string | null;
@@ -1023,7 +1025,7 @@ export interface Setting {
   createdAt?: string | null;
 }
 /**
- * The homepage hero section.
+ * La bannière d’accueil, en haut de la page d’accueil.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "hero".
@@ -1062,7 +1064,7 @@ export interface Hero {
     href?: string | null;
   };
   /**
-   * Upload one file per language. The button only appears once a file is set for the current language, and links directly to it.
+   * Ajoutez un fichier par langue. Le bouton n’apparaît que lorsqu’un fichier est défini pour la langue affichée, et pointe directement dessus.
    */
   resumeCta?: {
     label?: string | null;
@@ -1072,7 +1074,7 @@ export interface Hero {
     title?: string | null;
     description?: string | null;
     /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     * Taille maximale : 12 Mo. Idéalement moins de 500 Ko par image.
      */
     image?: (number | null) | Media;
   };
@@ -1080,7 +1082,7 @@ export interface Hero {
   createdAt?: string | null;
 }
 /**
- * The homepage about section.
+ * La section « à propos » de la page d’accueil.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "about".
@@ -1120,7 +1122,7 @@ export interface About {
     [k: string]: unknown;
   } | null;
   /**
-   * Titled lists shown next to the portrait — e.g. Soft skills, Interests, Travels, Sports background.
+   * Listes titrées affichées à côté du portrait — par exemple Soft skills, Centres d’intérêt, Voyages, Parcours sportif.
    */
   pointGroups?:
     | {
@@ -1148,7 +1150,7 @@ export interface About {
   createdAt?: string | null;
 }
 /**
- * The homepage contact section.
+ * La section contact de la page d’accueil.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "contact".
@@ -1177,7 +1179,7 @@ export interface Contact {
   createdAt?: string | null;
 }
 /**
- * Primary header navigation links.
+ * Liens de navigation principaux, dans l’en-tête.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "navigation".
@@ -1195,7 +1197,7 @@ export interface Navigation {
   createdAt?: string | null;
 }
 /**
- * Footer text and links.
+ * Texte et liens du pied de page.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "footer".
@@ -1214,7 +1216,7 @@ export interface Footer {
   createdAt?: string | null;
 }
 /**
- * Toggle which sections of the site are shown. Disabled sections are hidden from the homepage, the navigation, and (for Journal) its dedicated pages.
+ * Choisissez les sections affichées sur le site. Une section désactivée disparaît de la page d’accueil, de la navigation et, pour le journal, de ses pages dédiées.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sections-visibility".
@@ -1222,46 +1224,46 @@ export interface Footer {
 export interface SectionsVisibility {
   id: number;
   /**
-   * Show or hide the Hero section across the site.
+   * Affiche ou masque la section Bannière sur tout le site.
    */
   hero?: boolean | null;
   /**
-   * Show or hide the About section across the site.
+   * Affiche ou masque la section À propos sur tout le site.
    */
   about?: boolean | null;
   /**
-   * Show or hide the Projects section across the site.
+   * Affiche ou masque la section Projets sur tout le site.
    */
   projects?: boolean | null;
   /**
-   * Show or hide the Experience section across the site.
+   * Affiche ou masque la section Expériences sur tout le site.
    */
   experience?: boolean | null;
   /**
-   * Show or hide the Education section across the site.
+   * Affiche ou masque la section Formations sur tout le site.
    */
   education?: boolean | null;
   /**
-   * Show or hide the Skills section across the site.
+   * Affiche ou masque la section Compétences sur tout le site.
    */
   skills?: boolean | null;
   /**
-   * Show or hide the Testimonials section across the site.
+   * Affiche ou masque la section Témoignages sur tout le site.
    */
   testimonials?: boolean | null;
   /**
-   * Show or hide the Contact section across the site.
+   * Affiche ou masque la section Contact sur tout le site.
    */
   contact?: boolean | null;
   /**
-   * Show or hide the Journal section across the site.
+   * Affiche ou masque la section Journal sur tout le site.
    */
   journal?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
- * Eyebrow, title and description text shown above the Projects, Experience, Education, Skills, Testimonials and Journal sections.
+ * Surtitre, titre et description affichés au-dessus des sections Projets, Expériences, Formations, Compétences, Témoignages et Journal.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sections-content".

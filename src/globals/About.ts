@@ -1,14 +1,15 @@
 import type { GlobalConfig } from 'payload'
 
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { adminGroups } from '@/lib/adminLabels'
 import { textToLexicalParagraphs } from '@/lib/richText'
 
 export const About: GlobalConfig = {
   slug: 'about',
-  label: 'About',
+  label: 'À propos',
   admin: {
-    group: 'Content',
-    description: 'The homepage about section.',
+    group: adminGroups.content,
+    description: 'La section « à propos » de la page d’accueil.',
   },
   access: {
     read: () => true,
@@ -20,14 +21,14 @@ export const About: GlobalConfig = {
     {
       name: 'eyebrow',
       type: 'text',
-      label: 'Eyebrow',
+      label: 'Surtitre',
       localized: true,
       defaultValue: 'About',
     },
     {
       name: 'title',
       type: 'text',
-      label: 'Title',
+      label: 'Titre',
       required: true,
       localized: true,
       defaultValue: 'Designing thoughtful products with engineering depth.',
@@ -44,33 +45,33 @@ export const About: GlobalConfig = {
     {
       name: 'body',
       type: 'richText',
-      label: 'Body',
+      label: 'Corps de texte',
       localized: true,
     },
     {
       name: 'pointGroups',
       type: 'array',
-      label: 'Point groups',
+      label: 'Groupes de points',
       labels: {
-        singular: 'Point group',
-        plural: 'Point groups',
+        singular: 'Groupe de points',
+        plural: 'Groupes de points',
       },
       localized: true,
       admin: {
         description:
-          'Titled lists shown next to the portrait — e.g. Soft skills, Interests, Travels, Sports background.',
+          'Listes titrées affichées à côté du portrait — par exemple Soft skills, Centres d’intérêt, Voyages, Parcours sportif.',
       },
       fields: [
         {
           name: 'title',
           type: 'text',
-          label: 'Title',
+          label: 'Titre',
           required: true,
         },
         {
           name: 'content',
           type: 'richText',
-          label: 'Content',
+          label: 'Contenu',
         },
       ],
     },

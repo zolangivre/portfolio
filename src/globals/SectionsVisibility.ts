@@ -1,24 +1,25 @@
-import type { GlobalConfig } from 'payload'
+import type { CheckboxField, GlobalConfig } from 'payload'
 
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { adminGroups, sectionLabels } from '@/lib/adminLabels'
 
-const sectionField = (name: string, label: string) => ({
+const sectionField = (name: keyof typeof sectionLabels): CheckboxField => ({
   name,
-  type: 'checkbox' as const,
-  label,
+  type: 'checkbox',
+  label: sectionLabels[name],
   defaultValue: true,
   admin: {
-    description: `Show or hide the ${label} section across the site.`,
+    description: `Affiche ou masque la section ${sectionLabels[name]} sur tout le site.`,
   },
 })
 
 export const SectionsVisibility: GlobalConfig = {
   slug: 'sections-visibility',
-  label: 'Sections visibility',
+  label: 'Visibilité des sections',
   admin: {
-    group: 'Site',
+    group: adminGroups.site,
     description:
-      'Toggle which sections of the site are shown. Disabled sections are hidden from the homepage, the navigation, and (for Journal) its dedicated pages.',
+      'Choisissez les sections affichées sur le site. Une section désactivée disparaît de la page d’accueil, de la navigation et, pour le journal, de ses pages dédiées.',
   },
   access: {
     read: () => true,
@@ -27,14 +28,14 @@ export const SectionsVisibility: GlobalConfig = {
     afterChange: [revalidateGlobalAfterChange],
   },
   fields: [
-    sectionField('hero', 'Hero'),
-    sectionField('about', 'About'),
-    sectionField('projects', 'Projects'),
-    sectionField('experience', 'Experience'),
-    sectionField('education', 'Education'),
-    sectionField('skills', 'Skills'),
-    sectionField('testimonials', 'Testimonials'),
-    sectionField('contact', 'Contact'),
-    sectionField('journal', 'Journal'),
+    sectionField('hero'),
+    sectionField('about'),
+    sectionField('projects'),
+    sectionField('experience'),
+    sectionField('education'),
+    sectionField('skills'),
+    sectionField('testimonials'),
+    sectionField('contact'),
+    sectionField('journal'),
   ],
 }

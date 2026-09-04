@@ -1,5 +1,6 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { seoPlugin } from '@payloadcms/plugin-seo'
+import { fr } from '@payloadcms/translations/languages/fr'
 import { s3Storage } from '@payloadcms/storage-s3'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
@@ -20,6 +21,7 @@ import { Education } from './collections/Education'
 import { Testimonials } from './collections/Testimonials'
 import { Messages } from './collections/Messages'
 import { Journal } from './collections/Journal'
+import { translateSeoFields } from './lib/adminLabels'
 import { GlobalSettings } from './globals/GlobalSettings'
 import { Hero } from './globals/Hero'
 import { About } from './globals/About'
@@ -70,6 +72,17 @@ export default buildConfig({
     SectionsContent,
   ],
   editor: lexicalEditor(),
+  // The admin panel is French-only — separate from the site's content locales
+  // below, which translate the values editors type in. Listing `fr` alone is
+  // what pins it: Payload picks the request's Accept-Language whenever that
+  // language is supported, and only falls back otherwise. Labels throughout
+  // the config are plain French strings to match; adding a second language
+  // here means translating them too (Payload takes a Record<lang, string>
+  // anywhere it takes a label).
+  i18n: {
+    supportedLanguages: { fr },
+    fallbackLanguage: 'fr',
+  },
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
@@ -97,6 +110,7 @@ export default buildConfig({
       collections: ['projects', 'journal'],
       globals: ['hero'],
       uploadsCollection: 'media',
+      fields: translateSeoFields,
       generateTitle: ({ doc }) => {
         const title = (doc as { title?: string })?.title
         return title ? `${title} | Developer Portfolio` : 'Developer Portfolio'

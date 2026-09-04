@@ -1,13 +1,14 @@
 import type { GlobalConfig } from 'payload'
 
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { adminGroups } from '@/lib/adminLabels'
 
 export const Footer: GlobalConfig = {
   slug: 'footer',
-  label: 'Footer',
+  label: 'Pied de page',
   admin: {
-    group: 'Site',
-    description: 'Footer text and links.',
+    group: adminGroups.site,
+    description: 'Texte et liens du pied de page.',
   },
   access: {
     read: () => true,
@@ -19,24 +20,31 @@ export const Footer: GlobalConfig = {
     {
       name: 'text',
       type: 'text',
-      label: 'Footer text',
+      label: 'Texte du pied de page',
       localized: true,
-      defaultValue: 'Crafted for ambitious products, polished interfaces, and reliable engineering.',
+      defaultValue:
+        'Crafted for ambitious products, polished interfaces, and reliable engineering.',
     },
     {
       name: 'links',
       type: 'array',
-      label: 'Links',
+      label: 'Liens',
+      labels: {
+        singular: 'Lien',
+        plural: 'Liens',
+      },
       fields: [
         {
           name: 'label',
           type: 'text',
+          label: 'Libellé',
           required: true,
           localized: true,
         },
         {
           name: 'href',
           type: 'text',
+          label: 'Lien',
           required: true,
         },
       ],
