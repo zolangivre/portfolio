@@ -146,7 +146,12 @@ export default async function LocaleLayout(props: {
       <body>
         <style dangerouslySetInnerHTML={{ __html: themeStyle }} />
         <Script
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          // JSON.stringify leaves `<` intact, so a settings value containing
+          // `</script>` would close this tag early and let whatever follows
+          // run as markup. Escaping it keeps the payload valid JSON.
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
+          }}
           id="person-jsonld"
           type="application/ld+json"
         />
@@ -176,9 +181,7 @@ export default async function LocaleLayout(props: {
                 sections={sections}
                 settings={settings}
               />
-              <main id="main-content">
-                {children}
-              </main>
+              <main id="main-content">{children}</main>
               <Footer dictionary={dictionary} footer={footer} locale={locale} />
             </div>
           </MotionProvider>

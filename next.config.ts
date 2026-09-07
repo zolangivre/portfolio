@@ -24,6 +24,25 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96],
     minimumCacheTTL: 2592000,
   },
+  // Baseline security headers. Deliberately not a full Content-Security-Policy:
+  // Next injects inline bootstrap scripts and this layout renders an inline
+  // <style> plus a JSON-LD block, so a real CSP needs nonce plumbing through
+  // the proxy and testing against the admin panel — worth doing, but not
+  // something to switch on blind. HSTS is left to Vercel, which sets it on
+  // custom domains; declaring it here too would just duplicate the header.
+  headers: async () => [
+    {
+      source: '/:path*',
+      headers: [
+        // Nothing here is meant to be embedded — least of all /admin, where
+        // framing the panel is a clickjacking route to authenticated actions.
+        { key: 'X-Frame-Options', value: 'DENY' },
+        { key: 'X-Content-Type-Options', value: 'nosniff' },
+        { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+      ],
+    },
+  ],
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],

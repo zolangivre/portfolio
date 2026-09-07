@@ -7,7 +7,9 @@ import { cacheTags, FALLBACK_REVALIDATE } from '../cache'
 import { defaultLocale, type Locale } from '../locale'
 import { getPayloadClient } from '../payload'
 
-const DEFAULT_LIMIT = 12
+// Both the homepage section and the /projects archive render the full list,
+// so this ceiling is the real cap on how many projects the site can show.
+const DEFAULT_LIMIT = 100
 
 // depth: 2 inlines the technologies (and their logos), the category and the
 // cover images into the returned doc, so an edit on any of those has to bust

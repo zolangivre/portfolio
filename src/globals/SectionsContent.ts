@@ -1,6 +1,7 @@
 import type { Field, GlobalConfig } from 'payload'
 
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { adminGroups, sectionLabels } from '@/lib/adminLabels'
 import { textToLexicalParagraphs } from '@/lib/richText'
 
 const sectionIntroFields = ({
@@ -15,14 +16,14 @@ const sectionIntroFields = ({
   {
     name: 'eyebrow',
     type: 'text',
-    label: 'Eyebrow',
+    label: 'Surtitre',
     localized: true,
     defaultValue: eyebrow,
   },
   {
     name: 'title',
     type: 'text',
-    label: 'Title',
+    label: 'Titre',
     required: true,
     localized: true,
     defaultValue: title,
@@ -38,11 +39,11 @@ const sectionIntroFields = ({
 
 export const SectionsContent: GlobalConfig = {
   slug: 'sections-content',
-  label: 'Sections content',
+  label: 'Contenu des sections',
   admin: {
-    group: 'Content',
+    group: adminGroups.content,
     description:
-      'Eyebrow, title and description text shown above the Projects, Experience, Education, Skills, Testimonials and Journal sections.',
+      'Surtitre, titre et description affichés au-dessus des sections Projets, Expériences, Formations, Compétences, Témoignages et Journal.',
   },
   access: {
     read: () => true,
@@ -54,7 +55,7 @@ export const SectionsContent: GlobalConfig = {
     {
       name: 'projects',
       type: 'group',
-      label: 'Projects',
+      label: sectionLabels.projects,
       fields: sectionIntroFields({
         eyebrow: 'Selected work',
         title: 'Projects',
@@ -65,7 +66,7 @@ export const SectionsContent: GlobalConfig = {
     {
       name: 'experience',
       type: 'group',
-      label: 'Experience',
+      label: sectionLabels.experience,
       fields: sectionIntroFields({
         eyebrow: 'Background',
         title: 'Experience',
@@ -76,7 +77,7 @@ export const SectionsContent: GlobalConfig = {
     {
       name: 'education',
       type: 'group',
-      label: 'Education',
+      label: sectionLabels.education,
       fields: sectionIntroFields({
         eyebrow: 'Education',
         title: 'Education',
@@ -86,7 +87,7 @@ export const SectionsContent: GlobalConfig = {
     {
       name: 'skills',
       type: 'group',
-      label: 'Skills',
+      label: sectionLabels.skills,
       fields: sectionIntroFields({
         eyebrow: 'Capabilities',
         title: 'Skills',
@@ -97,7 +98,7 @@ export const SectionsContent: GlobalConfig = {
     {
       name: 'testimonials',
       type: 'group',
-      label: 'Testimonials',
+      label: sectionLabels.testimonials,
       fields: sectionIntroFields({
         eyebrow: 'Testimonials',
         title: 'What people say',
@@ -107,7 +108,7 @@ export const SectionsContent: GlobalConfig = {
     {
       name: 'journal',
       type: 'group',
-      label: 'Journal',
+      label: sectionLabels.journal,
       fields: sectionIntroFields({
         eyebrow: 'Beyond code',
         title: 'Journal',

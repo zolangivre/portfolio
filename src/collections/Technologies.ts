@@ -1,13 +1,22 @@
 import type { CollectionConfig } from 'payload'
 
-import { revalidateCollectionAfterChange, revalidateCollectionAfterDelete } from '@/hooks/revalidateSite'
+import { invertLogoInDarkModeField } from '@/fields/shared'
+import {
+  revalidateCollectionAfterChange,
+  revalidateCollectionAfterDelete,
+} from '@/hooks/revalidateSite'
+import { adminGroups } from '@/lib/adminLabels'
 import { isValidHexColor } from '@/lib/color'
 
 export const Technologies: CollectionConfig = {
   slug: 'technologies',
+  labels: {
+    singular: 'Technologie',
+    plural: 'Technologies',
+  },
   admin: {
-    group: 'Taxonomy',
-    description: 'Technology tags referenced by projects and experience entries.',
+    group: adminGroups.taxonomy,
+    description: 'Étiquettes de technologies utilisées par les projets et les expériences.',
     defaultColumns: ['logo', 'name', 'category', 'color'],
     useAsTitle: 'name',
   },
@@ -22,11 +31,13 @@ export const Technologies: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
+      label: 'Nom',
       required: true,
     },
     {
       name: 'slug',
       type: 'text',
+      label: 'Identifiant (slug)',
       required: true,
       unique: true,
       index: true,
@@ -34,27 +45,22 @@ export const Technologies: CollectionConfig = {
     {
       name: 'logo',
       type: 'upload',
+      label: 'Logo',
       relationTo: 'media',
     },
-    {
-      name: 'invertLogoInDarkMode',
-      type: 'checkbox',
-      defaultValue: false,
-      admin: {
-        description:
-          'Invert the logo colors when the site is in dark mode. Enable for black/dark logos so they stay visible on the dark theme.',
-      },
-    },
+    invertLogoInDarkModeField(),
     {
       name: 'website',
       type: 'text',
+      label: 'Site web',
     },
     {
       name: 'color',
       type: 'text',
+      label: 'Couleur',
       admin: {
         description:
-          'Optional hex color shown as a small dot on the tech chips, e.g. #4287F5 (the # is added automatically if missing).',
+          'Couleur hexadécimale facultative, affichée en petit point sur les puces de technologies, par exemple #4287F5 (le # est ajouté automatiquement s’il manque).',
         components: {
           Cell: '/components/admin/TechColorSwatchCell#TechColorSwatchCell',
         },
@@ -72,13 +78,15 @@ export const Technologies: CollectionConfig = {
       validate: (value: string | null | undefined) => {
         if (value == null || value === '') return true
         return (
-          isValidHexColor(value) || 'Enter a hex color like #4287F5 (3, 4, 6 or 8 hex digits).'
+          isValidHexColor(value) ||
+          'Saisissez une couleur hexadécimale comme #4287F5 (3, 4, 6 ou 8 chiffres hexadécimaux).'
         )
       },
     },
     {
       name: 'category',
       type: 'relationship',
+      label: 'Catégorie',
       relationTo: 'categories',
       filterOptions: {
         group: { equals: 'tech' },

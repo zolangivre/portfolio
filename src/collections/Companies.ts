@@ -1,12 +1,20 @@
 import type { CollectionConfig } from 'payload'
 
-import { revalidateCollectionAfterChange, revalidateCollectionAfterDelete } from '@/hooks/revalidateSite'
+import {
+  revalidateCollectionAfterChange,
+  revalidateCollectionAfterDelete,
+} from '@/hooks/revalidateSite'
+import { adminGroups } from '@/lib/adminLabels'
 
 export const Companies: CollectionConfig = {
   slug: 'companies',
+  labels: {
+    singular: 'Entreprise',
+    plural: 'Entreprises',
+  },
   admin: {
-    group: 'Taxonomy',
-    description: 'Companies referenced by experience entries.',
+    group: adminGroups.taxonomy,
+    description: 'Entreprises référencées par les expériences professionnelles.',
     defaultColumns: ['logo', 'name', 'location', 'updatedAt'],
     useAsTitle: 'name',
   },
@@ -21,25 +29,30 @@ export const Companies: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
+      label: 'Nom',
       required: true,
     },
     {
       name: 'logo',
       type: 'upload',
+      label: 'Logo',
       relationTo: 'media',
     },
     {
       name: 'website',
       type: 'text',
+      label: 'Site web',
     },
     {
       name: 'location',
       type: 'text',
+      label: 'Lieu',
       localized: true,
     },
     {
       name: 'description',
       type: 'textarea',
+      label: 'Description',
       localized: true,
     },
   ],

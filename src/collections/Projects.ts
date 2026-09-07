@@ -1,16 +1,22 @@
 import type { CollectionConfig } from 'payload'
 
-import { revalidateCollectionAfterChange, revalidateCollectionAfterDelete } from '@/hooks/revalidateSite'
+import { orderField, visibilityField } from '@/fields/shared'
+import {
+  revalidateCollectionAfterChange,
+  revalidateCollectionAfterDelete,
+} from '@/hooks/revalidateSite'
+import { readPublicOrAuthenticated } from '@/lib/access'
+import { adminGroups } from '@/lib/adminLabels'
 
 export const Projects: CollectionConfig = {
   slug: 'projects',
   labels: {
-    singular: 'Project',
-    plural: 'Projects',
+    singular: 'Projet',
+    plural: 'Projets',
   },
   admin: {
-    group: 'Portfolio',
-    description: 'Portfolio projects shown in the projects section.',
+    group: adminGroups.portfolio,
+    description: 'Projets du portfolio affichés dans la section projets.',
     defaultColumns: [
       'coverImage',
       'title',
@@ -26,7 +32,7 @@ export const Projects: CollectionConfig = {
   },
   defaultSort: 'order',
   access: {
-    read: () => true,
+    read: readPublicOrAuthenticated,
   },
   hooks: {
     afterChange: [revalidateCollectionAfterChange],
@@ -36,12 +42,14 @@ export const Projects: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
+      label: 'Titre',
       required: true,
       localized: true,
     },
     {
       name: 'slug',
       type: 'text',
+      label: 'Identifiant (slug)',
       required: true,
       unique: true,
       index: true,
@@ -49,44 +57,51 @@ export const Projects: CollectionConfig = {
     {
       name: 'shortDescription',
       type: 'textarea',
+      label: 'Description courte',
       required: true,
       localized: true,
     },
     {
       name: 'description',
       type: 'richText',
+      label: 'Description',
       required: true,
       localized: true,
     },
     {
       name: 'coverImage',
       type: 'upload',
+      label: 'Image de couverture',
       relationTo: 'media',
     },
     {
       name: 'coverImageDark',
       type: 'upload',
+      label: 'Image de couverture (mode sombre)',
       relationTo: 'media',
       admin: {
         description:
-          'Optional dark-mode variant of the cover image. Shown instead of the cover image when the site is in dark mode.',
+          'Variante facultative de l’image de couverture pour le mode sombre. Elle remplace l’image de couverture quand le site est en mode sombre.',
       },
     },
     {
       name: 'gallery',
       type: 'relationship',
+      label: 'Galerie',
       relationTo: 'media',
       hasMany: true,
     },
     {
       name: 'technologies',
       type: 'relationship',
+      label: 'Technologies',
       relationTo: 'technologies',
       hasMany: true,
     },
     {
       name: 'githubUrl',
       type: 'text',
+      label: 'Lien GitHub',
       admin: {
         placeholder: 'https://github.com/username/project',
       },
@@ -94,6 +109,7 @@ export const Projects: CollectionConfig = {
     {
       name: 'liveUrl',
       type: 'text',
+      label: 'Lien en ligne',
       admin: {
         placeholder: 'https://example.com',
       },
@@ -101,34 +117,18 @@ export const Projects: CollectionConfig = {
     {
       name: 'featured',
       type: 'checkbox',
+      label: 'Mis en avant',
       defaultValue: false,
       index: true,
     },
-    {
-      name: 'visibility',
-      type: 'select',
-      required: true,
-      defaultValue: 'public',
-      options: [
-        { label: 'Public', value: 'public' },
-        { label: 'Private (hidden from the site)', value: 'private' },
-      ],
-      admin: {
-        description: 'Private projects are kept in the CMS but never rendered on the site.',
-      },
-    },
-    {
-      name: 'order',
-      type: 'number',
-      admin: {
-        step: 1,
-        description:
-          'Display order: 1 shows first, 2 second, etc. Leave empty to fall back to newest-first after ordered projects.',
-      },
-    },
+    visibilityField(
+      'Les projets privés restent dans le CMS mais ne sont jamais affichés sur le site.',
+    ),
+    orderField('le projet après ceux qui sont ordonnés, du plus récent au plus ancien'),
     {
       name: 'year',
       type: 'number',
+      label: 'Année',
       admin: {
         step: 1,
       },
@@ -136,16 +136,18 @@ export const Projects: CollectionConfig = {
     {
       name: 'status',
       type: 'select',
+      label: 'Statut',
       options: [
-        { label: 'Live', value: 'live' },
-        { label: 'In progress', value: 'in-progress' },
-        { label: 'Archived', value: 'archived' },
+        { label: 'En ligne', value: 'live' },
+        { label: 'En cours', value: 'in-progress' },
+        { label: 'Archivé', value: 'archived' },
       ],
       defaultValue: 'live',
     },
     {
       name: 'category',
       type: 'relationship',
+      label: 'Catégorie',
       relationTo: 'categories',
       filterOptions: {
         group: { equals: 'project' },

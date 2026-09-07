@@ -59,7 +59,9 @@ export async function generateMetadata({
     return {}
   }
 
-  const imageUrl = getMediaUrl(entry.coverImage)
+  // See the note in the project page: the generated card wins unless an image
+  // was explicitly chosen in the SEO tab.
+  const imageUrl = getMediaUrl(entry.meta?.image)
 
   return {
     title: entry.meta?.title || entry.title,

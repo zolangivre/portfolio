@@ -1,14 +1,15 @@
 import type { GlobalConfig } from 'payload'
 
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { adminGroups } from '@/lib/adminLabels'
 import { textToLexicalParagraphs } from '@/lib/richText'
 
 export const Contact: GlobalConfig = {
   slug: 'contact',
   label: 'Contact',
   admin: {
-    group: 'Content',
-    description: 'The homepage contact section.',
+    group: adminGroups.content,
+    description: 'La section contact de la page d’accueil.',
   },
   access: {
     read: () => true,
@@ -20,14 +21,14 @@ export const Contact: GlobalConfig = {
     {
       name: 'eyebrow',
       type: 'text',
-      label: 'Eyebrow',
+      label: 'Surtitre',
       localized: true,
       defaultValue: 'Contact',
     },
     {
       name: 'title',
       type: 'text',
-      label: 'Title',
+      label: 'Titre',
       required: true,
       localized: true,
       defaultValue: 'Let’s build something meaningful.',
@@ -44,7 +45,7 @@ export const Contact: GlobalConfig = {
     {
       name: 'successMessage',
       type: 'text',
-      label: 'Success message',
+      label: 'Message de confirmation',
       localized: true,
       defaultValue: 'Thanks for reaching out — I’ll get back to you shortly.',
     },

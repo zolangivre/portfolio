@@ -1,17 +1,21 @@
 import type { CollectionConfig } from 'payload'
 
-import { revalidateCollectionAfterChange, revalidateCollectionAfterDelete } from '@/hooks/revalidateSite'
+import {
+  revalidateCollectionAfterChange,
+  revalidateCollectionAfterDelete,
+} from '@/hooks/revalidateSite'
+import { adminGroups } from '@/lib/adminLabels'
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
   labels: {
-    singular: 'Category',
-    plural: 'Categories',
+    singular: 'Catégorie',
+    plural: 'Catégories',
   },
   admin: {
-    group: 'Taxonomy',
+    group: adminGroups.taxonomy,
     description:
-      'Shared categories used across Skills, Technologies, Projects and Journal. Grouped by domain so each collection only offers its relevant categories.',
+      'Catégories partagées par les compétences, les technologies, les projets et le journal. Regroupées par domaine pour que chaque collection ne propose que les catégories qui la concernent.',
     defaultColumns: ['name', 'group', 'order'],
     useAsTitle: 'name',
   },
@@ -27,12 +31,14 @@ export const Categories: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
+      label: 'Nom',
       required: true,
       localized: true,
     },
     {
       name: 'slug',
       type: 'text',
+      label: 'Identifiant (slug)',
       required: true,
       unique: true,
       index: true,
@@ -40,21 +46,26 @@ export const Categories: CollectionConfig = {
     {
       name: 'group',
       type: 'select',
+      label: 'Groupe',
       required: true,
       index: true,
       options: [
-        { label: 'Tech (Skills & Technologies)', value: 'tech' },
-        { label: 'Projects', value: 'project' },
+        {
+          label: 'Tech (compétences et technologies)',
+          value: 'tech',
+        },
+        { label: 'Projets', value: 'project' },
         { label: 'Journal', value: 'journal' },
       ],
     },
     {
       name: 'order',
       type: 'number',
+      label: 'Ordre',
       admin: {
         step: 1,
         description:
-          'Display order within the group: 1 shows first, 2 second, etc. Categories without a value come last, sorted by name.',
+          'Ordre d’affichage au sein du groupe : 1 s’affiche en premier, 2 en deuxième, etc. Les catégories sans valeur passent en dernier, triées par nom.',
       },
     },
   ],

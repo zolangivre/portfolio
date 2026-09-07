@@ -9,6 +9,11 @@ export type ContactFormState = {
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+// Mirrors the maxLength on the Messages collection. Enforced here too so an
+// over-long value is rejected with a form error instead of surfacing as a
+// Payload validation exception caught as a generic 'server-error'.
+const LIMITS = { email: 254, message: 5000, name: 120 } as const
+
 export async function submitContactForm(
   _prevState: ContactFormState,
   formData: FormData,
@@ -29,6 +34,10 @@ export async function submitContactForm(
 
   if (!EMAIL_PATTERN.test(email)) {
     return { error: 'invalid-email', success: false }
+  }
+
+  if (name.length > LIMITS.name || email.length > LIMITS.email || message.length > LIMITS.message) {
+    return { error: 'missing-fields', success: false }
   }
 
   const result = await createMessage({ email, message, name })

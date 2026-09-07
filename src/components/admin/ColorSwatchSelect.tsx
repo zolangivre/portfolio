@@ -1,25 +1,26 @@
 'use client'
 
-import { useField } from '@payloadcms/ui'
+import { useField, useTranslation } from '@payloadcms/ui'
 import type { SelectFieldClientComponent } from 'payload'
 
 import { palette } from '@/lib/theme/palette'
 
 export const ColorSwatchSelect: SelectFieldClientComponent = ({ field, path }) => {
   const { setValue, value } = useField<string>({ path })
+  const { t } = useTranslation()
   const allowsEmpty = !field.required
 
   return (
     <div className="color-swatch-select">
       {allowsEmpty ? (
         <button
-          aria-label="None"
+          aria-label={t('general:none')}
           aria-pressed={!value}
           className="color-swatch-select__item color-swatch-select__item--empty"
           data-active={!value}
           key="__none"
           onClick={() => setValue(null)}
-          title="None"
+          title={t('general:none')}
           type="button"
         />
       ) : null}

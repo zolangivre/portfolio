@@ -1,23 +1,29 @@
 import type { CollectionConfig } from 'payload'
 
-import { revalidateCollectionAfterChange, revalidateCollectionAfterDelete } from '@/hooks/revalidateSite'
+import { orderField, visibilityField } from '@/fields/shared'
+import {
+  revalidateCollectionAfterChange,
+  revalidateCollectionAfterDelete,
+} from '@/hooks/revalidateSite'
+import { readPublicOrAuthenticated } from '@/lib/access'
+import { adminGroups } from '@/lib/adminLabels'
 
 export const Journal: CollectionConfig = {
   slug: 'journal',
   labels: {
-    singular: 'Journal Entry',
+    singular: 'Entrée de journal',
     plural: 'Journal',
   },
   admin: {
-    group: 'Journal',
+    group: adminGroups.journal,
     description:
-      'Personal, non-technical stories — travel, sport, achievements, events, discoveries.',
+      'Récits personnels, hors technique : voyages, sport, réussites, événements, découvertes.',
     defaultColumns: ['coverImage', 'title', 'category', 'visibility', 'date', 'featured', 'order'],
     useAsTitle: 'title',
   },
   defaultSort: 'order',
   access: {
-    read: () => true,
+    read: readPublicOrAuthenticated,
   },
   hooks: {
     afterChange: [revalidateCollectionAfterChange],
@@ -27,12 +33,14 @@ export const Journal: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
+      label: 'Titre',
       required: true,
       localized: true,
     },
     {
       name: 'slug',
       type: 'text',
+      label: 'Identifiant (slug)',
       required: true,
       unique: true,
       index: true,
@@ -40,6 +48,7 @@ export const Journal: CollectionConfig = {
     {
       name: 'category',
       type: 'relationship',
+      label: 'Catégorie',
       relationTo: 'categories',
       required: true,
       filterOptions: {
@@ -49,29 +58,34 @@ export const Journal: CollectionConfig = {
     {
       name: 'shortDescription',
       type: 'textarea',
+      label: 'Description courte',
       required: true,
       localized: true,
     },
     {
       name: 'content',
       type: 'richText',
+      label: 'Contenu',
       required: true,
       localized: true,
     },
     {
       name: 'coverImage',
       type: 'upload',
+      label: 'Image de couverture',
       relationTo: 'media',
     },
     {
       name: 'gallery',
       type: 'relationship',
+      label: 'Galerie',
       relationTo: 'media',
       hasMany: true,
     },
     {
       name: 'date',
       type: 'date',
+      label: 'Date',
       required: true,
       admin: {
         date: {
@@ -82,15 +96,22 @@ export const Journal: CollectionConfig = {
     {
       name: 'location',
       type: 'text',
+      label: 'Lieu',
       localized: true,
     },
     {
       name: 'tags',
       type: 'array',
+      label: 'Étiquettes',
+      labels: {
+        singular: 'Étiquette',
+        plural: 'Étiquettes',
+      },
       fields: [
         {
           name: 'value',
           type: 'text',
+          label: 'Étiquette',
           required: true,
         },
       ],
@@ -98,31 +119,16 @@ export const Journal: CollectionConfig = {
     {
       name: 'featured',
       type: 'checkbox',
+      label: 'Mis en avant',
       defaultValue: false,
       index: true,
     },
-    {
-      name: 'visibility',
-      type: 'select',
-      required: true,
-      defaultValue: 'public',
-      options: [
-        { label: 'Public', value: 'public' },
-        { label: 'Private (hidden from the site)', value: 'private' },
-      ],
-      admin: {
-        description: 'Private entries are kept in the CMS but never rendered on the site.',
-      },
-    },
-    {
-      name: 'order',
-      type: 'number',
-      admin: {
-        step: 1,
-        description:
-          'Display order: 1 shows first, 2 second, etc. Leave empty to fall back to most recent date after ordered entries.',
-      },
-    },
+    visibilityField(
+      'Les entrées privées restent dans le CMS mais ne sont jamais affichées sur le site.',
+    ),
+    orderField(
+      'l’entrée après celles qui sont ordonnées, de la date la plus récente à la plus ancienne',
+    ),
   ],
   timestamps: true,
 }
