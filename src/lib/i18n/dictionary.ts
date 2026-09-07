@@ -212,8 +212,8 @@ const dictionaries: Record<Locale, Dictionary> = {
       readMoreLabel: 'Lire l’article',
       backLabel: '← Retour au journal',
       adjacentNavAriaLabel: 'Navigation entre les entrées du journal',
-      previousEntryLabel: 'Entrée précédente',
-      nextEntryLabel: 'Entrée suivante',
+      previousEntryLabel: 'Souvenir précédent',
+      nextEntryLabel: 'Souvenir suivant',
     },
     lightbox: {
       closeLabel: 'Fermer',
@@ -326,8 +326,8 @@ const dictionaries: Record<Locale, Dictionary> = {
       readMoreLabel: 'Read entry',
       backLabel: '← Back to journal',
       adjacentNavAriaLabel: 'Journal navigation',
-      previousEntryLabel: 'Previous entry',
-      nextEntryLabel: 'Next entry',
+      previousEntryLabel: 'Previous memory',
+      nextEntryLabel: 'Next memory',
     },
     lightbox: {
       closeLabel: 'Close',
