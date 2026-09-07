@@ -34,6 +34,13 @@ export interface Dictionary {
     adjacentNavAriaLabel: string
     previousProjectLabel: string
     nextProjectLabel: string
+    countSuffix: string
+    archiveEyebrow: string
+    archiveTitle: string
+    archiveDescription: string
+    allTechnologiesLabel: string
+    filterAriaLabel: string
+    backToHomeLabel: string
   }
   experience: {
     eyebrow: string
@@ -83,6 +90,7 @@ export interface Dictionary {
     emptyState: string
     featuredBadge: string
     allCategoriesLabel: string
+    countSuffix: string
     readMoreLabel: string
     backLabel: string
     adjacentNavAriaLabel: string
@@ -136,6 +144,14 @@ const dictionaries: Record<Locale, Dictionary> = {
       adjacentNavAriaLabel: 'Navigation entre les projets',
       previousProjectLabel: 'Projet précédent',
       nextProjectLabel: 'Projet suivant',
+      countSuffix: 'projets',
+      archiveEyebrow: 'Archive',
+      archiveTitle: 'Tous les projets',
+      archiveDescription:
+        'L’ensemble des projets publiés, filtrables par technologie.',
+      allTechnologiesLabel: 'Toutes',
+      filterAriaLabel: 'Filtrer les projets par technologie',
+      backToHomeLabel: '← Retour à l’accueil',
     },
     experience: {
       eyebrow: 'Parcours',
@@ -192,6 +208,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       emptyState: 'Aucune entrée n’a encore été publiée.',
       featuredBadge: 'À la une',
       allCategoriesLabel: 'Tout',
+      countSuffix: 'entrées',
       readMoreLabel: 'Lire l’article',
       backLabel: '← Retour au journal',
       adjacentNavAriaLabel: 'Navigation entre les entrées du journal',
@@ -243,6 +260,13 @@ const dictionaries: Record<Locale, Dictionary> = {
       adjacentNavAriaLabel: 'Project navigation',
       previousProjectLabel: 'Previous project',
       nextProjectLabel: 'Next project',
+      countSuffix: 'projects',
+      archiveEyebrow: 'Archive',
+      archiveTitle: 'All projects',
+      archiveDescription: 'Every published project, filterable by technology.',
+      allTechnologiesLabel: 'All',
+      filterAriaLabel: 'Filter projects by technology',
+      backToHomeLabel: '← Back to home',
     },
     experience: {
       eyebrow: 'Background',
@@ -298,6 +322,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       emptyState: 'No entries have been published yet.',
       featuredBadge: 'Featured',
       allCategoriesLabel: 'All',
+      countSuffix: 'entries',
       readMoreLabel: 'Read entry',
       backLabel: '← Back to journal',
       adjacentNavAriaLabel: 'Journal navigation',

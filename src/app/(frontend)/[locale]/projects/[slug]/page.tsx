@@ -55,7 +55,11 @@ export async function generateMetadata({
     return {}
   }
 
-  const imageUrl = getMediaUrl(project.meta?.image ?? project.coverImage)
+  // Only an image picked in the SEO tab overrides the generated card from
+  // `opengraph-image.tsx`. The cover image used to be the fallback here, but
+  // covers are framed for the page (often a logo on empty space) and made a
+  // poor 1200x630 preview — the generated card is the better default.
+  const imageUrl = getMediaUrl(project.meta?.image)
 
   return {
     title: project.meta?.title || project.title,

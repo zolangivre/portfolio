@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
+import { notifyNewMessage } from '@/hooks/notifyNewMessage'
 import { adminGroups } from '@/lib/adminLabels'
 
 export const Messages: CollectionConfig = {
@@ -13,6 +14,9 @@ export const Messages: CollectionConfig = {
     description: 'Messages envoyés depuis le formulaire de contact du site.',
     defaultColumns: ['name', 'email', 'read', 'createdAt'],
     useAsTitle: 'name',
+  },
+  hooks: {
+    afterChange: [notifyNewMessage],
   },
   access: {
     create: () => true,
