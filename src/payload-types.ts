@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    videos: Video;
     projects: Project;
     experiences: Experience;
     skills: Skill;
@@ -89,6 +90,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    videos: VideosSelect<false> | VideosSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     experiences: ExperiencesSelect<false> | ExperiencesSelect<true>;
     skills: SkillsSelect<false> | SkillsSelect<true>;
@@ -185,7 +187,7 @@ export interface User {
   collection: 'users';
 }
 /**
- * Images, logos et vidéos réutilisables un peu partout sur le site.
+ * Images, logos et PDF réutilisables un peu partout sur le site. Les captures vidéo ont leur propre rubrique, « Vidéos ».
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
@@ -193,6 +195,31 @@ export interface User {
 export interface Media {
   id: number;
   alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * Captures vidéo (mockups, démos). Sans limite de taille, contrairement aux médias — mais compressez quand même : le fichier est téléchargé tel quel par les visiteurs.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videos".
+ */
+export interface Video {
+  id: number;
+  /**
+   * Décrit ce que montre la vidéo — lu par les lecteurs d’écran.
+   */
+  alt: string;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -243,12 +270,39 @@ export interface Project {
   /**
    * Image ou vidéo affichée dans le cadre — une vidéo est lue en boucle, sans son. Idéalement au format de l’appareil : vertical (9:19,5) pour l’iPhone, 16:10 pour le MacBook. Avec « Image déjà en mockup », déposez plutôt le montage terminé, de préférence en PNG sur fond transparent. Sans fichier, l’image de couverture est affichée comme avant.
    */
-  mockupImage?: (number | null) | Media;
+  mockupImage?:
+    | ({
+        relationTo: 'media';
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'videos';
+        value: number | Video;
+      } | null);
   /**
    * Variante facultative pour le mode sombre, si l’application ou le site a un thème sombre.
    */
-  mockupImageDark?: (number | null) | Media;
-  gallery?: (number | Media)[] | null;
+  mockupImageDark?:
+    | ({
+        relationTo: 'media';
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'videos';
+        value: number | Video;
+      } | null);
+  gallery?:
+    | (
+        | {
+            relationTo: 'media';
+            value: number | Media;
+          }
+        | {
+            relationTo: 'videos';
+            value: number | Video;
+          }
+      )[]
+    | null;
   technologies?: (number | Technology)[] | null;
   githubUrl?: string | null;
   liveUrl?: string | null;
@@ -575,6 +629,10 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
+        relationTo: 'videos';
+        value: number | Video;
+      } | null)
+    | ({
         relationTo: 'projects';
         value: number | Project;
       } | null)
@@ -688,6 +746,25 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videos_select".
+ */
+export interface VideosSelect<T extends boolean = true> {
+  alt?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

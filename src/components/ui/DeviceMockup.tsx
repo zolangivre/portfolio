@@ -1,7 +1,7 @@
 import { FadeImage } from '@/components/ui/FadeImage'
 import { MockupVideo } from '@/components/ui/MockupVideo'
-import { getMediaUrl, isVideo } from '@/lib/media'
-import type { Media } from '@/payload-types'
+import { asMediaDoc, getMediaUrl, isVideo } from '@/lib/media'
+import type { MediaRelation } from '@/lib/media'
 
 export type MockupFrame = 'phone' | 'desktop' | 'custom'
 
@@ -221,13 +221,10 @@ type DeviceMockupProps = {
   /** Shown when the chosen upload carries no alt of its own. */
   fallbackAlt: string
   frame: MockupFrame
-  image?: (number | null) | Media
-  imageDark?: (number | null) | Media
+  image?: MediaRelation
+  imageDark?: MediaRelation
   priority?: boolean
 }
-
-const asMedia = (media: (number | null) | Media | undefined): Media | null =>
-  media && typeof media === 'object' ? media : null
 
 /**
  * The first screen of a project shown inside the device it was built for —
@@ -246,8 +243,8 @@ export function DeviceMockup({
   imageDark,
   priority,
 }: DeviceMockupProps) {
-  const light = asMedia(image)
-  const dark = asMedia(imageDark)
+  const light = asMediaDoc(image)
+  const dark = asMediaDoc(imageDark)
   // A dark-only upload is promoted to the main slot rather than rendered as a
   // twin of nothing — so it is never also the dark variant.
   const primary = light ?? dark

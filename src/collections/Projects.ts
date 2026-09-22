@@ -110,7 +110,11 @@ export const Projects: CollectionConfig = {
       name: 'mockupImage',
       type: 'upload',
       label: 'Capture ou vidéo à afficher',
-      relationTo: 'media',
+      // Polymorphic so one field still accepts either kind, even though the
+      // two live in separate collections for upload-size reasons (see
+      // collections/Videos.ts). The admin shows a collection picker; the
+      // stored value becomes { relationTo, value } rather than a bare doc.
+      relationTo: ['media', 'videos'],
       admin: {
         condition: (data) => hasMockupFrame(data),
         description:
@@ -121,7 +125,7 @@ export const Projects: CollectionConfig = {
       name: 'mockupImageDark',
       type: 'upload',
       label: 'Capture ou vidéo (mode sombre)',
-      relationTo: 'media',
+      relationTo: ['media', 'videos'],
       admin: {
         condition: (data) => hasMockupFrame(data),
         description:
@@ -132,7 +136,7 @@ export const Projects: CollectionConfig = {
       name: 'gallery',
       type: 'relationship',
       label: 'Galerie',
-      relationTo: 'media',
+      relationTo: ['media', 'videos'],
       hasMany: true,
     },
     {

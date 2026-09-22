@@ -12,7 +12,8 @@ import { FadeImage } from './FadeImage'
 import { Reveal } from './Reveal'
 
 type GalleryImage = {
-  id: number
+  /** `<collection>-<id>`: ids alone are not unique across media and videos. */
+  id: string
   src: string
   alt: string
   mimeType?: string | null
