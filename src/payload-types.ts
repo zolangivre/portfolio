@@ -236,6 +236,18 @@ export interface Project {
    * Variante facultative de l’image de couverture pour le mode sombre. Elle remplace l’image de couverture quand le site est en mode sombre.
    */
   coverImageDark?: (number | null) | Media;
+  /**
+   * En haut de la page du projet, affiche la capture ci-dessous dans un cadre d’appareil à la place de l’image de couverture. Les cartes continuent d’utiliser l’image de couverture (le logo).
+   */
+  mockupFrame?: ('none' | 'phone' | 'desktop' | 'custom') | null;
+  /**
+   * Image ou vidéo affichée dans le cadre — une vidéo est lue en boucle, sans son. Idéalement au format de l’appareil : vertical (9:19,5) pour l’iPhone, 16:10 pour le MacBook. Avec « Image déjà en mockup », déposez plutôt le montage terminé, de préférence en PNG sur fond transparent. Sans fichier, l’image de couverture est affichée comme avant.
+   */
+  mockupImage?: (number | null) | Media;
+  /**
+   * Variante facultative pour le mode sombre, si l’application ou le site a un thème sombre.
+   */
+  mockupImageDark?: (number | null) | Media;
   gallery?: (number | Media)[] | null;
   technologies?: (number | Technology)[] | null;
   githubUrl?: string | null;
@@ -699,6 +711,9 @@ export interface ProjectsSelect<T extends boolean = true> {
   description?: T;
   coverImage?: T;
   coverImageDark?: T;
+  mockupFrame?: T;
+  mockupImage?: T;
+  mockupImageDark?: T;
   gallery?: T;
   technologies?: T;
   githubUrl?: T;

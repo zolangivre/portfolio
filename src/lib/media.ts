@@ -7,3 +7,6 @@ export const getMediaUrl = (media: Media | number | null | undefined): string | 
 
   return media.url ?? null
 }
+
+export const isVideo = (mimeType: string | null | undefined): boolean =>
+  Boolean(mimeType?.startsWith('video/'))

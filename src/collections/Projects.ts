@@ -8,6 +8,12 @@ import {
 import { readPublicOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 
+// Both mockup uploads only mean anything once a frame is chosen. The first
+// half of the check is not redundant: on a brand-new doc `mockupFrame` is
+// still undefined, and `undefined !== 'none'` would reveal them.
+const hasMockupFrame = (data: { mockupFrame?: string | null } | undefined) =>
+  Boolean(data?.mockupFrame && data.mockupFrame !== 'none')
+
 export const Projects: CollectionConfig = {
   slug: 'projects',
   labels: {
@@ -82,6 +88,44 @@ export const Projects: CollectionConfig = {
       admin: {
         description:
           'Variante facultative de l’image de couverture pour le mode sombre. Elle remplace l’image de couverture quand le site est en mode sombre.',
+      },
+    },
+    {
+      name: 'mockupFrame',
+      type: 'select',
+      label: 'Cadre de présentation',
+      defaultValue: 'none',
+      options: [
+        { label: 'Aucun (image de couverture)', value: 'none' },
+        { label: 'iPhone (application mobile)', value: 'phone' },
+        { label: 'MacBook (site web)', value: 'desktop' },
+        { label: 'Image déjà en mockup (sans cadre)', value: 'custom' },
+      ],
+      admin: {
+        description:
+          'En haut de la page du projet, affiche la capture ci-dessous dans un cadre d’appareil à la place de l’image de couverture. Les cartes continuent d’utiliser l’image de couverture (le logo).',
+      },
+    },
+    {
+      name: 'mockupImage',
+      type: 'upload',
+      label: 'Capture ou vidéo à afficher',
+      relationTo: 'media',
+      admin: {
+        condition: (data) => hasMockupFrame(data),
+        description:
+          'Image ou vidéo affichée dans le cadre — une vidéo est lue en boucle, sans son. Idéalement au format de l’appareil : vertical (9:19,5) pour l’iPhone, 16:10 pour le MacBook. Avec « Image déjà en mockup », déposez plutôt le montage terminé, de préférence en PNG sur fond transparent. Sans fichier, l’image de couverture est affichée comme avant.',
+      },
+    },
+    {
+      name: 'mockupImageDark',
+      type: 'upload',
+      label: 'Capture ou vidéo (mode sombre)',
+      relationTo: 'media',
+      admin: {
+        condition: (data) => hasMockupFrame(data),
+        description:
+          'Variante facultative pour le mode sombre, si l’application ou le site a un thème sombre.',
       },
     },
     {

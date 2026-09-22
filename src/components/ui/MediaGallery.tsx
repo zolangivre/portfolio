@@ -6,6 +6,8 @@ import Video from 'yet-another-react-lightbox/plugins/video'
 import Zoom from 'yet-another-react-lightbox/plugins/zoom'
 import 'yet-another-react-lightbox/styles.css'
 
+import { isVideo } from '@/lib/media'
+
 import { FadeImage } from './FadeImage'
 import { Reveal } from './Reveal'
 
@@ -26,8 +28,6 @@ type MediaGalleryProps = {
   previousLabel: string
 }
 
-const isVideo = (mimeType?: string | null) => Boolean(mimeType?.startsWith('video/'))
-
 export function MediaGallery({
   ariaLabel,
   closeLabel,
@@ -41,12 +41,7 @@ export function MediaGallery({
     <>
       <div aria-label={ariaLabel} className="media-gallery">
         {images.map((image, imageIndex) => (
-          <Reveal
-            blur={8}
-            delay={Math.min(imageIndex, 5) * 0.08}
-            key={image.id}
-            scale={0.92}
-          >
+          <Reveal blur={8} delay={Math.min(imageIndex, 5) * 0.08} key={image.id} scale={0.92}>
             <button
               aria-label={image.alt}
               className="media-gallery-item relative"
@@ -99,9 +94,7 @@ export function MediaGallery({
           // images snap from wide to tall, reading as a jump behind the
           // opening animation instead of a smooth reveal.
           imageProps: (slide) =>
-            slide.width && slide.height
-              ? { height: slide.height, width: slide.width }
-              : {},
+            slide.width && slide.height ? { height: slide.height, width: slide.width } : {},
         }}
         animation={{
           easing: {

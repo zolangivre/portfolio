@@ -6,6 +6,7 @@ import { AdjacentNav } from '@/components/ui/AdjacentNav'
 import { AnimatedTitle } from '@/components/ui/AnimatedTitle'
 import { TechChip } from '@/components/ui/TechChip'
 import { Container } from '@/components/ui/Container'
+import { DeviceMockup } from '@/components/ui/DeviceMockup'
 import { Divider } from '@/components/ui/Divider'
 import { FadeImage } from '@/components/ui/FadeImage'
 import { MediaGallery } from '@/components/ui/MediaGallery'
@@ -90,6 +91,14 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
     typeof project.coverImage === 'object' && project.coverImage
       ? project.coverImage.alt
       : project.title
+  // The opener prefers a screenshot framed in the device the project was built
+  // for; the cover image (usually a logo) stays the fallback here and the only
+  // thing the cards ever show.
+  const mockupFrame =
+    project.mockupFrame && project.mockupFrame !== 'none' ? project.mockupFrame : null
+  // Only whether there is anything to frame — DeviceMockup resolves which of
+  // the two uploads to show, and everything that follows from that.
+  const mockupUrl = getMediaUrl(project.mockupImage) ?? getMediaUrl(project.mockupImageDark)
   const categoryLabel =
     typeof project.category === 'object' && project.category ? project.category.name : null
   const statusLabel = project.status
@@ -153,7 +162,17 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
           </div>
         </Reveal>
 
-        {imageUrl || darkImageUrl ? (
+        {mockupFrame && mockupUrl ? (
+          <Reveal delay={0.16}>
+            <DeviceMockup
+              fallbackAlt={project.title}
+              frame={mockupFrame}
+              image={project.mockupImage}
+              imageDark={project.mockupImageDark}
+              priority
+            />
+          </Reveal>
+        ) : imageUrl || darkImageUrl ? (
           <Reveal delay={0.16}>
             <div className="relative mt-8 aspect-video overflow-hidden rounded-[28px] bg-surface">
               {imageUrl ? (
