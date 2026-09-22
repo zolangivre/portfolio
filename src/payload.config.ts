@@ -54,6 +54,15 @@ const r2StorageBase = {
       secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
     },
     forcePathStyle: true,
+    // AWS SDK v3 (>= 3.729) checksums every request by default, and for a
+    // pre-signed PUT it does so at signing time — before the browser has sent
+    // a byte — so the URL carries `x-amz-checksum-crc32=AAAAAA==`, the CRC32
+    // of an empty body. R2 then rejects every real upload, and since R2 puts
+    // no CORS headers on error responses, the browser reports it as a CORS
+    // failure rather than the checksum mismatch it is. Cloudflare's documented
+    // fix for R2: only checksum when an operation actually requires it.
+    requestChecksumCalculation: 'WHEN_REQUIRED' as const,
+    responseChecksumValidation: 'WHEN_REQUIRED' as const,
   },
 }
 
