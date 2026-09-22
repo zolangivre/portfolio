@@ -179,7 +179,7 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
               <MediaGallery
                 closeLabel={dictionary.lightbox.closeLabel}
                 images={gallery.map((media) => ({
-                  id: media.id,
+                  id: `media-${media.id}`,
                   src: getMediaUrl(media) ?? '',
                   alt: media.alt,
                   mimeType: media.mimeType,

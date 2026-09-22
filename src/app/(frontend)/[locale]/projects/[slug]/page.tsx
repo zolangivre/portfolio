@@ -15,9 +15,8 @@ import { RichText } from '@/components/ui/RichText'
 import { getAdjacentBySlug } from '@/lib/adjacent'
 import { getDictionary } from '@/lib/i18n/dictionary'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
-import { getMediaUrl } from '@/lib/media'
+import { asMediaDoc, getMediaUrl, getRelationUrl } from '@/lib/media'
 import { getAllProjects, getProject, getSectionsVisibility } from '@/lib/queries'
-import type { Media } from '@/payload-types'
 import { ReadingProgress } from '@/components/ui/ReadingProgress'
 
 // Safety net only — see the note in the locale layout. Freshness comes from
@@ -98,16 +97,21 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
     project.mockupFrame && project.mockupFrame !== 'none' ? project.mockupFrame : null
   // Only whether there is anything to frame — DeviceMockup resolves which of
   // the two uploads to show, and everything that follows from that.
-  const mockupUrl = getMediaUrl(project.mockupImage) ?? getMediaUrl(project.mockupImageDark)
+  const mockupUrl = getRelationUrl(project.mockupImage) ?? getRelationUrl(project.mockupImageDark)
   const categoryLabel =
     typeof project.category === 'object' && project.category ? project.category.name : null
   const statusLabel = project.status
     ? (dictionary.projects.statusLabels[project.status] ?? project.status)
     : null
   const technologies = project.technologies ?? []
-  const gallery = (project.gallery ?? []).filter(
-    (item): item is Media => typeof item === 'object' && item !== null,
-  )
+  // Both collections can be dropped in the same gallery, and their ids are
+  // independent sequences — so the key has to carry the collection too, or a
+  // media and a video that happen to share an id collide in the React list.
+  const gallery = (project.gallery ?? []).flatMap((item) => {
+    const doc = asMediaDoc(item)
+
+    return doc ? [{ doc, key: `${item.relationTo}-${doc.id}` }] : []
+  })
 
   // Same query — and so the same order — as the projects section, so
   // "previous" and "next" match the list the visitor came from.
@@ -257,13 +261,13 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
               <MediaGallery
                 ariaLabel={`${project.title} ${dictionary.projects.galleryAriaLabelSuffix}`}
                 closeLabel={dictionary.lightbox.closeLabel}
-                images={gallery.map((media) => ({
-                  id: media.id,
-                  src: getMediaUrl(media) ?? '',
-                  alt: media.alt,
-                  mimeType: media.mimeType,
-                  width: media.width ?? undefined,
-                  height: media.height ?? undefined,
+                images={gallery.map(({ doc, key }) => ({
+                  id: key,
+                  src: getMediaUrl(doc) ?? '',
+                  alt: doc.alt,
+                  mimeType: doc.mimeType,
+                  width: doc.width ?? undefined,
+                  height: doc.height ?? undefined,
                 }))}
                 nextLabel={dictionary.lightbox.nextLabel}
                 previousLabel={dictionary.lightbox.previousLabel}

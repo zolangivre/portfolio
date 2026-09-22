@@ -15,7 +15,8 @@ export const Media: CollectionConfig = {
   },
   admin: {
     group: adminGroups.site,
-    description: 'Images, logos et vidéos réutilisables un peu partout sur le site.',
+    description:
+      'Images, logos et PDF réutilisables un peu partout sur le site. Les captures vidéo ont leur propre rubrique, « Vidéos ».',
     useAsTitle: 'alt',
     defaultColumns: ['preview', 'filename', 'alt', 'updatedAt'],
   },
@@ -81,6 +82,10 @@ export const Media: CollectionConfig = {
     // the main file's url, so thumbnail/card/hero derivatives were generated
     // and stored in R2 on every upload without a single component reading
     // them back.
-    mimeTypes: ['image/*', 'video/*', 'application/pdf'],
+    // Videos deliberately excluded: they belong in the `videos` collection,
+    // whose storage instance bypasses the 4.5MB Vercel body limit that a
+    // server-side upload here cannot clear. Leaving 'video/*' accepted would
+    // just let a large capture be dropped in and fail with an opaque 413.
+    mimeTypes: ['image/*', 'application/pdf'],
   },
 }

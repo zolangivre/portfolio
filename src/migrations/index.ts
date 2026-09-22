@@ -19,6 +19,7 @@ import * as migration_20260727_180000_remove_media_sizes from './20260727_180000
 import * as migration_20260829_120000_add_hero_resume_cta from './20260829_120000_add_hero_resume_cta';
 import * as migration_20260922_120000_add_project_mockup from './20260922_120000_add_project_mockup';
 import * as migration_20260922_160000_add_project_mockup_custom_frame from './20260922_160000_add_project_mockup_custom_frame';
+import * as migration_20260923_120000_add_videos_collection from './20260923_120000_add_videos_collection';
 
 export const migrations = [
   {
@@ -125,5 +126,10 @@ export const migrations = [
     up: migration_20260922_160000_add_project_mockup_custom_frame.up,
     down: migration_20260922_160000_add_project_mockup_custom_frame.down,
     name: '20260922_160000_add_project_mockup_custom_frame'
+  },
+  {
+    up: migration_20260923_120000_add_videos_collection.up,
+    down: migration_20260923_120000_add_videos_collection.down,
+    name: '20260923_120000_add_videos_collection'
   },
 ];
