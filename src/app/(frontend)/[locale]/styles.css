@@ -1126,12 +1126,81 @@ h3 {
   opacity: 0;
   pointer-events: none;
   position: absolute;
-  transition: opacity 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: opacity var(--duration-base) var(--ease-out-premium);
 }
 
-.card-glow:hover::after,
+/*
+ * Only a real pointer lights the glow, so a tap on a touch screen doesn't
+ * leave a card lit until the next tap elsewhere. `focus-within` stays outside
+ * the query — keyboard users need it on every device.
+ */
+@media (hover: hover) and (pointer: fine) {
+  .card-glow:hover::after {
+    opacity: 1;
+  }
+}
+
 .card-glow:focus-within::after {
   opacity: 1;
+}
+
+/*
+ * The grid cards lift exactly like `.timeline-item` (experience, education):
+ * 3px, the shared premium easing, and plain `transform` — not Tailwind v4's
+ * standalone `translate` property, which composites differently. Only the
+ * movement and its timing live here; each card keeps its own `hover:border-*`
+ * colour through Tailwind.
+ */
+.card-lift {
+  transition:
+    border-color var(--duration-base) var(--ease-out-premium),
+    transform var(--duration-base) var(--ease-out-premium);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-lift:hover {
+    transform: translateY(-3px);
+  }
+}
+
+.card-lift:focus-within {
+  transform: translateY(-3px);
+}
+
+/*
+ * Project/journal/adjacent cards host the glow on a static wrapper (see
+ * .card-glow above), so without this the glow stays put while the card
+ * lifts. `> .card-lift` only matches those wrappers — cards carrying both
+ * classes on one element already move their own ::after.
+ */
+.card-glow:has(> .card-lift)::after {
+  transition:
+    opacity var(--duration-base) var(--ease-out-premium),
+    transform var(--duration-base) var(--ease-out-premium);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-glow:has(> .card-lift):hover::after {
+    transform: translateY(-3px);
+  }
+}
+
+.card-glow:has(> .card-lift):focus-within::after {
+  transform: translateY(-3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-lift,
+  .card-glow:has(> .card-lift)::after {
+    transition: none;
+  }
+
+  .card-lift:hover,
+  .card-lift:focus-within,
+  .card-glow:has(> .card-lift):hover::after,
+  .card-glow:has(> .card-lift):focus-within::after {
+    transform: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

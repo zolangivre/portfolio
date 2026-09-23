@@ -33,7 +33,7 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
     // its rounded corners, which would clip the glow's shadow too).
     <div className="card-glow h-full rounded-[28px]">
       <article
-        className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-bg-elevated shadow-lg shadow-black/5 transition duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-1.5 hover:border-accent-soft-border"
+        className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-bg-elevated shadow-lg shadow-black/5 card-lift hover:border-accent-soft-border"
         data-cursor="pointer"
       >
         <Link className="flex flex-1 flex-col" href={detailHref}>

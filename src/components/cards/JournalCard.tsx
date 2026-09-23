@@ -32,7 +32,7 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
     // rounded corners, which would clip the glow's shadow too).
     <div className="card-glow h-full rounded-[28px]">
       <Link
-        className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-bg-elevated shadow-lg shadow-black/5 transition duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-1.5 hover:border-accent-soft-border"
+        className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-bg-elevated shadow-lg shadow-black/5 card-lift hover:border-accent-soft-border"
         data-cursor="pointer"
         href={`/${locale}/journal/${entry.slug}`}
       >
@@ -66,9 +66,7 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
             {entry.location ? ` · ${entry.location}` : null}
           </p>
           <h3 className="mt-2 text-xl font-semibold text-fg">{entry.title}</h3>
-          <p className="mt-3 flex-1 text-sm leading-7 text-fg-muted">
-            {entry.shortDescription}
-          </p>
+          <p className="mt-3 flex-1 text-sm leading-7 text-fg-muted">{entry.shortDescription}</p>
 
           {tags.length > 0 ? (
             <ul className="mt-5 flex flex-wrap gap-2" aria-label="tags">
