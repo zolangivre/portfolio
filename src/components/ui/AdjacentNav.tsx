@@ -38,7 +38,7 @@ function AdjacentLink({ direction, imageFit, item, label }: AdjacentLinkProps) {
     // wrapper the Link's rounded/overflow clipping can't reach.
     <div className="card-glow h-full rounded-[28px]">
       <Link
-        className={`group flex h-full items-center gap-4 rounded-[28px] border border-border bg-bg-elevated p-4 shadow-lg shadow-black/5 transition duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-1 hover:border-accent-soft-border sm:p-5 ${
+        className={`group flex h-full items-center gap-4 rounded-[28px] border border-border bg-bg-elevated p-4 shadow-lg shadow-black/5 card-lift hover:border-accent-soft-border sm:p-5 ${
           isPrevious ? '' : 'flex-row-reverse text-right'
         }`}
         data-cursor="pointer"
