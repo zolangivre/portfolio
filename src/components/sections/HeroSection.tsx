@@ -3,11 +3,13 @@
 import { motion } from 'motion/react'
 import Image from 'next/image'
 
+import { buttonClassName } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import { RichText } from '@/components/ui/RichText'
 import { useMagneticHover } from '@/hooks/useMagneticHover'
 import { useTypewriter } from '@/hooks/useTypewriter'
 import { getMediaUrl } from '@/lib/media'
+import { DURATION_SLOW, EASE_OUT_PREMIUM } from '@/lib/motion/tokens'
 import type { Hero, Setting } from '@/payload-types'
 
 type HeroSectionProps = {
@@ -25,7 +27,7 @@ const heroItemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { duration: DURATION_SLOW, ease: EASE_OUT_PREMIUM },
   },
 }
 
@@ -75,7 +77,7 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
           <motion.div className="mt-8 flex flex-wrap gap-3" variants={heroItemVariants}>
             {primaryCta?.label && primaryCta?.href ? (
               <a
-                className="btn-cta rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-fg transition duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.04] active:scale-[0.97] hover:bg-accent-strong"
+                className={buttonClassName()}
                 href={primaryCta.href}
                 ref={primaryCtaRef}
               >
@@ -84,7 +86,7 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
             ) : null}
             {secondaryCta?.label && secondaryCta?.href ? (
               <a
-                className="btn-cta rounded-full border border-border-strong bg-surface px-5 py-3 text-sm font-semibold text-fg transition duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.04] active:scale-[0.97] hover:border-accent-soft-border hover:text-accent"
+                className={buttonClassName('secondary')}
                 href={secondaryCta.href}
                 ref={secondaryCtaRef}
               >
@@ -93,7 +95,7 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
             ) : null}
             {resumeCta?.label && resumeUrl ? (
               <a
-                className="btn-cta rounded-full border border-border-strong bg-surface px-5 py-3 text-sm font-semibold text-fg transition duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.04] active:scale-[0.97] hover:border-accent-soft-border hover:text-accent"
+                className={buttonClassName('secondary')}
                 download
                 href={resumeUrl}
                 ref={resumeCtaRef}
@@ -121,7 +123,7 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
             animate={{ opacity: 1, scale: 1, rotate: 0 }}
             className="relative mt-10 lg:mt-0"
             initial={{ opacity: 0, scale: 0.94, rotate: -2 }}
-            transition={{ delay: 0.15, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ delay: 0.15, duration: DURATION_SLOW, ease: EASE_OUT_PREMIUM }}
           >
             <div
               aria-hidden="true"
@@ -130,7 +132,7 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
             />
             <Image
               alt=""
-              className="h-auto w-full max-w-sm rounded-[28px] border border-border shadow-xl shadow-black/10 lg:w-80 lg:shrink-0"
+              className="h-auto w-full max-w-sm rounded-card border border-border shadow-raised lg:w-80 lg:shrink-0"
               height={photoHeight}
               priority
               quality={90}

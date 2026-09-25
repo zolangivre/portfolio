@@ -159,7 +159,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
             ) : null}
             <AnimatedTitle title={project.title} />
             {project.shortDescription ? (
-              <p className="text-sm font-medium uppercase tracking-[0.18em] text-fg-subtle">
+              <p className="text-sm font-medium uppercase tracking-label text-fg-subtle">
                 {project.shortDescription}
               </p>
             ) : null}
@@ -178,7 +178,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
           </Reveal>
         ) : imageUrl || darkImageUrl ? (
           <Reveal delay={0.16}>
-            <div className="relative mt-8 aspect-video overflow-hidden rounded-[28px] bg-surface">
+            <div className="relative mt-8 aspect-video overflow-hidden rounded-card bg-surface">
               {imageUrl ? (
                 <FadeImage
                   alt={imageAlt}

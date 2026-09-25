@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 
+import { buttonClassName } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
 
@@ -44,13 +45,13 @@ export function RouteNotFound() {
           <p className="mt-3 text-sm leading-7 text-fg-muted">{copy.description}</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
-              className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-fg transition duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.04] hover:bg-accent-strong active:scale-[0.97]"
+              className={buttonClassName()}
               href={`/${locale}`}
             >
               {copy.home}
             </Link>
             <Link
-              className="rounded-full border border-border-strong px-5 py-3 text-sm font-semibold text-fg transition duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.04] hover:border-accent-soft-border hover:text-accent active:scale-[0.97]"
+              className={buttonClassName('secondary')}
               href={`/${locale}/projects`}
             >
               {copy.back}

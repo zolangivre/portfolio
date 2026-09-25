@@ -1,6 +1,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { cardClassName, cardFrameClassName } from '@/components/ui/Card'
+import { Pill } from '@/components/ui/Pill'
 import { TechChip } from '@/components/ui/TechChip'
 import { getMediaUrl } from '@/lib/media'
 import type { Dictionary } from '@/lib/i18n/dictionary'
@@ -31,9 +33,9 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
     // .card-glow's hover glow lives on an ::after — it needs an ancestor
     // without overflow-hidden (the article below clips the cover image to
     // its rounded corners, which would clip the glow's shadow too).
-    <div className="card-glow h-full rounded-[28px]">
+    <div className={cardFrameClassName('h-full')}>
       <article
-        className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-bg-elevated shadow-lg shadow-black/5 card-lift hover:border-accent-soft-border"
+        className={cardClassName({ className: 'group flex h-full flex-col overflow-hidden' })}
         data-cursor="pointer"
       >
         <Link className="flex flex-1 flex-col" href={detailHref}>
@@ -65,14 +67,14 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
             <div className="mb-2 flex items-start justify-between gap-3">
               <h3 className="text-xl font-semibold text-fg">{project.title}</h3>
               {project.featured ? (
-                <span className="shrink-0 rounded-full border border-accent-soft-border bg-accent-soft px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-accent">
+                <Pill className="shrink-0" tone="accent">
                   {dictionary.projects.featuredBadge}
-                </span>
+                </Pill>
               ) : null}
             </div>
 
             {categoryLabel || project.year || statusLabel ? (
-              <p className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium uppercase tracking-widest text-fg-subtle">
+              <p className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-label uppercase text-fg-subtle">
                 {categoryLabel ? <span>{categoryLabel}</span> : null}
                 {categoryLabel && project.year ? <span aria-hidden="true">·</span> : null}
                 {project.year ? <span>{project.year}</span> : null}

@@ -2,7 +2,9 @@
 
 import { motion } from 'motion/react'
 
+import { cardClassName, cardFrameClassName } from '@/components/ui/Card'
 import { RichText } from '@/components/ui/RichText'
+import { DURATION_SLOW, EASE_OUT_PREMIUM } from '@/lib/motion/tokens'
 import type { LexicalContent } from '@/lib/richText'
 
 type PointGroupCardProps = {
@@ -20,8 +22,8 @@ const cardVariants = {
     transition: {
       delay,
       delayChildren: delay + 0.1,
-      duration: 0.6,
-      ease: [0.22, 1, 0.36, 1] as const,
+      duration: DURATION_SLOW,
+      ease: EASE_OUT_PREMIUM,
       staggerChildren: 0.1,
     },
   }),
@@ -29,30 +31,35 @@ const cardVariants = {
 
 const itemVariants = {
   hidden: { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } },
+  visible: { opacity: 1, y: 0, transition: { duration: DURATION_SLOW, ease: EASE_OUT_PREMIUM } },
 }
 
 export function PointGroupCard({ content, delay, title }: PointGroupCardProps) {
   return (
+    // The entrance animation runs on the static .card-glow wrapper and the
+    // hover lift on the inner card, so motion's inline `transform` never
+    // overrides .card-lift's (see .card-glow in styles.css).
     <motion.div
-      className="card-glow rounded-[28px] border border-accent-soft-border bg-accent-soft p-8 card-lift hover:border-accent-strong"
+      className={cardFrameClassName()}
       custom={delay}
       initial="hidden"
       variants={cardVariants}
       viewport={{ margin: '-80px', once: true }}
       whileInView="visible"
     >
-      <motion.p
-        className="text-sm font-semibold uppercase tracking-[0.2em] text-accent"
-        variants={itemVariants}
-      >
-        {title}
-      </motion.p>
-      {content ? (
-        <motion.div className="mt-5 text-sm leading-7 text-fg" variants={itemVariants}>
-          <RichText content={content} />
-        </motion.div>
-      ) : null}
+      <div className={cardClassName({ className: 'h-full p-8', tone: 'accent' })}>
+        <motion.p
+          className="eyebrow mb-0"
+          variants={itemVariants}
+        >
+          {title}
+        </motion.p>
+        {content ? (
+          <motion.div className="mt-5 text-sm leading-7 text-fg" variants={itemVariants}>
+            <RichText content={content} />
+          </motion.div>
+        ) : null}
+      </div>
     </motion.div>
   )
 }

@@ -10,7 +10,7 @@ export function FadeImage({ className, onLoad, ...props }: ImageProps) {
     // eslint-disable-next-line jsx-a11y/alt-text -- alt is required by ImageProps and forwarded via props
     <Image
       {...props}
-      className={`transition-opacity duration-500 ease-out ${loaded ? 'opacity-100' : 'opacity-0'}${className ? ` ${className}` : ''}`}
+      className={`transition-opacity duration-(--duration-base) ease-out ${loaded ? 'opacity-100' : 'opacity-0'}${className ? ` ${className}` : ''}`}
       onLoad={(event) => {
         setLoaded(true)
         onLoad?.(event)

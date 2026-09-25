@@ -39,7 +39,7 @@ export function AboutSection({ about, dictionary }: AboutSectionProps) {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch">
           {portraitUrl ? (
             <Reveal blur={8} scale={0.96}>
-              <div className="relative h-64 w-full overflow-hidden rounded-[28px] border border-border shadow-xl shadow-black/10 sm:h-96 lg:h-full lg:w-80 lg:shrink-0">
+              <div className="relative h-64 w-full overflow-hidden rounded-card border border-border shadow-raised sm:h-96 lg:h-full lg:w-80 lg:shrink-0">
                 <FadeImage
                   alt=""
                   className="object-cover"

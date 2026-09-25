@@ -8,6 +8,7 @@ import { Container } from '@/components/ui/Container'
 import { Divider } from '@/components/ui/Divider'
 import { FadeImage } from '@/components/ui/FadeImage'
 import { MediaGallery } from '@/components/ui/MediaGallery'
+import { Pill } from '@/components/ui/Pill'
 import { ReadingProgress } from '@/components/ui/ReadingProgress'
 import { Reveal } from '@/components/ui/Reveal'
 import { RichText } from '@/components/ui/RichText'
@@ -130,7 +131,7 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
           <div>
             {categoryLabel ? <p className="eyebrow mt-6">{categoryLabel}</p> : null}
             <AnimatedTitle title={entry.title} />
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-fg-subtle">
+            <p className="text-sm font-medium uppercase tracking-label text-fg-subtle">
               {formattedDate}
               {entry.location ? ` · ${entry.location}` : null}
             </p>
@@ -141,7 +142,7 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
           <Reveal delay={0.16}>
             <FadeImage
               alt={imageAlt}
-              className="mt-8 block h-auto w-full rounded-[28px] bg-surface"
+              className="mt-8 block h-auto w-full rounded-card bg-surface"
               height={coverImage?.height ?? 900}
               priority
               sizes="(min-width: 1200px) 1160px, 100vw"
@@ -161,12 +162,9 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
           <Reveal>
             <ul className="mt-8 flex flex-wrap gap-2" aria-label="tags">
               {entry.tags.map((tag, index) => (
-                <li
-                  className="rounded-full border border-border bg-surface px-3 py-1 text-[11px] font-medium uppercase tracking-[0.15em] text-fg-muted transition hover:scale-105 hover:border-accent-soft-border hover:text-fg"
-                  key={`${tag.value}-${index}`}
-                >
+                <Pill as="li" interactive key={`${tag.value}-${index}`}>
                   {tag.value}
-                </li>
+                </Pill>
               ))}
             </ul>
           </Reveal>
