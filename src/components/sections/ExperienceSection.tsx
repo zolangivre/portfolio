@@ -1,6 +1,7 @@
 import Image from 'next/image'
 
 import { Container } from '@/components/ui/Container'
+import { Pill } from '@/components/ui/Pill'
 import { TechChip } from '@/components/ui/TechChip'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
@@ -63,14 +64,14 @@ export function ExperienceSection({
                   delay={Math.min(index, 5) * 0.08}
                   key={experience.id}
                 >
-                  <article className="timeline-item">
+                  <article className="timeline-item card-lift">
                     <div className="timeline-meta">
-                      <span className="timeline-date">
+                      <Pill tone="accent">
                         {formatDate(experience.startDate, locale, dictionary.experience.present)} –{' '}
                         {formatDate(experience.endDate, locale, dictionary.experience.present)}
-                      </span>
+                      </Pill>
                       {experience.employmentType ? (
-                        <span className="text-xs font-medium uppercase tracking-widest text-fg-subtle">
+                        <span className="text-label uppercase text-fg-subtle">
                           {experience.employmentType}
                         </span>
                       ) : null}

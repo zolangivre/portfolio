@@ -4,8 +4,19 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useActionState } from 'react'
 
 import type { Dictionary } from '@/lib/i18n/dictionary'
+import { buttonClassName } from '@/components/ui/Button'
 import { useMagneticHover } from '@/hooks/useMagneticHover'
 import { submitContactForm, type ContactFormState } from '@/lib/actions/contact'
+import { DURATION_BASE, DURATION_FAST, EASE_OUT_PREMIUM } from '@/lib/motion/tokens'
+
+/*
+ * Fields keep the global :focus-visible ring (2px accent outline, which
+ * every browser shows on a focused text input) instead of `outline-none` —
+ * the border change alone was ~1.4:1 against the field and failed WCAG's
+ * 3:1 for focus indicators. The border still turns accent as a second cue.
+ */
+const FIELD_CLASSNAME =
+  'w-full border border-border bg-surface px-4 py-3 text-sm text-fg transition focus:border-accent'
 
 type ContactFormProps = {
   dictionary: Dictionary
@@ -14,7 +25,7 @@ type ContactFormProps = {
 
 const initialState: ContactFormState = { success: false }
 
-const fadeTransition = { duration: 0.2, ease: [0.4, 0, 0.2, 1] as const }
+const fadeTransition = { duration: DURATION_FAST, ease: EASE_OUT_PREMIUM }
 
 const fieldContainerVariants = {
   hidden: {},
@@ -23,7 +34,7 @@ const fieldContainerVariants = {
 
 const fieldVariants = {
   hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } },
+  visible: { opacity: 1, y: 0, transition: { duration: DURATION_BASE, ease: EASE_OUT_PREMIUM } },
 }
 
 export function ContactForm({ dictionary, successMessage }: ContactFormProps) {
@@ -66,7 +77,7 @@ export function ContactForm({ dictionary, successMessage }: ContactFormProps) {
             <label className="block text-sm text-fg-muted">
               <span className="mb-2 block">{dictionary.contact.formNameLabel}</span>
               <input
-                className="w-full rounded-full border border-border bg-surface px-4 py-3 text-sm text-fg outline-none transition focus:border-accent-soft-border"
+                className={`${FIELD_CLASSNAME} rounded-full`}
                 maxLength={120}
                 name="name"
                 placeholder={dictionary.contact.formNamePlaceholder}
@@ -76,7 +87,7 @@ export function ContactForm({ dictionary, successMessage }: ContactFormProps) {
             <label className="block text-sm text-fg-muted">
               <span className="mb-2 block">{dictionary.contact.formEmailLabel}</span>
               <input
-                className="w-full rounded-full border border-border bg-surface px-4 py-3 text-sm text-fg outline-none transition focus:border-accent-soft-border"
+                className={`${FIELD_CLASSNAME} rounded-full`}
                 maxLength={254}
                 name="email"
                 placeholder={dictionary.contact.formEmailPlaceholder}
@@ -88,7 +99,7 @@ export function ContactForm({ dictionary, successMessage }: ContactFormProps) {
           <motion.label className="block text-sm text-fg-muted" variants={fieldVariants}>
             <span className="mb-2 block">{dictionary.contact.formMessageLabel}</span>
             <textarea
-              className="min-h-36 w-full rounded-4xl border border-border bg-surface px-4 py-3 text-sm text-fg outline-none transition focus:border-accent-soft-border"
+              className={`${FIELD_CLASSNAME} min-h-36 rounded-4xl`}
               maxLength={5000}
               name="message"
               placeholder={dictionary.contact.formMessagePlaceholder}
@@ -98,7 +109,7 @@ export function ContactForm({ dictionary, successMessage }: ContactFormProps) {
 
           <motion.div className="min-h-5" variants={fieldVariants}>
             {state.error ? (
-              <p className="text-sm font-medium text-red-500" role="alert">
+              <p className="text-sm font-medium text-danger" role="alert">
                 {dictionary.contact.errors[state.error] ??
                   dictionary.contact.errors['server-error']}
               </p>
@@ -106,7 +117,7 @@ export function ContactForm({ dictionary, successMessage }: ContactFormProps) {
           </motion.div>
 
           <motion.button
-            className="btn-cta rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-fg transition duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.04] active:scale-[0.97] hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
+            className={buttonClassName()}
             disabled={pending}
             ref={submitRef}
             type="submit"

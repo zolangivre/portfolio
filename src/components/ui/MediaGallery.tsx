@@ -54,7 +54,7 @@ export function MediaGallery({
               {isVideo(image.mimeType) ? (
                 <>
                   <video
-                    className="rounded-[20px] bg-surface"
+                    className="rounded-inset bg-surface"
                     height={image.height ?? 1200}
                     muted
                     playsInline
@@ -73,14 +73,14 @@ export function MediaGallery({
               ) : (
                 <FadeImage
                   alt={image.alt}
-                  className="rounded-[20px] bg-surface"
+                  className="rounded-inset bg-surface"
                   height={image.height ?? 1200}
                   sizes="(min-width: 720px) 33vw, 50vw"
                   src={image.src}
                   width={image.width ?? 1600}
                 />
               )}
-              <span aria-hidden="true" className="media-gallery-overlay rounded-[20px]" />
+              <span aria-hidden="true" className="media-gallery-overlay rounded-inset" />
             </button>
           </Reveal>
         ))}

@@ -1,6 +1,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { cardClassName, cardFrameClassName } from '@/components/ui/Card'
+
 export type AdjacentItem = {
   href: string
   imageAlt?: string
@@ -36,17 +38,19 @@ function AdjacentLink({ direction, imageFit, item, label }: AdjacentLinkProps) {
   return (
     // Same trick as the cards: the glow lives on an ::after, so it needs a
     // wrapper the Link's rounded/overflow clipping can't reach.
-    <div className="card-glow h-full rounded-[28px]">
+    <div className={cardFrameClassName('h-full')}>
       <Link
-        className={`group flex h-full items-center gap-4 rounded-[28px] border border-border bg-bg-elevated p-4 shadow-lg shadow-black/5 card-lift hover:border-accent-soft-border sm:p-5 ${
-          isPrevious ? '' : 'flex-row-reverse text-right'
-        }`}
+        className={cardClassName({
+          className: `group flex h-full items-center gap-4 p-4 sm:p-5${
+            isPrevious ? '' : ' flex-row-reverse text-right'
+          }`,
+        })}
         data-cursor="pointer"
         href={item.href}
       >
         {item.imageUrl ? (
           <span
-            className={`relative hidden h-16 w-16 shrink-0 overflow-hidden rounded-[20px] bg-surface sm:block${
+            className={`relative hidden h-16 w-16 shrink-0 overflow-hidden rounded-inset bg-surface sm:block${
               imageFit === 'contain' ? ' p-2' : ''
             }`}
           >
@@ -75,13 +79,13 @@ function AdjacentLink({ direction, imageFit, item, label }: AdjacentLinkProps) {
 
         <span className="min-w-0 flex-1">
           <span
-            className={`flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.2em] text-fg-subtle ${
+            className={`flex items-center gap-2 text-label uppercase text-fg-subtle ${
               isPrevious ? '' : 'flex-row-reverse'
             }`}
           >
             <span
               aria-hidden
-              className={`text-accent transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+              className={`text-accent transition-transform duration-(--duration-base) ease-bounce ${
                 isPrevious ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'
               }`}
             >

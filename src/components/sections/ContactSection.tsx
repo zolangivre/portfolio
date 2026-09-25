@@ -1,5 +1,6 @@
 import Image from 'next/image'
 
+import { cardClassName } from '@/components/ui/Card'
 import { Container } from '@/components/ui/Container'
 import { getMediaUrl } from '@/lib/media'
 import type { Dictionary } from '@/lib/i18n/dictionary'
@@ -34,8 +35,8 @@ export function ContactSection({ contact, dictionary, settings }: ContactSection
         />
 
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <Reveal className="rounded-[28px] border border-border bg-bg-elevated p-8 shadow-lg shadow-black/5">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">
+          <Reveal className={cardClassName({ className: 'p-8', interactive: false })}>
+            <p className="eyebrow mb-0">
               {dictionary.contact.reachOut}
             </p>
             <a
@@ -57,7 +58,7 @@ export function ContactSection({ contact, dictionary, settings }: ContactSection
                       rel="noreferrer"
                       target="_blank"
                     >
-                      <span className="inline-flex transition duration-200 group-hover:-translate-y-0.5 group-hover:scale-110">
+                      <span className="inline-flex transition group-hover:-translate-y-0.5 group-hover:scale-110">
                         {iconUrl ? (
                           <Image
                             alt=""
@@ -79,7 +80,7 @@ export function ContactSection({ contact, dictionary, settings }: ContactSection
           </Reveal>
 
           <Reveal
-            className="rounded-[28px] border border-border bg-bg-elevated p-8 shadow-lg shadow-black/5"
+            className={cardClassName({ className: 'p-8', interactive: false })}
             delay={0.1}
           >
             <ContactForm dictionary={dictionary} successMessage={successMessage} />

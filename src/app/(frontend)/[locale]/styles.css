@@ -38,14 +38,14 @@ a {
   border: 1px solid var(--border-strong);
   border-radius: 999px;
   color: var(--fg);
-  font-size: 0.85rem;
+  font-size: var(--text-caption);
   font-weight: 600;
   left: 1.25rem;
   padding: 0.6rem 1.1rem;
   position: fixed;
   top: -4rem;
-  transition: top 180ms ease;
-  z-index: 100;
+  transition: top var(--duration-fast) ease;
+  z-index: var(--z-skip-link);
 }
 
 .skip-link:focus-visible {
@@ -106,7 +106,7 @@ a {
 .ambient-parallax {
   inset: 0;
   position: absolute;
-  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform var(--duration-base) var(--ease-out-premium);
   will-change: transform;
 }
 
@@ -303,7 +303,7 @@ a {
   position: fixed;
   top: 0;
   will-change: transform;
-  z-index: 10000;
+  z-index: var(--z-cursor);
 }
 
 .cursor-dot.is-visible,
@@ -316,7 +316,7 @@ a {
   border-radius: 999px;
   height: 7px;
   margin: -3.5px 0 0 -3.5px;
-  transition: opacity 200ms ease;
+  transition: opacity var(--duration-fast) ease;
   width: 7px;
 }
 
@@ -342,9 +342,9 @@ a {
   position: absolute;
   transform: scale(1);
   transition:
-    transform 250ms cubic-bezier(0.22, 1, 0.36, 1),
-    background-color 250ms ease,
-    border-color 250ms ease;
+    transform var(--duration-fast) var(--ease-out-premium),
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
 }
 
 .cursor-ring.is-hovering::before {
@@ -374,8 +374,8 @@ a {
   position: absolute;
   transform: scale(1);
   transition:
-    transform 250ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 250ms ease;
+    transform var(--duration-fast) var(--ease-out-premium),
+    opacity var(--duration-fast) ease;
 }
 
 .cursor-ring.is-hovering::after {
@@ -389,7 +389,7 @@ a {
 
 .cursor-trail {
   opacity: 0;
-  transition: opacity 200ms ease;
+  transition: opacity var(--duration-fast) ease;
 }
 
 .cursor-trail.is-visible {
@@ -403,7 +403,7 @@ a {
   pointer-events: none;
   position: fixed;
   top: 0;
-  z-index: 10000;
+  z-index: var(--z-cursor);
 }
 
 
@@ -442,10 +442,10 @@ a {
   border-bottom: 1px solid transparent;
   position: sticky;
   top: 0;
-  transition: border-color 320ms ease;
+  transition: border-color var(--duration-base) ease;
   view-transition-name: site-header;
   width: 100%;
-  z-index: 10;
+  z-index: var(--z-header);
   isolation: isolate;
 }
 
@@ -487,7 +487,7 @@ a {
   pointer-events: none;
   position: absolute;
   transform: translateZ(0);
-  transition: opacity 320ms ease;
+  transition: opacity var(--duration-base) ease;
   will-change: opacity;
   z-index: -1;
 }
@@ -512,7 +512,7 @@ a {
   align-items: center;
   display: inline-flex;
   text-decoration: none;
-  transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform var(--duration-base) var(--ease-out-premium);
 }
 
 .site-logo:hover {
@@ -521,13 +521,11 @@ a {
 
 .site-logo-initials {
   align-items: center;
-  /* color: var(--fg); */
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
-  line-height: 1;
   padding-right: 0.2em;
   display: inline-block;
   font-weight: 600;
@@ -588,7 +586,7 @@ a {
   color: var(--fg-muted);
   font-size: 0.95rem;
   text-decoration: none;
-  transition: color 180ms ease;
+  transition: color var(--duration-fast) ease;
 }
 
 .site-nav a,
@@ -608,7 +606,7 @@ a {
   right: 0;
   transform: scaleX(0);
   transform-origin: center;
-  transition: transform 240ms ease;
+  transition: transform var(--duration-fast) ease;
 }
 
 .site-nav a:hover,
@@ -628,7 +626,7 @@ a {
 
 .link-underline {
   position: relative;
-  transition: color 180ms ease;
+  transition: color var(--duration-fast) ease;
 }
 
 .link-underline::after {
@@ -642,7 +640,7 @@ a {
   right: 0;
   transform: scaleX(0);
   transform-origin: center;
-  transition: transform 240ms ease;
+  transition: transform var(--duration-fast) ease;
 }
 
 .link-underline:hover::after {
@@ -679,7 +677,7 @@ a {
 
 @media (hover: hover) and (pointer: fine) {
   .btn-cta:hover {
-    box-shadow: 0 12px 32px -12px var(--accent-soft-border);
+    box-shadow: var(--shadow-glow-sm);
   }
 }
 
@@ -701,7 +699,7 @@ a {
   color: var(--fg-muted);
   cursor: pointer;
   display: inline-flex;
-  font-size: 0.78rem;
+  font-size: var(--text-caption);
   font-weight: 600;
   justify-content: center;
   letter-spacing: 0.06em;
@@ -711,7 +709,7 @@ a {
   /* `color` is the only thing these ever change (see :hover and
      [data-active] below) — `all` made the engine watch every animatable
      property, filters and box-shadows included, for nothing. */
-  transition: color 180ms ease;
+  transition: color var(--duration-fast) ease;
 }
 
 .theme-toggle-item {
@@ -759,7 +757,7 @@ a {
   justify-content: center;
   position: relative;
   width: 2.75rem;
-  z-index: 20;
+  z-index: var(--z-drawer-toggle);
 }
 
 .nav-toggle-line {
@@ -768,8 +766,8 @@ a {
   display: block;
   height: 2px;
   transition:
-    transform 220ms ease,
-    opacity 220ms ease;
+    transform var(--duration-fast) ease,
+    opacity var(--duration-fast) ease;
   width: 1.1rem;
 }
 
@@ -810,9 +808,9 @@ a {
     right: 0;
     top: 0;
     transform: translateX(100%);
-    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform var(--duration-base) var(--ease-out-premium);
     width: min(20rem, 86vw);
-    z-index: 15;
+    z-index: var(--z-drawer);
   }
 
   .site-header-nav[data-open='true'] {
@@ -846,8 +844,8 @@ a {
     opacity: 0;
     pointer-events: none;
     position: fixed;
-    transition: opacity 280ms ease;
-    z-index: 12;
+    transition: opacity var(--duration-base) ease;
+    z-index: var(--z-scrim);
   }
 
   .nav-scrim[data-open='true'] {
@@ -884,7 +882,7 @@ a {
     position: fixed;
     top: 50%;
     transform: translateY(-50%);
-    z-index: 5;
+    z-index: var(--z-rail);
   }
 }
 
@@ -920,9 +918,9 @@ a {
   border-radius: 999px;
   height: 0.5rem;
   transition:
-    background-color 250ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    border-color 250ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    background-color var(--duration-fast) var(--ease-bounce),
+    border-color var(--duration-fast) var(--ease-bounce),
+    transform var(--duration-fast) var(--ease-bounce);
   width: 0.5rem;
 }
 
@@ -940,16 +938,16 @@ a {
 
 .index-rail-label {
   color: var(--fg-muted);
-  font-size: 0.78rem;
+  font-size: var(--text-caption);
   max-width: 9rem;
   opacity: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   transform: translateX(-4px);
   transition:
-    opacity 200ms ease,
-    transform 200ms ease,
-    color 200ms ease;
+    opacity var(--duration-fast) ease,
+    transform var(--duration-fast) ease,
+    color var(--duration-fast) ease;
   white-space: nowrap;
 }
 
@@ -993,7 +991,7 @@ main {
 
 .eyebrow {
   color: var(--accent);
-  font-size: 0.82rem;
+  font-size: var(--text-caption);
   font-weight: 700;
   letter-spacing: 0.2em;
   margin: 0 0 0.9rem;
@@ -1025,7 +1023,7 @@ h1 {
 /* Hero title only (the name) — every other h1 keeps the 4rem default above,
    and this is the one place the playful Bagel Fat One face shows up (it only
    ships a single weight, so it's reset to 400 instead of inheriting the
-   h1/h2/h3 600 above, and tracking is loosened — the -0.2em used for the
+   h1/h2/h3 700 above, and tracking is loosened — the -0.2em used for the
    compact logo mark would collapse a full name into itself at this size). */
 #hero-title {
   align-items: center;
@@ -1058,20 +1056,21 @@ h2 {
   margin-bottom: 0.95rem;
 }
 
+/* Same size as the card titles (`text-xl`), so every h3 reads as one level. */
 h3 {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   margin-bottom: 0.5rem;
 }
 
 .hero-copy p:not(.eyebrow) {
   color: var(--fg-muted);
-  font-size: 1.05rem;
+  font-size: var(--text-lead);
   max-width: 700px;
 }
 
 .section-header p:not(.eyebrow) {
   color: var(--fg-muted);
-  font-size: 1.05rem;
+  font-size: var(--text-lead);
 }
 
 .section-header {
@@ -1088,31 +1087,35 @@ h3 {
 .skill-group {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 24px;
-  box-shadow: 0 10px 35px rgb(var(--shadow-color) / 0.08);
-}
-
-.project-card {
-  overflow: hidden;
+  border-radius: var(--radius-group);
+  box-shadow: var(--shadow-rest);
 }
 
 /*
- * Shared hover glow for the grid cards (projects, journal, testimonials,
- * point groups) — each used to carry its own `hover:shadow-[0_25px_60px_
- * -15px_var(--accent-soft-border)]` Tailwind utility, animating box-shadow
- * directly via the `transition` utility. These sit in dense grids the
- * pointer moves across constantly, and animating a wide (60px blur) shadow
- * forces a full repaint of that area on every frame — noticeably worse on
- * Safari than Chrome. The shadow's shape/color never changes, only its
- * visibility, so it lives on its own layer (`::after`) and only its
- * (compositable) opacity animates. `-translate-y-1.5` and
- * `hover:border-...` stay as plain Tailwind utilities on each card —
- * transform and border-color are cheap either way.
+ * Shared hover glow + lift for the grid cards (projects, journal,
+ * testimonials, point groups, prev/next nav) — each used to carry its own
+ * `hover:shadow-[0_25px_60px_-15px_var(--accent-soft-border)]` Tailwind
+ * utility, animating box-shadow directly via the `transition` utility.
+ * These sit in dense grids the pointer moves across constantly, and
+ * animating a wide (60px blur) shadow forces a full repaint of that area on
+ * every frame — noticeably worse on Safari than Chrome. The shadow's
+ * shape/color never changes, only its visibility, so it lives on its own
+ * layer (`::after`) and only its (compositable) opacity animates.
  *
- * Cards that also clip an inner image with `overflow-hidden` (project,
- * journal) can't host this directly — box-shadow on a child is clipped by
- * an ancestor's overflow-hidden — so those wrap the existing card in a
- * `.card-glow` element instead of applying the class to the clipped card.
+ * Every card is split in two: a static `.card-glow` wrapper and the visible
+ * `.card-lift` card inside it. The wrapper is the hover target and hosts the
+ * glow; the card is what moves. Keying both off the wrapper keeps glow and
+ * card in sync, and stops the jitter you get when the hovered element itself
+ * lifts out from under a pointer resting on its bottom edge. It also keeps
+ * the glow clear of the card's own `overflow-hidden` (project, journal clip
+ * their cover image, which would clip the glow's shadow too), and leaves the
+ * card's `transform` free of motion's inline style when the entrance
+ * animation runs on the wrapper (PointGroupCard).
+ *
+ * The border colour can't live here: this file sits in @layer base, which
+ * Tailwind's `border-*` utilities outrank. Each card sets it with
+ * `group-hover/card:` and `group-has-focus-visible/card:`, with
+ * `group/card` on the wrapper.
  */
 .card-glow {
   position: relative;
@@ -1120,36 +1123,22 @@ h3 {
 
 .card-glow::after {
   border-radius: inherit;
-  box-shadow: 0 25px 60px -15px var(--accent-soft-border);
+  box-shadow: var(--shadow-glow);
   content: '';
   inset: 0;
   opacity: 0;
   pointer-events: none;
   position: absolute;
-  transition: opacity var(--duration-base) var(--ease-out-premium);
+  transition:
+    opacity var(--duration-base) var(--ease-out-premium),
+    transform var(--duration-base) var(--ease-out-premium);
 }
 
 /*
- * Only a real pointer lights the glow, so a tap on a touch screen doesn't
- * leave a card lit until the next tap elsewhere. `focus-within` stays outside
- * the query — keyboard users need it on every device.
- */
-@media (hover: hover) and (pointer: fine) {
-  .card-glow:hover::after {
-    opacity: 1;
-  }
-}
-
-.card-glow:focus-within::after {
-  opacity: 1;
-}
-
-/*
- * The grid cards lift exactly like `.timeline-item` (experience, education):
- * 3px, the shared premium easing, and plain `transform` — not Tailwind v4's
- * standalone `translate` property, which composites differently. Only the
- * movement and its timing live here; each card keeps its own `hover:border-*`
- * colour through Tailwind.
+ * `.timeline-item` (experience, education) lifts through the same class,
+ * hovered via its `.timeline-row`, so the movement is defined once: 3px, the
+ * shared premium easing, and plain `transform` — not Tailwind v4's
+ * standalone `translate` property, which composites differently.
  */
 .card-lift {
   transition:
@@ -1157,73 +1146,58 @@ h3 {
     transform var(--duration-base) var(--ease-out-premium);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .card-lift:hover {
-    transform: translateY(-3px);
-  }
-}
-
-.card-lift:focus-within {
-  transform: translateY(-3px);
-}
-
 /*
- * Project/journal/adjacent cards host the glow on a static wrapper (see
- * .card-glow above), so without this the glow stays put while the card
- * lifts. `> .card-lift` only matches those wrappers — cards carrying both
- * classes on one element already move their own ::after.
+ * Only a real pointer triggers hover, so a tap on a touch screen doesn't
+ * leave a card lifted and lit until the next tap elsewhere. Focus uses
+ * `:focus-visible` for the same reason: it matches keyboard focus on every
+ * device, but not the focus a click or tap leaves behind on a link.
  */
-.card-glow:has(> .card-lift)::after {
-  transition:
-    opacity var(--duration-base) var(--ease-out-premium),
-    transform var(--duration-base) var(--ease-out-premium);
+@media (hover: hover) and (pointer: fine) {
+  .card-glow:hover::after {
+    opacity: 1;
+  }
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .card-glow:has(> .card-lift):hover::after {
+.card-glow:has(:focus-visible)::after {
+  opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .card-glow:hover::after,
+  .card-glow:hover > .card-lift,
+  .timeline-row:hover > .card-lift {
     transform: translateY(-3px);
   }
 }
 
-.card-glow:has(> .card-lift):focus-within::after {
-  transform: translateY(-3px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .card-lift,
-  .card-glow:has(> .card-lift)::after {
-    transition: none;
-  }
-
-  .card-lift:hover,
-  .card-lift:focus-within,
-  .card-glow:has(> .card-lift):hover::after,
-  .card-glow:has(> .card-lift):focus-within::after {
-    transform: none;
+@media (prefers-reduced-motion: no-preference) {
+  .card-glow:has(:focus-visible)::after,
+  .card-glow:has(:focus-visible) > .card-lift,
+  .timeline-row:has(:focus-visible) > .card-lift {
+    transform: translateY(-3px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card-glow::after {
+  .card-glow::after,
+  .card-lift {
     transition: none;
   }
-}
-
-.project-card-content,
-.skill-group {
-  padding: 1.25rem;
 }
 
 .skill-group {
   display: flex;
   flex-direction: column;
   height: 100%;
+  padding: 1.25rem;
 }
 
+/* Moves like the grid cards (.card-lift): same 3px lift, duration and
+   easing — only its glow is the smaller one, to suit the tile's size. */
 .skill-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--radius-tile);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -1231,8 +1205,8 @@ h3 {
   padding: 1rem;
   position: relative;
   transition:
-    border-color 250ms ease-out,
-    transform 250ms ease-out;
+    border-color var(--duration-base) var(--ease-out-premium),
+    transform var(--duration-base) var(--ease-out-premium);
 }
 
 /*
@@ -1245,29 +1219,29 @@ h3 {
  */
 .skill-card::after {
   border-radius: inherit;
-  box-shadow: 0 20px 45px -15px var(--accent-soft-border);
+  box-shadow: var(--shadow-glow-sm);
   content: '';
   inset: 0;
   opacity: 0;
   pointer-events: none;
   position: absolute;
-  transition: opacity 250ms ease-out;
+  transition: opacity var(--duration-base) var(--ease-out-premium);
 }
 
 .skill-card-icon {
-  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform var(--duration-base) var(--ease-bounce);
 }
 
 .skill-card-link-icon {
   color: var(--fg-subtle);
   opacity: 0;
-  transition: opacity 200ms ease-out;
+  transition: opacity var(--duration-fast) ease-out;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .skill-card:hover {
     border-color: var(--accent-soft-border);
-    transform: translateY(-4px);
+    transform: translateY(-3px);
   }
 
   .skill-card:hover::after {
@@ -1285,7 +1259,7 @@ h3 {
 
 .skill-card:focus-visible {
   border-color: var(--accent-soft-border);
-  transform: translateY(-4px);
+  transform: translateY(-3px);
 }
 
 .skill-card:focus-visible::after {
@@ -1328,25 +1302,6 @@ h3 {
   .skill-card-float {
     animation: none;
   }
-}
-
-.tag-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  list-style: none;
-  margin: 1rem 0 0;
-  padding: 0;
-}
-
-.tag-list li {
-  background: var(--accent-soft);
-  border: 1px solid var(--accent-soft-border);
-  border-radius: 999px;
-  color: var(--accent);
-  font-size: 0.8rem;
-  line-height: 1;
-  padding: 0.45rem 0.7rem;
 }
 
 /*
@@ -1399,8 +1354,14 @@ h3 {
   z-index: 1;
 }
 
-.timeline-row:hover::before,
-.timeline-row:focus-within::before {
+@media (hover: hover) and (pointer: fine) {
+  .timeline-row:hover::before {
+    box-shadow: 0 0 0 6px var(--accent-soft);
+    transform: scale(1.15);
+  }
+}
+
+.timeline-row:has(:focus-visible)::before {
   box-shadow: 0 0 0 6px var(--accent-soft);
   transform: scale(1.15);
 }
@@ -1432,15 +1393,10 @@ h3 {
 .timeline-item {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 22px;
-  box-shadow:
-    0 1px 2px rgb(var(--shadow-color) / 0.05),
-    0 24px 48px -28px rgb(var(--shadow-color) / 0.22);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-rest);
   padding: 1.75rem;
   position: relative;
-  transition:
-    border-color var(--duration-base) var(--ease-out-premium),
-    transform var(--duration-base) var(--ease-out-premium);
 }
 
 /* Same idea as .skill-card::after: the colored hover shadow fades in on its
@@ -1448,7 +1404,7 @@ h3 {
    shadow above never needs to repaint. */
 .timeline-item::after {
   border-radius: inherit;
-  box-shadow: 0 28px 60px -24px var(--accent-soft-border);
+  box-shadow: var(--shadow-glow);
   content: '';
   inset: 0;
   opacity: 0;
@@ -1457,26 +1413,29 @@ h3 {
   transition: opacity var(--duration-base) var(--ease-out-premium);
 }
 
-.timeline-item:hover,
-.timeline-item:focus-within {
-  border-color: var(--accent-soft-border);
-  transform: translateY(-3px);
+/* Triggered from the row like the grid cards (see .card-glow): the lift
+   itself comes from `.card-lift`. */
+@media (hover: hover) and (pointer: fine) {
+  .timeline-row:hover > .timeline-item {
+    border-color: var(--accent-soft-border);
+  }
+
+  .timeline-row:hover > .timeline-item::after {
+    opacity: 1;
+  }
 }
 
-.timeline-item:hover::after,
-.timeline-item:focus-within::after {
+.timeline-row:has(:focus-visible) > .timeline-item {
+  border-color: var(--accent-soft-border);
+}
+
+.timeline-row:has(:focus-visible) > .timeline-item::after {
   opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .timeline-item,
   .timeline-item::after {
     transition: none;
-  }
-
-  .timeline-item:hover,
-  .timeline-item:focus-within {
-    transform: none;
   }
 }
 
@@ -1486,18 +1445,6 @@ h3 {
   flex-wrap: wrap;
   gap: 0.6rem;
   margin-bottom: 0.85rem;
-}
-
-.timeline-date {
-  background: var(--accent-soft);
-  border: 1px solid var(--accent-soft-border);
-  border-radius: 999px;
-  color: var(--accent);
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  padding: 0.3rem 0.8rem;
-  white-space: nowrap;
 }
 
 .timeline-company,
@@ -1516,7 +1463,7 @@ h3 {
 
 .empty-state {
   border: 1px dashed var(--border-strong);
-  border-radius: 20px;
+  border-radius: var(--radius-inset);
   margin: 0;
   padding: 1.25rem;
 }
@@ -1548,7 +1495,7 @@ h3 {
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 639px) {
   .site-footer-inner {
     align-items: flex-start;
     flex-direction: column;
@@ -1576,16 +1523,16 @@ h3 {
   background: var(--bg-elevated);
   color: var(--fg-muted);
   cursor: pointer;
-  font-size: 0.82rem;
+  font-size: var(--text-caption);
   font-weight: 600;
   letter-spacing: 0.04em;
   padding: 0.5rem 1.1rem;
   /* Same as the language/theme items: list what :hover and [data-active]
      below actually change rather than transitioning `all`. */
   transition:
-    background-color 180ms ease,
-    border-color 180ms ease,
-    color 180ms ease;
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
 }
 
 .category-filter-item:hover {
@@ -1601,7 +1548,7 @@ h3 {
 
 .rich-text {
   color: var(--fg-muted);
-  font-size: 1.05rem;
+  font-size: var(--text-lead);
   line-height: 1.85;
 }
 
@@ -1620,7 +1567,7 @@ h3 {
   color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 3px;
-  transition: color 180ms ease;
+  transition: color var(--duration-fast) ease;
 }
 
 .rich-text a:hover {
@@ -1666,7 +1613,7 @@ h3 {
 .media-gallery-item {
   background: none;
   border: none;
-  border-radius: 20px;
+  border-radius: var(--radius-inset);
   break-inside: avoid;
   cursor: zoom-in;
   display: block;
@@ -1675,7 +1622,7 @@ h3 {
   overflow: hidden;
   padding: 0;
   position: relative;
-  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform var(--duration-base) var(--ease-out-premium);
   width: 100%;
 }
 
@@ -1692,7 +1639,7 @@ h3 {
 }
 
 .media-gallery-play-badge {
-  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform var(--duration-base) var(--ease-out-premium);
 }
 
 .media-gallery-item:hover .media-gallery-play-badge,
@@ -1708,7 +1655,7 @@ h3 {
   position: absolute;
   right: 0;
   top: 0;
-  transition: opacity 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity var(--duration-base) var(--ease-out-premium);
 }
 
 .media-gallery-item:hover .media-gallery-overlay,
@@ -1749,7 +1696,7 @@ h3 {
 
 .yarl__slide {
   transform: scale(0.94);
-  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform var(--duration-base) var(--ease-out-premium);
 }
 
 .yarl__portal_open .yarl__slide {

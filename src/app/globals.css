@@ -13,7 +13,9 @@
   --border-strong: rgba(16, 20, 23, 0.2);
   --fg: #12151a;
   --fg-muted: #4b5563;
-  --fg-subtle: #6b7280;
+  /* ≥ 4.5:1 on every surface up to --surface-hover — it carries 11px labels. */
+  --fg-subtle: #5a616c;
+  --danger: #b42318;
   --shadow-color: 16 20 23;
 
   /*
@@ -33,17 +35,30 @@
   --accent-soft-border: color-mix(in srgb, var(--accent) 22%, transparent);
 
   /*
-   * Shared motion vocabulary. Every hand-written CSS transition/animation
-   * in this project should reach for one of these instead of a new literal
-   * bezier/duration, so the whole site moves with one consistent voice.
+   * Durations — the easings they pair with live in @theme below. Every
+   * hand-written CSS transition should reach for one of these instead of a
+   * new literal, so the whole site moves with one consistent voice: fast for
+   * colour/opacity feedback, base for movement, slow for entrances. Tailwind
+   * has no duration namespace, so TSX uses `duration-(--duration-base)`.
    * TS equivalents live in src/lib/motion/tokens.ts for `motion` props.
    */
-  --ease-out-premium: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-in-out-premium: cubic-bezier(0.65, 0, 0.35, 1);
   --duration-fast: 200ms;
   --duration-base: 400ms;
   --duration-slow: 700ms;
+
+  /*
+   * Global stacking layers. Only elements that compete across the page get
+   * one — local `z-index: -1 / 1` inside an isolated component stays literal.
+   * The lightbox portal (yet-another-react-lightbox) sits at 9999 on its own.
+   */
+  --z-rail: 5;
+  --z-header: 10;
+  --z-scrim: 12;
+  --z-drawer: 15;
+  --z-drawer-toggle: 20;
+  --z-progress: 50;
+  --z-skip-link: 100;
+  --z-cursor: 10000;
 }
 
 :root.dark {
@@ -57,7 +72,8 @@
   --border-strong: rgba(238, 241, 244, 0.2);
   --fg: #eef1f4;
   --fg-muted: #9aa4b2;
-  --fg-subtle: #6b7684;
+  --fg-subtle: #8590a0;
+  --danger: #f87171;
   --shadow-color: 0 0 0;
 
   --accent: #ff8a3d;
@@ -88,14 +104,67 @@
   --color-accent-soft: var(--accent-soft);
   --color-accent-soft-border: var(--accent-soft-border);
   --color-accent-2: var(--accent-2);
+  --color-danger: var(--danger);
+}
+
+/*
+ * Theme-independent design tokens. `static` makes Tailwind emit every one
+ * of these on :root even when no utility uses it, so styles.css can rely on
+ * var(--radius-card) etc. as well as the generated `rounded-card`,
+ * `shadow-rest`, `ease-bounce`, `text-label` utilities.
+ */
+@theme static {
+  /* Easings — TS mirrors in src/lib/motion/tokens.ts. */
+  --ease-out-premium: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out-premium: cubic-bezier(0.65, 0, 0.35, 1);
+  /* What a bare `transition` utility runs at (Tailwind's own default is
+     150ms) — keeps every colour-only hover on the fast token. */
+  --default-transition-duration: var(--duration-fast);
+
+  /* Radii: grid cards and large photos; skill groups; timeline cards;
+     thumbnails, gallery tiles and empty states; skill tiles.
+     Pills and avatars use `rounded-full`. */
+  --radius-card: 28px;
+  --radius-group: 24px;
+  --radius-panel: 22px;
+  --radius-inset: 20px;
+  --radius-tile: 16px;
+
+  /* Elevation. The resting shadows follow --shadow-color, so they soften in
+     dark mode; the glows are the accent-tinted hover halos, shown on their
+     own layer (see .card-glow in styles.css). */
+  --shadow-rest:
+    0 1px 2px rgb(var(--shadow-color) / 0.05), 0 24px 48px -28px rgb(var(--shadow-color) / 0.22);
+  --shadow-raised:
+    0 1px 2px rgb(var(--shadow-color) / 0.06), 0 32px 64px -28px rgb(var(--shadow-color) / 0.3);
+  --shadow-glow: 0 25px 60px -15px var(--accent-soft-border);
+  --shadow-glow-sm: 0 12px 32px -12px var(--accent-soft-border);
+
+  /* Type sizes outside Tailwind's scale. `label` is the one uppercase
+     micro-label (meta lines, pills, badges — pair with `uppercase`);
+     `caption` is small UI text (switchers, filters, eyebrows); `lead` is
+     intro/body copy set slightly above 1rem. */
+  --tracking-label: 0.18em;
+  --text-label: 0.6875rem;
+  --text-label--letter-spacing: var(--tracking-label);
+  --text-label--font-weight: 500;
+  --text-caption: 0.8125rem;
+  --text-lead: 1.05rem;
+
+  /* Breakpoints — styles.css media queries use the same values in px:
+     sm 640, md 720, nav 880 (header collapses to the drawer), lg 1024,
+     2xl 1536. md is narrowed from Tailwind's 768 to match the grids. */
+  --breakpoint-md: 45rem;
+  --breakpoint-nav: 55rem;
 }
 
 body {
   @apply bg-bg text-fg antialiased;
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   transition:
-    background-color 220ms ease,
-    color 220ms ease;
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
 }
 
 html {

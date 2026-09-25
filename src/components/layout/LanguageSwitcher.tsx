@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import { locales, type Locale } from '@/lib/locale'
 import { LANG_TRANSITION_FLAG, LANG_TRANSITION_SCROLL_KEY } from '@/lib/motion/langTransition'
+import { DURATION_BASE, EASE_OUT_PREMIUM } from '@/lib/motion/tokens'
 
 type LanguageSwitcherProps = {
   dictionary: Dictionary
@@ -77,7 +78,7 @@ export function LanguageSwitcher({ dictionary, locale }: LanguageSwitcherProps) 
               <motion.span
                 className="theme-toggle-active"
                 layoutId="language-switcher-active"
-                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: DURATION_BASE, ease: EASE_OUT_PREMIUM }}
               />
             ) : null}
             <motion.span

@@ -1,6 +1,7 @@
 import Image from 'next/image'
 
 import { Container } from '@/components/ui/Container'
+import { Pill } from '@/components/ui/Pill'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
 import { getMediaUrl } from '@/lib/media'
@@ -54,12 +55,12 @@ export function EducationSection({
 
               return (
                 <Reveal className="timeline-row" delay={Math.min(index, 5) * 0.08} key={entry.id}>
-                  <article className="timeline-item">
+                  <article className="timeline-item card-lift">
                     <div className="timeline-meta">
-                      <span className="timeline-date">
+                      <Pill tone="accent">
                         {formatDate(entry.startDate, locale, dictionary.experience.present)} –{' '}
                         {formatDate(entry.endDate, locale, dictionary.experience.present)}
-                      </span>
+                      </Pill>
                     </div>
                     <h3>{entry.degree}</h3>
                     <div className="timeline-company flex flex-wrap items-center gap-2">

@@ -1,6 +1,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { cardClassName, cardFrameClassName } from '@/components/ui/Card'
+import { Pill } from '@/components/ui/Pill'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
 import { getMediaUrl } from '@/lib/media'
@@ -30,9 +32,9 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
     // .card-glow's hover glow lives on an ::after — it needs an ancestor
     // without overflow-hidden (the Link below clips the cover image to its
     // rounded corners, which would clip the glow's shadow too).
-    <div className="card-glow h-full rounded-[28px]">
+    <div className={cardFrameClassName('h-full')}>
       <Link
-        className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-bg-elevated shadow-lg shadow-black/5 card-lift hover:border-accent-soft-border"
+        className={cardClassName({ className: 'group flex h-full flex-col overflow-hidden' })}
         data-cursor="pointer"
         href={`/${locale}/journal/${entry.slug}`}
       >
@@ -49,19 +51,19 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
           ) : null}
           <div className="absolute inset-0 bg-linear-to-t from-bg/70 via-bg/5 to-transparent" />
           {categoryLabel ? (
-            <span className="absolute left-4 top-4 rounded-full border border-accent-soft-border bg-bg-elevated/90 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-accent backdrop-blur-sm">
+            <Pill className="absolute left-4 top-4" tone="floating">
               {categoryLabel}
-            </span>
+            </Pill>
           ) : null}
           {entry.featured ? (
-            <span className="absolute right-4 top-4 rounded-full border border-accent-soft-border bg-accent-soft px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-accent backdrop-blur-sm">
+            <Pill className="absolute right-4 top-4 backdrop-blur-sm" tone="accent">
               {dictionary.journal.featuredBadge}
-            </span>
+            </Pill>
           ) : null}
         </div>
 
         <div className="flex flex-1 flex-col p-6 sm:p-7">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-fg-subtle">
+          <p className="text-label uppercase text-fg-subtle">
             {formattedDate}
             {entry.location ? ` · ${entry.location}` : null}
           </p>
@@ -71,12 +73,9 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
           {tags.length > 0 ? (
             <ul className="mt-5 flex flex-wrap gap-2" aria-label="tags">
               {tags.slice(0, 4).map((tag, index) => (
-                <li
-                  className="rounded-full border border-border bg-surface px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-fg-muted"
-                  key={`${tag.value}-${index}`}
-                >
+                <Pill as="li" key={`${tag.value}-${index}`}>
                   {tag.value}
-                </li>
+                </Pill>
               ))}
             </ul>
           ) : null}
