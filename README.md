@@ -67,8 +67,9 @@ The database is exposed on `127.0.0.1:5432`, the site on port 3000. The containe
 | `pnpm payload migrate` | Applies pending migrations |
 | `pnpm payload migrate:status` | Migration status |
 | `pnpm lint` | ESLint |
-| `pnpm test` | Integration tests (Vitest) then e2e (Playwright) |
-| `pnpm test:int` / `pnpm test:e2e` | Each suite separately |
+| `pnpm test` | Unit, then integration (Vitest), then e2e (Playwright) |
+| `pnpm test:unit` / `pnpm test:int` / `pnpm test:e2e` | Each suite separately |
+| `pnpm test:coverage` | Unit suite with coverage, failing under 90% on `src/lib`, `src/hooks`, the proxy and the sitemap |
 
 ## Content model
 
@@ -110,16 +111,19 @@ After any schema change: write/generate the matching migration, then run `pnpm g
 
 ## Tests
 
-- **Integration** (`tests/int`) — Payload API via Vitest
-- **E2E** (`tests/e2e`) — frontend and admin via Playwright
+- **Unit** (`tests/unit`) — pure logic, no database. Anything with I/O is mocked.
+- **Integration** (`tests/int`) — the real Payload Local API against a throwaway `payload-portfolio-test` database, configured in [`.env.test`](.env.test). Postgres creates it on first run; every run drops it and rebuilds it with `payload migrate:fresh`, so the suite also proves the migrations still build a working schema from scratch. It refuses to start unless `DATABASE_URL` is a local database named `*-test`, and never reads `.env`.
+- **Component** (`tests/dom`) — React components with Testing Library in jsdom.
+- **E2E** (`tests/e2e`) — frontend and admin via Playwright, against `pnpm dev` and the dev database.
 
 ```bash
-pnpm test
+pnpm test:unit   # no setup needed
+pnpm test:int    # needs local Postgres (docker compose up postgres)
 ```
 
 ## CI/CD
 
-- **GitHub Actions** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs on every push to `main`/`develop` and on pull requests: lint + typecheck, then integration and e2e tests against a fresh PostgreSQL built from the migrations (`PAYLOAD_DB_PUSH=false` disables dev push so the schema comes exclusively from migrations).
+- **GitHub Actions** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs on every push to `main`/`staging` and on pull requests, as three parallel jobs: lint + typecheck; unit tests with the coverage thresholds; integration tests against a PostgreSQL service that starts empty and is built from the migrations alone (`PAYLOAD_DB_PUSH=false`), so a migration that no longer applies to a fresh database fails the build. The e2e suite doesn't run in CI yet.
 - **Vercel** builds with `pnpm run ci` ([`vercel.json`](vercel.json)), which applies pending migrations to the production database before `next build` — the schema can never lag behind the deployed code.
 
 ## Deployment

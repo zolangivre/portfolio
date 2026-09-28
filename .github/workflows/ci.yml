@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, staging]
   pull_request:
 
 concurrency:
@@ -31,3 +31,60 @@ jobs:
 
       - name: Typecheck
         run: pnpm exec tsc --noEmit
+
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Fails under the 90% thresholds set in vitest.config.mts.
+      - name: Unit tests with coverage
+        run: pnpm test:coverage
+
+  integration:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    # Matches .env.test, so the suite runs with no CI-specific config. The
+    # database starts empty: the suite's global setup builds it from the
+    # migrations alone, which is also the check that a fresh `payload migrate`
+    # — a new environment, a preview branch — still works.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: payload-portfolio-test
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Integration tests
+        run: pnpm test:int

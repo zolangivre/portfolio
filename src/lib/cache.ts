@@ -32,6 +32,7 @@ export const cacheTags = {
   skills: 'skills',
   technologies: 'technologies',
   testimonials: 'testimonials',
+  videos: 'videos',
 } as const
 
 /**
