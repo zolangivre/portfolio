@@ -27,7 +27,27 @@ function slugify(value: string): string {
     .replace(/(^-|-$)/g, '')
 }
 
-export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+type Category = { slug: string; group: 'tech' | 'project' | 'journal'; fr: string; en: string }
+
+// Plain SQL rather than the Local API: `payload.create` builds its queries
+// from today's config, not the schema as it stood at this migration, so it
+// broke on a fresh database as soon as a later migration added a collection
+// (its lock check reads `payload_locked_documents_rels.<collection>_id`).
+async function insertCategory(db: MigrateUpArgs['db'], category: Category): Promise<number> {
+  const result = await db.execute(sql`
+    INSERT INTO "categories" ("slug", "group")
+    VALUES (${category.slug}, ${category.group})
+    RETURNING "id";`)
+  const id = (result.rows[0] as { id: number }).id
+
+  await db.execute(sql`
+    INSERT INTO "categories_locales" ("name", "_locale", "_parent_id")
+    VALUES (${category.fr}, 'fr', ${id}), (${category.en}, 'en', ${id});`)
+
+  return id
+}
+
+export async function up({ db }: MigrateUpArgs): Promise<void> {
   // 1. Schema for the new `categories` collection.
   await db.execute(sql`
    CREATE TYPE "public"."enum_categories_group" AS ENUM('tech', 'project', 'journal');
@@ -55,42 +75,24 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_categories_fk" FOREIGN KEY ("categories_id") REFERENCES "public"."categories"("id") ON DELETE cascade ON UPDATE no action;
   CREATE INDEX "payload_locked_documents_rels_categories_id_idx" ON "payload_locked_documents_rels" USING btree ("categories_id");`)
 
-  // 2. Seed categories via the Local API so the localized `name` field is written correctly.
+  // 2. Seed categories, with the localized `name` in both locales.
   const techIdBySlug: Record<string, number> = {}
   const journalIdBySlug: Record<string, number> = {}
 
   for (const cat of TECH_CATEGORIES) {
-    const created = await payload.create({
-      collection: 'categories',
-      data: { name: cat.fr, slug: `tech-${cat.slug}`, group: 'tech' },
-      locale: 'fr',
-      req,
+    techIdBySlug[cat.slug] = await insertCategory(db, {
+      ...cat,
+      slug: `tech-${cat.slug}`,
+      group: 'tech',
     })
-    await payload.update({
-      collection: 'categories',
-      id: created.id,
-      data: { name: cat.en },
-      locale: 'en',
-      req,
-    })
-    techIdBySlug[cat.slug] = created.id as number
   }
 
   for (const cat of JOURNAL_CATEGORIES) {
-    const created = await payload.create({
-      collection: 'categories',
-      data: { name: cat.fr, slug: `journal-${cat.slug}`, group: 'journal' },
-      locale: 'fr',
-      req,
+    journalIdBySlug[cat.slug] = await insertCategory(db, {
+      ...cat,
+      slug: `journal-${cat.slug}`,
+      group: 'journal',
     })
-    await payload.update({
-      collection: 'categories',
-      id: created.id,
-      data: { name: cat.en },
-      locale: 'en',
-      req,
-    })
-    journalIdBySlug[cat.slug] = created.id as number
   }
 
   // Project categories are free text historically, so seed from whatever distinct values exist.
@@ -102,20 +104,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   for (const row of existingProjectCategories.rows as { category: string }[]) {
     const name = row.category
     const slug = `project-${slugify(name) || Object.keys(projectIdByName).length}`
-    const created = await payload.create({
-      collection: 'categories',
-      data: { name, slug, group: 'project' },
-      locale: 'fr',
-      req,
-    })
-    await payload.update({
-      collection: 'categories',
-      id: created.id,
-      data: { name },
-      locale: 'en',
-      req,
-    })
-    projectIdByName[name] = created.id as number
+    projectIdByName[name] = await insertCategory(db, { slug, group: 'project', fr: name, en: name })
   }
 
   // 3. Add the new relationship columns and backfill them from the legacy values.

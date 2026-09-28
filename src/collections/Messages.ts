@@ -58,6 +58,12 @@ export const Messages: CollectionConfig = {
       label: 'Lu',
       defaultValue: false,
       index: true,
+      access: {
+        // Anyone may create a message, but only an editor decides it has been
+        // read — otherwise a script posting to /api/messages could file its
+        // spam as already seen, out of sight of the unread list.
+        create: ({ req }) => Boolean(req.user),
+      },
     },
   ],
   timestamps: true,

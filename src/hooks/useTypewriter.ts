@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
+
+const subscribeToNothing = () => () => {}
 
 /**
  * Reveals `text` one character at a time, like it's being typed live.
@@ -8,9 +10,20 @@ import { useEffect, useState } from 'react'
  * doesn't run underneath still-translucent text) and skips straight to the
  * full text for prefers-reduced-motion. Shared by the homepage Hero title
  * and any other title reusing the same entrance (project/journal details).
+ *
+ * The server render — and the hydration pass that has to match it — gets
+ * the full text, so the h1 in the HTML carries the real title for crawlers
+ * instead of an empty span. The browser switches to the typed length right
+ * after hydration, while the title is still inside its opacity-0 entrance,
+ * so the full text is never seen.
  */
 export function useTypewriter(text: string, speed = 55, delay = 550) {
   const [length, setLength] = useState(0)
+  const hydrated = useSyncExternalStore(
+    subscribeToNothing,
+    () => true,
+    () => false,
+  )
 
   useEffect(() => {
     let index = 0
@@ -49,5 +62,5 @@ export function useTypewriter(text: string, speed = 55, delay = 550) {
     }
   }, [text, speed, delay])
 
-  return length
+  return hydrated ? length : text.length
 }

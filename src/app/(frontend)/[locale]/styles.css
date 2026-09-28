@@ -808,13 +808,21 @@ a {
     right: 0;
     top: 0;
     transform: translateX(100%);
-    transition: transform var(--duration-base) var(--ease-out-premium);
+    /* Off-screen alone isn't closed: the links stayed in the tab order and
+       the accessibility tree. `visibility` takes them out, flipped only once
+       the slide-out has finished so the exit still animates. */
+    transition:
+      transform var(--duration-base) var(--ease-out-premium),
+      visibility 0s linear var(--duration-base);
+    visibility: hidden;
     width: min(20rem, 86vw);
     z-index: var(--z-drawer);
   }
 
   .site-header-nav[data-open='true'] {
     transform: translateX(0);
+    transition: transform var(--duration-base) var(--ease-out-premium);
+    visibility: visible;
   }
 
   .site-nav {

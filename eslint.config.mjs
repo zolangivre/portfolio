@@ -24,7 +24,23 @@ const eslintConfig = [
     },
   },
   {
-    ignores: ['.next/', 'src/payload-types.ts', 'src/payload-generated-schema.ts'],
+    // Migrations keep the `({ db, payload, req })` signature Payload's template
+    // generates, whichever of the three a given migration needs.
+    files: ['src/migrations/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['warn', { vars: 'all', args: 'none' }],
+    },
+  },
+  {
+    ignores: [
+      '.next/',
+      '.next-e2e/',
+      'coverage/',
+      'playwright-report/',
+      'test-results/',
+      'src/payload-types.ts',
+      'src/payload-generated-schema.ts',
+    ],
   },
 ]
 

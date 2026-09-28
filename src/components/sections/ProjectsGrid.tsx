@@ -28,6 +28,7 @@ export function ProjectsGrid({ dictionary, locale, projects }: ProjectsGridProps
       {technologies.length > 1 ? (
         <div aria-label={dictionary.projects.filterAriaLabel} className="category-filter" role="group">
           <button
+            aria-pressed={activeTechnologyId === null}
             className="category-filter-item"
             data-active={activeTechnologyId === null}
             onClick={() => setActiveTechnologyId(null)}
@@ -37,6 +38,7 @@ export function ProjectsGrid({ dictionary, locale, projects }: ProjectsGridProps
           </button>
           {technologies.map((technology) => (
             <button
+              aria-pressed={activeTechnologyId === technology.id}
               className="category-filter-item"
               data-active={activeTechnologyId === technology.id}
               key={technology.id}

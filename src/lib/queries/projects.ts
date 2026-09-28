@@ -11,14 +11,16 @@ import { getPayloadClient } from '../payload'
 // so this ceiling is the real cap on how many projects the site can show.
 const DEFAULT_LIMIT = 100
 
-// depth: 2 inlines the technologies (and their logos), the category and the
-// cover images into the returned doc, so an edit on any of those has to bust
-// this entry too — not just an edit on the project itself.
+// depth: 2 inlines the technologies (and their logos), the category, the
+// cover images and the mockup media — images or videos — into the returned
+// doc, so an edit on any of those has to bust this entry too — not just an
+// edit on the project itself.
 const PROJECT_TAGS = [
   cacheTags.projects,
   cacheTags.technologies,
   cacheTags.categories,
   cacheTags.media,
+  cacheTags.videos,
 ]
 
 const fetchAllProjects = unstable_cache(

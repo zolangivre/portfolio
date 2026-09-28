@@ -7,6 +7,11 @@ const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
 
 const nextConfig: NextConfig = {
+  // The e2e suite builds into its own directory (tests/e2e/serve.ts). The
+  // data cache lives under distDir and its keys don't include the database,
+  // so a shared `.next` let an e2e build and a regular build serve each
+  // other's content.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   images: {
     // All <Image> sources are Payload media served directly from the R2
     // custom domain (see generateFileURL in payload.config.ts) — there's no
