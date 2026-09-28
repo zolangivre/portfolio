@@ -17,9 +17,11 @@ import {
   editor,
   hero,
   journalEntries,
+  navigation,
   privateJournalEntry,
   privateProject,
   projects,
+  technologies,
 } from './fixtures'
 
 loadTestEnv('.env.e2e')
@@ -80,6 +82,30 @@ for (const locale of ['fr', 'en'] as const) {
   })
 }
 
+// The items array isn't localized but its labels are: write the rows in
+// French, then give the English labels to the same row ids.
+const { items } = await payload.updateGlobal({
+  context,
+  data: { items: navigation.map(({ fr, href }) => ({ href, label: fr })) },
+  locale: 'fr',
+  slug: 'navigation',
+})
+await payload.updateGlobal({
+  context,
+  data: {
+    items: (items ?? []).map((item, index) => ({ ...item, label: navigation[index]!.en })),
+  },
+  locale: 'en',
+  slug: 'navigation',
+})
+
+const technologyIds = new Map<string, number>()
+
+for (const technology of technologies) {
+  const doc = await payload.create({ collection: 'technologies', context, data: technology })
+  technologyIds.set(technology.name, doc.id)
+}
+
 const projectFields = (title: string) => ({
   description: textToLexicalParagraphs(`${title} — description.`),
   shortDescription: `${title} — short description.`,
@@ -92,6 +118,7 @@ for (const [index, project] of projects.entries()) {
     {
       order: index + 1,
       slug: project.slug,
+      technologies: project.technologies.map((name) => technologyIds.get(name)!),
       visibility: 'public',
     },
     projectFields,
@@ -109,14 +136,13 @@ await createLocalized(
   privateProject,
 )
 
-// The migrations seed the journal categories; any one will do.
-const {
-  docs: [category],
-} = await payload.find({
+// The journal categories come from the migrations.
+const { docs: categories } = await payload.find({
   collection: 'categories',
-  limit: 1,
+  limit: 0,
   where: { group: { equals: 'journal' } },
 })
+const categoryId = (slug: string) => categories.find((category) => category.slug === slug)!.id
 
 const journalFields = (title: string) => ({
   content: textToLexicalParagraphs(`${title} — content.`),
@@ -131,7 +157,7 @@ for (const [entry, visibility] of [
   await createLocalized(
     'journal',
     {
-      category: category!.id,
+      category: categoryId(entry.category),
       date: '2026-01-15T00:00:00.000Z',
       slug: entry.slug,
       visibility,

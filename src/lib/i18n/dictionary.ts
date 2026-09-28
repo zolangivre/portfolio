@@ -90,6 +90,7 @@ export interface Dictionary {
     emptyState: string
     featuredBadge: string
     allCategoriesLabel: string
+    filterAriaLabel: string
     countSuffix: string
     readMoreLabel: string
     backLabel: string
@@ -208,6 +209,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       emptyState: 'Aucune entrée n’a encore été publiée.',
       featuredBadge: 'À la une',
       allCategoriesLabel: 'Tout',
+      filterAriaLabel: 'Filtrer les entrées par catégorie',
       countSuffix: 'entrées',
       readMoreLabel: 'Lire l’article',
       backLabel: '← Retour au journal',
@@ -322,6 +324,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       emptyState: 'No entries have been published yet.',
       featuredBadge: 'Featured',
       allCategoriesLabel: 'All',
+      filterAriaLabel: 'Filter entries by category',
       countSuffix: 'entries',
       readMoreLabel: 'Read entry',
       backLabel: '← Back to journal',

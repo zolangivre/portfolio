@@ -36,7 +36,15 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
+      testIgnore: '**/mobile.e2e.spec.ts',
       use: { ...devices['Desktop Chrome'], channel: 'chromium' },
+    },
+    {
+      // Safari's engine at phone width: the collapsed header, and the visitor
+      // journeys a recruiter opening a link from their phone takes.
+      name: 'mobile-safari',
+      testMatch: ['**/mobile.e2e.spec.ts', '**/navigation.e2e.spec.ts'],
+      use: { ...devices['iPhone 15'] },
     },
   ],
   webServer: {

@@ -1,6 +1,7 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 
 import { hero, journalEntries, privateJournalEntry, privateProject, projects } from './fixtures'
+import { openMenuIfCollapsed, primaryNav } from './ui'
 
 const [alpha, beta, gamma] = projects
 
@@ -38,6 +39,7 @@ test('the language switcher keeps the current page', async ({ page }) => {
   await page.goto(`/fr/projects/${alpha.slug}`)
   await expect(page.locator('h1').first()).toHaveText(alpha.fr)
 
+  await openMenuIfCollapsed(page)
   await page
     .getByRole('group', { name: 'Changer de langue' })
     .getByRole('link', { name: /^en$/i })
@@ -64,6 +66,51 @@ test('a visitor can go from the homepage through the projects and back', async (
 
   await page.getByRole('link', { name: '← Retour aux projets' }).click()
   await expect(page).toHaveURL('/fr#projects')
+})
+
+/**
+ * Section links point at anchors that only exist on the homepage. From any
+ * other page, the click has to navigate there and then scroll to the section
+ * once it has rendered — the job of HashScrollHandler, RouteScrollManager and
+ * pendingScrollHash, written around a race with the router's own hash
+ * handling. Nothing short of a browser can check it.
+ */
+test.describe('section links in the header', () => {
+  const followNavLink = async (page: Page, from: string, label: string) => {
+    await page.goto(from)
+    await openMenuIfCollapsed(page)
+    await primaryNav(page).getByRole('link', { name: label, exact: true }).click()
+  }
+
+  test('reach their section from another page', async ({ page }) => {
+    await followNavLink(page, '/fr/journal', 'Projets')
+
+    await expect(page).toHaveURL('/fr#projects')
+    await expect(page.locator('#projects')).toBeInViewport()
+  })
+
+  test('reach their section from a project page', async ({ page }) => {
+    await followNavLink(page, `/fr/projects/${alpha.slug}`, 'Contact')
+
+    await expect(page).toHaveURL('/fr#contact')
+    await expect(page.locator('#contact')).toBeInViewport()
+  })
+
+  test('scroll to their section on the homepage itself', async ({ page }) => {
+    await followNavLink(page, '/fr', 'Contact')
+
+    await expect(page).toHaveURL('/fr#contact')
+    await expect(page.locator('#contact')).toBeInViewport()
+  })
+})
+
+test('a new page opens at its top, not where the last one was scrolled', async ({ page }) => {
+  await page.goto('/fr')
+  await page.locator('#projects').getByRole('link', { name: gamma.fr }).first().click()
+
+  await expect(page).toHaveURL(`/fr/projects/${gamma.slug}`)
+  await expect(page.locator('h1').first()).toBeInViewport()
+  expect(await page.evaluate(() => window.scrollY)).toBeLessThan(50)
 })
 
 test('the archive lists every public project and nothing else', async ({ page }) => {

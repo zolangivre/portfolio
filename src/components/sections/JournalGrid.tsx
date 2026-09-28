@@ -48,8 +48,9 @@ export function JournalGrid({ dictionary, entries, locale }: JournalGridProps) {
   return (
     <>
       {categories.length > 1 ? (
-        <div className="category-filter" role="group">
+        <div aria-label={dictionary.journal.filterAriaLabel} className="category-filter" role="group">
           <button
+            aria-pressed={activeCategoryId === null}
             className="category-filter-item"
             data-active={activeCategoryId === null}
             onClick={() => setActiveCategoryId(null)}
@@ -59,6 +60,7 @@ export function JournalGrid({ dictionary, entries, locale }: JournalGridProps) {
           </button>
           {categories.map((category) => (
             <button
+              aria-pressed={activeCategoryId === category.id}
               className="category-filter-item"
               data-active={activeCategoryId === category.id}
               key={category.id}

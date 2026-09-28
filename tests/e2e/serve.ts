@@ -9,6 +9,7 @@
  * the dev database.
  */
 import { execFileSync } from 'node:child_process'
+import { rmSync } from 'node:fs'
 
 import { assertTestDatabase, loadTestEnv } from '../helpers/testDatabase'
 
@@ -24,6 +25,10 @@ const env = {
 const run = (args: string[]) => execFileSync('pnpm', args, { env, stdio: 'inherit' })
 
 run(['exec', 'tsx', 'tests/e2e/prepare.ts'])
+// The data cache outlives the build that wrote it, and its keys don't
+// include the database: left in place, this build would prerender query
+// results from the previous run's seed. The compiler cache next to it stays.
+rmSync('.next-e2e/cache/fetch-cache', { force: true, recursive: true })
 run(['build'])
 // Blocks for as long as the server runs; Playwright stops it after the suite.
 run(['start', '--port', '3100'])
