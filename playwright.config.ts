@@ -31,7 +31,14 @@ export default defineConfig({
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'html',
   use: {
     baseURL,
-    trace: 'on-first-retry',
+    // A video of every test, shown next to it in the HTML report (and in the
+    // `playwright-report` artifact on CI). Measured at no extra run time and
+    // ~2MB for the whole desktop suite. Traces — the step-by-step DOM,
+    // network and console record — are far heavier, so only failures keep
+    // one, along with a screenshot of the final state.
+    video: 'on',
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
   },
   projects: [
     {

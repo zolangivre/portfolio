@@ -69,6 +69,7 @@ The database is exposed on `127.0.0.1:5432`, the site on port 3000. The containe
 | `pnpm lint` | ESLint |
 | `pnpm test` | Unit, then integration (Vitest), then e2e (Playwright) |
 | `pnpm test:unit` / `pnpm test:int` / `pnpm test:e2e` | Each suite separately |
+| `pnpm test:e2e:ui` / `pnpm test:e2e:report` | Playwright UI mode / HTML report of the last e2e run (videos included) |
 | `pnpm test:coverage` | Unit suite with coverage, failing under 90% on `src/lib`, `src/hooks`, the proxy and the sitemap |
 
 ## Content model
@@ -121,7 +122,11 @@ pnpm test:unit        # no setup needed
 pnpm test:int         # needs local Postgres (docker compose up postgres)
 pnpm test:e2e         # needs local Postgres; builds the site first (~2 min)
 pnpm test:e2e:serve   # keep a seeded server up on :3100 — test:e2e reuses it
+pnpm test:e2e:ui      # Playwright UI mode: run specs one by one, step through a timeline of each
+pnpm test:e2e:report  # open the HTML report of the last run
 ```
+
+Every e2e test is recorded on video; a failing one also keeps a screenshot and a full trace (DOM, network and console at each step). All of it is in the HTML report — locally with `pnpm test:e2e:report`, and on CI in the `playwright-report` artifact of the run (download it, then `pnpm exec playwright show-report <folder>`).
 
 ## CI/CD
 

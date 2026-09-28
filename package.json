@@ -18,6 +18,8 @@
     "test:coverage": "vitest run --project unit --coverage",
     "test:e2e": "cross-env NODE_OPTIONS=--no-deprecation playwright test --config=playwright.config.ts",
     "test:e2e:serve": "tsx tests/e2e/serve.ts",
+    "test:e2e:ui": "cross-env NODE_OPTIONS=--no-deprecation playwright test --ui --project=chromium",
+    "test:e2e:report": "playwright show-report",
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --project int",
     "test:unit": "vitest run --project unit"
   },
