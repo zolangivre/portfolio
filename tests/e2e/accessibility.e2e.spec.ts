@@ -1,5 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
-import { test, expect, type Page } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
+
+import { journalEntries, projects } from './fixtures'
 
 async function scanAccessibility(page: Page) {
   // The decorative ambient background (blurred, animated, aria-hidden) sits behind
@@ -28,32 +30,35 @@ async function scanAccessibility(page: Page) {
   return results
 }
 
-test.describe('Frontend', () => {
-  test.use({ locale: 'fr-FR' })
+const pages = [
+  '/fr',
+  '/en',
+  '/fr/projects',
+  `/fr/projects/${projects[0].slug}`,
+  '/fr/journal',
+  `/fr/journal/${journalEntries[0].slug}`,
+]
 
-  test.beforeAll(async ({ browser }) => {
-    const context = await browser.newContext()
-    await context.newPage()
+// The seeded settings keep the default theme, 'system', so the emulated
+// color scheme picks the theme.
+for (const colorScheme of ['light', 'dark'] as const) {
+  test.describe(`${colorScheme} theme`, () => {
+    test.use({ colorScheme })
+
+    for (const path of pages) {
+      test(`${path} has no detectable accessibility violations`, async ({ page }) => {
+        await page.goto(path)
+
+        if (colorScheme === 'dark') {
+          await expect(page.locator('html')).toHaveClass(/\bdark\b/)
+        } else {
+          await expect(page.locator('html')).not.toHaveClass(/\bdark\b/)
+        }
+
+        const results = await scanAccessibility(page)
+
+        expect(results.violations).toEqual([])
+      })
+    }
   })
-
-  test('can go on homepage', async ({ page }) => {
-    await page.goto('http://localhost:3000')
-
-    await expect(page).toHaveURL(/\/fr$/)
-    await expect(page).toHaveTitle(/Developer Portfolio/)
-
-    const heading = page.locator('h1').first()
-
-    await expect(heading).toHaveText(
-      'Building polished digital products with calm, modern engineering.',
-    )
-  })
-
-  test('has no automatically detectable accessibility violations', async ({ page }) => {
-    await page.goto('http://localhost:3000/fr')
-
-    const results = await scanAccessibility(page)
-
-    expect(results.violations).toEqual([])
-  })
-})
+}

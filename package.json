@@ -16,7 +16,8 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "test": "pnpm run test:unit && pnpm run test:int && pnpm run test:e2e",
     "test:coverage": "vitest run --project unit --coverage",
-    "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" playwright test --config=playwright.config.ts",
+    "test:e2e": "cross-env NODE_OPTIONS=--no-deprecation playwright test --config=playwright.config.ts",
+    "test:e2e:serve": "tsx tests/e2e/serve.ts",
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --project int",
     "test:unit": "vitest run --project unit"
   },
@@ -63,7 +64,7 @@
     "vitest": "4.0.18"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0",
+    "node": ">=24",
     "pnpm": "^9 || ^10 || ^11"
   },
   "packageManager": "pnpm@10.27.0",

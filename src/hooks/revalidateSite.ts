@@ -9,10 +9,14 @@ type MaybeHidden = { visibility?: 'public' | 'private' | null } | null | undefin
 
 function revalidate(tag: string) {
   try {
-    // 'max' is the drop-in replacement for the deprecated single-argument form
-    // of revalidateTag — it purges the tag immediately, which is what we want
-    // here: the next visitor gets the freshly published content.
-    revalidateTag(tag, 'max')
+    // Expires the tag outright: the next request waits for a fresh render
+    // instead of getting the old page, so reloading right after a save shows
+    // the edit. 'max' (stale-while-revalidate) served the stale page once
+    // first. `updateTag` would be the idiomatic call, but it only works in
+    // Server Actions — Payload saves arrive through Route Handlers, which is
+    // the case Next documents `{ expire: 0 }` for. The cost is one render on
+    // the first visit after a save.
+    revalidateTag(tag, { expire: 0 })
   } catch {
     // revalidateTag only works inside a Next.js request context — not
     // available when Payload runs from a standalone script or `payload

@@ -20,7 +20,7 @@ Bilingual (FR/EN) developer portfolio fully driven by a CMS: content, sections, 
 
 ## Quick start
 
-Requirements: Node 20+, pnpm, PostgreSQL (or Docker).
+Requirements: Node 24+, pnpm, PostgreSQL (or Docker).
 
 ```bash
 git clone <repo>
@@ -114,16 +114,18 @@ After any schema change: write/generate the matching migration, then run `pnpm g
 - **Unit** (`tests/unit`) — pure logic, no database. Anything with I/O is mocked.
 - **Integration** (`tests/int`) — the real Payload Local API against a throwaway `payload-portfolio-test` database, configured in [`.env.test`](.env.test). Postgres creates it on first run; every run drops it and rebuilds it with `payload migrate:fresh`, so the suite also proves the migrations still build a working schema from scratch. It refuses to start unless `DATABASE_URL` is a local database named `*-test`, and never reads `.env`.
 - **Component** (`tests/dom`) — React components with Testing Library in jsdom.
-- **E2E** (`tests/e2e`) — frontend and admin via Playwright, against `pnpm dev` and the dev database.
+- **E2E** (`tests/e2e`) — frontend and admin via Playwright, against a production build (`next build && next start` on port 3100) and its own `payload-portfolio-e2e-test` database, configured in [`.env.e2e`](.env.e2e). [`tests/e2e/serve.ts`](tests/e2e/serve.ts) rebuilds the database from the migrations, seeds the content in [`tests/e2e/fixtures.ts`](tests/e2e/fixtures.ts), then builds into `.next-e2e` — a separate directory, so an e2e build and a regular build never share a data cache. Specs that edit content do it through the REST API and put it back.
 
 ```bash
-pnpm test:unit   # no setup needed
-pnpm test:int    # needs local Postgres (docker compose up postgres)
+pnpm test:unit        # no setup needed
+pnpm test:int         # needs local Postgres (docker compose up postgres)
+pnpm test:e2e         # needs local Postgres; builds the site first (~2 min)
+pnpm test:e2e:serve   # keep a seeded server up on :3100 — test:e2e reuses it
 ```
 
 ## CI/CD
 
-- **GitHub Actions** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs on every push to `main`/`staging` and on pull requests, as three parallel jobs: lint + typecheck; unit tests with the coverage thresholds; integration tests against a PostgreSQL service that starts empty and is built from the migrations alone (`PAYLOAD_DB_PUSH=false`), so a migration that no longer applies to a fresh database fails the build. The e2e suite doesn't run in CI yet.
+- **GitHub Actions** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs on every push to `main`/`staging` and on pull requests, as four parallel jobs: lint + typecheck; unit tests with the coverage thresholds; integration tests against a PostgreSQL service that starts empty and is built from the migrations alone (`PAYLOAD_DB_PUSH=false`), so a migration that no longer applies to a fresh database fails the build; e2e tests against a seeded production build (the Playwright report is attached to the run).
 - **Vercel** builds with `pnpm run ci` ([`vercel.json`](vercel.json)), which applies pending migrations to the production database before `next build` — the schema can never lag behind the deployed code.
 
 ## Deployment

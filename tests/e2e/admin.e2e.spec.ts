@@ -1,41 +1,41 @@
-import { test, expect, Page } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
+
 import { login } from '../helpers/login'
-import { seedTestUser, cleanupTestUser, testUser } from '../helpers/seedUser'
+import { editor } from './fixtures'
 
 test.describe('Admin Panel', () => {
   let page: Page
 
   test.beforeAll(async ({ browser }) => {
-    await seedTestUser()
+    page = await browser.newPage()
 
-    const context = await browser.newContext()
-    page = await context.newPage()
-
-    await login({ page, user: testUser })
+    await login({ page, user: editor })
   })
 
   test.afterAll(async () => {
-    await cleanupTestUser()
+    await page.close()
   })
 
   test('can navigate to dashboard', async () => {
-    await page.goto('http://localhost:3000/admin')
-    await expect(page).toHaveURL('http://localhost:3000/admin')
-    const dashboardArtifact = page.locator('span[title="Dashboard"]').first()
-    await expect(dashboardArtifact).toBeVisible()
+    await page.goto('/admin')
+    await expect(page).toHaveURL('/admin')
+    await expect(page.locator('span[title="Tableau de bord"]').first()).toBeVisible()
   })
 
   test('can navigate to list view', async () => {
-    await page.goto('http://localhost:3000/admin/collections/users')
-    await expect(page).toHaveURL('http://localhost:3000/admin/collections/users')
-    const listViewArtifact = page.locator('h1', { hasText: 'Users' }).first()
-    await expect(listViewArtifact).toBeVisible()
+    await page.goto('/admin/collections/projects')
+    await expect(page).toHaveURL(/\/admin\/collections\/projects(\?|$)/)
+    await expect(page.locator('h1', { hasText: 'Projets' }).first()).toBeVisible()
   })
 
   test('can navigate to edit view', async () => {
-    await page.goto('http://localhost:3000/admin/collections/users/create')
+    await page.goto('/admin/collections/users/create')
     await expect(page).toHaveURL(/\/admin\/collections\/users\/[a-zA-Z0-9-_]+/)
-    const editViewArtifact = page.locator('input[name="email"]')
-    await expect(editViewArtifact).toBeVisible()
+    await expect(page.locator('input[name="email"]')).toBeVisible()
+  })
+
+  test('lists private projects to editors', async () => {
+    await page.goto('/admin/collections/projects')
+    await expect(page.getByText('Projet caché')).toBeVisible()
   })
 })

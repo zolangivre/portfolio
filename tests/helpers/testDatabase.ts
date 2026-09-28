@@ -3,15 +3,15 @@ import { config } from 'dotenv'
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]'])
 
 /**
- * Loads `.env.test` — and only that file. The regular `.env` is left out on
- * purpose: it holds the R2 keys (uploads would land in the real bucket) and,
- * commented or not, the production database URL.
+ * Loads `.env.test` (or `.env.e2e`) — and only that file. The regular `.env`
+ * is left out on purpose: it holds the R2 keys (uploads would land in the
+ * real bucket) and, commented or not, the production database URL.
  *
  * Variables already set in the shell win, so CI can point at its own service
  * container. `assertTestDatabase` is what keeps that from going wrong.
  */
-export function loadTestEnv(): void {
-  config({ path: '.env.test' })
+export function loadTestEnv(path: '.env.test' | '.env.e2e' = '.env.test'): void {
+  config({ path })
 }
 
 /**

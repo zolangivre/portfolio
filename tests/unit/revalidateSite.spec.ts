@@ -50,7 +50,7 @@ describe('revalidateCollectionAfterChange', () => {
     afterChange({ before, now, operation })
 
     if (expected) {
-      expect(revalidateTag).toHaveBeenCalledExactlyOnceWith('projects', 'max')
+      expect(revalidateTag).toHaveBeenCalledExactlyOnceWith('projects', { expire: 0 })
     } else {
       expect(revalidateTag).not.toHaveBeenCalled()
     }
@@ -65,7 +65,7 @@ describe('revalidateCollectionAfterChange', () => {
   it('revalidates when an existing media file changes', () => {
     afterChange({ collection: 'media', operation: 'update' })
 
-    expect(revalidateTag).toHaveBeenCalledExactlyOnceWith('media', 'max')
+    expect(revalidateTag).toHaveBeenCalledExactlyOnceWith('media', { expire: 0 })
   })
 
   it('stays quiet for maintenance scripts', () => {
@@ -99,7 +99,7 @@ describe('revalidateCollectionAfterDelete', () => {
   it('revalidates when a public doc is deleted', () => {
     afterDelete('public')
 
-    expect(revalidateTag).toHaveBeenCalledExactlyOnceWith('journal', 'max')
+    expect(revalidateTag).toHaveBeenCalledExactlyOnceWith('journal', { expire: 0 })
   })
 
   it('skips an already-private doc', () => {
@@ -127,7 +127,7 @@ describe('revalidateGlobalAfterChange', () => {
   it('revalidates the global by its slug', () => {
     globalChange()
 
-    expect(revalidateTag).toHaveBeenCalledExactlyOnceWith('hero', 'max')
+    expect(revalidateTag).toHaveBeenCalledExactlyOnceWith('hero', { expire: 0 })
   })
 
   it('stays quiet for maintenance scripts', () => {

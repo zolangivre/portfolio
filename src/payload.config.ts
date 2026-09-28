@@ -134,6 +134,10 @@ export default buildConfig({
   },
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
+    // Off in the test suites (.env.test, .env.e2e): they load this config
+    // without the R2 keys, which drops the storage plugin's fields, and the
+    // regenerated file would lose them.
+    autoGenerate: process.env.PAYLOAD_AUTOGENERATE_TYPES !== 'false',
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   localization: {
