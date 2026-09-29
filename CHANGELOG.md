@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/zolangivre/portfolio/compare/v1.0.0...v1.0.1) (2026-09-29)
+
+
+### Corrections
+
+* **ci:** refine job skipping conditions for lint, unit, integration, and e2e tests ([cc0a2bf](https://github.com/zolangivre/portfolio/commit/cc0a2bf0c18db03e8b426315660653e809667fd0))
+
 ## 1.0.0 (2026-09-29)
 
 
