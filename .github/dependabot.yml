@@ -1,6 +1,50 @@
 version: 2
 
 updates:
+  # npm packages: PRs against staging every Monday, checked by CI (lint,
+  # typecheck, unit, integration and e2e tests) — nothing is merged
+  # automatically. Packages that must stay in step move together, majors
+  # included; other minors and patches are grouped into one PR; other majors
+  # come one at a time.
+  - package-ecosystem: npm
+    directory: /
+    target-branch: staging
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    # A version is only proposed once it has been on the registry for 3 days:
+    # a compromised release (supply-chain attack) is usually pulled before
+    # then. Security updates are not delayed.
+    cooldown:
+      default-days: 3
+    # "chore(deps): …" commits: Conventional Commits format, like the others
+    # (see .githooks/commit-msg and release-please).
+    commit-message:
+      prefix: chore
+      include: scope
+    # A package goes into the first group it matches.
+    groups:
+      # Every @payloadcms/* package must match payload's exact version, and
+      # payload only accepts some next/react versions: one PR for all of them.
+      payload-next-react:
+        patterns:
+          - 'payload'
+          - '@payloadcms/*'
+          - 'next'
+          - '@next/*'
+          - 'eslint-config-next'
+          - 'react'
+          - 'react-dom'
+          - '@types/react'
+          - '@types/react-dom'
+      vitest:
+        patterns: ['vitest', '@vitest/*']
+      tailwind:
+        patterns: ['tailwindcss', '@tailwindcss/*']
+      minor-and-patch:
+        update-types: [minor, patch]
+
   # Keeps the SHA-pinned release-please action (and the other actions) up to
   # date. "ci: …" commits: Conventional Commits format, like the others (see
   # .githooks/commit-msg and release-please).

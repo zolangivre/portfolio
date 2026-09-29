@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/zolangivre/portfolio/compare/v1.0.1...v1.1.0) (2026-09-29)
+
+
+### Nouveautés
+
+* **vercel:** enable deployment for main and staging branches ([89b8475](https://github.com/zolangivre/portfolio/commit/89b8475b3cfb5a4762886ec442beb8258e38c683))
+
 ## [1.0.1](https://github.com/zolangivre/portfolio/compare/v1.0.0...v1.0.1) (2026-09-29)
 
 

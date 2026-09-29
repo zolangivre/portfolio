@@ -132,7 +132,7 @@ A failing e2e test keeps a video, a screenshot and a full trace (DOM, network an
 
 - **GitHub Actions** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs on every push to `main`/`staging` and on pull requests, as four parallel jobs: lint + typecheck; unit tests with the coverage thresholds; integration tests against a PostgreSQL service that starts empty and is built from the migrations alone (`PAYLOAD_DB_PUSH=false`), so a migration that no longer applies to a fresh database fails the build; e2e tests against a seeded production build (the Playwright report is attached to the run). Every job is skipped when the code was already tested: the `pull_request` run of the `staging` → `main` PR (the `push` run on `staging` tests the same commit), and the release-please version PR and its merge into `staging` (see [Versioning](#versioning)).
 - **Release** ([`.github/workflows/release.yml`](.github/workflows/release.yml)) — see [Versioning](#versioning).
-- **Vercel** builds with `pnpm run ci` ([`vercel.json`](vercel.json)), which applies pending migrations to the production database before `next build` — the schema can never lag behind the deployed code.
+- **Vercel** builds with `pnpm run ci` ([`vercel.json`](vercel.json)), which applies pending migrations to the production database before `next build` — the schema can never lag behind the deployed code. Only `main` (production) and `staging` (preview) are deployed: `git.deploymentEnabled` in the same file blocks every other branch (`feature/…`, Dependabot, the release-please version PR), so they trigger no build and no migration.
 
 ## Versioning
 
