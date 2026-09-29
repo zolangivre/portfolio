@@ -31,12 +31,11 @@ export default defineConfig({
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'html',
   use: {
     baseURL,
-    // A video of every test, shown next to it in the HTML report (and in the
-    // `playwright-report` artifact on CI). Measured at no extra run time and
-    // ~2MB for the whole desktop suite. Traces — the step-by-step DOM,
-    // network and console record — are far heavier, so only failures keep
-    // one, along with a screenshot of the final state.
-    video: 'on',
+    // Only a failing test keeps its evidence: a video, a trace (the
+    // step-by-step DOM, network and console record) and a screenshot of the
+    // final state, all in the HTML report — and in the `playwright-report`
+    // artifact on CI.
+    video: 'retain-on-failure',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },

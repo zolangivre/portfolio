@@ -1,0 +1,16 @@
+version: 2
+
+updates:
+  # Keeps the SHA-pinned release-please action (and the other actions) up to
+  # date. "ci: …" commits: Conventional Commits format, like the others (see
+  # .githooks/commit-msg and release-please).
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: staging
+    commit-message:
+      prefix: ci
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ['*']
