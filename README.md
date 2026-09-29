@@ -69,7 +69,7 @@ The database is exposed on `127.0.0.1:5432`, the site on port 3000. The containe
 | `pnpm lint` | ESLint |
 | `pnpm test` | Unit, then integration (Vitest), then e2e (Playwright) |
 | `pnpm test:unit` / `pnpm test:int` / `pnpm test:e2e` | Each suite separately |
-| `pnpm test:e2e:ui` / `pnpm test:e2e:report` | Playwright UI mode / HTML report of the last e2e run (videos included) |
+| `pnpm test:e2e:ui` / `pnpm test:e2e:report` | Playwright UI mode / HTML report of the last e2e run |
 | `pnpm test:coverage` | Unit suite with coverage, failing under 90% on `src/lib`, `src/hooks`, the proxy and the sitemap |
 
 ## Content model
@@ -126,12 +126,32 @@ pnpm test:e2e:ui      # Playwright UI mode: run specs one by one, step through a
 pnpm test:e2e:report  # open the HTML report of the last run
 ```
 
-Every e2e test is recorded on video; a failing one also keeps a screenshot and a full trace (DOM, network and console at each step). All of it is in the HTML report — locally with `pnpm test:e2e:report`, and on CI in the `playwright-report` artifact of the run (download it, then `pnpm exec playwright show-report <folder>`).
+A failing e2e test keeps a video, a screenshot and a full trace (DOM, network and console at each step). All of it is in the HTML report — locally with `pnpm test:e2e:report`, and on CI in the `playwright-report` artifact of the run (download it, then `pnpm exec playwright show-report <folder>`).
 
 ## CI/CD
 
-- **GitHub Actions** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs on every push to `main`/`staging` and on pull requests, as four parallel jobs: lint + typecheck; unit tests with the coverage thresholds; integration tests against a PostgreSQL service that starts empty and is built from the migrations alone (`PAYLOAD_DB_PUSH=false`), so a migration that no longer applies to a fresh database fails the build; e2e tests against a seeded production build (the Playwright report is attached to the run).
+- **GitHub Actions** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs on every push to `main`/`staging` and on pull requests, as four parallel jobs: lint + typecheck; unit tests with the coverage thresholds; integration tests against a PostgreSQL service that starts empty and is built from the migrations alone (`PAYLOAD_DB_PUSH=false`), so a migration that no longer applies to a fresh database fails the build; e2e tests against a seeded production build (the Playwright report is attached to the run). Every job is skipped when the code was already tested: the `pull_request` run of the `staging` → `main` PR (the `push` run on `staging` tests the same commit), and the release-please version PR and its merge into `staging` (see [Versioning](#versioning)).
+- **Release** ([`.github/workflows/release.yml`](.github/workflows/release.yml)) — see [Versioning](#versioning).
 - **Vercel** builds with `pnpm run ci` ([`vercel.json`](vercel.json)), which applies pending migrations to the production database before `next build` — the schema can never lag behind the deployed code.
+
+## Versioning
+
+[SemVer](https://semver.org) versions derived from commit messages ([Conventional Commits](https://www.conventionalcommits.org)), checked by `.githooks/commit-msg` (enabled by `pnpm install`):
+
+| Commit | Effect on the version |
+| --- | --- |
+| `fix: …`, `perf: …` | patch: 1.0.0 → 1.0.1 |
+| `feat: …` | minor: 1.0.0 → 1.1.0 |
+| `feat!: …` or `BREAKING CHANGE:` in the body | major: 1.0.0 → 2.0.0 |
+| `chore`, `refactor`, `docs`, `test`, `ci`… | none, left out of the CHANGELOG |
+
+Same flow as patateprod-front and patateprod-back:
+
+1. Push to `staging` as usual. release-please ([`.github/workflows/release.yml`](.github/workflows/release.yml)) keeps a "chore(staging): version X.Y.Z" PR open against `staging`: `package.json` version and `CHANGELOG.md`.
+2. To release, merge that PR into `staging`: the `vX.Y.Z` tag and the GitHub Release are created.
+3. Merge `staging` → `main`: Vercel deploys once, with the right version number.
+
+Merge `staging` → `main` right after the version PR: a commit pushed in between would go to production under that number without appearing in its CHANGELOG. First version: 1.0.0 (`initial-version` in `release-please-config.json`); `package.json` stays at `0.0.0` until then.
 
 ## Deployment
 

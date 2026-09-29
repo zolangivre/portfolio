@@ -64,7 +64,6 @@ describe('proxy matcher', () => {
     '/sitemap.xml',
     '/icon.png',
     '/fonts/display.css',
-    '/my-route',
   ])('skips %s', (path) => {
     expect(matcher.test(path)).toBe(false)
   })

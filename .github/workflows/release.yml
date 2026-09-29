@@ -1,0 +1,43 @@
+name: Release
+
+# On every push to staging, release-please keeps a "version PR" open against
+# staging. It works out the next version from the commits (fix → patch, feat →
+# minor, `feat!:` or BREAKING CHANGE → major) and updates package.json and
+# CHANGELOG.md. Merging that PR creates the vX.Y.Z tag and the GitHub Release.
+# First version: 1.0.0 (release-please-config.json).
+#
+# The release is prepared on staging, not main, so that the staging → main
+# merge deploys to Vercel only once, with the right version number. Same flow
+# as patateprod-front and patateprod-back.
+#
+# Requires: Settings → Actions → General → "Allow GitHub Actions to create and
+# approve pull requests".
+
+on:
+  push:
+    branches: [staging]
+
+# Separate from ci.yml so that only this job has write access
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Pinned to a commit rather than the `v5` tag: this is the only workflow
+      # that can write to the repo (tags, PRs, contents), and a tag can be moved
+      # to any code. Dependabot (github-actions) bumps the SHA and the version
+      # comment.
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          target-branch: staging

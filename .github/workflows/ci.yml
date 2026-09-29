@@ -12,6 +12,22 @@ concurrency:
 jobs:
   lint:
     name: Lint & typecheck
+    # Skips runs that would test code already tested:
+    # - a pull_request run of the staging → main PR: the push run on staging
+    #   already tests the same commit;
+    # - the release-please version PR (branch release-please--…) and its merge
+    #   into staging, "Merge pull request … release-please--" (merge) or
+    #   "chore(staging): version X.Y.Z" (squash): package.json and CHANGELOG.md
+    #   only, the code was checked on the previous push.
+    # Defined once here (&run-ci), reused by the other jobs (*run-ci).
+    if: &run-ci >-
+      ${{ !(
+            (github.event_name == 'pull_request' &&
+             (github.head_ref == 'staging' || startsWith(github.head_ref, 'release-please--'))) ||
+            (github.event_name == 'push' &&
+             (startsWith(github.event.head_commit.message, 'chore(staging): version ') ||
+              contains(github.event.head_commit.message, 'release-please--branches--')))
+          ) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -34,6 +50,7 @@ jobs:
 
   unit:
     name: Unit tests
+    if: *run-ci
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -54,6 +71,7 @@ jobs:
 
   integration:
     name: Integration tests
+    if: *run-ci
     runs-on: ubuntu-latest
     # Matches .env.test, so the suite runs with no CI-specific config. The
     # database starts empty: the suite's global setup builds it from the
@@ -91,6 +109,7 @@ jobs:
 
   e2e:
     name: E2E tests
+    if: *run-ci
     runs-on: ubuntu-latest
     # Matches .env.e2e. The Playwright web server (tests/e2e/serve.ts) builds
     # the database from the migrations, seeds it, then runs `next build` and
