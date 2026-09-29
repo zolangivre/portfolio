@@ -12,6 +12,14 @@ concurrency:
 jobs:
   lint:
     name: Lint & typecheck
+    # Merge of the release-please version PR into staging (package.json +
+    # CHANGELOG only): the code was already checked on the previous push.
+    # "Merge pull request … release-please--" (merge) or
+    # "chore(staging): version X.Y.Z" (squash).
+    if: >-
+      ${{ !(github.event_name == 'push' &&
+            (startsWith(github.event.head_commit.message, 'chore(staging): version ') ||
+             contains(github.event.head_commit.message, 'release-please--branches--'))) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -34,6 +42,11 @@ jobs:
 
   unit:
     name: Unit tests
+    # Same skip as the lint job.
+    if: >-
+      ${{ !(github.event_name == 'push' &&
+            (startsWith(github.event.head_commit.message, 'chore(staging): version ') ||
+             contains(github.event.head_commit.message, 'release-please--branches--'))) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -54,6 +67,11 @@ jobs:
 
   integration:
     name: Integration tests
+    # Same skip as the lint job.
+    if: >-
+      ${{ !(github.event_name == 'push' &&
+            (startsWith(github.event.head_commit.message, 'chore(staging): version ') ||
+             contains(github.event.head_commit.message, 'release-please--branches--'))) }}
     runs-on: ubuntu-latest
     # Matches .env.test, so the suite runs with no CI-specific config. The
     # database starts empty: the suite's global setup builds it from the
@@ -91,6 +109,11 @@ jobs:
 
   e2e:
     name: E2E tests
+    # Same skip as the lint job.
+    if: >-
+      ${{ !(github.event_name == 'push' &&
+            (startsWith(github.event.head_commit.message, 'chore(staging): version ') ||
+             contains(github.event.head_commit.message, 'release-please--branches--'))) }}
     runs-on: ubuntu-latest
     # Matches .env.e2e. The Playwright web server (tests/e2e/serve.ts) builds
     # the database from the migrations, seeds it, then runs `next build` and
