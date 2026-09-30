@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/zolangivre/portfolio/compare/v1.1.0...v1.1.1) (2026-09-30)
+
+
+### Corrections
+
+* **migrations:** add columns required by Payload 3.90 ([01f92f9](https://github.com/zolangivre/portfolio/commit/01f92f99c41664fdf5566b15e194e4d3aa0c3cd7))
+
 ## [1.1.0](https://github.com/zolangivre/portfolio/compare/v1.0.1...v1.1.0) (2026-09-29)
 
 
