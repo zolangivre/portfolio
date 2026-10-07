@@ -13,7 +13,7 @@ test.describe('theme toggle', () => {
     await themes.getByRole('button', { name: 'Thème sombre' }).click()
     await expect(html).toHaveClass(/\bdark\b/)
     await expect(themes.getByRole('button', { name: 'Thème sombre' })).toHaveAttribute(
-      'aria-current',
+      'aria-pressed',
       'true',
     )
 
