@@ -2,9 +2,18 @@
 
 import { createMessage } from '@/lib/queries/messages'
 
+export type ContactField = 'name' | 'email' | 'message'
+
 export type ContactFormState = {
   error?: string
+  /** The field the error is about, so the form can mark and focus it. */
+  field?: ContactField
   success: boolean
+  /**
+   * What the visitor typed, sent back on error: React resets a form once its
+   * action settles, so without this a rejected message would be wiped.
+   */
+  values?: Record<ContactField, string>
 }
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -28,22 +37,36 @@ export async function submitContactForm(
   const email = String(formData.get('email') ?? '').trim()
   const message = String(formData.get('message') ?? '').trim()
 
-  if (!name || !email || !message) {
-    return { error: 'missing-fields', success: false }
+  const values = { email, message, name }
+  const fail = (error: string, field?: ContactField): ContactFormState => ({
+    error,
+    field,
+    success: false,
+    values,
+  })
+
+  const missing = (['name', 'email', 'message'] as const).find((field) => !values[field])
+
+  if (missing) {
+    return fail('missing-fields', missing)
   }
 
   if (!EMAIL_PATTERN.test(email)) {
-    return { error: 'invalid-email', success: false }
+    return fail('invalid-email', 'email')
   }
 
-  if (name.length > LIMITS.name || email.length > LIMITS.email || message.length > LIMITS.message) {
-    return { error: 'missing-fields', success: false }
+  const overLong = (['name', 'email', 'message'] as const).find(
+    (field) => values[field].length > LIMITS[field],
+  )
+
+  if (overLong) {
+    return fail('missing-fields', overLong)
   }
 
   const result = await createMessage({ email, message, name })
 
   if (!result.success) {
-    return { error: 'server-error', success: false }
+    return fail('server-error')
   }
 
   return { success: true }
