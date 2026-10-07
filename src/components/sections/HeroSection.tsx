@@ -76,11 +76,7 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
           ) : null}
           <motion.div className="mt-8 flex flex-wrap gap-3" variants={heroItemVariants}>
             {primaryCta?.label && primaryCta?.href ? (
-              <a
-                className={buttonClassName()}
-                href={primaryCta.href}
-                ref={primaryCtaRef}
-              >
+              <a className={buttonClassName()} href={primaryCta.href} ref={primaryCtaRef}>
                 {primaryCta.label}
               </a>
             ) : null}
@@ -112,7 +108,11 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
               {highlights.map((item, index) => (
                 <span key={`${item.value}-${index}`}>
                   {item.value}
-                  {index < highlights.length - 1 ? <span className="mx-2">•</span> : null}
+                  {index < highlights.length - 1 ? (
+                    <span aria-hidden="true" className="mx-2">
+                      •
+                    </span>
+                  ) : null}
                 </span>
               ))}
             </motion.div>

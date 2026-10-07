@@ -40,9 +40,9 @@ export function MediaGallery({
 
   return (
     <>
-      <div aria-label={ariaLabel} className="media-gallery">
+      <div aria-label={ariaLabel} className="media-gallery" role="group">
         {images.map((image, imageIndex) => (
-          <Reveal blur={8} delay={Math.min(imageIndex, 5) * 0.08} key={image.id} scale={0.92}>
+          <Reveal delay={Math.min(imageIndex, 5) * 0.08} key={image.id} scale={0.92}>
             <button
               aria-label={image.alt}
               className="media-gallery-item relative"

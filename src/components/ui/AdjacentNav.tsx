@@ -57,7 +57,7 @@ function AdjacentLink({ direction, imageFit, item, label }: AdjacentLinkProps) {
             {item.imageUrl && (
               <Image
                 alt={item.imageAlt ?? ''}
-                className={`h-full w-full ${imageFit === 'contain' ? 'object-contain' : 'object-cover'} ${item.darkImageUrl ? ' dark:hidden' : ''}`}
+                className={`h-full w-full ${imageFit === 'contain' ? 'object-contain' : 'object-cover'}${item.darkImageUrl ? ' dark:hidden' : ''}`}
                 height={128}
                 sizes="64px"
                 src={item.imageUrl}
@@ -67,7 +67,7 @@ function AdjacentLink({ direction, imageFit, item, label }: AdjacentLinkProps) {
             {item.darkImageUrl && (
               <Image
                 alt={item.imageAlt ?? ''}
-                className={`h-full w-full ${imageFit === 'contain' ? 'object-contain' : 'object-cover'} dark:block`}
+                className={`hidden h-full w-full ${imageFit === 'contain' ? 'object-contain' : 'object-cover'} dark:block`}
                 height={128}
                 sizes="64px"
                 src={item.darkImageUrl}
