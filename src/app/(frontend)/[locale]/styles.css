@@ -9,6 +9,19 @@
 
 html {
   -webkit-font-smoothing: antialiased;
+  /* Intentional rather than the grey default flash: a faint accent tint. */
+  -webkit-tap-highlight-color: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+/* No double-tap-to-zoom delay on anything tappable. */
+a,
+button,
+input,
+label,
+select,
+summary,
+textarea {
+  touch-action: manipulation;
 }
 
 body {
@@ -802,8 +815,12 @@ a {
     gap: 1.75rem;
     height: 100dvh;
     overflow-y: auto;
+    /* Reaching the end of the drawer must not start scrolling the page. */
+    overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
-    padding: 6rem 1.75rem 2rem;
+    /* Clear of the home indicator and a landscape notch. */
+    padding: 6rem calc(1.75rem + env(safe-area-inset-right))
+      calc(2rem + env(safe-area-inset-bottom)) 1.75rem;
     position: fixed;
     right: 0;
     top: 0;
@@ -1009,17 +1026,31 @@ main {
 h1,
 h2,
 h3,
+h4,
 p {
   margin-top: 0;
 }
 
 h1,
 h2,
-h3 {
+h3,
+h4 {
   font-family: var(--font-display), sans-serif;
   font-weight: 700;
   letter-spacing: -0.05em;
   line-height: 1.1;
+}
+
+/* Not h1: every h1 here is typed in character by character, and balancing
+   would re-break its lines on each new letter. */
+h2,
+h3,
+h4 {
+  text-wrap: balance;
+}
+
+h4 {
+  margin-bottom: 0.5rem;
 }
 
 h1 {
@@ -1246,21 +1277,23 @@ h3 {
   transition: opacity var(--duration-fast) ease-out;
 }
 
+/* Only the tiles that are links react to hover — a lift on a plain tile
+   would promise a click that goes nowhere. */
 @media (hover: hover) and (pointer: fine) {
-  .skill-card:hover {
+  a.skill-card:hover {
     border-color: var(--accent-soft-border);
     transform: translateY(-3px);
   }
 
-  .skill-card:hover::after {
+  a.skill-card:hover::after {
     opacity: 1;
   }
 
-  .skill-card:hover .skill-card-icon {
+  a.skill-card:hover .skill-card-icon {
     transform: scale(1.1);
   }
 
-  .skill-card:hover .skill-card-link-icon {
+  a.skill-card:hover .skill-card-link-icon {
     opacity: 1;
   }
 }
