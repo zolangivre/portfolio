@@ -18,6 +18,14 @@ const localeLabels: Record<Locale, string> = {
   en: 'EN',
 }
 
+// Each language named in itself, as a visitor looking for it would read it.
+// The visible code stays part of the label so voice control ("click EN")
+// still matches.
+const localeNames: Record<Locale, string> = {
+  fr: 'Français',
+  en: 'English',
+}
+
 const EXIT_DURATION_MS = 220
 
 function handleLanguageChange(event: React.MouseEvent<HTMLAnchorElement>, href: string) {
@@ -37,9 +45,10 @@ function handleLanguageChange(event: React.MouseEvent<HTMLAnchorElement>, href: 
   const root = document.getElementById('main-content')
 
   if (root) {
-    root.style.transition = `opacity ${EXIT_DURATION_MS}ms ease, filter ${EXIT_DURATION_MS}ms ease, transform ${EXIT_DURATION_MS}ms ease`
+    // Opacity and transform only — a blur here would re-rasterize the whole
+    // page on every frame of the exit.
+    root.style.transition = `opacity ${EXIT_DURATION_MS}ms ease, transform ${EXIT_DURATION_MS}ms ease`
     root.style.opacity = '0'
-    root.style.filter = 'blur(6px)'
     root.style.transform = 'scale(0.99)'
   }
 
@@ -54,7 +63,11 @@ export function LanguageSwitcher({ dictionary, locale }: LanguageSwitcherProps) 
   const suffix = pathname.startsWith(localePrefix) ? pathname.slice(localePrefix.length) : ''
 
   return (
-    <div aria-label={dictionary.nav.languageSwitcherLabel} className="language-switcher" role="group">
+    <div
+      aria-label={dictionary.nav.languageSwitcherLabel}
+      className="language-switcher"
+      role="group"
+    >
       {locales.map((entry) => {
         const href = `/${entry}${suffix}`
 
@@ -68,10 +81,13 @@ export function LanguageSwitcher({ dictionary, locale }: LanguageSwitcherProps) 
           // reload with an exit animation, it doesn't replace it.
           <a
             aria-current={entry === locale ? 'true' : undefined}
+            aria-label={`${localeNames[entry]} (${localeLabels[entry]})`}
             className="language-switcher-item"
             data-active={entry === locale}
             href={href}
+            hrefLang={entry}
             key={entry}
+            lang={entry}
             onClick={(event) => handleLanguageChange(event, href)}
           >
             {entry === locale ? (

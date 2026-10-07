@@ -44,10 +44,10 @@ export function Header({ dictionary, locale, navigation, sections, settings }: H
       <RouteScrollManager />
       <HashScrollHandler />
       <Container className="site-header-inner">
-        <Link aria-label={name} className="site-logo" href={`/${locale}`}>
-          <span className="site-logo-initials">
-            {initials}
-          </span>
+        {/* The label has to contain the visible initials, or a voice-control
+            user saying what they see ("click ZG") can't reach the link. */}
+        <Link aria-label={`${name} (${initials})`} className="site-logo" href={`/${locale}`}>
+          <span className="site-logo-initials">{initials}</span>
         </Link>
         <MobileNavToggle
           closeLabel={dictionary.nav.closeMenuLabel}
