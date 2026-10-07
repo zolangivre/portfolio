@@ -16,15 +16,13 @@ export function TestimonialCard({ testimonial }: TestimonialCardProps) {
     // Static .card-glow wrapper: it's the hover target and hosts the glow,
     // while the article lifts inside it (see .card-glow in styles.css).
     <div className={cardFrameClassName('h-full')}>
-      <article
-        className={cardClassName({ className: 'flex h-full flex-col justify-between p-7' })}
-        data-cursor="pointer"
-      >
+      <article className={cardClassName({ className: 'flex h-full flex-col justify-between p-7' })}>
         <p className="text-base leading-7 text-fg-muted">“{testimonial.quote}”</p>
         <div className="mt-6 flex items-center gap-3">
           {avatarUrl ? (
             <FadeImage
-              alt={testimonial.author}
+              // The author's name is printed right beside it.
+              alt=""
               className="h-10 w-10 rounded-full bg-surface object-contain"
               height={40}
               src={avatarUrl}
