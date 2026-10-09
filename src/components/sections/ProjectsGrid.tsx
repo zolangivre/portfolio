@@ -52,7 +52,7 @@ export function ProjectsGrid({ dictionary, locale, projects }: ProjectsGridProps
       ) : null}
 
       {visibleProjects.length > 0 ? (
-        <RevealGroup className="project-grid" scale={0.96}>
+        <RevealGroup className="project-grid" layout scale={0.96}>
           {visibleProjects.map((project) => (
             <ProjectCard dictionary={dictionary} key={project.id} locale={locale} project={project} />
           ))}

@@ -38,7 +38,7 @@ export function Header({ dictionary, locale, navigation, sections, settings }: H
   const showJournalLink = sections?.journal !== false
 
   return (
-    <header className="site-header p-2" data-scrolled="false">
+    <header className="site-header p-2 z-50" data-scrolled="false">
       <HeaderScrollWatcher />
       <NavScrollSpy />
       <RouteScrollManager />
