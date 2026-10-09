@@ -424,7 +424,12 @@ a {
    défilement et casserait le `position: sticky` du header. `clip` se contente
    de rogner, donc les débordements purement décoratifs (halos floutés, blobs)
    ne peuvent plus créer de scroll horizontal / marge à droite sur mobile. */
+/* A column whose `main` takes up the slack: on a page shorter than the
+   viewport (404, error) the footer stays pinned to the bottom at its normal
+   height, instead of ending mid-screen with an empty band underneath. */
 .site-shell {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   overflow-x: clip;
 }
@@ -973,6 +978,7 @@ a {
 
 main {
   display: flex;
+  flex: 1 0 auto;
   flex-direction: column;
 }
 

@@ -37,7 +37,7 @@ export function RouteNotFound() {
   const copy = COPY[locale]
 
   return (
-    <section className="content-section">
+    <section className="content-section flex flex-1 items-center">
       <Container>
         <div className="mx-auto max-w-lg text-center">
           <p className="eyebrow">404</p>

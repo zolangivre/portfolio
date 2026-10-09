@@ -122,6 +122,7 @@ test.describe('pages that must not exist', () => {
     '/fr/projects/does-not-exist',
     `/fr/journal/${privateJournalEntry.slug}`,
     '/fr/journal/does-not-exist',
+    '/fr/nothing/here',
     '/de',
   ]) {
     test(`${path} answers 404`, async ({ page }) => {
@@ -130,6 +131,16 @@ test.describe('pages that must not exist', () => {
       expect(response?.status()).toBe(404)
     })
   }
+
+  // Unmatched URLs used to get Next's bare default 404; the [...rest]
+  // catch-all routes them to the site's own page, inside the site layout.
+  test('an unknown URL shows the site 404, not the framework one', async ({ page }) => {
+    await page.goto('/en/nothing/here')
+
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('This page does not exist.')
+    await expect(page.getByRole('link', { name: 'Back to home' })).toHaveAttribute('href', '/en')
+    await expect(page.locator('.site-header')).toBeVisible()
+  })
 })
 
 test('the sitemap lists public pages only', async ({ request }) => {
