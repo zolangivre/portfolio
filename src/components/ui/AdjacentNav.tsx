@@ -85,7 +85,7 @@ function AdjacentLink({ direction, imageFit, item, label }: AdjacentLinkProps) {
           >
             <span
               aria-hidden
-              className={`text-accent transition-transform duration-(--duration-base) ease-bounce ${
+              className={`text-accent transition-transform duration-(--duration-ui) ease-bounce ${
                 isPrevious ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'
               }`}
             >

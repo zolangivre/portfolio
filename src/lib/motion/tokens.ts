@@ -9,6 +9,7 @@ export const EASE_BOUNCE = [0.34, 1.56, 0.64, 1] as const
 export const EASE_IN_OUT_PREMIUM = [0.65, 0, 0.35, 1] as const
 
 export const DURATION_FAST = 0.2
+export const DURATION_UI = 0.25
 export const DURATION_BASE = 0.4
 export const DURATION_SLOW = 0.7
 
