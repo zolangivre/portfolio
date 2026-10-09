@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.2.0](https://github.com/zolangivre/portfolio/compare/v1.1.1...v1.2.0) (2026-10-09)
+
+
+### Nouveautés
+
+* add availability badge feature to Hero section with migration support ([8a742f9](https://github.com/zolangivre/portfolio/commit/8a742f9851a570c967e872354cf68e91aac7c563))
+* implement custom 404 handling and enhance layout for unmatched URLs ([a13c0ca](https://github.com/zolangivre/portfolio/commit/a13c0cab48560f6c4b553ae65e10ca8f186c9861))
+
+
+### Corrections
+
+* add /plans directory to .gitignore ([73a4ed4](https://github.com/zolangivre/portfolio/commit/73a4ed43f82b9b783e814fc830e41005c8b6d42f))
+* add next_cache volume for Turbopack's persistent cache in docker-compose ([4f18c8d](https://github.com/zolangivre/portfolio/commit/4f18c8de4c013d0f97cd6bad2486104559894b37))
+* add viewport tinting for mobile browsers and enhance video label accessibility in ProjectDetailPage ([82f832c](https://github.com/zolangivre/portfolio/commit/82f832c5ef4b159b768362cc01db1775baf89353))
+* enhance accessibility and performance in various components ([468ba0f](https://github.com/zolangivre/portfolio/commit/468ba0f678b81025ecdfa5777a633ef39fe36c1c))
+* enhance accessibility by adding line clamping to descriptions in JournalCard and ProjectCard components ([af00a17](https://github.com/zolangivre/portfolio/commit/af00a178ef079fdad8bff434eb4b627da5e5ed81))
+* enhance accessibility by displaying descriptions directly in Education and Experience sections ([716b0f4](https://github.com/zolangivre/portfolio/commit/716b0f4d915d2809903783ac10e734788c674687))
+* enhance accessibility in Header, LanguageSwitcher, MobileNavToggle, and ThemeToggle components ([43c62f1](https://github.com/zolangivre/portfolio/commit/43c62f1be00a89d16322578bc1699c075aa7b2c8))
+* enhance contact form validation and add localized video labels in dictionary ([831ae28](https://github.com/zolangivre/portfolio/commit/831ae28f43816d8dc185dca698b5dbe7c6f33302))
+* enhance touch interactions and layout adjustments in styles.css ([4c728d3](https://github.com/zolangivre/portfolio/commit/4c728d36c3eedf55ce96421db6bed436113fd0c3))
+* improve error handling and focus management; update email fallback in ContactSection ([9a55462](https://github.com/zolangivre/portfolio/commit/9a554621bbf641501cf7e2818ec1206720ce2428))
+* **tests:** update language switcher link text and adjust aria attributes in tests ([ddf9a69](https://github.com/zolangivre/portfolio/commit/ddf9a694ced3fc48b9661354ccd4527ed8b3df29))
+* update motion durations and enhance layout transitions across components ([f6aaf6c](https://github.com/zolangivre/portfolio/commit/f6aaf6ce9ef9c127f12a67f94a1a2e6876e0a0fb))
+* update motion durations and enhance layout transitions in RevealGroup ([198abf5](https://github.com/zolangivre/portfolio/commit/198abf52f0cd7e84201cbc36c1ee59874f9f3e91))
+* update transition durations for UI elements and enhance motion consistency ([61137cb](https://github.com/zolangivre/portfolio/commit/61137cb4227984f688625d58e8868854f4bbd377))
+
+
+### Refactorisation
+
+* remove projects archive and related components from the codebase ([033acb4](https://github.com/zolangivre/portfolio/commit/033acb4836c22384af08889e44571e40b30b2311))
+
 ## [1.1.1](https://github.com/zolangivre/portfolio/compare/v1.1.0...v1.1.1) (2026-09-30)
 
 
