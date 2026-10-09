@@ -1,5 +1,5 @@
 import { FadeImage } from '@/components/ui/FadeImage'
-import { MockupVideo } from '@/components/ui/MockupVideo'
+import { MockupVideo, type MockupVideoLabels } from '@/components/ui/MockupVideo'
 import { asMediaDoc, getMediaUrl, isVideo } from '@/lib/media'
 import type { MediaRelation } from '@/lib/media'
 
@@ -14,6 +14,7 @@ type FrameProps = {
   mimeType?: string | null
   priority?: boolean
   src: string
+  videoLabels: MockupVideoLabels
   width: number
 }
 
@@ -38,21 +39,24 @@ function MockupMedia({
   priority,
   sizes,
   src,
+  videoLabels,
   width,
 }: MockupMediaProps) {
-  const renderOne = (mediaSrc: string, mediaClassName: string, isLight: boolean) =>
+  const renderOne = (mediaSrc: string, visibility: string, isLight: boolean) =>
     isVideo(mimeType) ? (
       <MockupVideo
         ariaLabel={alt}
-        className={mediaClassName}
+        className={className}
         height={height}
+        labels={videoLabels}
         src={mediaSrc}
+        visibilityClassName={visibility}
         width={width}
       />
     ) : (
       <FadeImage
         alt={alt}
-        className={mediaClassName}
+        className={`${visibility} ${className}`}
         height={height}
         priority={isLight ? priority : undefined}
         sizes={sizes}
@@ -63,8 +67,8 @@ function MockupMedia({
 
   return (
     <>
-      {renderOne(src, `${className}${darkSrc ? ' dark:hidden' : ''}`, true)}
-      {darkSrc ? renderOne(darkSrc, `hidden dark:block ${className}`, false) : null}
+      {renderOne(src, darkSrc ? 'dark:hidden' : '', true)}
+      {darkSrc ? renderOne(darkSrc, 'hidden dark:block', false) : null}
     </>
   )
 }
@@ -224,6 +228,8 @@ type DeviceMockupProps = {
   image?: MediaRelation
   imageDark?: MediaRelation
   priority?: boolean
+  /** For the play/pause button a screen recording comes with. */
+  videoLabels: MockupVideoLabels
 }
 
 /**
@@ -242,6 +248,7 @@ export function DeviceMockup({
   image,
   imageDark,
   priority,
+  videoLabels,
 }: DeviceMockupProps) {
   const light = asMediaDoc(image)
   const dark = asMediaDoc(imageDark)
@@ -272,6 +279,7 @@ export function DeviceMockup({
         mimeType={primary.mimeType}
         priority={priority}
         src={src}
+        videoLabels={videoLabels}
         width={primary.width ?? width}
       />
     </div>

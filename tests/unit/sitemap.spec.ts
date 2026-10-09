@@ -32,7 +32,6 @@ describe('sitemap', () => {
     expect(await urls()).toEqual(
       ['fr', 'en'].flatMap((locale) => [
         `https://site.test/${locale}`,
-        `https://site.test/${locale}/projects`,
         `https://site.test/${locale}/projects/alpha`,
         `https://site.test/${locale}/projects/beta`,
         `https://site.test/${locale}/journal`,
@@ -72,7 +71,7 @@ describe('sitemap', () => {
   it('keeps every section when the visibility settings failed to load', async () => {
     vi.mocked(getSectionsVisibility).mockResolvedValue(null)
 
-    expect(await urls()).toHaveLength(12)
+    expect(await urls()).toHaveLength(10)
   })
 
   it('dates each index page by its most recent entry', async () => {

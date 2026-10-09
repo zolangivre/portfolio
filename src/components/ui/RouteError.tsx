@@ -35,7 +35,7 @@ export function RouteError({ error, reset }: RouteErrorProps) {
   }, [error])
 
   return (
-    <section className="content-section">
+    <section className="content-section flex flex-1 items-center">
       <Container>
         <div className="mx-auto max-w-md text-center">
           <h1>{copy.title}</h1>

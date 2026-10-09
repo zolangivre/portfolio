@@ -18,6 +18,33 @@ export const Hero: GlobalConfig = {
   },
   fields: [
     {
+      name: 'availability',
+      type: 'group',
+      label: 'Disponibilité',
+      admin: {
+        description:
+          'Badge affiché au-dessus du titre pour signaler aux recruteurs que vous êtes disponible. Décochez-le une fois en poste.',
+      },
+      fields: [
+        {
+          name: 'enabled',
+          type: 'checkbox',
+          label: 'Afficher le badge',
+          defaultValue: false,
+        },
+        {
+          name: 'label',
+          type: 'text',
+          label: 'Texte',
+          localized: true,
+          admin: {
+            description:
+              'Ex. « Disponible pour un CDI full-stack dès janvier 2027 · Montpellier / remote ».',
+          },
+        },
+      ],
+    },
+    {
       name: 'eyebrow',
       type: 'text',
       label: 'Surtitre / rôle',

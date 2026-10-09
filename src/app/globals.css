@@ -38,11 +38,14 @@
    * Durations — the easings they pair with live in @theme below. Every
    * hand-written CSS transition should reach for one of these instead of a
    * new literal, so the whole site moves with one consistent voice: fast for
-   * colour/opacity feedback, base for movement, slow for entrances. Tailwind
-   * has no duration namespace, so TSX uses `duration-(--duration-base)`.
+   * colour/opacity feedback, ui for the hover/focus/toggle feedback the
+   * pointer hits constantly (UI motion stays under 300ms), base for surfaces
+   * crossing the screen (drawer, lightbox), slow for entrances. Tailwind
+   * has no duration namespace, so TSX uses `duration-(--duration-ui)`.
    * TS equivalents live in src/lib/motion/tokens.ts for `motion` props.
    */
   --duration-fast: 200ms;
+  --duration-ui: 250ms;
   --duration-base: 400ms;
   --duration-slow: 700ms;
 
@@ -183,7 +186,9 @@ html {
  * Global safety net: every component below is expected to add its own
  * explicit prefers-reduced-motion block when it needs a genuinely different
  * (not just faster) reduced state. This is the belt-and-suspenders fallback
- * so nothing new can slip through with a full-speed animation.
+ * for keyframe loops only; transitions are handled per component so
+ * opacity/colour feedback survives — reduced motion means less movement, not
+ * none.
  */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -191,7 +196,6 @@ html {
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
 }

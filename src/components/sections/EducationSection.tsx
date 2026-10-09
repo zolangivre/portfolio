@@ -79,22 +79,24 @@ export function EducationSection({
                           href={school.website}
                           rel="noreferrer"
                           target="_blank"
-                          title={school.description ?? undefined}
                         >
                           {school.name}
                         </a>
                       ) : (
-                        <span title={school?.description ?? undefined}>
-                          {school?.name ?? dictionary.education.fallbackSchool}
-                        </span>
+                        <span>{school?.name ?? dictionary.education.fallbackSchool}</span>
                       )}
                     </div>
+                    {/* Shown on the page rather than in a `title` tooltip, which
+                        keyboard and touch visitors never get to see. */}
+                    {school?.description ? (
+                      <p className="timeline-company mt-1 text-xs">{school.description}</p>
+                    ) : null}
                     {entry.location ? (
                       <p className="timeline-company mt-1 text-xs">{entry.location}</p>
                     ) : null}
                     <div className="timeline-body text-fg-muted">
                       {entry.fieldOfStudy ? (
-                        <h3 className="text-base">{entry.fieldOfStudy}</h3>
+                        <h4 className="text-base">{entry.fieldOfStudy}</h4>
                       ) : null}
                       {entry.description ? <RichText content={entry.description} /> : null}
                     </div>

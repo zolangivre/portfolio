@@ -38,16 +38,16 @@ export function Header({ dictionary, locale, navigation, sections, settings }: H
   const showJournalLink = sections?.journal !== false
 
   return (
-    <header className="site-header p-2" data-scrolled="false">
+    <header className="site-header p-2 z-50" data-scrolled="false">
       <HeaderScrollWatcher />
       <NavScrollSpy />
       <RouteScrollManager />
       <HashScrollHandler />
       <Container className="site-header-inner">
-        <Link aria-label={name} className="site-logo" href={`/${locale}`}>
-          <span className="site-logo-initials">
-            {initials}
-          </span>
+        {/* The label has to contain the visible initials, or a voice-control
+            user saying what they see ("click ZG") can't reach the link. */}
+        <Link aria-label={`${name} (${initials})`} className="site-logo" href={`/${locale}`}>
+          <span className="site-logo-initials">{initials}</span>
         </Link>
         <MobileNavToggle
           closeLabel={dictionary.nav.closeMenuLabel}

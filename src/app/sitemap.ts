@@ -30,9 +30,7 @@ function mostRecent(values: (string | null | undefined)[]): Date | undefined {
  */
 function alternates(path: string): Entry['alternates'] {
   return {
-    languages: Object.fromEntries(
-      locales.map((locale) => [locale, `${siteUrl}/${locale}${path}`]),
-    ),
+    languages: Object.fromEntries(locales.map((locale) => [locale, `${siteUrl}/${locale}${path}`])),
   }
 }
 
@@ -59,23 +57,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     entries.push({
       url: `${siteUrl}/${locale}`,
-      lastModified: mostRecent(
-        [...projects, ...journalEntries].map((doc) => doc.updatedAt),
-      ),
+      lastModified: mostRecent([...projects, ...journalEntries].map((doc) => doc.updatedAt)),
       changeFrequency: 'weekly',
       priority: 1,
       alternates: alternates(''),
     })
 
     if (projectsVisible) {
-      entries.push({
-        url: `${siteUrl}/${locale}/projects`,
-        lastModified: mostRecent(projects.map((project) => project.updatedAt)),
-        changeFrequency: 'weekly',
-        priority: 0.8,
-        alternates: alternates('/projects'),
-      })
-
       for (const project of projects) {
         entries.push({
           url: `${siteUrl}/${locale}/projects/${project.slug}`,

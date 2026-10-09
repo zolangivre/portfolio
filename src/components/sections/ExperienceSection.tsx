@@ -93,16 +93,18 @@ export function ExperienceSection({
                           href={company.website}
                           rel="noreferrer"
                           target="_blank"
-                          title={company.description ?? undefined}
                         >
                           {company.name}
                         </a>
                       ) : (
-                        <span title={company?.description ?? undefined}>
-                          {company?.name ?? dictionary.experience.fallbackCompany}
-                        </span>
+                        <span>{company?.name ?? dictionary.experience.fallbackCompany}</span>
                       )}
                     </div>
+                    {/* Shown on the page rather than in a `title` tooltip, which
+                        keyboard and touch visitors never get to see. */}
+                    {company?.description ? (
+                      <p className="timeline-company mt-1 text-xs">{company.description}</p>
+                    ) : null}
                     {experience.location ? (
                       <p className="timeline-company mt-1 text-xs">{experience.location}</p>
                     ) : null}

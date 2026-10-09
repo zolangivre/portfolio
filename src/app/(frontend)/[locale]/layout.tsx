@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { notFound } from 'next/navigation'
 import { Baloo_2, Bagel_Fat_One, Inter } from 'next/font/google'
 import Script from 'next/script'
@@ -49,6 +49,16 @@ const bagelFatOne = Bagel_Fat_One({
 })
 
 type LayoutParams = { locale: string }
+
+// Tints the mobile browser chrome to the page. Mirrors --bg in globals.css;
+// it follows the system scheme, since a meta tag can't see the class the
+// theme toggle sets.
+export const viewport: Viewport = {
+  themeColor: [
+    { color: '#f4f5f2', media: '(prefers-color-scheme: light)' },
+    { color: '#0a0d11', media: '(prefers-color-scheme: dark)' },
+  ],
+}
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }))

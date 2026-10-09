@@ -29,9 +29,22 @@ function resolveLocale(locale: string): Locale {
   return locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale
 }
 
+// Pinned to UTC: the date is a stored calendar day, and formatting it in
+// the visitor's own time zone can land on the day before or after — and
+// differ from the server render this has to hydrate against.
 const dateFormatters: Record<Locale, Intl.DateTimeFormat> = {
-  fr: new Intl.DateTimeFormat('fr', { day: 'numeric', month: 'long', year: 'numeric' }),
-  en: new Intl.DateTimeFormat('en', { day: 'numeric', month: 'long', year: 'numeric' }),
+  fr: new Intl.DateTimeFormat('fr', {
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+    year: 'numeric',
+  }),
+  en: new Intl.DateTimeFormat('en', {
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+    year: 'numeric',
+  }),
 }
 
 export async function generateStaticParams() {
@@ -160,9 +173,9 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
 
         {entry.tags && entry.tags.length > 0 ? (
           <Reveal>
-            <ul className="mt-8 flex flex-wrap gap-2" aria-label="tags">
+            <ul className="mt-8 flex flex-wrap gap-2" aria-label={dictionary.journal.tagsAriaLabel}>
               {entry.tags.map((tag, index) => (
-                <Pill as="li" interactive key={`${tag.value}-${index}`}>
+                <Pill as="li" key={`${tag.value}-${index}`}>
                   {tag.value}
                 </Pill>
               ))}
