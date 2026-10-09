@@ -3,6 +3,7 @@
 import { motion } from 'motion/react'
 import Image from 'next/image'
 
+import { AvailabilityBadge, resolveAvailability } from '@/components/ui/AvailabilityBadge'
 import { buttonClassName } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import { RichText } from '@/components/ui/RichText'
@@ -33,6 +34,7 @@ const heroItemVariants = {
 export function HeroSection({ hero, settings }: HeroSectionProps) {
   const title = hero?.title ?? 'Building polished digital products with calm, modern engineering.'
   const typedLength = useTypewriter(title)
+  const availability = resolveAvailability(hero)
   const highlights = (hero?.highlights ?? []).filter((item) => item.value.trim().length > 0)
   const primaryCta = hero?.primaryCta
   const secondaryCta = hero?.secondaryCta
@@ -54,6 +56,11 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
           initial="hidden"
           variants={heroContainerVariants}
         >
+          {availability ? (
+            <motion.div className="mb-5" variants={heroItemVariants}>
+              <AvailabilityBadge label={availability} />
+            </motion.div>
+          ) : null}
           {hero?.eyebrow ? (
             <motion.p className="eyebrow" variants={heroItemVariants}>
               {hero.eyebrow}
