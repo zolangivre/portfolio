@@ -18,7 +18,7 @@ test.describe('theme toggle', () => {
     )
 
     // Survives a reload and a change of page, over the system preference.
-    await page.goto('/fr/projects')
+    await page.goto('/fr/journal')
     await expect(html).toHaveClass(/\bdark\b/)
 
     await themes.getByRole('button', { name: 'Thème clair' }).click()
@@ -48,7 +48,7 @@ test('the skip link is the first stop and moves focus past the header', async ({
 })
 
 test('security headers are sent on pages and the admin', async ({ request }) => {
-  for (const path of ['/fr', '/fr/projects', '/admin/login']) {
+  for (const path of ['/fr', '/fr/journal', '/admin/login']) {
     const headers = (await request.get(path)).headers()
 
     expect(headers['x-frame-options'], path).toBe('DENY')

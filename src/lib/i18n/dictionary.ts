@@ -34,13 +34,6 @@ export interface Dictionary {
     adjacentNavAriaLabel: string
     previousProjectLabel: string
     nextProjectLabel: string
-    countSuffix: string
-    archiveEyebrow: string
-    archiveTitle: string
-    archiveDescription: string
-    allTechnologiesLabel: string
-    filterAriaLabel: string
-    backToHomeLabel: string
   }
   experience: {
     eyebrow: string
@@ -151,13 +144,6 @@ const dictionaries: Record<Locale, Dictionary> = {
       adjacentNavAriaLabel: 'Navigation entre les projets',
       previousProjectLabel: 'Projet précédent',
       nextProjectLabel: 'Projet suivant',
-      countSuffix: 'projets',
-      archiveEyebrow: 'Archive',
-      archiveTitle: 'Tous les projets',
-      archiveDescription: 'L’ensemble des projets publiés, filtrables par technologie.',
-      allTechnologiesLabel: 'Toutes',
-      filterAriaLabel: 'Filtrer les projets par technologie',
-      backToHomeLabel: '← Retour à l’accueil',
     },
     experience: {
       eyebrow: 'Parcours',
@@ -272,13 +258,6 @@ const dictionaries: Record<Locale, Dictionary> = {
       adjacentNavAriaLabel: 'Project navigation',
       previousProjectLabel: 'Previous project',
       nextProjectLabel: 'Next project',
-      countSuffix: 'projects',
-      archiveEyebrow: 'Archive',
-      archiveTitle: 'All projects',
-      archiveDescription: 'Every published project, filterable by technology.',
-      allTechnologiesLabel: 'All',
-      filterAriaLabel: 'Filter projects by technology',
-      backToHomeLabel: '← Back to home',
     },
     experience: {
       eyebrow: 'Background',

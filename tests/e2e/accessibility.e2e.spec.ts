@@ -33,7 +33,6 @@ async function scanAccessibility(page: Page) {
 const pages = [
   '/fr',
   '/en',
-  '/fr/projects',
   `/fr/projects/${projects[0].slug}`,
   '/fr/journal',
   `/fr/journal/${journalEntries[0].slug}`,

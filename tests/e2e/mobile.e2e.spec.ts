@@ -59,7 +59,6 @@ test('choosing a link closes the menu and goes there', async ({ page }) => {
 for (const path of [
   '/fr',
   '/en',
-  '/fr/projects',
   `/fr/projects/${projects[0]!.slug}`,
   '/fr/journal',
   `/fr/journal/${journalEntries[0].slug}`,

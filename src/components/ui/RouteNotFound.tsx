@@ -44,16 +44,10 @@ export function RouteNotFound() {
           <h1>{copy.title}</h1>
           <p className="mt-3 text-sm leading-7 text-fg-muted">{copy.description}</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link
-              className={buttonClassName()}
-              href={`/${locale}`}
-            >
+            <Link className={buttonClassName()} href={`/${locale}`}>
               {copy.home}
             </Link>
-            <Link
-              className={buttonClassName('secondary')}
-              href={`/${locale}/projects`}
-            >
+            <Link className={buttonClassName('secondary')} href={`/${locale}#projects`}>
               {copy.back}
             </Link>
           </div>

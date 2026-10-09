@@ -113,17 +113,10 @@ test('a new page opens at its top, not where the last one was scrolled', async (
   expect(await page.evaluate(() => window.scrollY)).toBeLessThan(50)
 })
 
-test('the archive lists every public project and nothing else', async ({ page }) => {
-  await page.goto('/fr/projects')
-
-  for (const project of [alpha, beta, gamma]) {
-    await expect(page.getByRole('heading', { name: project.fr })).toBeVisible()
-  }
-  await expect(page.getByText(privateProject.fr)).toHaveCount(0)
-})
-
 test.describe('pages that must not exist', () => {
   for (const path of [
+    // The archive was removed: projects live on the homepage only.
+    '/fr/projects',
     `/fr/projects/${privateProject.slug}`,
     `/en/projects/${privateProject.slug}`,
     '/fr/projects/does-not-exist',

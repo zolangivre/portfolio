@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import type { Project, Technology } from '@/payload-types'
 import { getAdjacentBySlug } from '@/lib/adjacent'
 import { isValidHexColor } from '@/lib/color'
 import { extractSectionKey, resolveNavHref } from '@/lib/nav'
-import { collectTechnologies, projectUsesTechnology } from '@/lib/projects'
 import { lexicalToPlainText, textToLexicalParagraphs } from '@/lib/richText'
 import { resolveSectionCopy } from '@/lib/sectionCopy'
 
@@ -112,37 +110,6 @@ describe('getAdjacentBySlug', () => {
 
     expect(result.previous?.slug ?? null).toBe(previous)
     expect(result.next?.slug ?? null).toBe(next)
-  })
-})
-
-describe('project technologies', () => {
-  const tech = (id: number, name: string) => ({ id, name }) as Technology
-  const react = tech(1, 'React')
-  const payload = tech(2, 'Payload')
-  const docker = tech(3, 'Docker')
-
-  const projects = [
-    { technologies: [react, payload] },
-    { technologies: [payload, docker, 99] }, // 99: unpopulated id, ignored
-    { technologies: [react, payload] },
-    { technologies: null },
-  ] as unknown as Project[]
-
-  it('orders by usage, then alphabetically, without duplicates', () => {
-    expect(collectTechnologies(projects).map((t) => t.name)).toEqual(['Payload', 'React', 'Docker'])
-  })
-
-  it('breaks ties alphabetically', () => {
-    const tied = [{ technologies: [react, docker] }] as unknown as Project[]
-
-    expect(collectTechnologies(tied).map((t) => t.name)).toEqual(['Docker', 'React'])
-  })
-
-  it('tells whether a project uses a technology', () => {
-    expect(projectUsesTechnology(projects[1]!, docker.id)).toBe(true)
-    expect(projectUsesTechnology(projects[0]!, docker.id)).toBe(false)
-    expect(projectUsesTechnology(projects[1]!, 99)).toBe(false)
-    expect(projectUsesTechnology(projects[3]!, react.id)).toBe(false)
   })
 })
 
