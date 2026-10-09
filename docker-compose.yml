@@ -6,6 +6,10 @@ services:
     volumes:
       - .:/home/node/app
       - node_modules:/home/node/app/node_modules
+      # Own build cache: Turbopack's persistent cache in .next is tied to the
+      # platform that wrote it. Sharing the host's (macOS) .next made the
+      # container fail to load lightningcss's linux-musl binary.
+      - next_cache:/home/node/app/.next
     working_dir: /home/node/app/
     command: sh -c "corepack enable && corepack prepare pnpm@10.27.0 --activate && pnpm install && pnpm dev"
     depends_on:
@@ -30,3 +34,4 @@ services:
 volumes:
   pgdata:
   node_modules:
+  next_cache:
