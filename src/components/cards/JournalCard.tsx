@@ -14,9 +14,22 @@ type JournalCardProps = {
   locale: Locale
 }
 
+// Pinned to UTC: the date is a stored calendar day, and formatting it in
+// the visitor's own time zone can land on the day before or after — and
+// differ from the server render this has to hydrate against.
 const dateFormatters: Record<Locale, Intl.DateTimeFormat> = {
-  fr: new Intl.DateTimeFormat('fr', { day: 'numeric', month: 'long', year: 'numeric' }),
-  en: new Intl.DateTimeFormat('en', { day: 'numeric', month: 'long', year: 'numeric' }),
+  fr: new Intl.DateTimeFormat('fr', {
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+    year: 'numeric',
+  }),
+  en: new Intl.DateTimeFormat('en', {
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+    year: 'numeric',
+  }),
 }
 
 export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
@@ -68,10 +81,12 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
             {entry.location ? ` · ${entry.location}` : null}
           </p>
           <h3 className="mt-2 text-xl font-semibold text-fg">{entry.title}</h3>
-          <p className="mt-3 flex-1 text-sm leading-7 text-fg-muted">{entry.shortDescription}</p>
+          <p className="mt-3 line-clamp-3 flex-1 text-sm leading-7 text-fg-muted">
+            {entry.shortDescription}
+          </p>
 
           {tags.length > 0 ? (
-            <ul className="mt-5 flex flex-wrap gap-2" aria-label="tags">
+            <ul className="mt-5 flex flex-wrap gap-2" aria-label={dictionary.journal.tagsAriaLabel}>
               {tags.slice(0, 4).map((tag, index) => (
                 <Pill as="li" key={`${tag.value}-${index}`}>
                   {tag.value}

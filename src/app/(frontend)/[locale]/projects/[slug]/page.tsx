@@ -174,6 +174,10 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
               image={project.mockupImage}
               imageDark={project.mockupImageDark}
               priority
+              videoLabels={{
+                pause: dictionary.video.pauseLabel,
+                play: dictionary.video.playLabel,
+              }}
             />
           </Reveal>
         ) : imageUrl || darkImageUrl ? (
@@ -195,7 +199,6 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                   alt={imageAlt}
                   className="hidden h-full w-full object-contain dark:block"
                   height={900}
-                  priority
                   sizes="(min-width: 1200px) 1160px, 100vw"
                   src={darkImageUrl}
                   width={1600}

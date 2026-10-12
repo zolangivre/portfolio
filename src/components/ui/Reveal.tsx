@@ -6,7 +6,6 @@ import type { ReactNode } from 'react'
 import { EASE_OUT_PREMIUM } from '@/lib/motion/tokens'
 
 type RevealProps = {
-  blur?: number
   children: ReactNode
   className?: string
   delay?: number
@@ -15,8 +14,9 @@ type RevealProps = {
   y?: number
 }
 
+// Opacity and transform only: an animated `filter: blur()` re-rasterizes the
+// whole element on every frame, and this wraps large images.
 export function Reveal({
-  blur = 0,
   children,
   className,
   delay = 0,
@@ -27,10 +27,10 @@ export function Reveal({
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y, scale, filter: blur ? `blur(${blur}px)` : undefined }}
+      initial={{ opacity: 0, y, scale }}
       transition={{ delay, duration: 0.6, ease: EASE_OUT_PREMIUM }}
       viewport={{ margin: '-80px', once }}
-      whileInView={{ opacity: 1, y: 0, scale: scale !== undefined ? 1 : undefined, filter: blur ? 'blur(0px)' : undefined }}
+      whileInView={{ opacity: 1, y: 0, scale: scale !== undefined ? 1 : undefined }}
     >
       {children}
     </motion.div>

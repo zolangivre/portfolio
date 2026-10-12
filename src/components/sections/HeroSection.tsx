@@ -3,10 +3,10 @@
 import { motion } from 'motion/react'
 import Image from 'next/image'
 
+import { AvailabilityBadge, resolveAvailability } from '@/components/ui/AvailabilityBadge'
 import { buttonClassName } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import { RichText } from '@/components/ui/RichText'
-import { useMagneticHover } from '@/hooks/useMagneticHover'
 import { useTypewriter } from '@/hooks/useTypewriter'
 import { getMediaUrl } from '@/lib/media'
 import { DURATION_SLOW, EASE_OUT_PREMIUM } from '@/lib/motion/tokens'
@@ -34,9 +34,7 @@ const heroItemVariants = {
 export function HeroSection({ hero, settings }: HeroSectionProps) {
   const title = hero?.title ?? 'Building polished digital products with calm, modern engineering.'
   const typedLength = useTypewriter(title)
-  const primaryCtaRef = useMagneticHover<HTMLAnchorElement>()
-  const secondaryCtaRef = useMagneticHover<HTMLAnchorElement>()
-  const resumeCtaRef = useMagneticHover<HTMLAnchorElement>()
+  const availability = resolveAvailability(hero)
   const highlights = (hero?.highlights ?? []).filter((item) => item.value.trim().length > 0)
   const primaryCta = hero?.primaryCta
   const secondaryCta = hero?.secondaryCta
@@ -58,6 +56,11 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
           initial="hidden"
           variants={heroContainerVariants}
         >
+          {availability ? (
+            <motion.div className="mb-5" variants={heroItemVariants}>
+              <AvailabilityBadge label={availability} />
+            </motion.div>
+          ) : null}
           {hero?.eyebrow ? (
             <motion.p className="eyebrow" variants={heroItemVariants}>
               {hero.eyebrow}
@@ -76,30 +79,17 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
           ) : null}
           <motion.div className="mt-8 flex flex-wrap gap-3" variants={heroItemVariants}>
             {primaryCta?.label && primaryCta?.href ? (
-              <a
-                className={buttonClassName()}
-                href={primaryCta.href}
-                ref={primaryCtaRef}
-              >
+              <a className={buttonClassName()} href={primaryCta.href}>
                 {primaryCta.label}
               </a>
             ) : null}
             {secondaryCta?.label && secondaryCta?.href ? (
-              <a
-                className={buttonClassName('secondary')}
-                href={secondaryCta.href}
-                ref={secondaryCtaRef}
-              >
+              <a className={buttonClassName('secondary')} href={secondaryCta.href}>
                 {secondaryCta.label}
               </a>
             ) : null}
             {resumeCta?.label && resumeUrl ? (
-              <a
-                className={buttonClassName('secondary')}
-                download
-                href={resumeUrl}
-                ref={resumeCtaRef}
-              >
+              <a className={buttonClassName('secondary')} download href={resumeUrl}>
                 {resumeCta.label}
               </a>
             ) : null}
@@ -112,7 +102,11 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
               {highlights.map((item, index) => (
                 <span key={`${item.value}-${index}`}>
                   {item.value}
-                  {index < highlights.length - 1 ? <span className="mx-2">•</span> : null}
+                  {index < highlights.length - 1 ? (
+                    <span aria-hidden="true" className="mx-2">
+                      •
+                    </span>
+                  ) : null}
                 </span>
               ))}
             </motion.div>

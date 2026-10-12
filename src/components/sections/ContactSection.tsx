@@ -19,7 +19,7 @@ type ContactSectionProps = {
 
 export function ContactSection({ contact, dictionary, settings }: ContactSectionProps) {
   const title = contact?.title ?? 'Let’s build something meaningful.'
-  const email = settings?.contactEmail ?? 'hello@yourdomain.com'
+  const email = settings?.contactEmail
   const socialLinks = settings?.socialLinks ?? []
   const successMessage =
     contact?.successMessage ?? 'Thanks for reaching out — I’ll get back to you shortly.'
@@ -36,15 +36,15 @@ export function ContactSection({ contact, dictionary, settings }: ContactSection
 
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <Reveal className={cardClassName({ className: 'p-8', interactive: false })}>
-            <p className="eyebrow mb-0">
-              {dictionary.contact.reachOut}
-            </p>
-            <a
-              className="mt-4 inline-flex text-xl font-semibold text-fg transition hover:text-accent"
-              href={`mailto:${email}`}
-            >
-              {email}
-            </a>
+            <p className="eyebrow mb-0">{dictionary.contact.reachOut}</p>
+            {email ? (
+              <a
+                className="mt-4 inline-flex text-xl font-semibold text-fg transition hover:text-accent"
+                href={`mailto:${email}`}
+              >
+                {email}
+              </a>
+            ) : null}
             {socialLinks.length > 0 ? (
               <div className="mt-6 flex flex-wrap gap-4 text-sm text-fg-muted">
                 {socialLinks.map((link) => {
@@ -79,10 +79,7 @@ export function ContactSection({ contact, dictionary, settings }: ContactSection
             ) : null}
           </Reveal>
 
-          <Reveal
-            className={cardClassName({ className: 'p-8', interactive: false })}
-            delay={0.1}
-          >
+          <Reveal className={cardClassName({ className: 'p-8', interactive: false })} delay={0.1}>
             <ContactForm dictionary={dictionary} successMessage={successMessage} />
           </Reveal>
         </div>

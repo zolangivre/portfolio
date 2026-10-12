@@ -51,7 +51,14 @@ export function HashScrollHandler() {
 
       const section = document.getElementById(url.hash.slice(1))
 
-      section?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      // The CSS `scroll-behavior` override for reduced motion doesn't reach a
+      // scroll requested from script, so the preference is checked here.
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+      section?.scrollIntoView({
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+        block: 'start',
+      })
     }
 
     document.addEventListener('click', handleClick)

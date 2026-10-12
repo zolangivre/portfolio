@@ -85,7 +85,7 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
               </p>
             ) : null}
 
-            <p className="flex-1 text-sm leading-7 text-fg-muted">
+            <p className="line-clamp-3 flex-1 text-sm leading-7 text-fg-muted">
               {typeof project.shortDescription === 'string' &&
               project.shortDescription.trim().length > 0
                 ? project.shortDescription

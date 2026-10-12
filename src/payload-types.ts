@@ -1130,6 +1130,16 @@ export interface Setting {
  */
 export interface Hero {
   id: number;
+  /**
+   * Badge affiché au-dessus du titre pour signaler aux recruteurs que vous êtes disponible. Décochez-le une fois en poste.
+   */
+  availability?: {
+    enabled?: boolean | null;
+    /**
+     * Ex. « Disponible pour un CDI full-stack dès janvier 2027 · Montpellier / remote ».
+     */
+    label?: string | null;
+  };
   eyebrow?: string | null;
   title: string;
   description?: {
@@ -1527,6 +1537,12 @@ export interface SettingsSelect<T extends boolean = true> {
  * via the `definition` "hero_select".
  */
 export interface HeroSelect<T extends boolean = true> {
+  availability?:
+    | T
+    | {
+        enabled?: T;
+        label?: T;
+      };
   eyebrow?: T;
   title?: T;
   description?: T;

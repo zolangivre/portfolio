@@ -47,9 +47,10 @@ describe('submitContactForm', () => {
     const fields: Record<string, string> = { ...valid }
     delete fields[field]
 
-    expect(await submit(fields)).toEqual({ error: 'missing-fields', success: false })
-    expect(await submit({ ...valid, [field]: '   ' })).toEqual({
+    expect(await submit(fields)).toMatchObject({ error: 'missing-fields', field, success: false })
+    expect(await submit({ ...valid, [field]: '   ' })).toMatchObject({
       error: 'missing-fields',
+      field,
       success: false,
     })
     expect(createMessage).not.toHaveBeenCalled()
@@ -58,7 +59,11 @@ describe('submitContactForm', () => {
   it.each(['plain', 'a@b', 'a b@example.com', '@example.com', 'visitor@'])(
     'rejects the malformed email %j',
     async (email) => {
-      expect(await submit({ ...valid, email })).toEqual({ error: 'invalid-email', success: false })
+      expect(await submit({ ...valid, email })).toMatchObject({
+        error: 'invalid-email',
+        field: 'email',
+        success: false,
+      })
     },
   )
 
@@ -79,8 +84,9 @@ describe('submitContactForm', () => {
     ['email', `${'a'.repeat(243)}@example.com`],
     ['message', 'm'.repeat(5001)],
   ])('rejects an over-long %s as missing-fields', async (field, value) => {
-    expect(await submit({ ...valid, [field]: value })).toEqual({
+    expect(await submit({ ...valid, [field]: value })).toMatchObject({
       error: 'missing-fields',
+      field,
       success: false,
     })
     expect(createMessage).not.toHaveBeenCalled()
@@ -89,6 +95,17 @@ describe('submitContactForm', () => {
   it('reports a server error when the message could not be saved', async () => {
     vi.mocked(createMessage).mockResolvedValue({ success: false })
 
-    expect(await submit(valid)).toEqual({ error: 'server-error', success: false })
+    expect(await submit(valid)).toEqual({
+      error: 'server-error',
+      field: undefined,
+      success: false,
+      values: valid,
+    })
+  })
+
+  it('sends the trimmed input back on error, so the form can restore it', async () => {
+    expect(await submit({ ...valid, email: ' nope ' })).toMatchObject({
+      values: { ...valid, email: 'nope' },
+    })
   })
 })

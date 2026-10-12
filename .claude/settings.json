@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(pnpm lint*)",
+      "Bash(pnpm exec tsc --noEmit*)",
+      "Bash(pnpm exec prettier *)",
+      "Bash(pnpm generate:types)",
+      "Bash(pnpm generate:importmap)",
+      "Bash(pnpm test:unit*)",
+      "Bash(pnpm test:int*)",
+      "Bash(pnpm test:coverage*)",
+      "Bash(pnpm payload migrate:status*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/protect-files.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/format.sh",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/generate-types.sh",
+            "timeout": 120,
+            "statusMessage": "Regenerating Payload types…"
+          }
+        ]
+      }
+    ]
+  }
+}

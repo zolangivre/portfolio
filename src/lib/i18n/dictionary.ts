@@ -34,13 +34,6 @@ export interface Dictionary {
     adjacentNavAriaLabel: string
     previousProjectLabel: string
     nextProjectLabel: string
-    countSuffix: string
-    archiveEyebrow: string
-    archiveTitle: string
-    archiveDescription: string
-    allTechnologiesLabel: string
-    filterAriaLabel: string
-    backToHomeLabel: string
   }
   experience: {
     eyebrow: string
@@ -97,11 +90,16 @@ export interface Dictionary {
     adjacentNavAriaLabel: string
     previousEntryLabel: string
     nextEntryLabel: string
+    tagsAriaLabel: string
   }
   lightbox: {
     closeLabel: string
     nextLabel: string
     previousLabel: string
+  }
+  video: {
+    playLabel: string
+    pauseLabel: string
   }
 }
 
@@ -133,7 +131,8 @@ const dictionaries: Record<Locale, Dictionary> = {
       githubLabel: 'GitHub ↗',
       liveLabel: 'Voir le site ↗',
       technologiesAriaLabelSuffix: 'technologies',
-      fallbackDescription: 'Un projet récent construit avec des choix produit et techniques réfléchis.',
+      fallbackDescription:
+        'Un projet récent construit avec des choix produit et techniques réfléchis.',
       statusLabels: {
         live: 'En ligne',
         'in-progress': 'En cours',
@@ -145,20 +144,11 @@ const dictionaries: Record<Locale, Dictionary> = {
       adjacentNavAriaLabel: 'Navigation entre les projets',
       previousProjectLabel: 'Projet précédent',
       nextProjectLabel: 'Projet suivant',
-      countSuffix: 'projets',
-      archiveEyebrow: 'Archive',
-      archiveTitle: 'Tous les projets',
-      archiveDescription:
-        'L’ensemble des projets publiés, filtrables par technologie.',
-      allTechnologiesLabel: 'Toutes',
-      filterAriaLabel: 'Filtrer les projets par technologie',
-      backToHomeLabel: '← Retour à l’accueil',
     },
     experience: {
       eyebrow: 'Parcours',
       title: 'Expérience',
-      description:
-        'Un parcours de construction de produits avec une forte implication technique.',
+      description: 'Un parcours de construction de produits avec une forte implication technique.',
       emptyState: 'Aucune expérience n’a encore été publiée.',
       present: 'Aujourd’hui',
       fallbackCompany: 'Entreprise',
@@ -190,11 +180,11 @@ const dictionaries: Record<Locale, Dictionary> = {
       formNameLabel: 'Nom',
       formEmailLabel: 'Email',
       formMessageLabel: 'Message',
-      formNamePlaceholder: 'Votre nom',
+      formNamePlaceholder: 'Votre nom…',
       formEmailPlaceholder: 'vous@exemple.com',
-      formMessagePlaceholder: 'Votre message...',
+      formMessagePlaceholder: 'Votre message…',
       submitLabel: 'Envoyer',
-      sendingLabel: 'Envoi en cours...',
+      sendingLabel: 'Envoi en cours…',
       errors: {
         'missing-fields': 'Merci de renseigner tous les champs.',
         'invalid-email': 'Merci de saisir une adresse email valide.',
@@ -216,11 +206,16 @@ const dictionaries: Record<Locale, Dictionary> = {
       adjacentNavAriaLabel: 'Navigation entre les entrées du journal',
       previousEntryLabel: 'Souvenir précédent',
       nextEntryLabel: 'Souvenir suivant',
+      tagsAriaLabel: 'Étiquettes',
     },
     lightbox: {
       closeLabel: 'Fermer',
       nextLabel: 'Image suivante',
       previousLabel: 'Image précédente',
+    },
+    video: {
+      playLabel: 'Lire la vidéo',
+      pauseLabel: 'Mettre la vidéo en pause',
     },
   },
   en: {
@@ -250,7 +245,8 @@ const dictionaries: Record<Locale, Dictionary> = {
       githubLabel: 'GitHub ↗',
       liveLabel: 'Live demo ↗',
       technologiesAriaLabelSuffix: 'technologies',
-      fallbackDescription: 'A recent project built with thoughtful product and engineering decisions.',
+      fallbackDescription:
+        'A recent project built with thoughtful product and engineering decisions.',
       statusLabels: {
         live: 'Live',
         'in-progress': 'In progress',
@@ -262,18 +258,12 @@ const dictionaries: Record<Locale, Dictionary> = {
       adjacentNavAriaLabel: 'Project navigation',
       previousProjectLabel: 'Previous project',
       nextProjectLabel: 'Next project',
-      countSuffix: 'projects',
-      archiveEyebrow: 'Archive',
-      archiveTitle: 'All projects',
-      archiveDescription: 'Every published project, filterable by technology.',
-      allTechnologiesLabel: 'All',
-      filterAriaLabel: 'Filter projects by technology',
-      backToHomeLabel: '← Back to home',
     },
     experience: {
       eyebrow: 'Background',
       title: 'Experience',
-      description: 'A track record of building product experiences with strong technical ownership.',
+      description:
+        'A track record of building product experiences with strong technical ownership.',
       emptyState: 'No experience entries have been published yet.',
       present: 'Present',
       fallbackCompany: 'Company',
@@ -296,7 +286,7 @@ const dictionaries: Record<Locale, Dictionary> = {
     testimonials: {
       eyebrow: 'Testimonials',
       title: 'What people say',
-      description: "Feedback from people I've worked with on shipped products.",
+      description: 'Feedback from people I’ve worked with on shipped products.',
       emptyState: 'No testimonials have been published yet.',
     },
     contact: {
@@ -305,11 +295,11 @@ const dictionaries: Record<Locale, Dictionary> = {
       formNameLabel: 'Name',
       formEmailLabel: 'Email',
       formMessageLabel: 'Message',
-      formNamePlaceholder: 'Your name',
+      formNamePlaceholder: 'Your name…',
       formEmailPlaceholder: 'you@example.com',
-      formMessagePlaceholder: 'Your message...',
+      formMessagePlaceholder: 'Your message…',
       submitLabel: 'Send inquiry',
-      sendingLabel: 'Sending...',
+      sendingLabel: 'Sending…',
       errors: {
         'missing-fields': 'Please fill in all fields.',
         'invalid-email': 'Please enter a valid email address.',
@@ -319,8 +309,7 @@ const dictionaries: Record<Locale, Dictionary> = {
     journal: {
       eyebrow: 'Beyond code',
       title: 'Journal',
-      description:
-        'Travel, sport, achievements, and milestones — another side of the journey.',
+      description: 'Travel, sport, achievements, and milestones — another side of the journey.',
       emptyState: 'No entries have been published yet.',
       featuredBadge: 'Featured',
       allCategoriesLabel: 'All',
@@ -331,11 +320,16 @@ const dictionaries: Record<Locale, Dictionary> = {
       adjacentNavAriaLabel: 'Journal navigation',
       previousEntryLabel: 'Previous memory',
       nextEntryLabel: 'Next memory',
+      tagsAriaLabel: 'Tags',
     },
     lightbox: {
       closeLabel: 'Close',
       nextLabel: 'Next image',
       previousLabel: 'Previous image',
+    },
+    video: {
+      playLabel: 'Play video',
+      pauseLabel: 'Pause video',
     },
   },
 }

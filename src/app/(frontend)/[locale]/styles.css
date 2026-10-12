@@ -9,6 +9,19 @@
 
 html {
   -webkit-font-smoothing: antialiased;
+  /* Intentional rather than the grey default flash: a faint accent tint. */
+  -webkit-tap-highlight-color: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+/* No double-tap-to-zoom delay on anything tappable. */
+a,
+button,
+input,
+label,
+select,
+summary,
+textarea {
+  touch-action: manipulation;
 }
 
 body {
@@ -411,7 +424,12 @@ a {
    défilement et casserait le `position: sticky` du header. `clip` se contente
    de rogner, donc les débordements purement décoratifs (halos floutés, blobs)
    ne peuvent plus créer de scroll horizontal / marge à droite sur mobile. */
+/* A column whose `main` takes up the slack: on a page shorter than the
+   viewport (404, error) the footer stays pinned to the bottom at its normal
+   height, instead of ending mid-screen with an empty band underneath. */
 .site-shell {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   overflow-x: clip;
 }
@@ -512,7 +530,7 @@ a {
   align-items: center;
   display: inline-flex;
   text-decoration: none;
-  transition: transform var(--duration-base) var(--ease-out-premium);
+  transition: transform var(--duration-ui) var(--ease-out-premium);
 }
 
 .site-logo:hover {
@@ -647,40 +665,6 @@ a {
   transform: scaleX(1);
 }
 
-/* Contained press-ripple + soft hover glow shared by every primary/secondary
-   CTA button (hero, contact form). Applied alongside each button's own
-   Tailwind hover:scale/hover:bg classes. */
-.btn-cta {
-  isolation: isolate;
-  overflow: hidden;
-  position: relative;
-}
-
-.btn-cta::after {
-  background: radial-gradient(circle, rgb(255 255 255 / 0.4) 0%, transparent 65%);
-  border-radius: inherit;
-  content: '';
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  position: absolute;
-  transform: scale(0);
-  transition:
-    opacity var(--duration-base) var(--ease-out-premium),
-    transform var(--duration-base) var(--ease-out-premium);
-}
-
-.btn-cta:active::after {
-  opacity: 1;
-  transform: scale(1.8);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .btn-cta:hover {
-    box-shadow: var(--shadow-glow-sm);
-  }
-}
-
 .language-switcher,
 .theme-toggle {
   display: inline-flex;
@@ -802,8 +786,12 @@ a {
     gap: 1.75rem;
     height: 100dvh;
     overflow-y: auto;
+    /* Reaching the end of the drawer must not start scrolling the page. */
+    overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
-    padding: 6rem 1.75rem 2rem;
+    /* Clear of the home indicator and a landscape notch. */
+    padding: 6rem calc(1.75rem + env(safe-area-inset-right))
+      calc(2rem + env(safe-area-inset-bottom)) 1.75rem;
     position: fixed;
     right: 0;
     top: 0;
@@ -870,9 +858,12 @@ a {
 
 @media (prefers-reduced-motion: reduce) {
   .site-header-nav,
-  .nav-toggle-line,
-  .nav-scrim {
+  .nav-toggle-line {
     transition: none;
+  }
+
+  .nav-scrim {
+    transition: opacity var(--duration-fast) ease;
   }
 }
 
@@ -968,14 +959,26 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .index-rail-num,
-  .index-rail-label {
-    transition: none;
+  .index-rail-num {
+    transition:
+      background-color var(--duration-fast) ease,
+      border-color var(--duration-fast) ease;
+  }
+
+  .index-rail-label,
+  .index-rail a:hover .index-rail-label,
+  .index-rail a:focus-visible .index-rail-label,
+  .index-rail a[aria-current] .index-rail-label {
+    transform: none;
+    transition:
+      opacity var(--duration-fast) ease,
+      color var(--duration-fast) ease;
   }
 }
 
 main {
   display: flex;
+  flex: 1 0 auto;
   flex-direction: column;
 }
 
@@ -1009,17 +1012,31 @@ main {
 h1,
 h2,
 h3,
+h4,
 p {
   margin-top: 0;
 }
 
 h1,
 h2,
-h3 {
+h3,
+h4 {
   font-family: var(--font-display), sans-serif;
   font-weight: 700;
   letter-spacing: -0.05em;
   line-height: 1.1;
+}
+
+/* Not h1: every h1 here is typed in character by character, and balancing
+   would re-break its lines on each new letter. */
+h2,
+h3,
+h4 {
+  text-wrap: balance;
+}
+
+h4 {
+  margin-bottom: 0.5rem;
 }
 
 h1 {
@@ -1138,8 +1155,8 @@ h3 {
   pointer-events: none;
   position: absolute;
   transition:
-    opacity var(--duration-base) var(--ease-out-premium),
-    transform var(--duration-base) var(--ease-out-premium);
+    opacity var(--duration-ui) var(--ease-out-premium),
+    transform var(--duration-ui) var(--ease-out-premium);
 }
 
 /*
@@ -1150,8 +1167,8 @@ h3 {
  */
 .card-lift {
   transition:
-    border-color var(--duration-base) var(--ease-out-premium),
-    transform var(--duration-base) var(--ease-out-premium);
+    border-color var(--duration-ui) var(--ease-out-premium),
+    transform var(--duration-ui) var(--ease-out-premium);
 }
 
 /*
@@ -1187,9 +1204,12 @@ h3 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card-glow::after,
+  .card-glow::after {
+    transition: opacity var(--duration-fast) ease;
+  }
+
   .card-lift {
-    transition: none;
+    transition: border-color var(--duration-fast) ease;
   }
 }
 
@@ -1213,8 +1233,8 @@ h3 {
   padding: 1rem;
   position: relative;
   transition:
-    border-color var(--duration-base) var(--ease-out-premium),
-    transform var(--duration-base) var(--ease-out-premium);
+    border-color var(--duration-ui) var(--ease-out-premium),
+    transform var(--duration-ui) var(--ease-out-premium);
 }
 
 /*
@@ -1233,11 +1253,11 @@ h3 {
   opacity: 0;
   pointer-events: none;
   position: absolute;
-  transition: opacity var(--duration-base) var(--ease-out-premium);
+  transition: opacity var(--duration-ui) var(--ease-out-premium);
 }
 
 .skill-card-icon {
-  transition: transform var(--duration-base) var(--ease-bounce);
+  transition: transform var(--duration-ui) var(--ease-bounce);
 }
 
 .skill-card-link-icon {
@@ -1246,21 +1266,23 @@ h3 {
   transition: opacity var(--duration-fast) ease-out;
 }
 
+/* Only the tiles that are links react to hover — a lift on a plain tile
+   would promise a click that goes nowhere. */
 @media (hover: hover) and (pointer: fine) {
-  .skill-card:hover {
+  a.skill-card:hover {
     border-color: var(--accent-soft-border);
     transform: translateY(-3px);
   }
 
-  .skill-card:hover::after {
+  a.skill-card:hover::after {
     opacity: 1;
   }
 
-  .skill-card:hover .skill-card-icon {
+  a.skill-card:hover .skill-card-icon {
     transform: scale(1.1);
   }
 
-  .skill-card:hover .skill-card-link-icon {
+  a.skill-card:hover .skill-card-link-icon {
     opacity: 1;
   }
 }
@@ -1283,11 +1305,24 @@ h3 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .skill-card,
+  .skill-card {
+    transition: border-color var(--duration-fast) ease;
+  }
+
   .skill-card::after,
-  .skill-card-icon,
   .skill-card-link-icon {
+    transition: opacity var(--duration-fast) ease;
+  }
+
+  .skill-card-icon {
     transition: none;
+  }
+
+  a.skill-card:hover,
+  .skill-card:focus-visible,
+  a.skill-card:hover .skill-card-icon,
+  .skill-card:focus-visible .skill-card-icon {
+    transform: none;
   }
 }
 
@@ -1356,8 +1391,8 @@ h3 {
   position: absolute;
   top: 1.9rem;
   transition:
-    box-shadow var(--duration-base) var(--ease-out-premium),
-    transform var(--duration-base) var(--ease-out-premium);
+    box-shadow var(--duration-ui) var(--ease-out-premium),
+    transform var(--duration-ui) var(--ease-out-premium);
   width: 12px;
   z-index: 1;
 }
@@ -1418,7 +1453,7 @@ h3 {
   opacity: 0;
   pointer-events: none;
   position: absolute;
-  transition: opacity var(--duration-base) var(--ease-out-premium);
+  transition: opacity var(--duration-ui) var(--ease-out-premium);
 }
 
 /* Triggered from the row like the grid cards (see .card-glow): the lift
@@ -1443,7 +1478,7 @@ h3 {
 
 @media (prefers-reduced-motion: reduce) {
   .timeline-item::after {
-    transition: none;
+    transition: opacity var(--duration-fast) ease;
   }
 }
 
@@ -1630,7 +1665,7 @@ h3 {
   overflow: hidden;
   padding: 0;
   position: relative;
-  transition: transform var(--duration-base) var(--ease-out-premium);
+  transition: transform var(--duration-ui) var(--ease-out-premium);
   width: 100%;
 }
 
@@ -1647,7 +1682,7 @@ h3 {
 }
 
 .media-gallery-play-badge {
-  transition: transform var(--duration-base) var(--ease-out-premium);
+  transition: transform var(--duration-ui) var(--ease-out-premium);
 }
 
 .media-gallery-item:hover .media-gallery-play-badge,
@@ -1663,7 +1698,7 @@ h3 {
   position: absolute;
   right: 0;
   top: 0;
-  transition: opacity var(--duration-base) var(--ease-out-premium);
+  transition: opacity var(--duration-ui) var(--ease-out-premium);
 }
 
 .media-gallery-item:hover .media-gallery-overlay,
@@ -1734,6 +1769,22 @@ h3 {
   .yarl__portal_open .yarl__slide {
     transform: none;
     transition: none;
+  }
+}
+
+/* Movement that had no reduced variant of its own (the global safety net
+   used to flatten every transition — see globals.css). */
+@media (prefers-reduced-motion: reduce) {
+  .skip-link,
+  .site-logo,
+  .site-nav a::after,
+  .site-footer a::after,
+  .link-underline::after {
+    transition: none;
+  }
+
+  .site-logo:hover {
+    transform: none;
   }
 }
 }

@@ -13,14 +13,13 @@ type FooterProps = {
 }
 
 export function Footer({ dictionary, footer, locale }: FooterProps) {
-  const text =
-    footer?.text ?? 'Crafted for ambitious products, polished interfaces, and reliable engineering.'
-  const links = footer?.links ?? [{ label: 'Open admin', href: '/admin' }]
+  const text = footer?.text
+  const links = footer?.links ?? []
 
   return (
     <footer className="site-footer">
       <Container className="site-footer-inner">
-        <p>{text}</p>
+        {text ? <p>{text}</p> : null}
         <nav aria-label={dictionary.nav.footerLabel} className="site-nav">
           {links.map((link) => (
             <Link href={resolveNavHref(locale, link.href)} key={link.href}>

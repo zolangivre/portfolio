@@ -1,15 +1,20 @@
 'use client'
 
-import { motion } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import { Children, type ReactNode } from 'react'
 
-import { EASE_OUT_PREMIUM } from '@/lib/motion/tokens'
+import { DURATION_FAST, EASE_IN_OUT_PREMIUM, EASE_OUT_PREMIUM } from '@/lib/motion/tokens'
 
 type RevealGroupProps = {
   /** Fraction of a card that must be visible before it reveals (0–1). */
   amount?: number
   children: ReactNode
   className?: string
+  /**
+   * For grids whose items change at runtime (filters): remaining items slide
+   * to their new slot and removed ones fade out, instead of teleporting.
+   */
+  layout?: boolean
   once?: boolean
   scale?: number
   staggerChildren?: number
@@ -34,28 +39,48 @@ export function RevealGroup({
   amount = 0.25,
   children,
   className,
+  layout = false,
   once = true,
   scale,
   staggerChildren = 0.08,
   staggerCap = 4,
   y = 18,
 }: RevealGroupProps) {
+  const items = Children.map(children, (child, index) => (
+    <motion.div
+      exit={
+        layout
+          ? {
+              opacity: 0,
+              scale: 0.96,
+              transition: { duration: DURATION_FAST, ease: EASE_OUT_PREMIUM },
+            }
+          : undefined
+      }
+      initial={{ opacity: 0, y, scale }}
+      layout={layout ? 'position' : undefined}
+      transition={{
+        delay: Math.min(index, staggerCap) * staggerChildren,
+        duration: 0.6,
+        ease: EASE_OUT_PREMIUM,
+        layout: { delay: 0, duration: 0.3, ease: EASE_IN_OUT_PREMIUM },
+      }}
+      viewport={{ amount, once }}
+      whileInView={{ opacity: 1, y: 0, scale: scale !== undefined ? 1 : undefined }}
+    >
+      {child}
+    </motion.div>
+  ))
+
+  if (!layout) {
+    return <div className={className}>{items}</div>
+  }
+
+  // popLayout takes exiting items out of flow with `position: absolute`,
+  // measured against this wrapper — hence `relative`.
   return (
-    <div className={className}>
-      {Children.map(children, (child, index) => (
-        <motion.div
-          initial={{ opacity: 0, y, scale }}
-          transition={{
-            delay: Math.min(index, staggerCap) * staggerChildren,
-            duration: 0.6,
-            ease: EASE_OUT_PREMIUM,
-          }}
-          viewport={{ amount, once }}
-          whileInView={{ opacity: 1, y: 0, scale: scale !== undefined ? 1 : undefined }}
-        >
-          {child}
-        </motion.div>
-      ))}
+    <div className={['relative', className].filter(Boolean).join(' ')}>
+      <AnimatePresence mode="popLayout">{items}</AnimatePresence>
     </div>
   )
 }

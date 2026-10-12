@@ -74,7 +74,7 @@ export function JournalGrid({ dictionary, entries, locale }: JournalGridProps) {
       ) : null}
 
       {visibleEntries.length > 0 ? (
-        <RevealGroup className="project-grid" scale={0.96}>
+        <RevealGroup className="project-grid" layout scale={0.96}>
           {visibleEntries.map((entry) => (
             <JournalCard dictionary={dictionary} entry={entry} key={entry.id} locale={locale} />
           ))}

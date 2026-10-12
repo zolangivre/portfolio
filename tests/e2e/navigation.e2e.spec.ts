@@ -42,7 +42,7 @@ test('the language switcher keeps the current page', async ({ page }) => {
   await openMenuIfCollapsed(page)
   await page
     .getByRole('group', { name: 'Changer de langue' })
-    .getByRole('link', { name: /^en$/i })
+    .getByRole('link', { name: 'English (EN)' })
     .click()
 
   await expect(page).toHaveURL(`/en/projects/${alpha.slug}`)
@@ -113,22 +113,16 @@ test('a new page opens at its top, not where the last one was scrolled', async (
   expect(await page.evaluate(() => window.scrollY)).toBeLessThan(50)
 })
 
-test('the archive lists every public project and nothing else', async ({ page }) => {
-  await page.goto('/fr/projects')
-
-  for (const project of [alpha, beta, gamma]) {
-    await expect(page.getByRole('heading', { name: project.fr })).toBeVisible()
-  }
-  await expect(page.getByText(privateProject.fr)).toHaveCount(0)
-})
-
 test.describe('pages that must not exist', () => {
   for (const path of [
+    // The archive was removed: projects live on the homepage only.
+    '/fr/projects',
     `/fr/projects/${privateProject.slug}`,
     `/en/projects/${privateProject.slug}`,
     '/fr/projects/does-not-exist',
     `/fr/journal/${privateJournalEntry.slug}`,
     '/fr/journal/does-not-exist',
+    '/fr/nothing/here',
     '/de',
   ]) {
     test(`${path} answers 404`, async ({ page }) => {
@@ -137,6 +131,16 @@ test.describe('pages that must not exist', () => {
       expect(response?.status()).toBe(404)
     })
   }
+
+  // Unmatched URLs used to get Next's bare default 404; the [...rest]
+  // catch-all routes them to the site's own page, inside the site layout.
+  test('an unknown URL shows the site 404, not the framework one', async ({ page }) => {
+    await page.goto('/en/nothing/here')
+
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('This page does not exist.')
+    await expect(page.getByRole('link', { name: 'Back to home' })).toHaveAttribute('href', '/en')
+    await expect(page.locator('.site-header')).toBeVisible()
+  })
 })
 
 test('the sitemap lists public pages only', async ({ request }) => {

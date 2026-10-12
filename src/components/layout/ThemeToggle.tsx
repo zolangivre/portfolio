@@ -6,7 +6,7 @@ import { useSyncExternalStore } from 'react'
 import { flushSync } from 'react-dom'
 
 import type { Dictionary } from '@/lib/i18n/dictionary'
-import { DURATION_BASE, EASE_OUT_PREMIUM } from '@/lib/motion/tokens'
+import { DURATION_UI, EASE_OUT_PREMIUM } from '@/lib/motion/tokens'
 
 type ThemeToggleProps = {
   dictionary: Dictionary
@@ -77,11 +77,11 @@ function setThemeWithTransition(
   const rect = event.currentTarget.getBoundingClientRect()
   document.documentElement.style.setProperty('--theme-x', `${rect.left + rect.width / 2}px`)
   document.documentElement.style.setProperty('--theme-y', `${rect.top + rect.height / 2}px`)
-  ;(document as Document & { startViewTransition: (callback: () => void) => void }).startViewTransition(
-    () => {
-      flushSync(() => setTheme(option))
-    },
-  )
+  ;(
+    document as Document & { startViewTransition: (callback: () => void) => void }
+  ).startViewTransition(() => {
+    flushSync(() => setTheme(option))
+  })
 }
 
 export function ThemeToggle({ dictionary }: ThemeToggleProps) {
@@ -94,7 +94,7 @@ export function ThemeToggle({ dictionary }: ThemeToggleProps) {
     <div aria-label={dictionary.nav.themeToggleLabel} className="theme-toggle" role="group">
       {themes.map((option) => (
         <button
-          aria-current={active === option ? 'true' : undefined}
+          aria-pressed={active === option}
           aria-label={option === 'light' ? dictionary.nav.lightLabel : dictionary.nav.darkLabel}
           className="theme-toggle-item"
           data-active={active === option}
@@ -106,7 +106,7 @@ export function ThemeToggle({ dictionary }: ThemeToggleProps) {
             <motion.span
               className="theme-toggle-active"
               layoutId="theme-toggle-active"
-              transition={{ duration: DURATION_BASE, ease: EASE_OUT_PREMIUM }}
+              transition={{ duration: DURATION_UI, ease: EASE_OUT_PREMIUM }}
             />
           ) : null}
           <motion.span
