@@ -6,7 +6,7 @@ import { useSyncExternalStore } from 'react'
 import { flushSync } from 'react-dom'
 
 import type { Dictionary } from '@/lib/i18n/dictionary'
-import { DURATION_UI, EASE_OUT_PREMIUM } from '@/lib/motion/tokens'
+import { springPlayful } from '@/lib/motion/tokens'
 
 type ThemeToggleProps = {
   dictionary: Dictionary
@@ -121,7 +121,7 @@ export function ThemeToggle({ dictionary }: ThemeToggleProps) {
             <motion.span
               className="theme-toggle-active"
               layoutId="theme-toggle-active"
-              transition={{ duration: DURATION_UI, ease: EASE_OUT_PREMIUM }}
+              transition={springPlayful}
             />
           ) : null}
           <motion.span

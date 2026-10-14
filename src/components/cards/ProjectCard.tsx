@@ -51,7 +51,7 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
         className={cardClassName({ className: 'group flex h-full flex-col overflow-hidden' })}
         data-cursor="pointer"
       >
-        <Link className="flex flex-1 flex-col" href={detailHref}>
+        <Link className="flex flex-1 flex-col" data-card-link href={detailHref}>
           {mockupFrame && hasMockup ? (
             <div className="relative aspect-16/10 overflow-hidden rounded-t-card bg-surface">
               <DeviceMockup

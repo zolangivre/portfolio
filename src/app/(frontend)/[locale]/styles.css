@@ -690,10 +690,12 @@ a {
   padding: 0.3rem 0.65rem;
   position: relative;
   text-decoration: none;
-  /* `color` is the only thing these ever change (see :hover and
-     [data-active] below) — `all` made the engine watch every animatable
-     property, filters and box-shadows included, for nothing. */
-  transition: color var(--duration-fast) ease;
+  /* `color` and the press `scale` are all these ever change (see :hover,
+     :active and [data-active]) — `all` made the engine watch every
+     animatable property, filters and box-shadows included, for nothing. */
+  transition:
+    color var(--duration-fast) ease,
+    scale var(--duration-ui) var(--ease-bounce);
 }
 
 .theme-toggle-item {
@@ -1194,7 +1196,37 @@ h3 {
 .card-lift {
   transition:
     border-color var(--duration-ui) var(--ease-out-premium),
-    transform var(--duration-ui) var(--ease-out-premium);
+    transform var(--duration-ui) var(--ease-out-premium),
+    scale var(--duration-ui) var(--ease-bounce);
+}
+
+/*
+ * Press feedback, on the press itself rather than the release: the card
+ * dips while the finger or button is down and springs back after. Keyed to
+ * the card's main link (`data-card-link`), so pressing one of the small
+ * links at its foot (GitHub, the live site) doesn't squash the whole card.
+ * `scale` composes with the hover lift's `transform` instead of fighting it.
+ */
+.card-glow:has([data-card-link]:active) > .card-lift {
+  scale: 0.98;
+  transition:
+    border-color var(--duration-ui) var(--ease-out-premium),
+    transform var(--duration-ui) var(--ease-out-premium),
+    scale 100ms ease-out;
+}
+
+/* The same dip for the small controls: filters, switchers, gallery tiles. */
+.category-filter-item:active,
+.language-switcher-item:active,
+.theme-toggle-item:active,
+.media-gallery-item:active {
+  scale: 0.94;
+  transition-duration: 100ms;
+  transition-timing-function: ease-out;
+}
+
+.media-gallery-item:active {
+  scale: 0.97;
 }
 
 /*
@@ -1594,14 +1626,19 @@ h3 {
   cursor: pointer;
   font-size: var(--text-caption);
   font-weight: 600;
+  /* The accent pill (.category-filter-active) slides underneath the label. */
+  isolation: isolate;
   letter-spacing: 0.04em;
   padding: 0.5rem 1.1rem;
-  /* Same as the language/theme items: list what :hover and [data-active]
-     below actually change rather than transitioning `all`. */
+  position: relative;
+  /* Same as the language/theme items: list what :hover, :active and
+     [data-active] below actually change rather than transitioning `all`.
+     The label's colour takes about as long as the pill takes to arrive
+     under it. Scale: a quick dip on press, a springy release. */
   transition:
-    background-color var(--duration-fast) ease,
     border-color var(--duration-fast) ease,
-    color var(--duration-fast) ease;
+    color var(--duration-ui) ease,
+    scale var(--duration-ui) var(--ease-bounce);
 }
 
 .category-filter-item:hover {
@@ -1610,9 +1647,18 @@ h3 {
 }
 
 .category-filter-item[data-active='true'] {
-  background: var(--accent);
   border-color: var(--accent);
   color: var(--accent-fg);
+}
+
+/* The one moving pill, shared by every filter button (layoutId in
+   JournalGrid): it covers the button's border so the edge doesn't show. */
+.category-filter-active {
+  background: var(--accent);
+  border-radius: 999px;
+  inset: -1px;
+  position: absolute;
+  z-index: -1;
 }
 
 .rich-text {
@@ -1691,7 +1737,9 @@ h3 {
   overflow: hidden;
   padding: 0;
   position: relative;
-  transition: transform var(--duration-ui) var(--ease-out-premium);
+  transition:
+    transform var(--duration-ui) var(--ease-out-premium),
+    scale var(--duration-ui) var(--ease-bounce);
   width: 100%;
 }
 

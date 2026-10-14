@@ -45,6 +45,7 @@ function AdjacentLink({ direction, imageFit, item, label }: AdjacentLinkProps) {
             isPrevious ? '' : ' flex-row-reverse text-right'
           }`,
         })}
+        data-card-link
         data-cursor="pointer"
         href={item.href}
       >

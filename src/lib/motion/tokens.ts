@@ -43,6 +43,17 @@ export const springMove = {
   visualDuration: 0.4,
 } as const
 
+/**
+ * The selection pill of a segmented control (filters, theme) gliding to the
+ * option just picked. A touch of bounce — not momentum, but these are the
+ * site's playful chips, and the overshoot reads as the pill settling in.
+ */
+export const springPlayful = {
+  type: 'spring',
+  bounce: 0.2,
+  visualDuration: 0.35,
+} as const
+
 /** Drawers and sheets released from a drag (Apple ships ratio 0.8, response 0.3). */
 export const springDrawer = {
   type: 'spring',

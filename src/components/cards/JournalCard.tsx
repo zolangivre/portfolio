@@ -50,6 +50,7 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
     <div className={cardFrameClassName('h-full scroll-mt-28')} id={`entry-${entry.slug}`}>
       <Link
         className={cardClassName({ className: 'group flex h-full flex-col overflow-hidden' })}
+        data-card-link
         data-cursor="pointer"
         href={`/${locale}/journal/${entry.slug}`}
       >
