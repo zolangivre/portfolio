@@ -1,4 +1,4 @@
-import { cardClassName, cardFrameClassName } from '@/components/ui/Card'
+import { cardClassName } from '@/components/ui/Card'
 import { FadeImage } from '@/components/ui/FadeImage'
 import { getMediaUrl } from '@/lib/media'
 import type { Testimonial } from '@/payload-types'
@@ -13,10 +13,15 @@ export function TestimonialCard({ testimonial }: TestimonialCardProps) {
     typeof testimonial.company === 'object' && testimonial.company ? testimonial.company.name : null
 
   return (
-    // Static .card-glow wrapper: it's the hover target and hosts the glow,
-    // while the article lifts inside it (see .card-glow in styles.css).
-    <div className={cardFrameClassName('h-full')}>
-      <article className={cardClassName({ className: 'flex h-full flex-col justify-between p-7' })}>
+    // Not a link, so no hover glow or lift (those are for the cards you can
+    // click — see Card.tsx).
+    <div className="h-full">
+      <article
+        className={cardClassName({
+          className: 'flex h-full flex-col justify-between p-7',
+          interactive: false,
+        })}
+      >
         <p className="text-base leading-7 text-fg-muted">“{testimonial.quote}”</p>
         <div className="mt-6 flex items-center gap-3">
           {avatarUrl ? (

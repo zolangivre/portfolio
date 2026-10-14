@@ -18,6 +18,8 @@ type GalleryImage = {
   src: string
   alt: string
   mimeType?: string | null
+  /** Blurred preview shown while the photo loads (Payload, see placeholder.ts). */
+  placeholder?: string | null
   width?: number
   height?: number
 }
@@ -204,6 +206,9 @@ export function MediaGallery({
                 </>
               ) : (
                 <FadeImage
+                  {...(image.placeholder
+                    ? { blurDataURL: image.placeholder, placeholder: 'blur' as const }
+                    : {})}
                   alt={image.alt}
                   className="rounded-inset bg-surface"
                   height={image.height ?? 1200}

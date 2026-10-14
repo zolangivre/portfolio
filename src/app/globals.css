@@ -262,6 +262,47 @@ html {
     view-transition-name: none;
   }
 
+  /* Previous / next between projects or journal entries (AdjacentNav):
+     the page you leave slips out one way and the next comes in from the
+     other, a short distance — enough to say "onward" or "back", not a
+     whole-screen slide to track. The old one leaves quickly; the new one
+     settles on the default spring. */
+  @keyframes vt-slide-out {
+    to {
+      translate: var(--slide-offset) 0;
+    }
+  }
+
+  @keyframes vt-slide-in {
+    from {
+      translate: var(--slide-offset) 0;
+    }
+  }
+
+  ::view-transition-old(.nav-forward),
+  ::view-transition-old(.nav-back) {
+    animation:
+      vt-fade-out var(--duration-fast) ease-in both,
+      vt-slide-out var(--duration-spring-move) var(--ease-spring-move) both;
+  }
+
+  ::view-transition-new(.nav-forward),
+  ::view-transition-new(.nav-back) {
+    animation:
+      vt-fade-in var(--duration-ui) ease-out var(--duration-fast) both,
+      vt-slide-in var(--duration-spring-move) var(--ease-spring-move) both;
+  }
+
+  ::view-transition-old(.nav-forward),
+  ::view-transition-new(.nav-back) {
+    --slide-offset: -60px;
+  }
+
+  ::view-transition-new(.nav-forward),
+  ::view-transition-old(.nav-back) {
+    --slide-offset: 60px;
+  }
+
   ::view-transition-group(gallery-photo) {
     animation-duration: var(--duration-spring-move);
     animation-timing-function: var(--ease-spring-move);

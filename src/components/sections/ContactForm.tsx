@@ -26,24 +26,31 @@ const FIELDS: ContactField[] = ['name', 'email', 'message']
 
 type Problems = Partial<Record<ContactField, ContactFieldProblem>>
 
-/** A field's own error line, eased in under it rather than popping in. */
+/**
+ * A field's own error line. Its room is always reserved — one line under the
+ * field, empty while all is well — so a message appearing or going away
+ * never pushes the rest of the form down mid-typing. The message itself
+ * fades and settles into that line; a different message cross-fades in.
+ */
 function FieldError({ id, message }: { id: string; message: string | null }) {
   return (
-    <AnimatePresence initial={false}>
-      {message ? (
-        <motion.span
-          animate={{ height: 'auto', opacity: 1 }}
-          className="block overflow-hidden"
-          exit={{ height: 0, opacity: 0 }}
-          initial={{ height: 0, opacity: 0 }}
-          transition={{ duration: DURATION_UI, ease: EASE_OUT_PREMIUM }}
-        >
-          <span className="block pt-2 pl-4 text-xs font-medium text-danger" id={id}>
+    <span className="relative block min-h-5 pt-1 pl-4">
+      <AnimatePresence initial={false}>
+        {message ? (
+          <motion.span
+            animate={{ opacity: 1, y: 0 }}
+            className="absolute top-1 right-0 left-4 block text-xs font-medium text-danger"
+            exit={{ opacity: 0, y: -2 }}
+            id={id}
+            initial={{ opacity: 0, y: -4 }}
+            key={message}
+            transition={{ duration: DURATION_UI, ease: EASE_OUT_PREMIUM }}
+          >
             {message}
-          </span>
-        </motion.span>
-      ) : null}
-    </AnimatePresence>
+          </motion.span>
+        ) : null}
+      </AnimatePresence>
+    </span>
   )
 }
 
@@ -251,7 +258,7 @@ export function ContactForm({ dictionary, successMessage }: ContactFormProps) {
           <motion.form
             action={formAction}
             animate="visible"
-            className="space-y-4"
+            className="space-y-1"
             exit={{ opacity: 0, y: -8 }}
             initial="hidden"
             key="form"
@@ -269,7 +276,7 @@ export function ContactForm({ dictionary, successMessage }: ContactFormProps) {
               type="text"
               autoComplete="off"
             />
-            <motion.div className="grid gap-4 sm:grid-cols-2" variants={fieldVariants}>
+            <motion.div className="grid gap-x-4 gap-y-1 sm:grid-cols-2" variants={fieldVariants}>
               <div>
                 <label className="block text-sm text-fg-muted">
                   <span className="mb-2 block">{dictionary.contact.formNameLabel}</span>

@@ -83,6 +83,11 @@ export interface Dictionary {
     formMessagePlaceholder: string
     submitLabel: string
     sendingLabel: string
+    /** The copy button beside the contact email. */
+    copyLabel: string
+    copiedLabel: string
+    copyFailedLabel: string
+    copyEmailAriaLabel: string
     errors: Record<string, string>
     /** Shown under a field as soon as the visitor leaves it invalid. */
     fieldErrors: {
@@ -107,6 +112,8 @@ export interface Dictionary {
     previousEntryLabel: string
     nextEntryLabel: string
     tagsAriaLabel: string
+    /** "{minutes}" is replaced by the estimate. */
+    readingTime: string
   }
   lightbox: {
     closeLabel: string
@@ -206,6 +213,10 @@ const dictionaries: Record<Locale, Dictionary> = {
       formMessagePlaceholder: 'Votre message…',
       submitLabel: 'Envoyer',
       sendingLabel: 'Envoi en cours…',
+      copyLabel: 'Copier',
+      copiedLabel: 'Copié',
+      copyFailedLabel: 'Copie impossible',
+      copyEmailAriaLabel: 'Copier l’adresse email',
       errors: {
         'missing-fields': 'Merci de renseigner tous les champs.',
         'invalid-email': 'Merci de saisir une adresse email valide.',
@@ -234,6 +245,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       previousEntryLabel: 'Souvenir précédent',
       nextEntryLabel: 'Souvenir suivant',
       tagsAriaLabel: 'Étiquettes',
+      readingTime: '{minutes} min de lecture',
     },
     lightbox: {
       closeLabel: 'Fermer',
@@ -332,6 +344,10 @@ const dictionaries: Record<Locale, Dictionary> = {
       formMessagePlaceholder: 'Your message…',
       submitLabel: 'Send inquiry',
       sendingLabel: 'Sending…',
+      copyLabel: 'Copy',
+      copiedLabel: 'Copied',
+      copyFailedLabel: 'Couldn’t copy',
+      copyEmailAriaLabel: 'Copy email address',
       errors: {
         'missing-fields': 'Please fill in all fields.',
         'invalid-email': 'Please enter a valid email address.',
@@ -359,6 +375,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       previousEntryLabel: 'Previous memory',
       nextEntryLabel: 'Next memory',
       tagsAriaLabel: 'Tags',
+      readingTime: '{minutes} min read',
     },
     lightbox: {
       closeLabel: 'Close',

@@ -59,7 +59,18 @@ type Sample = { t: number; x: number; y: number }
  * first screen of scrolling (styles.css), and stays still for reduced
  * motion.
  */
-export function PlaygroundBackground() {
+type PlaygroundBackgroundProps = {
+  /**
+   * A page's own playground (the 404's). While it's on screen it takes
+   * precedence: the site-wide one, if that's the chosen background, hides
+   * (styles.css) and stops answering the pointer, so they never double up.
+   */
+  local?: boolean
+  /** Where the shapes settle (fractions of the screen), one per shape. */
+  positions?: [number, number][]
+}
+
+export function PlaygroundBackground({ local, positions }: PlaygroundBackgroundProps = {}) {
   const layerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -78,11 +89,16 @@ export function PlaygroundBackground() {
       const spec = SHAPES[index]!
       // Measured, not taken from the spec: phones draw the shapes smaller.
       const r = el.offsetWidth / 2
-      const x = spec.at[0] * width
-      const y = spec.at[1] * height
+      const [fx, fy] = positions?.[index] ?? spec.at
+      const x = fx * width
+      const y = fy * height
 
-      // On load each shape glides in from just off the right edge and
-      // settles in place — a first hint that these things have weight.
+      // On load each shape glides in from off screen and settles in place —
+      // a first hint that these things have weight.
+      // Each glides in from the nearer side edge, so none crosses the
+      // screen through the others on its way to its spot.
+      const startX = fx < 0.5 ? -r * 2 : width + r * 2
+
       return reduceMotion
         ? { angle: 0, el, r, vx: 0, vy: 0, x, y }
         : {
@@ -91,9 +107,9 @@ export function PlaygroundBackground() {
             r,
             // Enough speed to coast to its spot under DECELERATION (Apple's
             // projection: distance ≈ v × 0.5 s at 0.998 per ms).
-            vx: -(width + r - x) * 2,
+            vx: (x - startX) * 2,
             vy: 0,
-            x: width + r * 2,
+            x: startX,
             y,
           }
     })
@@ -230,7 +246,11 @@ export function PlaygroundBackground() {
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target instanceof Element ? event.target : null
 
+      // A page's own playground has the floor while it's there.
+      const outranked = !local && document.querySelector('.playground-layer[data-local]')
+
       if (
+        outranked ||
         !active() ||
         event.button !== 0 ||
         target?.closest('a, button, input, textarea, select, label, [role="button"]')
@@ -385,11 +405,11 @@ export function PlaygroundBackground() {
       window.removeEventListener('resize', onResize)
       window.removeEventListener('scroll', fadeWithScroll)
     }
-  }, [])
+  }, [local, positions])
 
   return (
     <div aria-hidden="true" className="ambient-background" data-variant="playground">
-      <div className="playground-layer" ref={layerRef}>
+      <div className="playground-layer" data-local={local || undefined} ref={layerRef}>
         {SHAPES.map((shape, index) => (
           <span
             className="playground-shape"

@@ -2,7 +2,7 @@
 
 import { motion } from 'motion/react'
 
-import { cardClassName, cardFrameClassName } from '@/components/ui/Card'
+import { cardClassName } from '@/components/ui/Card'
 import { RichText } from '@/components/ui/RichText'
 import { DURATION_SLOW, EASE_OUT_PREMIUM } from '@/lib/motion/tokens'
 import type { LexicalContent } from '@/lib/richText'
@@ -39,8 +39,10 @@ export function PointGroupCard({ content, delay, title }: PointGroupCardProps) {
     // The entrance animation runs on the static .card-glow wrapper and the
     // hover lift on the inner card, so motion's inline `transform` never
     // overrides .card-lift's (see .card-glow in styles.css).
+    // Not a link, so a plain frame: no hover glow or lift (those are for
+    // the cards you can click — see Card.tsx).
     <motion.div
-      className={cardFrameClassName()}
+      className="rounded-card"
       custom={delay}
       initial="hidden"
       variants={cardVariants}
@@ -49,7 +51,9 @@ export function PointGroupCard({ content, delay, title }: PointGroupCardProps) {
       viewport={{ amount: 0.01, once: true }}
       whileInView="visible"
     >
-      <div className={cardClassName({ className: 'h-full p-8', tone: 'accent' })}>
+      <div
+        className={cardClassName({ className: 'h-full p-8', interactive: false, tone: 'accent' })}
+      >
         <motion.p className="eyebrow mb-0" variants={itemVariants}>
           {title}
         </motion.p>

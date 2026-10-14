@@ -9,6 +9,8 @@ import type { Navigation, SectionsVisibility, Setting } from '@/payload-types'
 import { HashScrollHandler } from './HashScrollHandler'
 import { HeaderScrollWatcher } from './HeaderScrollWatcher'
 import { LanguageSwitcher } from './LanguageSwitcher'
+import { LogoLink } from './LogoLink'
+import { NavIndicator } from './NavIndicator'
 import { NavScrollSpy } from './NavScrollSpy'
 import { MobileNavToggle } from './MobileNavToggle'
 import { RouteScrollManager } from './RouteScrollManager'
@@ -46,9 +48,9 @@ export function Header({ dictionary, locale, navigation, sections, settings }: H
       <Container className="site-header-inner">
         {/* The label has to contain the visible initials, or a voice-control
             user saying what they see ("click ZG") can't reach the link. */}
-        <Link aria-label={`${name} (${initials})`} className="site-logo" href={`/${locale}`}>
+        <LogoLink ariaLabel={`${name} (${initials})`} className="site-logo" href={`/${locale}`}>
           <span className="site-logo-initials">{initials}</span>
-        </Link>
+        </LogoLink>
         <MobileNavToggle
           closeLabel={dictionary.nav.closeMenuLabel}
           openLabel={dictionary.nav.openMenuLabel}
@@ -62,6 +64,7 @@ export function Header({ dictionary, locale, navigation, sections, settings }: H
             {showJournalLink ? (
               <Link href={`/${locale}/journal`}>{dictionary.nav.journalLabel}</Link>
             ) : null}
+            <NavIndicator />
           </nav>
           <div className="site-header-controls">
             <LanguageSwitcher dictionary={dictionary} locale={locale} />

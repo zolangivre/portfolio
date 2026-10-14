@@ -65,7 +65,7 @@ export function ExperienceSection({
                   delay={Math.min(index, 5) * 0.08}
                   key={experience.id}
                 >
-                  <article className="timeline-item card-lift">
+                  <article className="timeline-item">
                     <div className="timeline-meta">
                       <Pill tone="accent">
                         {formatDate(experience.startDate, locale, dictionary.experience.present)} –{' '}

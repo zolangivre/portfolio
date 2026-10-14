@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 
+import { PlaygroundBackground } from '@/components/ui/background/PlaygroundBackground'
 import { buttonClassName } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
@@ -13,13 +14,17 @@ import { defaultLocale, locales, type Locale } from '@/lib/locale'
  * boundary renders without the route's params being passed down. Same tradeoff
  * as `RouteError`.
  */
-const COPY: Record<Locale, { title: string; description: string; home: string; back: string }> = {
+const COPY: Record<
+  Locale,
+  { title: string; description: string; home: string; back: string; hint: string }
+> = {
   en: {
     title: 'This page does not exist.',
     description:
       'The link may be outdated, or the page may have been unpublished. Everything else is still where you left it.',
     home: 'Back to home',
     back: 'Browse the projects',
+    hint: 'Psst… try throwing the shapes around.',
   },
   fr: {
     title: 'Cette page n’existe pas.',
@@ -27,8 +32,19 @@ const COPY: Record<Locale, { title: string; description: string; home: string; b
       'Le lien est peut-être obsolète, ou la page a été dépubliée. Le reste du site est toujours là.',
     home: 'Retour à l’accueil',
     back: 'Voir les projets',
+    hint: 'Psst… essayez de lancer les formes.',
   },
 }
+
+/** Along the edges of the screen, clear of the centred message. */
+const NOT_FOUND_SPOTS: [number, number][] = [
+  [0.12, 0.3],
+  [0.88, 0.28],
+  [0.14, 0.8],
+  [0.9, 0.74],
+  [0.3, 0.92],
+  [0.74, 0.12],
+]
 
 export function RouteNotFound() {
   const params = useParams<{ locale?: string }>()
@@ -38,6 +54,9 @@ export function RouteNotFound() {
 
   return (
     <section className="content-section flex flex-1 items-center">
+      {/* A dead end with something to play with: the soft shapes, settled
+          along the edges so the message stays clear. */}
+      <PlaygroundBackground local positions={NOT_FOUND_SPOTS} />
       <Container>
         <div className="mx-auto max-w-lg text-center">
           <p className="eyebrow">404</p>
@@ -51,6 +70,7 @@ export function RouteNotFound() {
               {copy.back}
             </Link>
           </div>
+          <p className="notfound-hint mt-8 text-xs text-fg-subtle">{copy.hint}</p>
         </div>
       </Container>
     </section>

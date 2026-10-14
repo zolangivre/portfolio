@@ -1,6 +1,6 @@
 import { FadeImage } from '@/components/ui/FadeImage'
 import { Container } from '@/components/ui/Container'
-import { getMediaUrl } from '@/lib/media'
+import { getMediaUrl, placeholderProps } from '@/lib/media'
 import { Shelf } from '../ui/Shelf'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { About } from '@/payload-types'
@@ -42,6 +42,7 @@ export function AboutSection({ about, dictionary }: AboutSectionProps) {
             <Reveal scale={0.96}>
               <div className="relative h-64 w-full overflow-hidden rounded-card border border-border shadow-raised sm:h-96 lg:h-full lg:w-80 lg:shrink-0">
                 <FadeImage
+                  {...placeholderProps(portrait)}
                   alt=""
                   className="object-cover"
                   fill

@@ -5,6 +5,9 @@ import { useCallback, useState } from 'react'
 
 export function FadeImage({ className, onLoad, ...props }: ImageProps) {
   const [loaded, setLoaded] = useState(false)
+  // With a blurred preview the image is never empty: the preview shows at
+  // once and the photo sharpens over it, so there's nothing to fade in.
+  const visible = loaded || props.placeholder === 'blur'
 
   // An image already in the cache (the card it was just shown in, on the way
   // to its page) is complete the moment it mounts: show it straight away
@@ -21,7 +24,7 @@ export function FadeImage({ className, onLoad, ...props }: ImageProps) {
     // eslint-disable-next-line jsx-a11y/alt-text -- alt is required by ImageProps and forwarded via props
     <Image
       {...props}
-      className={`transition-opacity duration-(--duration-base) ease-out ${loaded ? 'opacity-100' : 'opacity-0'}${className ? ` ${className}` : ''}`}
+      className={`transition-opacity duration-(--duration-base) ease-out ${visible ? 'opacity-100' : 'opacity-0'}${className ? ` ${className}` : ''}`}
       onLoad={(event) => {
         setLoaded(true)
         onLoad?.(event)

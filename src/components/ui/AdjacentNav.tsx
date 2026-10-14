@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { ViewTransition } from 'react'
 
 import { cardClassName, cardFrameClassName } from '@/components/ui/Card'
 
@@ -10,6 +11,11 @@ export type AdjacentItem = {
   darkImageUrl?: string | null
   meta?: string | null
   title: string
+  /**
+   * Shared with the image that opens the target page: the thumbnail grows
+   * into it on the way there (see globals.css, .media-morph).
+   */
+  transitionName?: string
 }
 
 type AdjacentNavProps = {
@@ -48,34 +54,68 @@ function AdjacentLink({ direction, imageFit, item, label }: AdjacentLinkProps) {
         data-card-link
         data-cursor="pointer"
         href={item.href}
+        // Next slides the page left, previous slides it right
+        // (globals.css): you move along the series in a direction.
+        transitionTypes={[isPrevious ? 'nav-back' : 'nav-forward']}
       >
         {item.imageUrl ? (
-          <span
-            className={`relative hidden h-16 w-16 shrink-0 overflow-hidden rounded-inset bg-surface sm:block${
-              imageFit === 'contain' ? ' p-2' : ''
-            }`}
-          >
-            {item.imageUrl && (
-              <Image
-                alt={item.imageAlt ?? ''}
-                className={`h-full w-full ${imageFit === 'contain' ? 'object-contain' : 'object-cover'}${item.darkImageUrl ? ' dark:hidden' : ''}`}
-                height={128}
-                sizes="64px"
-                src={item.imageUrl}
-                width={128}
-              />
-            )}
-            {item.darkImageUrl && (
-              <Image
-                alt={item.imageAlt ?? ''}
-                className={`hidden h-full w-full ${imageFit === 'contain' ? 'object-contain' : 'object-cover'} dark:block`}
-                height={128}
-                sizes="64px"
-                src={item.darkImageUrl}
-                width={128}
-              />
-            )}
-          </span>
+          item.transitionName ? (
+            <ViewTransition default="none" name={item.transitionName} share="media-morph">
+              <span
+                className={`relative hidden h-16 w-16 shrink-0 overflow-hidden rounded-inset bg-surface sm:block${
+                  imageFit === 'contain' ? ' p-2' : ''
+                }`}
+              >
+                {item.imageUrl && (
+                  <Image
+                    alt={item.imageAlt ?? ''}
+                    className={`h-full w-full ${imageFit === 'contain' ? 'object-contain' : 'object-cover'}${item.darkImageUrl ? ' dark:hidden' : ''}`}
+                    height={128}
+                    sizes="64px"
+                    src={item.imageUrl}
+                    width={128}
+                  />
+                )}
+                {item.darkImageUrl && (
+                  <Image
+                    alt={item.imageAlt ?? ''}
+                    className={`hidden h-full w-full ${imageFit === 'contain' ? 'object-contain' : 'object-cover'} dark:block`}
+                    height={128}
+                    sizes="64px"
+                    src={item.darkImageUrl}
+                    width={128}
+                  />
+                )}
+              </span>
+            </ViewTransition>
+          ) : (
+            <span
+              className={`relative hidden h-16 w-16 shrink-0 overflow-hidden rounded-inset bg-surface sm:block${
+                imageFit === 'contain' ? ' p-2' : ''
+              }`}
+            >
+              {item.imageUrl && (
+                <Image
+                  alt={item.imageAlt ?? ''}
+                  className={`h-full w-full ${imageFit === 'contain' ? 'object-contain' : 'object-cover'}${item.darkImageUrl ? ' dark:hidden' : ''}`}
+                  height={128}
+                  sizes="64px"
+                  src={item.imageUrl}
+                  width={128}
+                />
+              )}
+              {item.darkImageUrl && (
+                <Image
+                  alt={item.imageAlt ?? ''}
+                  className={`hidden h-full w-full ${imageFit === 'contain' ? 'object-contain' : 'object-cover'} dark:block`}
+                  height={128}
+                  sizes="64px"
+                  src={item.darkImageUrl}
+                  width={128}
+                />
+              )}
+            </span>
+          )
         ) : null}
 
         <span className="min-w-0 flex-1">

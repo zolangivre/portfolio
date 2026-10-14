@@ -8,7 +8,7 @@ import { buttonClassName } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import { RichText } from '@/components/ui/RichText'
 import { useTypewriter } from '@/hooks/useTypewriter'
-import { getMediaUrl } from '@/lib/media'
+import { getMediaUrl, placeholderProps } from '@/lib/media'
 import { DURATION_SLOW, EASE_OUT_PREMIUM } from '@/lib/motion/tokens'
 import type { Hero, Setting } from '@/payload-types'
 
@@ -155,6 +155,7 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
               className="hero-photo-glow absolute inset-x-0 -inset-y-6 -z-10 rounded-[36px] bg-accent-soft blur-3xl lg:-inset-6"
             />
             <Image
+              {...placeholderProps(photo)}
               alt=""
               className="h-auto w-52 rounded-card border border-border shadow-raised sm:w-60 lg:w-80 lg:shrink-0"
               height={photoHeight}

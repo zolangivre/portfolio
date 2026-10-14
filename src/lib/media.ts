@@ -60,3 +60,17 @@ export const getMediaUrl = (media: MediaDoc | number | null | undefined): string
 /** The url behind a polymorphic relation — `asMediaDoc` then `getMediaUrl`. */
 export const getRelationUrl = (relation: MediaRelation): string | null =>
   getMediaUrl(asMediaDoc(relation))
+
+/**
+ * next/image props for the blurred preview Payload stored with an image
+ * (see src/lib/placeholder.ts): shown at once, replaced by the photo when
+ * it has loaded. Empty when there's none (SVGs, PDFs, videos, older rows).
+ */
+export const placeholderProps = (
+  media: MediaDoc | number | null | undefined,
+): { blurDataURL?: string; placeholder?: 'blur' } => {
+  const preview =
+    media && typeof media === 'object' && 'placeholder' in media ? media.placeholder : null
+
+  return preview ? { blurDataURL: preview, placeholder: 'blur' } : {}
+}

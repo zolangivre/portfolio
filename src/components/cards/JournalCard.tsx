@@ -6,7 +6,8 @@ import { cardClassName, cardFrameClassName } from '@/components/ui/Card'
 import { Pill } from '@/components/ui/Pill'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
-import { getMediaUrl } from '@/lib/media'
+import { getMediaUrl, placeholderProps } from '@/lib/media'
+import { readingTimeLabel } from '@/lib/richText'
 import type { Journal } from '@/payload-types'
 
 type JournalCardProps = {
@@ -40,6 +41,7 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
   const categoryLabel =
     typeof entry.category === 'object' && entry.category ? entry.category.name : null
   const formattedDate = dateFormatters[locale].format(new Date(entry.date))
+  const readingTime = readingTimeLabel(entry.content, dictionary.journal.readingTime)
   const tags = entry.tags ?? []
 
   return (
@@ -61,6 +63,7 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
             <ViewTransition default="none" name={`journal-media-${entry.slug}`} share="media-morph">
               <Image
                 alt={imageAlt}
+                {...placeholderProps(entry.coverImage)}
                 className="h-full w-full rounded-t-card object-cover"
                 height={640}
                 sizes="(min-width: 1024px) min(33vw, 375px), (min-width: 720px) 50vw, 100vw"
@@ -86,6 +89,7 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
           <p className="text-label uppercase text-fg-subtle">
             {formattedDate}
             {entry.location ? ` · ${entry.location}` : null}
+            {readingTime ? ` · ${readingTime}` : null}
           </p>
           <h3 className="mt-2 text-xl font-semibold text-fg">{entry.title}</h3>
           <p className="mt-3 line-clamp-3 flex-1 text-sm leading-7 text-fg-muted">

@@ -196,6 +196,7 @@ export interface User {
 export interface Media {
   id: number;
   alt: string;
+  placeholder?: string | null;
   _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -750,6 +751,7 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  placeholder?: T;
   _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;

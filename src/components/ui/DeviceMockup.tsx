@@ -18,6 +18,9 @@ type FrameProps = {
   height: number
   /** Of the media actually shown; a screen recording is played, not shown. */
   mimeType?: string | null
+  /** Blurred previews (Payload, see placeholder.ts), light and dark. */
+  placeholder?: string | null
+  darkPlaceholder?: string | null
   priority?: boolean
   src: string
   videoLabels: MockupVideoLabels
@@ -40,17 +43,22 @@ function MockupMedia({
   alt,
   className,
   compact,
+  darkPlaceholder,
   darkSrc,
   height,
   mimeType,
+  placeholder,
   priority,
   sizes,
   src,
   videoLabels,
   width,
 }: MockupMediaProps) {
-  const renderOne = (mediaSrc: string, visibility: string, isLight: boolean) =>
-    compact ? (
+  const renderOne = (mediaSrc: string, visibility: string, isLight: boolean) => {
+    const preview = isLight ? placeholder : darkPlaceholder
+    const previewProps = preview ? { blurDataURL: preview, placeholder: 'blur' as const } : {}
+
+    return compact ? (
       // In a card: no fade (the card has its own entrance) and a recording
       // that only plays on hover — see CardVideo.
       isVideo(mimeType) ? (
@@ -63,6 +71,7 @@ function MockupMedia({
         />
       ) : (
         <Image
+          {...previewProps}
           alt={alt}
           className={`${visibility} ${className}`}
           height={height}
@@ -83,6 +92,7 @@ function MockupMedia({
       />
     ) : (
       <FadeImage
+        {...previewProps}
         alt={alt}
         className={`${visibility} ${className}`}
         height={height}
@@ -92,6 +102,7 @@ function MockupMedia({
         width={width}
       />
     )
+  }
 
   return (
     <>
@@ -329,9 +340,11 @@ export function DeviceMockup({
     <Component
       alt={primary.alt || fallbackAlt}
       compact={compact}
+      darkPlaceholder={secondary && 'placeholder' in secondary ? secondary.placeholder : null}
       darkSrc={getMediaUrl(secondary)}
       height={primary.height ?? height}
       mimeType={primary.mimeType}
+      placeholder={'placeholder' in primary ? primary.placeholder : null}
       priority={priority}
       src={src}
       videoLabels={videoLabels}

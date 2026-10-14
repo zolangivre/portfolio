@@ -56,7 +56,7 @@ export function EducationSection({
 
               return (
                 <Reveal className="timeline-row" delay={Math.min(index, 5) * 0.08} key={entry.id}>
-                  <article className="timeline-item card-lift">
+                  <article className="timeline-item">
                     <div className="timeline-meta">
                       <Pill tone="accent">
                         {formatDate(entry.startDate, locale, dictionary.experience.present)} –{' '}
