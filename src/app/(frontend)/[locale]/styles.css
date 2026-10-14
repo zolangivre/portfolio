@@ -76,10 +76,11 @@ a {
   z-index: -1;
 }
 
-/* Very slow, very quiet mesh-gradient layer so the page still feels alive
-   at rest, with no pointer/scroll interaction — sits beneath the blobs. */
+/* Very quiet mesh-gradient layer beneath the blobs. Still: it used to drift
+   on a 90s loop, but `background-position` can't be composited, so every
+   step repainted a full-viewport, three-gradient layer, forever, on every
+   page. The blobs above carry the movement now (see below). */
 .ambient-mesh {
-  animation: ambient-mesh-drift 90s ease-in-out infinite;
   background-image:
     radial-gradient(at 20% 30%, var(--accent) 0%, transparent 55%),
     radial-gradient(at 80% 70%, var(--accent-2) 0%, transparent 55%),
@@ -92,28 +93,6 @@ a {
 
 :root.dark .ambient-mesh {
   opacity: 0.08;
-}
-
-@keyframes ambient-mesh-drift {
-  0%,
-  100% {
-    background-position:
-      0% 0%,
-      100% 100%,
-      50% 100%;
-  }
-  50% {
-    background-position:
-      10% 15%,
-      85% 80%,
-      55% 90%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ambient-mesh {
-    animation: none;
-  }
 }
 
 .ambient-parallax {
@@ -150,7 +129,6 @@ a {
 }
 
 .ambient-blob-a {
-  animation: ambient-blob-drift-a 34s ease-in-out infinite;
   background: var(--accent);
   border-radius: 58% 42% 65% 35% / 45% 55% 45% 55%;
   height: 46vw;
@@ -160,7 +138,6 @@ a {
 }
 
 .ambient-blob-b {
-  animation: ambient-blob-drift-b 40s ease-in-out infinite;
   background: var(--accent-2);
   border-radius: 45% 55% 40% 60% / 55% 45% 62% 38%;
   bottom: -16vw;
@@ -170,41 +147,41 @@ a {
 }
 
 /*
- * transform-only now — this used to also morph border-radius every frame
- * for a "breathing" shape. border-radius can't be composited, so each step
- * forced a full repaint of this blur(90px), ~46vw layer; it ran forever, on
- * every page, whether or not anything else was happening on screen. That's
- * exactly the kind of always-on repaint Safari handles noticeably worse
- * than Chrome. The blob keeps its hand-painted, asymmetric silhouette (now
- * a static border-radius above) and still drifts/scales/rotates — it just
- * no longer reshapes mid-flight.
+ * The blobs move with the page instead of on a timer: as you scroll, the
+ * accent blob drifts down and across from the top-left while the second
+ * rises from the bottom-right, so the light seems to follow you down — and
+ * when you stop, it stops. They used to loop forever (34s and 40s), moving
+ * a full-viewport background even while nothing else on screen did.
+ *
+ * A scroll-driven animation: progress is the root scroller's position, run
+ * by the browser itself (no JS, composited — transform only, like before;
+ * the blob's blur is rasterized once and only moved). Browsers without
+ * scroll timelines get the still blobs, and so does reduced motion.
  */
-@keyframes ambient-blob-drift-a {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1) rotate(0deg);
-  }
-  33% {
-    transform: translate(3vw, 2vw) scale(1.06) rotate(8deg);
-  }
-  66% {
-    transform: translate(-2vw, 3vw) scale(0.97) rotate(-6deg);
+@keyframes ambient-blob-scroll-a {
+  to {
+    transform: translate(8vw, 24vh) scale(1.12) rotate(28deg);
   }
 }
 
-@keyframes ambient-blob-drift-b {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1) rotate(0deg);
-  }
-  50% {
-    transform: translate(-3vw, -3vw) scale(1.08) rotate(-9deg);
+@keyframes ambient-blob-scroll-b {
+  to {
+    transform: translate(-10vw, -28vh) scale(1.1) rotate(-24deg);
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .ambient-blob {
-    animation: none;
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .ambient-blob-a {
+      animation: ambient-blob-scroll-a linear both;
+      /* After the shorthand, which would reset it. */
+      animation-timeline: scroll(root block);
+    }
+
+    .ambient-blob-b {
+      animation: ambient-blob-scroll-b linear both;
+      animation-timeline: scroll(root block);
+    }
   }
 }
 
@@ -247,10 +224,8 @@ a {
  *
  * The grain is almost all of it: `mix-blend-mode` over the full viewport
  * makes the compositor re-blend everything underneath on every frame
- * anything below it repaints. The mesh is the thing that keeps making it
- * repaint — `background-position` can't be composited, so each step of its
- * 90s loop repaints a full-viewport, three-gradient layer, forever, on
- * every page.
+ * anything below it repaints. (The mesh's 90s loop, which kept making it
+ * repaint, is gone everywhere now — see .ambient-mesh.)
  *
  * `(pointer: coarse), (pointer: none)` rather than `not (pointer: fine)`:
  * the comma form is the plainly-supported spelling everywhere `pointer`
@@ -260,10 +235,6 @@ a {
 @media (pointer: coarse), (pointer: none) {
   .ambient-grain {
     display: none;
-  }
-
-  .ambient-mesh {
-    animation: none;
   }
 
   /* The blobs stay — they're the signature of this background, and at phone
@@ -1104,6 +1075,14 @@ h3,
 h4 {
   font-family: var(--font-display), sans-serif;
   font-weight: 700;
+}
+
+/* Running text: no lone word stranded on a paragraph's last line. */
+p,
+li,
+blockquote,
+figcaption {
+  text-wrap: pretty;
 }
 
 /* Not h1: every h1 here is typed in character by character, and balancing
