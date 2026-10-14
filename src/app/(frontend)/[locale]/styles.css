@@ -436,9 +436,17 @@ a {
   position: absolute;
 }
 
+/* Phones: no free band beside the text there — the shapes sit behind it,
+   so they're smaller and faded back enough to leave the words legible. */
 @media (max-width: 719px) {
   .playground-layer {
     --playground-scale: 0.6;
+  }
+
+  /* Scoped through the layer to outrank the base rules further down. */
+  .playground-layer .playground-shape,
+  :root.dark .playground-layer .playground-shape {
+    opacity: 0.35;
   }
 }
 
@@ -1610,6 +1618,35 @@ h1 {
   max-width: 900px;
 }
 
+/* The typed name over an invisible copy of the whole name (HeroSection):
+   both in one grid cell, so the box is always the finished width. */
+.hero-title-stack {
+  display: inline-grid;
+}
+
+.hero-title-stack > * {
+  grid-area: 1 / 1;
+}
+
+.hero-title-ghost {
+  /* Room for the cursor that follows the typed copy. */
+  padding-right: 0.14em;
+  visibility: hidden;
+}
+
+/* Phones and tablets: the title line above the name is centred with the
+   rest of the identity, its lines balanced to even lengths. The extra left
+   padding matches the tracking every letter carries after it — the last
+   one included — which would otherwise pull the centred block to the left. */
+@media (max-width: 1023px) {
+  .hero-eyebrow {
+    align-self: center;
+    padding-left: 0.2em;
+    text-align: center;
+    text-wrap: balance;
+  }
+}
+
 .hero-title-cursor {
   animation: logo-cursor-blink 1.1s step-end infinite;
   background: var(--accent);
@@ -2128,22 +2165,23 @@ h3 {
 }
 
 /*
- * Phones: the projects grid becomes a shelf you swipe through (App Store
- * style), instead of eight tall cards stacked down the page. It's native
+ * Phones: a grid of parallel items — the projects, the skill categories,
+ * the About cards — becomes a shelf you swipe through (App Store style),
+ * instead of a long stack of tall cards down the page. It's native
  * scrolling with scroll-snap, so the platform supplies the momentum, the
  * settle onto a card and the rubber-band at either end; a flick can carry
  * past several cards. The row bleeds to the screen edges (the container's
  * gutter turns into its padding) and each card leaves the next one peeking
- * in, which is what says "there's more this way". ProjectShelf.tsx adds the
+ * in, which is what says "there's more this way". Shelf.tsx adds the
  * dots under it.
  */
 /* Phones only — declared before the query below so it can turn them on. */
-.project-shelf-dots {
+.shelf-dots {
   display: none;
 }
 
 @media (max-width: 719px) {
-  .project-shelf {
+  .shelf {
     display: flex;
     gap: 0.9rem;
     margin-inline: -1.25rem;
@@ -2157,11 +2195,11 @@ h3 {
     scrollbar-width: none;
   }
 
-  .project-shelf::-webkit-scrollbar {
+  .shelf::-webkit-scrollbar {
     display: none;
   }
 
-  .project-shelf > * {
+  .shelf > * {
     /* Sized off the screen rather than a percentage of the scroller: the
        gutter on the left, then ~2rem of the next card showing on the right. */
     flex: 0 0 calc(100vw - 4.25rem);
@@ -2171,16 +2209,94 @@ h3 {
     scroll-snap-align: start;
   }
 
-  .project-shelf-dots {
+  .shelf-dots {
     display: flex;
     justify-content: center;
     margin-top: -0.5rem;
+  }
+
+  /* Skill categories hold anything from two tiles to ten: each card keeps
+     its own height instead of all stretching to the tallest. */
+  .skills-grid.shelf {
+    align-items: flex-start;
+  }
+
+  /* Two compact tiles to a row inside a category card. */
+  .shelf .skill-card {
+    font-size: 0.875rem;
+    padding: 0.65rem 0.75rem;
+  }
+}
+
+/*
+ * Timeline details (TimelineDetails.tsx): on phones an entry's description
+ * is folded under its opening paragraph, fading out, with a button to open
+ * the rest. The height animation itself is driven from JS (a spring); this
+ * is only the resting fold. From 720px everything shows and the button is
+ * gone.
+ */
+.timeline-details-toggle {
+  display: none;
+}
+
+@media (max-width: 719px) {
+  .timeline-details-body {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .timeline-details[data-foldable='true'] .timeline-details-body[data-folded='true'] {
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 2.5rem), transparent);
+    max-height: var(--fold-height, 7rem);
+  }
+
+  .timeline-details[data-foldable='true'] .timeline-details-toggle {
+    align-items: center;
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: var(--text-caption);
+    font-weight: 600;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+    min-height: 44px;
+    padding: 0;
+    transition: scale var(--duration-ui) var(--ease-bounce);
+  }
+
+  .timeline-details-toggle:active {
+    scale: 0.94;
+    transition-duration: 100ms;
+  }
+
+  .timeline-details-toggle svg {
+    transition: rotate var(--duration-ui) var(--ease-out-premium);
+  }
+
+  .timeline-details-toggle[aria-expanded='true'] svg {
+    rotate: 180deg;
+  }
+}
+
+/* The About cards (judo, way of working…): a shelf on phones (above), a
+   grid of two from 720px — the same breakpoint as the other shelves. */
+.about-points {
+  flex: 1;
+}
+
+@media (min-width: 720px) {
+  .about-points {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 /* Each dot is a 24px target around a 6px mark; the current one stretches
    into a short bar, as on iOS. */
-.project-shelf-dot {
+.shelf-dot {
   align-items: center;
   background: none;
   border: none;
@@ -2192,7 +2308,7 @@ h3 {
   padding: 0;
 }
 
-.project-shelf-dot::before {
+.shelf-dot::before {
   background: var(--border-strong);
   border-radius: 999px;
   content: '';
@@ -2203,13 +2319,13 @@ h3 {
   width: 6px;
 }
 
-.project-shelf-dot[data-active='true']::before {
+.shelf-dot[data-active='true']::before {
   background: var(--accent);
   width: 18px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .project-shelf-dot::before {
+  .shelf-dot::before {
     transition: background-color var(--duration-fast) ease;
   }
 }

@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 
-type ProjectShelfProps = {
-  /** The `.project-shelf` row — the projects grid, which becomes a shelf on phones. */
+type ShelfProps = {
+  /** The `.shelf` row — a grid that becomes a swipeable row on phones. */
   children: ReactNode
   navLabel: string
   /** One per card, in order: what each dot is announced as. */
@@ -11,21 +11,23 @@ type ProjectShelfProps = {
 }
 
 /**
- * On phones the projects grid turns into a row you swipe through, like an
- * App Store shelf (styles.css, .project-shelf). The swipe itself is native
+ * On phones a grid of parallel items — projects, skill categories, the
+ * About cards — turns into a row you swipe through, like an App Store shelf
+ * (styles.css, .shelf). Only for collections you browse: a chronology or a
+ * text you read stays vertical. The swipe itself is native
  * scrolling with scroll-snap — the platform's own momentum, rubber-banding
  * at the ends and settling on a card, which nothing hand-rolled matches on
  * iOS. This adds the page dots under it: where you are in the row, and a
  * way to jump. Hidden from 720px, where the grid is a grid again.
  */
-export function ProjectShelf({ children, navLabel, titles }: ProjectShelfProps) {
+export function Shelf({ children, navLabel, titles }: ShelfProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const [active, setActive] = useState(0)
 
-  const scroller = () => rootRef.current?.querySelector<HTMLElement>('.project-shelf') ?? null
+  const scroller = () => rootRef.current?.querySelector<HTMLElement>('.shelf') ?? null
 
   useEffect(() => {
-    const row = rootRef.current?.querySelector<HTMLElement>('.project-shelf')
+    const row = rootRef.current?.querySelector<HTMLElement>('.shelf')
 
     if (!row) {
       return
@@ -87,12 +89,12 @@ export function ProjectShelf({ children, navLabel, titles }: ProjectShelfProps) 
     <div ref={rootRef}>
       {children}
       {titles.length > 1 ? (
-        <div aria-label={navLabel} className="project-shelf-dots" role="group">
+        <div aria-label={navLabel} className="shelf-dots" role="group">
           {titles.map((title, index) => (
             <button
               aria-current={index === active ? 'true' : undefined}
               aria-label={title}
-              className="project-shelf-dot"
+              className="shelf-dot"
               data-active={index === active}
               key={`${title}-${index}`}
               onClick={() => goTo(index)}

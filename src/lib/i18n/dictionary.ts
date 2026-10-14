@@ -16,6 +16,8 @@ export interface Dictionary {
   }
   about: {
     eyebrow: string
+    /** The dots under the swipeable About cards on phones. */
+    shelfNavLabel: string
   }
   projects: {
     eyebrow: string
@@ -44,6 +46,9 @@ export interface Dictionary {
     emptyState: string
     present: string
     fallbackCompany: string
+    /** The disclosure that folds a timeline entry's details on phones. */
+    showDetailsLabel: string
+    hideDetailsLabel: string
   }
   education: {
     eyebrow: string
@@ -58,6 +63,8 @@ export interface Dictionary {
     description: string
     emptyState: string
     visitAriaLabelSuffix: string
+    /** The dots under the swipeable skill categories on phones. */
+    shelfNavLabel: string
   }
   testimonials: {
     eyebrow: string
@@ -129,6 +136,7 @@ const dictionaries: Record<Locale, Dictionary> = {
     },
     about: {
       eyebrow: 'À propos',
+      shelfNavLabel: 'Aller à un encadré',
     },
     projects: {
       eyebrow: 'Travaux sélectionnés',
@@ -162,6 +170,8 @@ const dictionaries: Record<Locale, Dictionary> = {
       emptyState: 'Aucune expérience n’a encore été publiée.',
       present: 'Aujourd’hui',
       fallbackCompany: 'Entreprise',
+      showDetailsLabel: 'Voir le détail',
+      hideDetailsLabel: 'Masquer le détail',
     },
     education: {
       eyebrow: 'Formation',
@@ -177,6 +187,7 @@ const dictionaries: Record<Locale, Dictionary> = {
         'Une palette d’outils affûtée pour le développement produit moderne, du frontend au delivery.',
       emptyState: 'Aucune compétence n’a encore été publiée.',
       visitAriaLabelSuffix: '(ouvre un nouvel onglet)',
+      shelfNavLabel: 'Aller à une catégorie',
     },
     testimonials: {
       eyebrow: 'Témoignages',
@@ -250,6 +261,7 @@ const dictionaries: Record<Locale, Dictionary> = {
     },
     about: {
       eyebrow: 'About',
+      shelfNavLabel: 'Jump to a card',
     },
     projects: {
       eyebrow: 'Selected work',
@@ -284,6 +296,8 @@ const dictionaries: Record<Locale, Dictionary> = {
       emptyState: 'No experience entries have been published yet.',
       present: 'Present',
       fallbackCompany: 'Company',
+      showDetailsLabel: 'Show details',
+      hideDetailsLabel: 'Hide details',
     },
     education: {
       eyebrow: 'Education',
@@ -299,6 +313,7 @@ const dictionaries: Record<Locale, Dictionary> = {
         'A toolkit refined for modern product development across frontend, backend, and delivery.',
       emptyState: 'No skills have been published yet.',
       visitAriaLabelSuffix: '(opens in a new tab)',
+      shelfNavLabel: 'Jump to a category',
     },
     testimonials: {
       eyebrow: 'Testimonials',

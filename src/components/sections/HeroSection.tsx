@@ -31,6 +31,16 @@ const heroItemVariants = {
   },
 }
 
+/**
+ * The title line wraps on phones, and should never break inside a
+ * hyphenated word ("FULL- / STACK") or leave a dash opening a line: hyphens
+ * between letters become non-breaking, and a dash stays with the word
+ * before it.
+ */
+function keepTogether(text: string) {
+  return text.replace(/(\p{L})-(?=\p{L})/gu, '$1\u2011').replace(/ ([—–])/g, '\u00a0$1')
+}
+
 export function HeroSection({ hero, settings }: HeroSectionProps) {
   const title = hero?.title ?? 'Building polished digital products with calm, modern engineering.'
   const typedLength = useTypewriter(title)
@@ -48,36 +58,57 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
   return (
     <section className="hero-section" aria-labelledby="hero-title">
       <Container
-        className={photoUrl ? 'lg:flex lg:items-center lg:justify-between lg:gap-12' : undefined}
+        // Below lg it reads name → photo → the rest: the text column is
+        // dissolved (`contents`) so the photo can slot in under the name,
+        // ordered with `order`; kept small so the name and the opening of
+        // the text still fit on the first screen. The identity — title,
+        // name, photo — is centred like a contact card, with the buttons;
+        // the paragraphs stay left-aligned, as long text reads best. From
+        // lg they sit side by side, text on the left.
+        className="flex flex-col lg:flex-row lg:items-center lg:justify-between lg:gap-12"
       >
         <motion.div
           animate="visible"
-          className="hero-copy"
+          className="hero-copy contents lg:block"
           initial="hidden"
           variants={heroContainerVariants}
         >
           {availability ? (
-            <motion.div className="mb-5" variants={heroItemVariants}>
+            <motion.div className="mb-5 self-center lg:self-auto" variants={heroItemVariants}>
               <AvailabilityBadge label={availability} />
             </motion.div>
           ) : null}
           {hero?.eyebrow ? (
-            <motion.p className="eyebrow" variants={heroItemVariants}>
-              {hero.eyebrow}
+            <motion.p className="eyebrow hero-eyebrow" variants={heroItemVariants}>
+              {keepTogether(hero.eyebrow)}
             </motion.p>
           ) : null}
-          <motion.h1 aria-label={title} id="hero-title" variants={heroItemVariants}>
-            <span aria-hidden="true">
-              {title.slice(0, typedLength)}
-              <span className="hero-title-cursor" />
+          <motion.h1
+            aria-label={title}
+            className="self-center lg:self-auto"
+            id="hero-title"
+            variants={heroItemVariants}
+          >
+            {/* The full name, invisible, holds the final width: centred, the
+                box doesn't shift as letters are typed in — they fill it
+                from the left instead of re-centring on every keystroke. */}
+            <span aria-hidden="true" className="hero-title-stack">
+              <span className="hero-title-ghost">{title}</span>
+              <span>
+                {title.slice(0, typedLength)}
+                <span className="hero-title-cursor" />
+              </span>
             </span>
           </motion.h1>
           {hero?.description ? (
-            <motion.div variants={heroItemVariants}>
+            <motion.div className="order-2 lg:order-none" variants={heroItemVariants}>
               <RichText content={hero.description} />
             </motion.div>
           ) : null}
-          <motion.div className="mt-8 flex flex-wrap gap-3" variants={heroItemVariants}>
+          <motion.div
+            className="order-2 mt-8 flex flex-wrap justify-center gap-3 lg:order-none lg:justify-start"
+            variants={heroItemVariants}
+          >
             {primaryCta?.label && primaryCta?.href ? (
               <a className={buttonClassName()} href={primaryCta.href}>
                 {primaryCta.label}
@@ -96,7 +127,7 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
           </motion.div>
           {highlights.length > 0 ? (
             <motion.div
-              className="mt-8 flex flex-wrap gap-4 text-sm text-fg-muted"
+              className="order-2 mt-8 flex flex-wrap justify-center gap-4 text-sm text-fg-muted lg:order-none lg:justify-start"
               variants={heroItemVariants}
             >
               {highlights.map((item, index) => (
@@ -115,7 +146,7 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
         {photoUrl ? (
           <motion.div
             animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            className="hero-photo relative mt-10 lg:mt-0"
+            className="hero-photo relative order-1 mb-7 self-center lg:order-none lg:mb-0 lg:self-auto"
             initial={{ opacity: 0, scale: 0.94, rotate: -2 }}
             transition={{ delay: 0.15, duration: DURATION_SLOW, ease: EASE_OUT_PREMIUM }}
           >
@@ -125,11 +156,11 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
             />
             <Image
               alt=""
-              className="h-auto w-full max-w-sm rounded-card border border-border shadow-raised lg:w-80 lg:shrink-0"
+              className="h-auto w-52 rounded-card border border-border shadow-raised sm:w-60 lg:w-80 lg:shrink-0"
               height={photoHeight}
               priority
               quality={90}
-              sizes="(min-width: 1024px) 480px, 100vw"
+              sizes="(min-width: 1024px) 320px, 240px"
               src={photoUrl}
               width={photoWidth}
             />

@@ -44,14 +44,13 @@ export function PointGroupCard({ content, delay, title }: PointGroupCardProps) {
       custom={delay}
       initial="hidden"
       variants={cardVariants}
-      viewport={{ margin: '-80px', once: true }}
+      // Any sliver on screen counts: on the phone shelf the second card only
+      // peeks in, and that peek has to be visible.
+      viewport={{ amount: 0.01, once: true }}
       whileInView="visible"
     >
       <div className={cardClassName({ className: 'h-full p-8', tone: 'accent' })}>
-        <motion.p
-          className="eyebrow mb-0"
-          variants={itemVariants}
-        >
+        <motion.p className="eyebrow mb-0" variants={itemVariants}>
           {title}
         </motion.p>
         {content ? (

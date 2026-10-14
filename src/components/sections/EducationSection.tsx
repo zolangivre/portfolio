@@ -11,6 +11,7 @@ import type { Education } from '@/payload-types'
 import { Reveal } from '../ui/Reveal'
 import { RichText } from '../ui/RichText'
 import { SectionHeader } from '../ui/SectionHeader'
+import { TimelineDetails } from '../ui/TimelineDetails'
 import { TimelineRail } from '../ui/TimelineRail'
 
 type EducationSectionProps = {
@@ -98,7 +99,15 @@ export function EducationSection({
                       {entry.fieldOfStudy ? (
                         <h4 className="text-base">{entry.fieldOfStudy}</h4>
                       ) : null}
-                      {entry.description ? <RichText content={entry.description} /> : null}
+                      {entry.description ? (
+                        // Folded to its opening paragraph on phones.
+                        <TimelineDetails
+                          hideLabel={dictionary.experience.hideDetailsLabel}
+                          showLabel={dictionary.experience.showDetailsLabel}
+                        >
+                          <RichText content={entry.description} />
+                        </TimelineDetails>
+                      ) : null}
                     </div>
                   </article>
                 </Reveal>
