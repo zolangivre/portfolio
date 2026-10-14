@@ -15,7 +15,10 @@ test('a visitor can send a message, and it lands in the admin', async ({ page, r
   await form.getByLabel('Message').fill('Hello from the e2e suite.')
   await form.getByRole('button', { name: 'Envoyer' }).click()
 
-  await expect(page.getByRole('status')).toHaveText(contactSuccess.fr)
+  // Not the only live region in the section: the copy-email button has one.
+  await expect(page.getByRole('status').filter({ hasText: contactSuccess.fr })).toHaveText(
+    contactSuccess.fr,
+  )
 
   const admin = await loginAsEditor(request)
   const { totalDocs } = await admin.find('messages', { email: { equals: email } })
