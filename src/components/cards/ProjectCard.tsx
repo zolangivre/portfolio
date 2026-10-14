@@ -98,7 +98,7 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
           )}
 
           <div className="flex flex-1 flex-col p-6 sm:p-7">
-            <div className="mb-2 flex items-center justify-between gap-3">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
               <div className="flex min-w-0 items-center gap-3">
                 {/* The logo moves here when the media area shows the device. */}
                 {hasMockup ? (

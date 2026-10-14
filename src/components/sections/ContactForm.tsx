@@ -5,7 +5,12 @@ import { useActionState, useEffect, useRef, useState } from 'react'
 
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import { buttonClassName } from '@/components/ui/Button'
-import { submitContactForm, type ContactField, type ContactFormState } from '@/lib/actions/contact'
+import { submitContactForm, type ContactFormState } from '@/lib/actions/contact'
+import {
+  contactFieldProblem,
+  type ContactField,
+  type ContactFieldProblem,
+} from '@/lib/contactValidation'
 import { DURATION_BASE, DURATION_FAST, DURATION_UI, EASE_OUT_PREMIUM } from '@/lib/motion/tokens'
 
 /*
@@ -15,7 +20,32 @@ import { DURATION_BASE, DURATION_FAST, DURATION_UI, EASE_OUT_PREMIUM } from '@/l
  * 3:1 for focus indicators. The border still turns accent as a second cue.
  */
 const FIELD_CLASSNAME =
-  'w-full border border-border bg-surface px-4 py-3 text-sm text-fg transition focus:border-accent'
+  'w-full border border-border bg-surface px-4 py-3 text-sm text-fg transition focus:border-accent aria-invalid:border-danger'
+
+const FIELDS: ContactField[] = ['name', 'email', 'message']
+
+type Problems = Partial<Record<ContactField, ContactFieldProblem>>
+
+/** A field's own error line, eased in under it rather than popping in. */
+function FieldError({ id, message }: { id: string; message: string | null }) {
+  return (
+    <AnimatePresence initial={false}>
+      {message ? (
+        <motion.span
+          animate={{ height: 'auto', opacity: 1 }}
+          className="block overflow-hidden"
+          exit={{ height: 0, opacity: 0 }}
+          initial={{ height: 0, opacity: 0 }}
+          transition={{ duration: DURATION_UI, ease: EASE_OUT_PREMIUM }}
+        >
+          <span className="block pt-2 pl-4 text-xs font-medium text-danger" id={id}>
+            {message}
+          </span>
+        </motion.span>
+      ) : null}
+    </AnimatePresence>
+  )
+}
 
 type ContactFormProps = {
   dictionary: Dictionary
@@ -41,6 +71,11 @@ export function ContactForm({ dictionary, successMessage }: ContactFormProps) {
   const formRef = useRef<HTMLFormElement>(null)
   const formHeightRef = useRef(0)
   const [lockedHeight, setLockedHeight] = useState<number | undefined>(undefined)
+  // Checked in the browser as the visitor goes: a field is judged when they
+  // leave it (not while they're still typing it), and once it's been judged
+  // its error clears the moment the input becomes valid.
+  const [problems, setProblems] = useState<Problems>({})
+  const touchedRef = useRef(new Set<ContactField>())
   const errorMessage = state.error
     ? (dictionary.contact.errors[state.error] ?? dictionary.contact.errors['server-error'])
     : null
@@ -67,6 +102,12 @@ export function ContactForm({ dictionary, successMessage }: ContactFormProps) {
     if (state.success && formHeightRef.current > 0) {
       setLockedHeight(formHeightRef.current)
     }
+
+    // A short tap under the finger as the check appears — Android only (iOS
+    // has no web vibration), and only for this one moment that matters.
+    if (state.success) {
+      navigator.vibrate?.(12)
+    }
   }, [state.success])
 
   // Sends the visitor straight to the field that needs fixing; its
@@ -81,10 +122,83 @@ export function ContactForm({ dictionary, successMessage }: ContactFormProps) {
     }
   }, [state])
 
-  const fieldErrorProps = (field: ContactField) =>
-    state.field === field
+  const check = (field: ContactField, value: string) => {
+    const problem = contactFieldProblem(field, value)
+
+    setProblems((current) =>
+      current[field] === (problem ?? undefined)
+        ? current
+        : { ...current, [field]: problem ?? undefined },
+    )
+  }
+
+  // Leaving a field is when it's judged; typing only ever clears an error
+  // already shown (or swaps it for the right one), never raises a new one.
+  // Both read the field from the element's `name`.
+  const handleBlur = (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const field = event.currentTarget.name as ContactField
+
+    touchedRef.current.add(field)
+    check(field, event.currentTarget.value)
+  }
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const field = event.currentTarget.name as ContactField
+
+    if (touchedRef.current.has(field)) {
+      check(field, event.currentTarget.value)
+    }
+  }
+
+  // Everything still wrong at submit is shown at once, and focus goes to the
+  // first of it; the server action never runs on a form we know is invalid.
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const form = event.currentTarget
+    const found: Problems = {}
+
+    for (const field of FIELDS) {
+      const element = form.elements.namedItem(field)
+      const problem =
+        element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement
+          ? contactFieldProblem(field, element.value)
+          : null
+
+      touchedRef.current.add(field)
+
+      if (problem) {
+        found[field] = problem
+      }
+    }
+
+    setProblems(found)
+
+    const first = FIELDS.find((field) => found[field])
+
+    if (first) {
+      event.preventDefault()
+      const element = form.elements.namedItem(first)
+
+      if (element instanceof HTMLElement) {
+        element.focus()
+      }
+    }
+  }
+
+  const fieldErrorProps = (field: ContactField) => {
+    if (problems[field]) {
+      return { 'aria-describedby': `contact-${field}-error`, 'aria-invalid': true as const }
+    }
+
+    return state.field === field
       ? { 'aria-describedby': 'contact-form-error', 'aria-invalid': true as const }
       : {}
+  }
+
+  const problemMessage = (field: ContactField) => {
+    const problem = problems[field]
+
+    return problem ? dictionary.contact.fieldErrors[problem] : null
+  }
 
   return (
     <>
@@ -141,6 +255,9 @@ export function ContactForm({ dictionary, successMessage }: ContactFormProps) {
             exit={{ opacity: 0, y: -8 }}
             initial="hidden"
             key="form"
+            // Our own inline messages replace the browser's bubbles.
+            noValidate
+            onSubmit={handleSubmit}
             ref={formRef}
             variants={fieldContainerVariants}
           >
@@ -153,47 +270,62 @@ export function ContactForm({ dictionary, successMessage }: ContactFormProps) {
               autoComplete="off"
             />
             <motion.div className="grid gap-4 sm:grid-cols-2" variants={fieldVariants}>
-              <label className="block text-sm text-fg-muted">
-                <span className="mb-2 block">{dictionary.contact.formNameLabel}</span>
-                <input
-                  autoComplete="name"
-                  className={`${FIELD_CLASSNAME} rounded-full`}
-                  defaultValue={state.values?.name}
-                  maxLength={120}
-                  name="name"
-                  placeholder={dictionary.contact.formNamePlaceholder}
-                  required
-                  {...fieldErrorProps('name')}
-                />
-              </label>
-              <label className="block text-sm text-fg-muted">
-                <span className="mb-2 block">{dictionary.contact.formEmailLabel}</span>
-                <input
-                  autoComplete="email"
-                  className={`${FIELD_CLASSNAME} rounded-full`}
-                  defaultValue={state.values?.email}
-                  maxLength={254}
-                  name="email"
-                  placeholder={dictionary.contact.formEmailPlaceholder}
-                  required
-                  spellCheck={false}
-                  type="email"
-                  {...fieldErrorProps('email')}
-                />
-              </label>
+              <div>
+                <label className="block text-sm text-fg-muted">
+                  <span className="mb-2 block">{dictionary.contact.formNameLabel}</span>
+                  <input
+                    autoComplete="name"
+                    className={`${FIELD_CLASSNAME} rounded-full`}
+                    defaultValue={state.values?.name}
+                    maxLength={120}
+                    name="name"
+                    placeholder={dictionary.contact.formNamePlaceholder}
+                    required
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    {...fieldErrorProps('name')}
+                  />
+                </label>
+                <FieldError id="contact-name-error" message={problemMessage('name')} />
+              </div>
+              <div>
+                <label className="block text-sm text-fg-muted">
+                  <span className="mb-2 block">{dictionary.contact.formEmailLabel}</span>
+                  <input
+                    autoComplete="email"
+                    className={`${FIELD_CLASSNAME} rounded-full`}
+                    defaultValue={state.values?.email}
+                    maxLength={254}
+                    name="email"
+                    placeholder={dictionary.contact.formEmailPlaceholder}
+                    required
+                    spellCheck={false}
+                    type="email"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    {...fieldErrorProps('email')}
+                  />
+                </label>
+                <FieldError id="contact-email-error" message={problemMessage('email')} />
+              </div>
             </motion.div>
-            <motion.label className="block text-sm text-fg-muted" variants={fieldVariants}>
-              <span className="mb-2 block">{dictionary.contact.formMessageLabel}</span>
-              <textarea
-                className={`${FIELD_CLASSNAME} min-h-36 rounded-4xl`}
-                defaultValue={state.values?.message}
-                maxLength={5000}
-                name="message"
-                placeholder={dictionary.contact.formMessagePlaceholder}
-                required
-                {...fieldErrorProps('message')}
-              />
-            </motion.label>
+            <motion.div variants={fieldVariants}>
+              <label className="block text-sm text-fg-muted">
+                <span className="mb-2 block">{dictionary.contact.formMessageLabel}</span>
+                <textarea
+                  className={`${FIELD_CLASSNAME} min-h-36 rounded-4xl`}
+                  defaultValue={state.values?.message}
+                  maxLength={5000}
+                  name="message"
+                  placeholder={dictionary.contact.formMessagePlaceholder}
+                  required
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  {...fieldErrorProps('message')}
+                />
+              </label>
+              <FieldError id="contact-message-error" message={problemMessage('message')} />
+            </motion.div>
 
             <motion.div className="min-h-5" variants={fieldVariants}>
               {errorMessage ? (

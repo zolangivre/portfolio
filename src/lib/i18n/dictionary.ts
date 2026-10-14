@@ -34,6 +34,8 @@ export interface Dictionary {
     adjacentNavAriaLabel: string
     previousProjectLabel: string
     nextProjectLabel: string
+    /** The dots under the swipeable row of projects on phones. */
+    shelfNavLabel: string
   }
   experience: {
     eyebrow: string
@@ -75,6 +77,13 @@ export interface Dictionary {
     submitLabel: string
     sendingLabel: string
     errors: Record<string, string>
+    /** Shown under a field as soon as the visitor leaves it invalid. */
+    fieldErrors: {
+      name: string
+      email: string
+      emailFormat: string
+      message: string
+    }
   }
   journal: {
     eyebrow: string
@@ -144,6 +153,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       adjacentNavAriaLabel: 'Navigation entre les projets',
       previousProjectLabel: 'Projet précédent',
       nextProjectLabel: 'Projet suivant',
+      shelfNavLabel: 'Aller à un projet',
     },
     experience: {
       eyebrow: 'Parcours',
@@ -189,6 +199,12 @@ const dictionaries: Record<Locale, Dictionary> = {
         'missing-fields': 'Merci de renseigner tous les champs.',
         'invalid-email': 'Merci de saisir une adresse email valide.',
         'server-error': 'Une erreur est survenue. Merci de réessayer plus tard.',
+      },
+      fieldErrors: {
+        name: 'Merci d’indiquer votre nom.',
+        email: 'Merci d’indiquer votre email.',
+        emailFormat: 'Cette adresse email ne semble pas valide.',
+        message: 'Merci d’écrire votre message.',
       },
     },
     journal: {
@@ -258,6 +274,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       adjacentNavAriaLabel: 'Project navigation',
       previousProjectLabel: 'Previous project',
       nextProjectLabel: 'Next project',
+      shelfNavLabel: 'Jump to a project',
     },
     experience: {
       eyebrow: 'Background',
@@ -304,6 +321,12 @@ const dictionaries: Record<Locale, Dictionary> = {
         'missing-fields': 'Please fill in all fields.',
         'invalid-email': 'Please enter a valid email address.',
         'server-error': 'Something went wrong. Please try again later.',
+      },
+      fieldErrors: {
+        name: 'Please enter your name.',
+        email: 'Please enter your email.',
+        emailFormat: 'This email address doesn’t look right.',
+        message: 'Please write your message.',
       },
     },
     journal: {

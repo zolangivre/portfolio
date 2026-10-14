@@ -1,8 +1,9 @@
 'use server'
 
+import { EMAIL_PATTERN, type ContactField } from '@/lib/contactValidation'
 import { createMessage } from '@/lib/queries/messages'
 
-export type ContactField = 'name' | 'email' | 'message'
+export type { ContactField }
 
 export type ContactFormState = {
   error?: string
@@ -15,8 +16,6 @@ export type ContactFormState = {
    */
   values?: Record<ContactField, string>
 }
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 // Mirrors the maxLength on the Messages collection. Enforced here too so an
 // over-long value is rejected with a form error instead of surfacing as a

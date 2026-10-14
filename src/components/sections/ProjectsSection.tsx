@@ -5,6 +5,7 @@ import type { SectionCopy } from '@/lib/sectionCopy'
 import type { Project } from '@/payload-types'
 
 import { ProjectCard } from '../cards/ProjectCard'
+import { ProjectShelf } from '../ui/ProjectShelf'
 import { RevealGroup } from '../ui/RevealGroup'
 import { SectionHeader } from '../ui/SectionHeader'
 
@@ -27,11 +28,25 @@ export function ProjectsSection({ content, dictionary, locale, projects }: Proje
         />
 
         {projects.length > 0 ? (
-          <RevealGroup className="project-grid" scale={0.96}>
-            {projects.map((project) => (
-              <ProjectCard dictionary={dictionary} key={project.id} locale={locale} project={project} />
-            ))}
-          </RevealGroup>
+          // A grid from 720px; below that, a row of cards to swipe through.
+          <ProjectShelf
+            navLabel={dictionary.projects.shelfNavLabel}
+            titles={projects.map((project) => project.title)}
+          >
+            {/* amount 0.01: on the phone shelf only a sliver of the next card
+                peeks in, and it has to be visible — it's what says the row
+                goes on. */}
+            <RevealGroup amount={0.01} className="project-grid project-shelf" scale={0.96}>
+              {projects.map((project) => (
+                <ProjectCard
+                  dictionary={dictionary}
+                  key={project.id}
+                  locale={locale}
+                  project={project}
+                />
+              ))}
+            </RevealGroup>
+          </ProjectShelf>
         ) : (
           <p className="empty-state">{dictionary.projects.emptyState}</p>
         )}
