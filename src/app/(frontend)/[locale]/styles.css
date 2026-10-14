@@ -114,8 +114,13 @@ a {
    irregular, animated border-radius so the shape itself feels drawn rather
    than generated. */
 .ambient-blob {
+  /* How strongly the blobs show: in full at the top of a page (the hero),
+     and once scrolled into the content — see the recede animation below.
+     Still pages (reduced motion, no scroll timelines) sit in between. */
+  --blob-hero: 0.62;
+  --blob-rest: 0.26;
   filter: blur(90px);
-  opacity: 0.34;
+  opacity: 0.4;
   position: absolute;
   /* transform only — border-radius is static since the "breathing shape"
      was removed (see the keyframes note below). A will-change on a
@@ -125,7 +130,9 @@ a {
 }
 
 :root.dark .ambient-blob {
-  opacity: 0.22;
+  --blob-hero: 0.46;
+  --blob-rest: 0.18;
+  opacity: 0.28;
 }
 
 .ambient-blob-a {
@@ -147,41 +154,517 @@ a {
 }
 
 /*
- * The blobs move with the page instead of on a timer: as you scroll, the
- * accent blob drifts down and across from the top-left while the second
- * rises from the bottom-right, so the light seems to follow you down — and
- * when you stop, it stops. They used to loop forever (34s and 40s), moving
- * a full-viewport background even while nothing else on screen did.
+ * The hero is where the background speaks; the content is where it steps
+ * back ("dim to focus"). At the top of any page the blobs are large, close
+ * in and well lit around the opening; over the first screen of scrolling
+ * they recede — shrinking, fading and drifting out to the corners — so the
+ * sections you read sit on a calm ground. Scrolling back up brings them
+ * forward again. They don't move on their own: at rest, nothing does.
  *
- * A scroll-driven animation: progress is the root scroller's position, run
- * by the browser itself (no JS, composited — transform only, like before;
- * the blob's blur is rasterized once and only moved). Browsers without
- * scroll timelines get the still blobs, and so does reduced motion.
+ * Scroll-driven (the root scroller's first 100vh), run by the browser
+ * itself — no JS, and only opacity and transform, so the blur is rasterized
+ * once and composited. They're semi-transparent while they travel. Browsers
+ * without scroll timelines, and reduced motion, get the still middle state.
  */
-@keyframes ambient-blob-scroll-a {
+@keyframes ambient-hero-recede-a {
+  from {
+    opacity: var(--blob-hero);
+    transform: translate(10vw, 8vh) scale(1.2);
+  }
   to {
-    transform: translate(8vw, 24vh) scale(1.12) rotate(28deg);
+    opacity: var(--blob-rest);
+    transform: translate(-4vw, -6vh) scale(0.9) rotate(-12deg);
   }
 }
 
-@keyframes ambient-blob-scroll-b {
+@keyframes ambient-hero-recede-b {
+  from {
+    opacity: var(--blob-hero);
+    transform: translate(-8vw, -16vh) scale(1.18);
+  }
   to {
-    transform: translate(-10vw, -28vh) scale(1.1) rotate(-24deg);
+    opacity: var(--blob-rest);
+    transform: translate(4vw, 6vh) scale(0.9) rotate(14deg);
   }
 }
 
 @supports (animation-timeline: scroll()) {
   @media (prefers-reduced-motion: no-preference) {
-    .ambient-blob-a {
-      animation: ambient-blob-scroll-a linear both;
-      /* After the shorthand, which would reset it. */
+    .ambient-blob-a,
+    .ambient-blob-b {
+      /* Longhands throughout: the `animation` shorthand would reset the
+         timeline and range set here. */
+      animation-fill-mode: both;
+      animation-range: 0 100vh;
+      animation-timing-function: linear;
       animation-timeline: scroll(root block);
     }
 
+    .ambient-blob-a {
+      animation-name: ambient-hero-recede-a;
+    }
+
     .ambient-blob-b {
-      animation: ambient-blob-scroll-b linear both;
+      animation-name: ambient-hero-recede-b;
+    }
+  }
+}
+
+/*
+ * Section tints (AmbientBackground.tsx): as each section of the page
+ * reaches the middle of the screen, the background takes on its colour —
+ * a broad glow rising from the bottom and a softer one on the left — and
+ * cross-fades to the next section's as you go. Where you are reads at a
+ * glance, without a single label. The colours are all derived from the two
+ * accents set in the CMS, so they follow the site's palette whatever it is.
+ *
+ * Two layers take turns (only opacity animates); the gradient of a layer
+ * is only repainted while it's hidden, when it's handed the next colour.
+ */
+:root {
+  --tint-projects: var(--accent);
+  --tint-experience: var(--accent-2);
+  --tint-education: color-mix(in oklch, var(--accent), var(--accent-2));
+  --tint-skills: color-mix(in oklch, var(--accent) 70%, var(--accent-2));
+  --tint-about: color-mix(in oklch, var(--accent-2) 70%, var(--accent));
+  --tint-contact: var(--accent);
+}
+
+/* Where relative colours are supported, two sections turn the accents a
+   little around the colour wheel, for more variety than a blend gives. */
+@supports (color: oklch(from red l c h)) {
+  :root {
+    --tint-skills: oklch(from var(--accent) l c calc(h + 60));
+    --tint-about: oklch(from var(--accent-2) l c calc(h - 60));
+  }
+}
+
+.ambient-tint {
+  --tint-strength: 48%;
+  background:
+    radial-gradient(
+      90% 70% at 70% 105%,
+      color-mix(in srgb, var(--tint, transparent) var(--tint-strength), transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      55% 50% at 0% 35%,
+      color-mix(in srgb, var(--tint, transparent) calc(var(--tint-strength) * 0.6), transparent),
+      transparent 70%
+    );
+  inset: 0;
+  opacity: 0;
+  position: absolute;
+  transition: opacity 900ms var(--ease-in-out-premium);
+}
+
+:root.dark .ambient-tint {
+  --tint-strength: 36%;
+}
+
+.ambient-tint[data-on='true'] {
+  opacity: 1;
+}
+
+/* ── Photo background (PhotoBackground.tsx) ───────────────────────────
+ * The CMS photos, blurred into colour and light behind a veil of the page
+ * colour. The blur is a static filter: rasterized once per photo. Scaled up
+ * a touch so the blur's soft edges stay off screen.
+ */
+.ambient-photo {
+  background-position: center;
+  background-size: cover;
+  filter: blur(36px) saturate(135%);
+  inset: 0;
+  opacity: 0;
+  position: absolute;
+  transform: scale(1.15);
+  transition: opacity 1100ms var(--ease-in-out-premium);
+}
+
+.ambient-photo[data-on='true'] {
+  opacity: 1;
+}
+
+.ambient-photo-veil {
+  background: color-mix(in srgb, var(--bg) 58%, transparent);
+  inset: 0;
+  position: absolute;
+}
+
+:root.dark .ambient-photo-veil {
+  background: color-mix(in srgb, var(--bg) 66%, transparent);
+}
+
+@media (pointer: coarse), (pointer: none) {
+  .ambient-photo {
+    filter: blur(24px) saturate(135%);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .ambient-photo-veil {
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+  }
+}
+
+/* ── Colour blocks (ColorBlocksBackground.tsx) ─────────────────────────
+ * One flat colour per section: the accents mixed into the page colour,
+ * richer behind the top of the page, soft under reading. All close in
+ * lightness, so moving between them never jumps in brightness.
+ */
+:root {
+  --block-hero: color-mix(in oklch, var(--accent) 20%, var(--bg));
+  --block-default: color-mix(in oklch, var(--accent) 8%, var(--bg));
+  --block-projects: color-mix(in oklch, var(--tint-projects) 11%, var(--bg));
+  --block-experience: color-mix(in oklch, var(--tint-experience) 11%, var(--bg));
+  --block-education: color-mix(in oklch, var(--tint-education) 11%, var(--bg));
+  --block-skills: color-mix(in oklch, var(--tint-skills) 11%, var(--bg));
+  --block-about: color-mix(in oklch, var(--tint-about) 11%, var(--bg));
+  --block-contact: color-mix(in oklch, var(--tint-contact) 15%, var(--bg));
+}
+
+.ambient-block {
+  background-color: var(--block, var(--bg));
+  inset: 0;
+  opacity: 0;
+  position: absolute;
+  transition: opacity 900ms var(--ease-in-out-premium);
+}
+
+.ambient-block[data-on='true'] {
+  opacity: 1;
+}
+
+/* ── Spatial glass shapes (SpatialBackground.tsx) ──────────────────────
+ * Three layers, each as tall as the screen plus the distance it travels,
+ * sliding up at its own share of the scroll (--speed): far slow, near fast.
+ * Shapes are placed down each layer, so some are always in view.
+ */
+.spatial-layer {
+  height: calc(100vh + var(--scroll-max, 0) * var(--speed) * 1px);
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.spatial-layer[data-depth='far'] {
+  --speed: 0.06;
+  filter: blur(3px);
+  opacity: 0.55;
+}
+
+.spatial-layer[data-depth='mid'] {
+  --speed: 0.16;
+  filter: blur(1px);
+  opacity: 0.75;
+}
+
+.spatial-layer[data-depth='near'] {
+  --speed: 0.32;
+  opacity: 0.9;
+}
+
+/* Glass: a translucent body, a bright rim where light enters at the top
+   and a deeper tone pooling at the bottom — no gradients, just light. */
+.spatial-shape {
+  --shape-tone: var(--accent);
+  aspect-ratio: 1;
+  background: color-mix(in srgb, var(--shape-tone) 20%, transparent);
+  border: 1px solid rgb(255 255 255 / 0.5);
+  box-shadow:
+    inset 0 3px 8px rgb(255 255 255 / 0.6),
+    inset 0 -14px 28px color-mix(in srgb, var(--shape-tone) 38%, transparent),
+    0 30px 60px -30px rgb(var(--shadow-color) / 0.35);
+  position: absolute;
+  rotate: var(--shape-turn);
+}
+
+.spatial-shape[data-tone='accent-2'] {
+  --shape-tone: var(--accent-2);
+}
+
+:root.dark .spatial-shape {
+  background: color-mix(in srgb, var(--shape-tone) 16%, transparent);
+  border-color: rgb(255 255 255 / 0.12);
+  box-shadow:
+    inset 0 3px 8px rgb(255 255 255 / 0.14),
+    inset 0 -14px 28px color-mix(in srgb, var(--shape-tone) 30%, transparent),
+    0 30px 60px -30px rgb(0 0 0 / 0.6);
+}
+
+@keyframes spatial-drift {
+  to {
+    transform: translateY(calc(var(--scroll-max, 0) * var(--speed) * -1px));
+  }
+}
+
+@keyframes spatial-turn {
+  to {
+    rotate: calc(var(--shape-turn) + 30deg);
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .spatial-layer,
+    .spatial-shape {
+      animation-fill-mode: both;
+      animation-timeline: scroll(root block);
+      animation-timing-function: linear;
+    }
+
+    .spatial-layer {
+      animation-name: spatial-drift;
+    }
+
+    .spatial-shape {
+      animation-name: spatial-turn;
+    }
+  }
+}
+
+/* ── Playground (PlaygroundBackground.tsx) ─────────────────────────────
+ * Soft, solid "jelly" shapes — the only background you can touch. They
+ * fade away over the first screen of scrolling, so the content below sits
+ * on a calm page.
+ */
+.playground-layer {
+  --playground-scale: 1;
+  inset: 0;
+  position: absolute;
+}
+
+@media (max-width: 719px) {
+  .playground-layer {
+    --playground-scale: 0.6;
+  }
+}
+
+.playground-shape {
+  --shape-tone: var(--accent);
+  background: color-mix(in srgb, var(--shape-tone) 62%, var(--bg));
+  box-shadow:
+    inset 0 6px 14px rgb(255 255 255 / 0.45),
+    inset 0 -12px 22px color-mix(in srgb, var(--shape-tone) 70%, black 10%),
+    0 24px 44px -22px rgb(var(--shadow-color) / 0.45);
+  height: calc(var(--shape-size) * var(--playground-scale));
+  left: 0;
+  opacity: 0.85;
+  position: absolute;
+  top: 0;
+  width: calc(var(--shape-size) * var(--playground-scale));
+  will-change: transform;
+}
+
+.playground-shape[data-tone='accent-2'] {
+  --shape-tone: var(--accent-2);
+}
+
+:root.dark .playground-shape {
+  background: color-mix(in srgb, var(--shape-tone) 48%, var(--bg));
+  box-shadow:
+    inset 0 6px 14px rgb(255 255 255 / 0.12),
+    inset 0 -12px 22px color-mix(in srgb, var(--shape-tone) 50%, black 30%),
+    0 24px 44px -22px rgb(0 0 0 / 0.6);
+  opacity: 0.75;
+}
+
+/* No text selection while a shape is being dragged across the hero. */
+html[data-playground-grabbing] {
+  cursor: grabbing;
+  user-select: none;
+}
+
+@keyframes playground-fade {
+  to {
+    opacity: 0;
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  .playground-layer {
+    animation: playground-fade linear both;
+    animation-range: 0 70vh;
+    animation-timeline: scroll(root block);
+  }
+}
+
+/* ── Daylight (DaylightBackground.tsx) ─────────────────────────────────
+ * The light of the visitor's hour: a wash of sky colour over the page and
+ * the sun (or moon) on its arc. Hidden until the browser has read the
+ * clock, then eased in.
+ */
+[data-variant='daylight'] {
+  --sky: transparent;
+  --orb: transparent;
+  --orb-glow: transparent;
+  --sky-strength: 26%;
+}
+
+:root.dark [data-variant='daylight'] {
+  --sky-strength: 20%;
+}
+
+[data-variant='daylight'][data-phase='dawn'] {
+  --sky: #f6c3a4;
+  --orb: #ffd9b8;
+  --orb-glow: rgb(255 170 120 / 0.55);
+}
+
+[data-variant='daylight'][data-phase='morning'] {
+  --sky: #f3e3b5;
+  --orb: #fff1c9;
+  --orb-glow: rgb(255 214 120 / 0.5);
+}
+
+[data-variant='daylight'][data-phase='day'] {
+  --sky: #b9dcf3;
+  --orb: #fff8e1;
+  --orb-glow: rgb(255 236 170 / 0.55);
+}
+
+[data-variant='daylight'][data-phase='golden'] {
+  --sky: #f4b67e;
+  --orb: #ffd38a;
+  --orb-glow: rgb(255 160 70 / 0.55);
+}
+
+[data-variant='daylight'][data-phase='dusk'] {
+  --sky: #c9a3d6;
+  --orb: #ffb59a;
+  --orb-glow: rgb(240 120 140 / 0.45);
+}
+
+[data-variant='daylight'][data-phase='night'] {
+  --sky: #2b3a6b;
+  --orb: #eef1ff;
+  --orb-glow: rgb(200 210 255 / 0.35);
+  --sky-strength: 18%;
+}
+
+.daylight-sky {
+  background: color-mix(in srgb, var(--sky) var(--sky-strength), var(--bg));
+  inset: 0;
+  opacity: 0;
+  position: absolute;
+  transition: opacity 1200ms var(--ease-in-out-premium);
+}
+
+.daylight-orb {
+  background: var(--orb);
+  border-radius: 50%;
+  box-shadow:
+    0 0 60px 20px var(--orb-glow),
+    0 0 160px 60px color-mix(in srgb, var(--orb-glow) 50%, transparent);
+  height: 16vw;
+  left: var(--orb-x, 50%);
+  margin: -8vw 0 0 -8vw;
+  max-height: 220px;
+  max-width: 220px;
+  min-height: 110px;
+  min-width: 110px;
+  opacity: 0;
+  position: absolute;
+  top: var(--orb-y, 30%);
+  transition: opacity 1200ms var(--ease-in-out-premium);
+  width: 16vw;
+}
+
+/* The moon: smaller than the sun, a crescent cut by its own shadow. */
+[data-phase='night'] .daylight-orb {
+  scale: 0.6;
+  box-shadow:
+    inset -28px -10px 0 0 color-mix(in srgb, var(--sky) 60%, var(--bg)),
+    0 0 60px 10px var(--orb-glow);
+}
+
+/* A scatter of stars at night: one element, its points drawn as shadows. */
+.daylight-stars {
+  border-radius: 50%;
+  box-shadow:
+    8vw 12vh 0 0 rgb(255 255 255 / 0.7),
+    18vw 32vh 0 0 rgb(255 255 255 / 0.5),
+    27vw 8vh 0 0 rgb(255 255 255 / 0.6),
+    39vw 22vh 0 0 rgb(255 255 255 / 0.45),
+    52vw 6vh 0 0 rgb(255 255 255 / 0.7),
+    61vw 28vh 0 0 rgb(255 255 255 / 0.5),
+    70vw 44vh 0 0 rgb(255 255 255 / 0.4),
+    86vw 34vh 0 0 rgb(255 255 255 / 0.6),
+    93vw 10vh 0 0 rgb(255 255 255 / 0.5),
+    12vw 58vh 0 0 rgb(255 255 255 / 0.35),
+    44vw 64vh 0 0 rgb(255 255 255 / 0.3),
+    79vw 70vh 0 0 rgb(255 255 255 / 0.35);
+  height: 2px;
+  left: 0;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  transition: opacity 1200ms var(--ease-in-out-premium);
+  width: 2px;
+}
+
+[data-variant='daylight'][data-phase] .daylight-sky,
+[data-variant='daylight'][data-phase] .daylight-orb {
+  opacity: 1;
+}
+
+:root:not(.dark) [data-phase='night'] .daylight-stars {
+  opacity: 0.35;
+  filter: invert(0.6);
+}
+
+:root.dark [data-phase='night'] .daylight-stars {
+  opacity: 1;
+}
+
+/* The sun sinks a little, and pales, as you scroll away from the top. */
+@keyframes daylight-sink {
+  to {
+    opacity: 0.35;
+    transform: translateY(18vh);
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-variant='daylight'][data-phase] .daylight-orb {
+      animation: daylight-sink linear both;
+      animation-range: 0 100vh;
       animation-timeline: scroll(root block);
     }
+  }
+}
+
+/*
+ * Glass surfaces: cards and panels let the coloured background show through
+ * a little, so they read as panes floating over the light rather than flat
+ * white blocks. A faux glass — a translucent fill and a bright top edge
+ * where the light catches it, but no backdrop blur: a real blur under every
+ * card on the page would cost every scroll frame on a phone. At 78-80%
+ * opaque the text stays as legible as on a solid card.
+ */
+:root {
+  --glass-bg: color-mix(in srgb, var(--bg-elevated) 78%, transparent);
+  --glass-edge: inset 0 1px 0 rgb(255 255 255 / 0.65);
+}
+
+:root.dark {
+  --glass-bg: color-mix(in srgb, var(--bg-elevated) 80%, transparent);
+  --glass-edge: inset 0 1px 0 rgb(255 255 255 / 0.07);
+}
+
+.glass-surface {
+  background-color: var(--glass-bg);
+  box-shadow: var(--glass-edge), var(--shadow-rest);
+}
+
+/* Asked for less transparency or more contrast: solid surfaces. */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  :root,
+  :root.dark {
+    --glass-bg: var(--bg-elevated);
   }
 }
 
@@ -1180,10 +1663,10 @@ h3 {
 }
 
 .skill-group {
-  background: var(--bg-elevated);
+  background: var(--glass-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-group);
-  box-shadow: var(--shadow-rest);
+  box-shadow: var(--glass-edge), var(--shadow-rest);
 }
 
 /*
@@ -1553,10 +2036,10 @@ h3 {
 }
 
 .timeline-item {
-  background: var(--bg-elevated);
+  background: var(--glass-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-panel);
-  box-shadow: var(--shadow-rest);
+  box-shadow: var(--glass-edge), var(--shadow-rest);
   padding: 1.75rem;
   position: relative;
 }

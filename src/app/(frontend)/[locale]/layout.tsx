@@ -136,6 +136,11 @@ export default async function LocaleLayout(props: {
 
   const themeStyle = buildThemeStyle(settings?.theme?.primaryColor, settings?.theme?.accentColor)
   const photoUrl = getMediaUrl(settings?.photo)
+  const backgroundPhotos = (settings?.theme?.backgroundPhotos ?? []).flatMap((row) => {
+    const url = getMediaUrl(row.photo)
+
+    return url ? [url] : []
+  })
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Person',
@@ -176,7 +181,10 @@ export default async function LocaleLayout(props: {
           enableSystem
         >
           <MotionProvider>
-            <AmbientBackground />
+            <AmbientBackground
+              photos={backgroundPhotos}
+              variant={settings?.theme?.backgroundStyle}
+            />
             <CursorEffects effect={settings?.theme?.cursorEffect} />
             <CardTilt />
             <IndexRail
