@@ -740,8 +740,14 @@ a {
   height: 2.75rem;
   justify-content: center;
   position: relative;
+  transition: scale 100ms ease-out;
   width: 2.75rem;
   z-index: var(--z-drawer-toggle);
+}
+
+/* Heard on the press, not the release. */
+.nav-toggle:active {
+  scale: 0.92;
 }
 
 .nav-toggle-line {
@@ -780,7 +786,12 @@ a {
     align-items: flex-start;
     background: var(--bg-elevated);
     border-left: 1px solid var(--border);
-    box-shadow: -20px 0 60px rgb(var(--shadow-color) / 0.25);
+    /* The first shadow is a solid strip of drawer past its right edge: the
+       spring's overshoot and the rubber-band pull it left of `right: 0`, and
+       that must reveal more drawer, not the page. */
+    box-shadow:
+      4rem 0 0 var(--bg-elevated),
+      -20px 0 60px rgb(var(--shadow-color) / 0.25);
     display: flex;
     flex-direction: column;
     gap: 1.75rem;
@@ -795,22 +806,24 @@ a {
     position: fixed;
     right: 0;
     top: 0;
-    transform: translateX(100%);
-    /* Off-screen alone isn't closed: the links stayed in the tab order and
-       the accessibility tree. `visibility` takes them out, flipped only once
-       the slide-out has finished so the exit still animates. */
-    transition:
-      transform var(--duration-base) var(--ease-out-premium),
-      visibility 0s linear var(--duration-base);
-    visibility: hidden;
+    /* Vertical pans scroll the drawer natively; horizontal ones reach
+       MobileNavToggle as pointer events for swipe-to-dismiss. Position and
+       opacity are inline styles from its spring. */
+    touch-action: pan-y;
     width: min(20rem, 86vw);
     z-index: var(--z-drawer);
   }
 
-  .site-header-nav[data-open='true'] {
-    transform: translateX(0);
-    transition: transform var(--duration-base) var(--ease-out-premium);
-    visibility: visible;
+  /* Off-screen alone isn't closed: the links stayed in the tab order and
+     the accessibility tree. `visibility` takes them out, flipped by
+     MobileNavToggle only once the slide-out has finished. */
+  .site-header-nav[data-visible='false'] {
+    visibility: hidden;
+  }
+
+  /* A mouse swipe across a link would otherwise start a native link drag. */
+  .site-header-nav a {
+    -webkit-user-drag: none;
   }
 
   .site-nav {
@@ -833,19 +846,18 @@ a {
     width: 100%;
   }
 
+  /* Opacity tracks the drawer's position (inline, from MobileNavToggle),
+     so it dims in step with a drag rather than on its own timer. */
   .nav-scrim {
     background: rgb(0 0 0 / 0.4);
     display: block;
     inset: 0;
-    opacity: 0;
     pointer-events: none;
     position: fixed;
-    transition: opacity var(--duration-base) ease;
     z-index: var(--z-scrim);
   }
 
   .nav-scrim[data-open='true'] {
-    opacity: 1;
     pointer-events: auto;
   }
 
@@ -856,14 +868,18 @@ a {
   }
 }
 
+/* Above the drawer breakpoint the panel is plain inline header content;
+   the drawer's inline transform/opacity must not reach it. */
+@media (width > 880px) {
+  .site-header-nav {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .site-header-nav,
   .nav-toggle-line {
     transition: none;
-  }
-
-  .nav-scrim {
-    transition: opacity var(--duration-fast) ease;
   }
 }
 
@@ -1023,8 +1039,6 @@ h3,
 h4 {
   font-family: var(--font-display), sans-serif;
   font-weight: 700;
-  letter-spacing: -0.05em;
-  line-height: 1.1;
 }
 
 /* Not h1: every h1 here is typed in character by character, and balancing
@@ -1035,12 +1049,19 @@ h4 {
   text-wrap: balance;
 }
 
+/* Tracking and leading follow size: display sizes tighten (letters drift
+   apart as they grow), card-sized headings stay near neutral so the
+   rounded face doesn't clot, and get room to wrap onto a second line. */
 h4 {
+  letter-spacing: -0.01em;
+  line-height: 1.3;
   margin-bottom: 0.5rem;
 }
 
 h1 {
   font-size: clamp(2.7rem, 7vw, 4rem);
+  letter-spacing: -0.045em;
+  line-height: 1.05;
   margin-bottom: 1.2rem;
   /* max-width: 900px; */
 }
@@ -1058,6 +1079,7 @@ h1 {
   font-size: clamp(2.7rem, 7vw, 5.4rem);
   font-weight: 400;
   letter-spacing: -0.01em;
+  line-height: 1.1;
   max-width: 900px;
 }
 
@@ -1078,12 +1100,16 @@ h1 {
 
 h2 {
   font-size: clamp(1.8rem, 4vw, 2.8rem);
+  letter-spacing: -0.035em;
+  line-height: 1.1;
   margin-bottom: 0.95rem;
 }
 
 /* Same size as the card titles (`text-xl`), so every h3 reads as one level. */
 h3 {
   font-size: 1.25rem;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
   margin-bottom: 0.5rem;
 }
 

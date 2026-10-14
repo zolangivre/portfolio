@@ -29,6 +29,41 @@ export const springGentle = {
   mass: 1,
 } as const
 
+/*
+ * Springs in Apple's two designer parameters rather than mass/stiffness:
+ * damping ratio (overshoot) maps to `bounce = 1 − ratio`, response (how fast
+ * it gets there) to `visualDuration`. Critically damped is the default;
+ * bounce only where a flick handed the spring real momentum.
+ */
+
+/** Reposition with no overshoot — taps, toggles, anything without a throw. */
+export const springMove = {
+  type: 'spring',
+  bounce: 0,
+  visualDuration: 0.4,
+} as const
+
+/** Drawers and sheets released from a drag (Apple ships ratio 0.8, response 0.3). */
+export const springDrawer = {
+  type: 'spring',
+  bounce: 0.2,
+  visualDuration: 0.3,
+} as const
+
+/**
+ * Where a release at `velocity` (units/s) would coast to under scroll-like
+ * deceleration — Apple's projection from *Designing Fluid Interfaces*. Add
+ * it to the current position and snap to the target nearest the result.
+ */
+export function projectMomentum(velocity: number, decelerationRate = 0.998) {
+  return ((velocity / 1000) * decelerationRate) / (1 - decelerationRate)
+}
+
+/** Progressive resistance past a bound: the further out, the less it follows. */
+export function rubberband(overshoot: number, dimension: number, constant = 0.55) {
+  return (overshoot * dimension * constant) / (dimension + constant * Math.abs(overshoot))
+}
+
 export const revealTransition = {
   duration: DURATION_SLOW,
   ease: EASE_OUT_PREMIUM,

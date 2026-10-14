@@ -110,6 +110,9 @@ export function MediaGallery({
           swipe: 450,
         }}
         close={() => setIndex(-1)}
+        // The photo follows the finger down and the backdrop fades with it,
+        // so dismissing is a throw rather than a hunt for the close button.
+        controller={{ closeOnPullDown: true }}
         index={index}
         labels={{ Close: closeLabel, Next: nextLabel, Previous: previousLabel }}
         open={index >= 0}
