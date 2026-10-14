@@ -338,6 +338,25 @@ html {
     object-fit: cover;
   }
 
+  /* The lightbox's backdrop while the photo flies in (MediaGallery): its
+     blur lives here, on its own layer over the captured page, since the
+     backdrop-filter inside the capture isn't drawn in Safari. On at once —
+     the photo arrives over a page already out of focus. */
+  ::view-transition-group(lightbox-backdrop) {
+    animation: none;
+    backdrop-filter: blur(28px) saturate(140%);
+    z-index: 1;
+  }
+
+  /* Over the backdrop: the photo is the one thing in focus. */
+  ::view-transition-group(gallery-photo) {
+    z-index: 2;
+  }
+
+  ::view-transition-new(lightbox-backdrop) {
+    animation: none;
+  }
+
   @keyframes vt-fade-out {
     to {
       opacity: 0;

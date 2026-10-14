@@ -39,7 +39,7 @@ export function ContactSection({ contact, dictionary, settings }: ContactSection
           <Reveal className={cardClassName({ className: 'p-8', interactive: false })}>
             <p className="eyebrow mb-0">{dictionary.contact.reachOut}</p>
             {email ? (
-              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+              <div className="mt-4 flex flex-wrap items-center gap-x-1 gap-y-2">
                 <a
                   className="inline-flex text-xl font-semibold text-fg transition hover:text-accent"
                   href={`mailto:${email}`}
@@ -50,7 +50,6 @@ export function ContactSection({ contact, dictionary, settings }: ContactSection
                   ariaLabel={dictionary.contact.copyEmailAriaLabel}
                   copiedLabel={dictionary.contact.copiedLabel}
                   failedLabel={dictionary.contact.copyFailedLabel}
-                  label={dictionary.contact.copyLabel}
                   value={email}
                 />
               </div>

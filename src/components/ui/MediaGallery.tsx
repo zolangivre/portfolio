@@ -27,6 +27,19 @@ type GalleryImage = {
 /** The one name the open photo and its thumbnail share while one morphs into the other. */
 const MORPH_NAME = 'gallery-photo'
 
+/**
+ * The lightbox's backdrop gets a layer of its own while the photo flies in.
+ * Safari draws no backdrop-filter inside a view transition, so the page
+ * showed sharp behind the tint until the morph was over; the blur goes on
+ * that layer's group instead (globals.css), which sits over the captured
+ * page — blurred from the very first frame, in every browser.
+ */
+const BACKDROP_NAME = 'lightbox-backdrop'
+
+function lightboxBackdrop() {
+  return document.querySelector<HTMLElement>('.yarl__portal')
+}
+
 type ViewTransitionDocument = Document & {
   startViewTransition: (update: () => void | Promise<void>) => { finished: Promise<void> }
 }
@@ -138,11 +151,23 @@ export function MediaGallery({
       if (to) {
         to.style.viewTransitionName = MORPH_NAME
       }
+
+      const backdrop = lightboxBackdrop()
+
+      if (backdrop) {
+        backdrop.style.viewTransitionName = BACKDROP_NAME
+      }
     }).finally(() => {
       const to = lightboxMedia()
 
       if (to) {
         to.style.viewTransitionName = ''
+      }
+
+      const backdrop = lightboxBackdrop()
+
+      if (backdrop) {
+        backdrop.style.viewTransitionName = ''
       }
 
       setMorphing(false)
