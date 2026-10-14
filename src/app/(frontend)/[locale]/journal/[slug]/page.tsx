@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { ViewTransition } from 'react'
 
 import { AdjacentNav } from '@/components/ui/AdjacentNav'
 import { AnimatedTitle } from '@/components/ui/AnimatedTitle'
@@ -134,7 +135,8 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
         <Reveal>
           <Link
             className="link-underline text-sm font-medium text-fg-muted transition hover:text-accent"
-            href={`/${locale}/journal`}
+            // Back to this entry's own card, which the cover morphs back into.
+            href={`/${locale}/journal#entry-${entry.slug}`}
           >
             {dictionary.journal.backLabel}
           </Link>
@@ -151,8 +153,11 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
           </div>
         </Reveal>
 
+        {/* Not wrapped in <Reveal>: the card's cover lands here (named as in
+            JournalCard), and a view transition snapshots it as the page
+            commits — mid-fade, it would morph into an empty box. */}
         {imageUrl ? (
-          <Reveal delay={0.16}>
+          <ViewTransition default="none" name={`journal-media-${entry.slug}`} share="media-morph">
             <FadeImage
               alt={imageAlt}
               className="mt-8 block h-auto w-full rounded-card bg-surface"
@@ -162,7 +167,7 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
               src={imageUrl}
               width={coverImage?.width ?? 1600}
             />
-          </Reveal>
+          </ViewTransition>
         ) : null}
 
         <Divider />

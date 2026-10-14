@@ -1,10 +1,21 @@
 'use client'
 
 import Image, { type ImageProps } from 'next/image'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 export function FadeImage({ className, onLoad, ...props }: ImageProps) {
   const [loaded, setLoaded] = useState(false)
+
+  // An image already in the cache (the card it was just shown in, on the way
+  // to its page) is complete the moment it mounts: show it straight away
+  // rather than fading in something that's already there. It also has to be
+  // visible right then — a view transition snapshots the new page during the
+  // commit, and would otherwise morph a card into an empty box.
+  const ref = useCallback((image: HTMLImageElement | null) => {
+    if (image?.complete && image.naturalWidth > 0) {
+      setLoaded(true)
+    }
+  }, [])
 
   return (
     // eslint-disable-next-line jsx-a11y/alt-text -- alt is required by ImageProps and forwarded via props
@@ -15,6 +26,7 @@ export function FadeImage({ className, onLoad, ...props }: ImageProps) {
         setLoaded(true)
         onLoad?.(event)
       }}
+      ref={ref}
     />
   )
 }

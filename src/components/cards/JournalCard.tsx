@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { ViewTransition } from 'react'
 
 import { cardClassName, cardFrameClassName } from '@/components/ui/Card'
 import { Pill } from '@/components/ui/Pill'
@@ -45,7 +46,8 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
     // .card-glow's hover glow lives on an ::after — it needs an ancestor
     // without overflow-hidden (the Link below clips the cover image to its
     // rounded corners, which would clip the glow's shadow too).
-    <div className={cardFrameClassName('h-full')}>
+    // The id is where "back to the journal" on this entry's page returns to.
+    <div className={cardFrameClassName('h-full scroll-mt-28')} id={`entry-${entry.slug}`}>
       <Link
         className={cardClassName({ className: 'group flex h-full flex-col overflow-hidden' })}
         data-cursor="pointer"
@@ -53,14 +55,18 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
       >
         <div className="relative aspect-16/10 overflow-hidden bg-surface">
           {imageUrl ? (
-            <Image
-              alt={imageAlt}
-              className="h-full w-full object-cover"
-              height={640}
-              sizes="(min-width: 1024px) min(33vw, 375px), (min-width: 720px) 50vw, 100vw"
-              src={imageUrl}
-              width={960}
-            />
+            // Same name as the cover on the entry's page, which it morphs
+            // into. Rounded itself: the snapshot ignores the card's clipping.
+            <ViewTransition default="none" name={`journal-media-${entry.slug}`} share="media-morph">
+              <Image
+                alt={imageAlt}
+                className="h-full w-full rounded-t-card object-cover"
+                height={640}
+                sizes="(min-width: 1024px) min(33vw, 375px), (min-width: 720px) 50vw, 100vw"
+                src={imageUrl}
+                width={960}
+              />
+            </ViewTransition>
           ) : null}
           <div className="absolute inset-0 bg-linear-to-t from-bg/70 via-bg/5 to-transparent" />
           {categoryLabel ? (

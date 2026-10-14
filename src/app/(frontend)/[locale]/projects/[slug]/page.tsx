@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { ViewTransition } from 'react'
 
 import { AdjacentNav } from '@/components/ui/AdjacentNav'
 import { AnimatedTitle } from '@/components/ui/AnimatedTitle'
@@ -8,8 +9,9 @@ import { TechChip } from '@/components/ui/TechChip'
 import { Container } from '@/components/ui/Container'
 import { DeviceMockup } from '@/components/ui/DeviceMockup'
 import { Divider } from '@/components/ui/Divider'
-import { FadeImage } from '@/components/ui/FadeImage'
+import Image from 'next/image'
 import { MediaGallery } from '@/components/ui/MediaGallery'
+import { ProjectLogo } from '@/components/ui/ProjectLogo'
 import { Reveal } from '@/components/ui/Reveal'
 import { RichText } from '@/components/ui/RichText'
 import { getAdjacentBySlug } from '@/lib/adjacent'
@@ -91,8 +93,9 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
       ? project.coverImage.alt
       : project.title
   // The opener prefers a screenshot framed in the device the project was built
-  // for; the cover image (usually a logo) stays the fallback here and the only
-  // thing the cards ever show.
+  // for — the same device its card shows, so the two morph into each other.
+  // The cover (usually a logo) then sits next to the title; without a mockup
+  // it stays the opener, as on the card.
   const mockupFrame =
     project.mockupFrame && project.mockupFrame !== 'none' ? project.mockupFrame : null
   // Only whether there is anything to frame — DeviceMockup resolves which of
@@ -142,49 +145,84 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
       <ReadingProgress />
       <Container>
         <Reveal>
-          <Link
-            className="link-underline text-sm font-medium text-fg-muted transition hover:text-accent"
-            href={`/${locale}#projects`}
-          >
-            {dictionary.projects.backLabel}
-          </Link>
-        </Reveal>
-
-        <Reveal delay={0.08}>
-          <div>
-            {categoryLabel || project.year || statusLabel ? (
-              <p className="eyebrow mt-6">
-                {[categoryLabel, project.year, statusLabel].filter(Boolean).join(' · ')}
-              </p>
-            ) : null}
-            <AnimatedTitle title={project.title} />
-            {project.shortDescription ? (
-              <p className="text-sm font-medium uppercase tracking-label text-fg-subtle">
-                {project.shortDescription}
-              </p>
+          {/* On phones the logo can't share the title's line — the column
+              is too narrow — so it takes the free end of this one. */}
+          <div className="flex items-center justify-between gap-4">
+            <Link
+              className="link-underline text-sm font-medium text-fg-muted transition hover:text-accent"
+              // Back to this project's own card, not the top of the section:
+              // the device morphs back into it, and a card far down the grid
+              // isn't left off-screen.
+              href={`/${locale}#project-${project.slug}`}
+            >
+              {dictionary.projects.backLabel}
+            </Link>
+            {mockupFrame && mockupUrl ? (
+              <span className="sm:hidden">
+                <ProjectLogo
+                  className="h-10 max-w-32"
+                  image={project.coverImage}
+                  imageDark={project.coverImageDark}
+                  size={128}
+                />
+              </span>
             ) : null}
           </div>
         </Reveal>
 
+        <Reveal delay={0.08}>
+          {/* With a mockup as the opener, the cover — a transparent logo —
+              takes the free space to the right of the title instead (above
+              the title on phones, see the back link). */}
+          <div className="mt-6 flex items-start justify-between gap-6 sm:gap-10">
+            <div className="min-w-0 flex-1">
+              {categoryLabel || project.year || statusLabel ? (
+                <p className="eyebrow">
+                  {[categoryLabel, project.year, statusLabel].filter(Boolean).join(' · ')}
+                </p>
+              ) : null}
+              <AnimatedTitle title={project.title} />
+              {project.shortDescription ? (
+                <p className="text-sm font-medium uppercase tracking-label text-fg-subtle">
+                  {project.shortDescription}
+                </p>
+              ) : null}
+            </div>
+            {mockupFrame && mockupUrl ? (
+              <span className="hidden shrink-0 self-center sm:block">
+                <ProjectLogo
+                  className="h-24 max-w-56 lg:h-28 lg:max-w-64"
+                  image={project.coverImage}
+                  imageDark={project.coverImageDark}
+                  size={256}
+                />
+              </span>
+            ) : null}
+          </div>
+        </Reveal>
+
+        {/* Not wrapped in <Reveal>: this is where the card's device or
+            cover lands (named as in ProjectCard), and the browser snapshots
+            it the moment the page commits — mid-fade, it would morph into an
+            empty box. Plain <Image> for the cover for the same reason. */}
         {mockupFrame && mockupUrl ? (
-          <Reveal delay={0.16}>
-            <DeviceMockup
-              fallbackAlt={project.title}
-              frame={mockupFrame}
-              image={project.mockupImage}
-              imageDark={project.mockupImageDark}
-              priority
-              videoLabels={{
-                pause: dictionary.video.pauseLabel,
-                play: dictionary.video.playLabel,
-              }}
-            />
-          </Reveal>
+          <DeviceMockup
+            fallbackAlt={project.title}
+            frame={mockupFrame}
+            image={project.mockupImage}
+            imageDark={project.mockupImageDark}
+            priority
+            transitionName={`project-media-${project.slug}`}
+            videoLabels={{
+              pause: dictionary.video.pauseLabel,
+              play: dictionary.video.playLabel,
+            }}
+          />
         ) : imageUrl || darkImageUrl ? (
-          <Reveal delay={0.16}>
+          <ViewTransition default="none" name={`project-media-${project.slug}`} share="media-morph">
             <div className="relative mt-8 aspect-video overflow-hidden rounded-card bg-surface">
               {imageUrl ? (
-                <FadeImage
+                <Image
                   alt={imageAlt}
                   className={`h-full w-full object-contain${darkImageUrl ? ' dark:hidden' : ''}`}
                   height={900}
@@ -195,7 +233,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                 />
               ) : null}
               {darkImageUrl ? (
-                <FadeImage
+                <Image
                   alt={imageAlt}
                   className="hidden h-full w-full object-contain dark:block"
                   height={900}
@@ -205,7 +243,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                 />
               ) : null}
             </div>
-          </Reveal>
+          </ViewTransition>
         ) : null}
 
         <Divider />
