@@ -31,6 +31,19 @@ type AdjacentNavProps = {
   previousLabel: string
 }
 
+/*
+ * The thumbnail shares its name with that entry's card on the list page, so
+ * on any other way in or out (opening an entry from the list, going back to
+ * it) the neighbour's card would fly across the screen to this thumbnail,
+ * down at the foot of the page, on top of the cover actually opening. It
+ * only morphs on previous / next, the move it's there for.
+ */
+const THUMBNAIL_SHARE = {
+  'nav-back': 'media-morph',
+  'nav-forward': 'media-morph',
+  default: 'none',
+}
+
 type AdjacentLinkProps = {
   direction: 'previous' | 'next'
   imageFit: 'contain' | 'cover'
@@ -60,7 +73,7 @@ function AdjacentLink({ direction, imageFit, item, label }: AdjacentLinkProps) {
       >
         {item.imageUrl ? (
           item.transitionName ? (
-            <ViewTransition default="none" name={item.transitionName} share="media-morph">
+            <ViewTransition default="none" name={item.transitionName} share={THUMBNAIL_SHARE}>
               <span
                 className={`relative hidden h-16 w-16 shrink-0 overflow-hidden rounded-inset bg-surface sm:block${
                   imageFit === 'contain' ? ' p-2' : ''

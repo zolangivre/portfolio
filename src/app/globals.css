@@ -126,8 +126,31 @@
      transitions above all. Pair with --duration-spring-move, its settle
      time. TS mirror: springMove in src/lib/motion/tokens.ts. */
   --ease-spring-move: linear(
-    0, 0.051, 0.163, 0.294, 0.422, 0.537, 0.636, 0.717, 0.782, 0.834, 0.874, 0.905, 0.929,
-    0.947, 0.961, 0.971, 0.979, 0.984, 0.989, 0.992, 0.994, 0.996, 0.997, 0.998, 1
+    0,
+    0.051,
+    0.163,
+    0.294,
+    0.422,
+    0.537,
+    0.636,
+    0.717,
+    0.782,
+    0.834,
+    0.874,
+    0.905,
+    0.929,
+    0.947,
+    0.961,
+    0.971,
+    0.979,
+    0.984,
+    0.989,
+    0.992,
+    0.994,
+    0.996,
+    0.997,
+    0.998,
+    1
   );
   --duration-spring-move: 550ms;
   /* What a bare `transition` utility runs at (Tailwind's own default is
@@ -342,6 +365,13 @@ html {
        them stretches, instead of being squashed into it. */
     height: 100%;
     object-fit: cover;
+  }
+
+  /* A card whose partner on the new page won't morph (the neighbour's
+     card, when the entry it opens names it in its previous / next):
+     nothing to travel to, so it leaves in place, with the page. */
+  ::view-transition-old(.media-morph):only-child {
+    animation: vt-fade-out var(--duration-fast) ease-out both;
   }
 
   @keyframes theme-reveal {
