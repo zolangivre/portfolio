@@ -239,12 +239,39 @@ html {
 
   /* Route changes: the page itself just cross-fades, quickly, under
      whatever shared element is morphing on top of it. */
-  html:not([data-theme-transition])::view-transition-old(root) {
+  html:not([data-theme-transition], [data-gallery-transition])::view-transition-old(root) {
     animation: vt-fade-out var(--duration-fast) ease-out both;
   }
 
-  html:not([data-theme-transition])::view-transition-new(root) {
+  html:not([data-theme-transition], [data-gallery-transition])::view-transition-new(root) {
     animation: vt-fade-in var(--duration-ui) ease-out var(--duration-fast) both;
+  }
+
+  /* Opening or closing the gallery lightbox (MediaGallery): the page stays
+     as it is — the lightbox runs its own fade, live — and only the photo
+     travels between its tile and the full screen. */
+  html[data-gallery-transition]::view-transition-old(root),
+  html[data-gallery-transition]::view-transition-new(root) {
+    animation: none;
+  }
+
+  /* The header normally gets its own transition layer (see below), which
+     would float it above the lightbox opening over it. Here it stays part
+     of the page, under the lightbox, like the rest. */
+  html[data-gallery-transition] .site-header {
+    view-transition-name: none;
+  }
+
+  ::view-transition-group(gallery-photo) {
+    animation-duration: var(--duration-spring-move);
+    animation-timing-function: var(--ease-spring-move);
+  }
+
+  ::view-transition-old(gallery-photo),
+  ::view-transition-new(gallery-photo) {
+    animation-duration: var(--duration-ui);
+    height: 100%;
+    object-fit: cover;
   }
 
   @keyframes vt-fade-out {

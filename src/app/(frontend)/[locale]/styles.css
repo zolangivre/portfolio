@@ -208,21 +208,17 @@ a {
   }
 }
 
-/* Soft breathing glow behind the hero photo. */
-@keyframes hero-photo-glow {
-  0%,
-  100% {
-    opacity: 0.35;
-  }
-  50% {
-    opacity: 0.65;
-  }
+/* Soft glow behind the hero photo. It used to breathe on a 6s loop — slow
+   oscillation near 0.2 Hz is the kind that unsettles — so it now rests, and
+   brightens when the pointer is on the photo. */
+.hero-photo-glow {
+  opacity: 0.45;
+  transition: opacity var(--duration-base) var(--ease-out-premium);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  [style*='hero-photo-glow'] {
-    animation: none !important;
-    opacity: 0.45 !important;
+@media (hover: hover) and (pointer: fine) {
+  .hero-photo:hover .hero-photo-glow {
+    opacity: 0.7;
   }
 }
 
@@ -1215,6 +1211,46 @@ h3 {
     scale 100ms ease-out;
 }
 
+/*
+ * Apple TV's focus effect, driven by CardTilt.tsx: the card leans toward the
+ * pointer (inline `rotate`, seen through the frame's perspective) and a soft
+ * sheen follows it. The sheen is a 2x-size radial highlight that only ever
+ * translates — no gradient is repainted as the pointer moves.
+ */
+.card-glow:has([data-card-link]) {
+  perspective: 1200px;
+}
+
+.card-glow:has([data-card-link]) > .card-lift {
+  overflow: hidden;
+  position: relative;
+}
+
+.card-glow:has([data-card-link]) > .card-lift::before {
+  background: radial-gradient(closest-side, rgb(255 255 255 / 0.55), transparent);
+  content: '';
+  inset: -50%;
+  mix-blend-mode: soft-light;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  transition: opacity var(--duration-ui) ease;
+  translate: var(--sheen-x, 0) var(--sheen-y, 0);
+  z-index: 2;
+}
+
+.card-glow:has([data-card-link]) > .card-lift[data-tilting]::before {
+  opacity: 1;
+}
+
+/* The accent halo behind a hovered card stays flat while the card leans, so
+   the two drift apart: while it tilts, the sheen is the hover feedback and
+   the halo stays off. It still shows for keyboard focus, and on a hover
+   that doesn't tilt (reduced motion). */
+.card-glow:has(> .card-lift[data-tilting])::after {
+  opacity: 0;
+}
+
 /* The same dip for the small controls: filters, switchers, gallery tiles. */
 .category-filter-item:active,
 .language-switcher-item:active,
@@ -1381,27 +1417,6 @@ h3 {
   a.skill-card:hover .skill-card-icon,
   .skill-card:focus-visible .skill-card-icon {
     transform: none;
-  }
-}
-
-.skill-card-float {
-  animation: skill-card-float 5s ease-in-out infinite;
-  display: block;
-}
-
-@keyframes skill-card-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-3px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .skill-card-float {
-    animation: none;
   }
 }
 
@@ -1818,6 +1833,13 @@ h3 {
 
 .yarl__portal_open .yarl__slide {
   transform: scale(1);
+}
+
+/* The photo is already flying in from its tile (MediaGallery's view
+   transition) — a scale on top would land it short, then jump. */
+.yarl__portal.is-morphing .yarl__slide {
+  transform: none;
+  transition: none;
 }
 
 /* The lightbox backdrop is near-black in both themes, so its buttons must

@@ -115,14 +115,13 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
         {photoUrl ? (
           <motion.div
             animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            className="relative mt-10 lg:mt-0"
+            className="hero-photo relative mt-10 lg:mt-0"
             initial={{ opacity: 0, scale: 0.94, rotate: -2 }}
             transition={{ delay: 0.15, duration: DURATION_SLOW, ease: EASE_OUT_PREMIUM }}
           >
             <div
               aria-hidden="true"
-              className="absolute inset-x-0 -inset-y-6 -z-10 rounded-[36px] bg-accent-soft opacity-0 blur-3xl lg:-inset-6"
-              style={{ animation: 'hero-photo-glow 6s ease-in-out 0.8s infinite' }}
+              className="hero-photo-glow absolute inset-x-0 -inset-y-6 -z-10 rounded-[36px] bg-accent-soft blur-3xl lg:-inset-6"
             />
             <Image
               alt=""

@@ -11,6 +11,7 @@ import { IndexRail } from '@/components/layout/IndexRail'
 import { MotionProvider } from '@/components/providers/MotionProvider'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { AmbientBackground } from '@/components/ui/AmbientBackground'
+import { CardTilt } from '@/components/ui/CardTilt'
 import { CursorEffects } from '@/components/ui/CursorEffects'
 import { getDictionary } from '@/lib/i18n/dictionary'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
@@ -177,6 +178,7 @@ export default async function LocaleLayout(props: {
           <MotionProvider>
             <AmbientBackground />
             <CursorEffects effect={settings?.theme?.cursorEffect} />
+            <CardTilt />
             <IndexRail
               dictionary={dictionary}
               locale={locale}

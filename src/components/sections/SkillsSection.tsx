@@ -54,12 +54,11 @@ export function SkillsSection({ content, dictionary, skills }: SkillsSectionProp
               <article className="skill-group" key={category?.id ?? 'uncategorized'}>
                 <h3 className="text-fg">{category?.name ?? dictionary.skills.eyebrow}</h3>
                 <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {categorySkills.map((skill, skillIndex) => (
-                    <li
-                      className="skill-card-float"
-                      key={skill.id}
-                      style={{ animationDelay: `${(skillIndex % 5) * 0.4}s` }}
-                    >
+                  {/* No idle bobbing: a few dozen tiles drifting on a 5s loop
+                      (0.2 Hz, the rate most likely to unsettle) pulled at the
+                      eye while reading. They still answer the pointer. */}
+                  {categorySkills.map((skill) => (
+                    <li className="block" key={skill.id}>
                       <SkillCard dictionary={dictionary} skill={skill} />
                     </li>
                   ))}
