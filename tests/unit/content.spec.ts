@@ -3,7 +3,12 @@ import { describe, expect, it } from 'vitest'
 import { getAdjacentBySlug } from '@/lib/adjacent'
 import { isValidHexColor } from '@/lib/color'
 import { extractSectionKey, resolveNavHref } from '@/lib/nav'
-import { lexicalToPlainText, textToLexicalParagraphs } from '@/lib/richText'
+import {
+  lexicalToPlainText,
+  readingMinutes,
+  readingTimeLabel,
+  textToLexicalParagraphs,
+} from '@/lib/richText'
 import { resolveSectionCopy } from '@/lib/sectionCopy'
 
 describe('rich text', () => {
@@ -42,6 +47,20 @@ describe('rich text', () => {
   it('returns an empty string for missing content', () => {
     expect(lexicalToPlainText(null)).toBe('')
     expect(lexicalToPlainText(undefined)).toBe('')
+  })
+
+  it('estimates reading time at 200 words a minute, never under one', () => {
+    expect(readingMinutes(textToLexicalParagraphs('Just a few words.'))).toBe(1)
+    expect(readingMinutes(textToLexicalParagraphs(Array(1000).fill('mot').join(' ')))).toBe(5)
+    expect(readingMinutes(null)).toBeNull()
+  })
+
+  it('only labels reads of two minutes or more', () => {
+    const short = textToLexicalParagraphs('A short entry.')
+    const long = textToLexicalParagraphs(Array(600).fill('mot').join(' '))
+
+    expect(readingTimeLabel(short, '{minutes} min')).toBeNull()
+    expect(readingTimeLabel(long, '{minutes} min')).toBe('3 min')
   })
 })
 

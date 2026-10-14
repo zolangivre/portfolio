@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.3.0](https://github.com/zolangivre/portfolio/compare/v1.2.0...v1.3.0) (2026-10-14)
+
+
+### Nouveautés
+
+* add LogoLink and NavIndicator components for improved navigation ([4bd5379](https://github.com/zolangivre/portfolio/commit/4bd5379fc29ebfcbf5e41539b9d124858e79490b))
+* add multiple background styles and settings ([afb14c0](https://github.com/zolangivre/portfolio/commit/afb14c0887f416fe904a9ef129167dee2380f8b1))
+* enhance card interactions with press feedback and improved transitions ([31a51fc](https://github.com/zolangivre/portfolio/commit/31a51fc4b09aa833594abf803a78f41369f8b252))
+* enhance contact form validation and add project shelf for mobile navigation ([ccb876b](https://github.com/zolangivre/portfolio/commit/ccb876b3f568234314742e7a4b2030a2715358ab))
+* enhance MobileNavToggle with drag-to-dismiss functionality and improve animations ([c153ca9](https://github.com/zolangivre/portfolio/commit/c153ca958951f8c35e0904b975aca3dbececb373))
+* implement CardTilt for enhanced card interaction and add view transitions for gallery lightbox ([d1a7ed3](https://github.com/zolangivre/portfolio/commit/d1a7ed322ec045557ca9b71f6dfdedf7ffcd0cb6))
+* implement swipeable shelf component for mobile navigation and enhance timeline details with foldable descriptions ([6717cf5](https://github.com/zolangivre/portfolio/commit/6717cf5b365c3ef99ac47be65f5cd399a3fc5895))
+* implement view transitions for enhanced navigation experience ([1c3d870](https://github.com/zolangivre/portfolio/commit/1c3d870105c06529aedd84ead19a4711eefe3e5e))
+* optimize ambient mesh and blob animations for improved performance and responsiveness ([579be6a](https://github.com/zolangivre/portfolio/commit/579be6ac587d22541ccb6e6ba00601d2d35d1b6e))
+
+
+### Refactorisation
+
+* CSS easing function for better readability and add view transition for media morphing in AdjacentNav component ([f449bec](https://github.com/zolangivre/portfolio/commit/f449becf14c1a443c0e53b1223018102d71ff252))
+
 ## [1.2.0](https://github.com/zolangivre/portfolio/compare/v1.1.1...v1.2.0) (2026-10-12)
 
 

@@ -1,10 +1,13 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { ViewTransition } from 'react'
 
 import { cardClassName, cardFrameClassName } from '@/components/ui/Card'
+import { DeviceMockup } from '@/components/ui/DeviceMockup'
 import { Pill } from '@/components/ui/Pill'
+import { ProjectLogo } from '@/components/ui/ProjectLogo'
 import { TechChip } from '@/components/ui/TechChip'
-import { getMediaUrl } from '@/lib/media'
+import { getMediaUrl, getRelationUrl } from '@/lib/media'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
 import type { Project } from '@/payload-types'
@@ -28,44 +31,86 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
   const categoryLabel =
     typeof project.category === 'object' && project.category ? project.category.name : null
   const detailHref = `/${locale}/projects/${project.slug}`
+  // The card shows the project running in its device (same as the opener of
+  // its page, so the two morph into each other); the cover — usually a logo
+  // — only when there's no mockup, and otherwise sits by the page's title.
+  const mockupFrame =
+    project.mockupFrame && project.mockupFrame !== 'none' ? project.mockupFrame : null
+  const hasMockup = Boolean(
+    mockupFrame && (getRelationUrl(project.mockupImage) ?? getRelationUrl(project.mockupImageDark)),
+  )
+  const transitionName = `project-media-${project.slug}`
 
   return (
     // .card-glow's hover glow lives on an ::after — it needs an ancestor
     // without overflow-hidden (the article below clips the cover image to
     // its rounded corners, which would clip the glow's shadow too).
-    <div className={cardFrameClassName('h-full')}>
+    // The id is where "back to projects" on this project's page returns to.
+    <div className={cardFrameClassName('h-full scroll-mt-28')} id={`project-${project.slug}`}>
       <article
         className={cardClassName({ className: 'group flex h-full flex-col overflow-hidden' })}
         data-cursor="pointer"
       >
-        <Link className="flex flex-1 flex-col" href={detailHref}>
-          <div className="relative aspect-16/10 overflow-hidden bg-surface">
-            {imageUrl ? (
-              <Image
-                alt={imageAlt}
-                className={`h-full w-full object-contain ${darkImageUrl ? ' dark:hidden' : ''}`}
-                height={640}
-                sizes="(min-width: 1024px) min(33vw, 375px), (min-width: 720px) 50vw, 100vw"
-                src={imageUrl}
-                width={960}
+        <Link className="flex flex-1 flex-col" data-card-link href={detailHref}>
+          {mockupFrame && hasMockup ? (
+            <div className="relative aspect-16/10 overflow-hidden rounded-t-card bg-surface">
+              <DeviceMockup
+                fallbackAlt={imageAlt}
+                frame={mockupFrame}
+                image={project.mockupImage}
+                imageDark={project.mockupImageDark}
+                transitionName={transitionName}
+                variant="card"
+                videoLabels={{
+                  pause: dictionary.video.pauseLabel,
+                  play: dictionary.video.playLabel,
+                }}
               />
-            ) : null}
-            {darkImageUrl ? (
-              <Image
-                alt={imageAlt}
-                className="hidden h-full w-full object-contain dark:block"
-                height={640}
-                sizes="(min-width: 1024px) min(33vw, 375px), (min-width: 720px) 50vw, 100vw"
-                src={darkImageUrl}
-                width={960}
-              />
-            ) : null}
-            <div className="absolute inset-0 bg-linear-to-t from-bg/70 via-bg/5 to-transparent" />
-          </div>
+            </div>
+          ) : (
+            // Same name as the cover on the project page: navigating between
+            // them, the browser morphs one into the other.
+            <ViewTransition default="none" name={transitionName} share="media-morph">
+              <div className="relative aspect-16/10 overflow-hidden rounded-t-card bg-surface">
+                {imageUrl ? (
+                  <Image
+                    alt={imageAlt}
+                    className={`h-full w-full object-contain ${darkImageUrl ? ' dark:hidden' : ''}`}
+                    height={640}
+                    sizes="(min-width: 1024px) min(33vw, 375px), (min-width: 720px) 50vw, 100vw"
+                    src={imageUrl}
+                    width={960}
+                  />
+                ) : null}
+                {darkImageUrl ? (
+                  <Image
+                    alt={imageAlt}
+                    className="hidden h-full w-full object-contain dark:block"
+                    height={640}
+                    sizes="(min-width: 1024px) min(33vw, 375px), (min-width: 720px) 50vw, 100vw"
+                    src={darkImageUrl}
+                    width={960}
+                  />
+                ) : null}
+                <div className="absolute inset-0 bg-linear-to-t from-bg/70 via-bg/5 to-transparent" />
+              </div>
+            </ViewTransition>
+          )}
 
           <div className="flex flex-1 flex-col p-6 sm:p-7">
-            <div className="mb-2 flex items-start justify-between gap-3">
-              <h3 className="text-xl font-semibold text-fg">{project.title}</h3>
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+              <div className="flex min-w-0 items-center gap-3">
+                {/* The logo moves here when the media area shows the device. */}
+                {hasMockup ? (
+                  <ProjectLogo
+                    className="h-9 max-w-24 shrink-0"
+                    image={project.coverImage}
+                    imageDark={project.coverImageDark}
+                    size={96}
+                  />
+                ) : null}
+                <h3 className="mb-0 text-xl font-semibold text-fg">{project.title}</h3>
+              </div>
               {project.featured ? (
                 <Pill className="shrink-0" tone="accent">
                   {dictionary.projects.featuredBadge}

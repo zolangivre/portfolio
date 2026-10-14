@@ -1,6 +1,7 @@
 import { FadeImage } from '@/components/ui/FadeImage'
 import { Container } from '@/components/ui/Container'
-import { getMediaUrl } from '@/lib/media'
+import { getMediaUrl, placeholderProps } from '@/lib/media'
+import { Shelf } from '../ui/Shelf'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { About } from '@/payload-types'
 
@@ -41,6 +42,7 @@ export function AboutSection({ about, dictionary }: AboutSectionProps) {
             <Reveal scale={0.96}>
               <div className="relative h-64 w-full overflow-hidden rounded-card border border-border shadow-raised sm:h-96 lg:h-full lg:w-80 lg:shrink-0">
                 <FadeImage
+                  {...placeholderProps(portrait)}
                   alt=""
                   className="object-cover"
                   fill
@@ -52,16 +54,24 @@ export function AboutSection({ about, dictionary }: AboutSectionProps) {
           ) : null}
 
           {pointGroups.length > 0 ? (
-            <div className="grid flex-1 gap-4 sm:grid-cols-2">
-              {pointGroups.map((group, groupIndex) => (
-                <PointGroupCard
-                  content={group.content}
-                  delay={Math.min(groupIndex, 5) * 0.08}
-                  key={`${group.title}-${groupIndex}`}
-                  title={group.title}
-                />
-              ))}
-            </div>
+            // Side by side from 640px; on phones, swiped through. The grid
+            // lives in styles.css (.about-points): a Tailwind `grid` here
+            // would outrank the shelf's `display: flex`.
+            <Shelf
+              navLabel={dictionary.about.shelfNavLabel}
+              titles={pointGroups.map((group) => group.title)}
+            >
+              <div className="about-points shelf">
+                {pointGroups.map((group, groupIndex) => (
+                  <PointGroupCard
+                    content={group.content}
+                    delay={Math.min(groupIndex, 5) * 0.08}
+                    key={`${group.title}-${groupIndex}`}
+                    title={group.title}
+                  />
+                ))}
+              </div>
+            </Shelf>
           ) : null}
         </div>
       </Container>

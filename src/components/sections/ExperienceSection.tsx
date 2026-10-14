@@ -12,6 +12,7 @@ import type { Experience } from '@/payload-types'
 import { Reveal } from '../ui/Reveal'
 import { RichText } from '../ui/RichText'
 import { SectionHeader } from '../ui/SectionHeader'
+import { TimelineDetails } from '../ui/TimelineDetails'
 import { TimelineRail } from '../ui/TimelineRail'
 
 type ExperienceSectionProps = {
@@ -64,7 +65,7 @@ export function ExperienceSection({
                   delay={Math.min(index, 5) * 0.08}
                   key={experience.id}
                 >
-                  <article className="timeline-item card-lift">
+                  <article className="timeline-item">
                     <div className="timeline-meta">
                       <Pill tone="accent">
                         {formatDate(experience.startDate, locale, dictionary.experience.present)} –{' '}
@@ -109,7 +110,14 @@ export function ExperienceSection({
                       <p className="timeline-company mt-1 text-xs">{experience.location}</p>
                     ) : null}
                     <div className="timeline-body">
-                      <RichText content={experience.description} />
+                      {/* Folded to its opening paragraph on phones; the
+                          technologies below stay in view. */}
+                      <TimelineDetails
+                        hideLabel={dictionary.experience.hideDetailsLabel}
+                        showLabel={dictionary.experience.showDetailsLabel}
+                      >
+                        <RichText content={experience.description} />
+                      </TimelineDetails>
                       {technologies.length > 0 ? (
                         <ul
                           aria-label={`${experience.position} ${dictionary.projects.technologiesAriaLabelSuffix}`}

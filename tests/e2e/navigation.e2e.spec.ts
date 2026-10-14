@@ -64,8 +64,10 @@ test('a visitor can go from the homepage through the projects and back', async (
   await adjacent.getByRole('link', { name: new RegExp(alpha.fr) }).click()
   await expect(page).toHaveURL(`/fr/projects/${alpha.slug}`)
 
+  // Back to this project's own card, which its media morphs back into.
   await page.getByRole('link', { name: '← Retour aux projets' }).click()
-  await expect(page).toHaveURL('/fr#projects')
+  await expect(page).toHaveURL(`/fr#project-${alpha.slug}`)
+  await expect(page.locator(`#project-${alpha.slug}`)).toBeInViewport()
 })
 
 /**

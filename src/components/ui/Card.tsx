@@ -1,8 +1,9 @@
 export type CardTone = 'default' | 'accent'
 
 const TONES: Record<CardTone, { base: string; hover: string }> = {
+  // Translucent fill and lit top edge: see .glass-surface in styles.css.
   default: {
-    base: 'border-border bg-bg-elevated shadow-rest',
+    base: 'glass-surface border-border',
     hover: 'group-hover/card:border-accent-soft-border group-has-focus-visible/card:border-accent-soft-border',
   },
   accent: {

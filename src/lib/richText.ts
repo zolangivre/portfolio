@@ -71,6 +71,37 @@ function collectPlainText(node: LexicalNode, parts: string[]): void {
   }
 }
 
+/** Words per minute for reading on screen — a calm, unhurried pace. */
+const READING_WORDS_PER_MINUTE = 200
+
+/**
+ * Minutes it takes to read `content`, rounded, never under one — or null
+ * when there's nothing to read, so the caller can leave the label out.
+ */
+export function readingMinutes(content: LexicalContent | null | undefined): number | null {
+  const text = lexicalToPlainText(content)
+
+  if (!text) {
+    return null
+  }
+
+  return Math.max(1, Math.round(text.split(' ').length / READING_WORDS_PER_MINUTE))
+}
+
+/**
+ * The "{minutes} min read" label for `content`, or null when it isn't worth
+ * showing: a one-minute read is every short entry, and repeating that on
+ * each card says nothing — the label earns its place from two minutes up.
+ */
+export function readingTimeLabel(
+  content: LexicalContent | null | undefined,
+  template: string,
+): string | null {
+  const minutes = readingMinutes(content)
+
+  return minutes && minutes >= 2 ? template.replace('{minutes}', String(minutes)) : null
+}
+
 export function lexicalToPlainText(content: LexicalContent | null | undefined): string {
   if (!content?.root?.children) return ''
 

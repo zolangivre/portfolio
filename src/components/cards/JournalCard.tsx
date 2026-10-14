@@ -1,11 +1,13 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { ViewTransition } from 'react'
 
 import { cardClassName, cardFrameClassName } from '@/components/ui/Card'
 import { Pill } from '@/components/ui/Pill'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
-import { getMediaUrl } from '@/lib/media'
+import { getMediaUrl, placeholderProps } from '@/lib/media'
+import { readingTimeLabel } from '@/lib/richText'
 import type { Journal } from '@/payload-types'
 
 type JournalCardProps = {
@@ -39,28 +41,36 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
   const categoryLabel =
     typeof entry.category === 'object' && entry.category ? entry.category.name : null
   const formattedDate = dateFormatters[locale].format(new Date(entry.date))
+  const readingTime = readingTimeLabel(entry.content, dictionary.journal.readingTime)
   const tags = entry.tags ?? []
 
   return (
     // .card-glow's hover glow lives on an ::after — it needs an ancestor
     // without overflow-hidden (the Link below clips the cover image to its
     // rounded corners, which would clip the glow's shadow too).
-    <div className={cardFrameClassName('h-full')}>
+    // The id is where "back to the journal" on this entry's page returns to.
+    <div className={cardFrameClassName('h-full scroll-mt-28')} id={`entry-${entry.slug}`}>
       <Link
         className={cardClassName({ className: 'group flex h-full flex-col overflow-hidden' })}
+        data-card-link
         data-cursor="pointer"
         href={`/${locale}/journal/${entry.slug}`}
       >
         <div className="relative aspect-16/10 overflow-hidden bg-surface">
           {imageUrl ? (
-            <Image
-              alt={imageAlt}
-              className="h-full w-full object-cover"
-              height={640}
-              sizes="(min-width: 1024px) min(33vw, 375px), (min-width: 720px) 50vw, 100vw"
-              src={imageUrl}
-              width={960}
-            />
+            // Same name as the cover on the entry's page, which it morphs
+            // into. Rounded itself: the snapshot ignores the card's clipping.
+            <ViewTransition default="none" name={`journal-media-${entry.slug}`} share="media-morph">
+              <Image
+                alt={imageAlt}
+                {...placeholderProps(entry.coverImage)}
+                className="h-full w-full rounded-t-card object-cover"
+                height={640}
+                sizes="(min-width: 1024px) min(33vw, 375px), (min-width: 720px) 50vw, 100vw"
+                src={imageUrl}
+                width={960}
+              />
+            </ViewTransition>
           ) : null}
           <div className="absolute inset-0 bg-linear-to-t from-bg/70 via-bg/5 to-transparent" />
           {categoryLabel ? (
@@ -79,6 +89,7 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
           <p className="text-label uppercase text-fg-subtle">
             {formattedDate}
             {entry.location ? ` · ${entry.location}` : null}
+            {readingTime ? ` · ${readingTime}` : null}
           </p>
           <h3 className="mt-2 text-xl font-semibold text-fg">{entry.title}</h3>
           <p className="mt-3 line-clamp-3 flex-1 text-sm leading-7 text-fg-muted">

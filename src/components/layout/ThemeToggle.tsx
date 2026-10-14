@@ -6,7 +6,7 @@ import { useSyncExternalStore } from 'react'
 import { flushSync } from 'react-dom'
 
 import type { Dictionary } from '@/lib/i18n/dictionary'
-import { DURATION_UI, EASE_OUT_PREMIUM } from '@/lib/motion/tokens'
+import { springPlayful } from '@/lib/motion/tokens'
 
 type ThemeToggleProps = {
   dictionary: Dictionary
@@ -74,14 +74,29 @@ function setThemeWithTransition(
     return
   }
 
+  const root = document.documentElement
   const rect = event.currentTarget.getBoundingClientRect()
-  document.documentElement.style.setProperty('--theme-x', `${rect.left + rect.width / 2}px`)
-  document.documentElement.style.setProperty('--theme-y', `${rect.top + rect.height / 2}px`)
+  root.style.setProperty('--theme-x', `${rect.left + rect.width / 2}px`)
+  root.style.setProperty('--theme-y', `${rect.top + rect.height / 2}px`)
+  // Route changes run view transitions too; this flag keeps the circular
+  // reveal in globals.css to theme switches only.
+  // A token, not a bare flag: a quick second click skips this transition,
+  // and its `finished` must not clear the flag the new one still needs.
+  const token = String(Date.now())
+  root.dataset.themeTransition = token
   ;(
-    document as Document & { startViewTransition: (callback: () => void) => void }
-  ).startViewTransition(() => {
-    flushSync(() => setTheme(option))
-  })
+    document as Document & {
+      startViewTransition: (callback: () => void) => { finished: Promise<void> }
+    }
+  )
+    .startViewTransition(() => {
+      flushSync(() => setTheme(option))
+    })
+    .finished.finally(() => {
+      if (root.dataset.themeTransition === token) {
+        delete root.dataset.themeTransition
+      }
+    })
 }
 
 export function ThemeToggle({ dictionary }: ThemeToggleProps) {
@@ -106,7 +121,7 @@ export function ThemeToggle({ dictionary }: ThemeToggleProps) {
             <motion.span
               className="theme-toggle-active"
               layoutId="theme-toggle-active"
-              transition={{ duration: DURATION_UI, ease: EASE_OUT_PREMIUM }}
+              transition={springPlayful}
             />
           ) : null}
           <motion.span

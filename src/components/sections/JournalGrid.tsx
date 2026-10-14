@@ -1,17 +1,35 @@
 'use client'
 
+import { motion } from 'motion/react'
 import { useMemo, useState } from 'react'
 
 import { JournalCard } from '@/components/cards/JournalCard'
 import { RevealGroup } from '@/components/ui/RevealGroup'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
+import { springPlayful } from '@/lib/motion/tokens'
 import type { Category, Journal } from '@/payload-types'
 
 type JournalGridProps = {
   dictionary: Dictionary
   entries: Journal[]
   locale: Locale
+}
+
+/**
+ * The accent pill behind the active filter: one element (shared layoutId)
+ * that glides from the old choice to the new one, instead of one button
+ * going dark while another lights up.
+ */
+function ActivePill() {
+  return (
+    <motion.span
+      aria-hidden="true"
+      className="category-filter-active"
+      layoutId="journal-filter-active"
+      transition={springPlayful}
+    />
+  )
 }
 
 function resolveCategory(entry: Journal): Category | null {
@@ -56,6 +74,7 @@ export function JournalGrid({ dictionary, entries, locale }: JournalGridProps) {
             onClick={() => setActiveCategoryId(null)}
             type="button"
           >
+            {activeCategoryId === null ? <ActivePill /> : null}
             {dictionary.journal.allCategoriesLabel}
           </button>
           {categories.map((category) => (
@@ -67,6 +86,7 @@ export function JournalGrid({ dictionary, entries, locale }: JournalGridProps) {
               onClick={() => setActiveCategoryId(category.id)}
               type="button"
             >
+              {activeCategoryId === category.id ? <ActivePill /> : null}
               {category.name}
             </button>
           ))}

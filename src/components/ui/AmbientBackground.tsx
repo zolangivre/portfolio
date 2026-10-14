@@ -1,60 +1,59 @@
-'use client'
+import dynamic from 'next/dynamic'
 
-import { useEffect, useRef } from 'react'
+import type { Setting } from '@/payload-types'
 
-export function AmbientBackground() {
-  const containerRef = useRef<HTMLDivElement>(null)
+import { GradientBackground } from './background/GradientBackground'
 
-  useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const hasFinePointer = window.matchMedia('(pointer: fine)').matches
+/*
+ * One chunk per background, loaded only for the one chosen: a static import
+ * of all six would ship every variant's code — the playground's physics
+ * included — to every visitor. Still server-rendered, so nothing pops in.
+ * The default (and fallback) stays a plain import.
+ */
+const ColorBlocksBackground = dynamic(() =>
+  import('./background/ColorBlocksBackground').then((module) => module.ColorBlocksBackground),
+)
+const DaylightBackground = dynamic(() =>
+  import('./background/DaylightBackground').then((module) => module.DaylightBackground),
+)
+const PhotoBackground = dynamic(() =>
+  import('./background/PhotoBackground').then((module) => module.PhotoBackground),
+)
+const PlaygroundBackground = dynamic(() =>
+  import('./background/PlaygroundBackground').then((module) => module.PlaygroundBackground),
+)
+const SpatialBackground = dynamic(() =>
+  import('./background/SpatialBackground').then((module) => module.SpatialBackground),
+)
 
-    if (prefersReducedMotion || !hasFinePointer) {
-      return
-    }
+export type BackgroundStyle = NonNullable<NonNullable<Setting['theme']>['backgroundStyle']>
 
-    const container = containerRef.current
+type AmbientBackgroundProps = {
+  /** URLs of the photos picked in the CMS, for the photo background. */
+  photos: string[]
+  /** Settings → Thème → Fond du site. */
+  variant?: BackgroundStyle | null
+}
 
-    if (!container) {
-      return
-    }
-
-    let frame = 0
-
-    function handlePointerMove(event: PointerEvent) {
-      if (frame !== 0) {
-        return
-      }
-
-      frame = requestAnimationFrame(() => {
-        frame = 0
-        const x = (event.clientX / window.innerWidth) * 2 - 1
-        const y = (event.clientY / window.innerHeight) * 2 - 1
-        container!.style.setProperty('--pointer-x', x.toFixed(3))
-        container!.style.setProperty('--pointer-y', y.toFixed(3))
-      })
-    }
-
-    window.addEventListener('pointermove', handlePointerMove, { passive: true })
-
-    return () => {
-      if (frame !== 0) {
-        cancelAnimationFrame(frame)
-      }
-      window.removeEventListener('pointermove', handlePointerMove)
-    }
-  }, [])
-
-  return (
-    <div aria-hidden="true" className="ambient-background" ref={containerRef}>
-      <div className="ambient-mesh" />
-      <div className="ambient-parallax ambient-parallax-a">
-        <div className="ambient-blob ambient-blob-a" />
-      </div>
-      <div className="ambient-parallax ambient-parallax-b">
-        <div className="ambient-blob ambient-blob-b" />
-      </div>
-      <div className="ambient-grain" />
-    </div>
-  )
+/**
+ * The fixed layer behind every page. Which one is chosen in the CMS; each
+ * variant is its own component and its own chunk, so only the chosen one's
+ * code is sent and runs. The photo background falls back to the coloured
+ * glows until photos are added.
+ */
+export function AmbientBackground({ photos, variant }: AmbientBackgroundProps) {
+  switch (variant) {
+    case 'photo':
+      return photos.length > 0 ? <PhotoBackground photos={photos} /> : <GradientBackground />
+    case 'spatial':
+      return <SpatialBackground />
+    case 'playground':
+      return <PlaygroundBackground />
+    case 'daylight':
+      return <DaylightBackground />
+    case 'colorBlocks':
+      return <ColorBlocksBackground />
+    default:
+      return <GradientBackground />
+  }
 }

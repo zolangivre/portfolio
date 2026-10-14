@@ -9,7 +9,10 @@ type TechChipProps = {
   technology: Technology | number
 }
 
-const CHIP_CLASSNAME = pillClassName({ interactive: true })
+// Only a chip that links somewhere reacts to the pointer; a plain one stays
+// still rather than promising a click.
+const CHIP_CLASSNAME = pillClassName()
+const LINK_CHIP_CLASSNAME = pillClassName({ interactive: true })
 
 export function TechChip({ technology }: TechChipProps) {
   const isResolved = typeof technology === 'object' && technology !== null
@@ -53,7 +56,7 @@ export function TechChip({ technology }: TechChipProps) {
     <li className="flex">
       {technology.website ? (
         <a
-          className={CHIP_CLASSNAME}
+          className={LINK_CHIP_CLASSNAME}
           href={technology.website}
           rel="noreferrer"
           target="_blank"

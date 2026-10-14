@@ -196,6 +196,7 @@ export interface User {
 export interface Media {
   id: number;
   alt: string;
+  placeholder?: string | null;
   _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -750,6 +751,7 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  placeholder?: T;
   _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1098,6 +1100,19 @@ export interface Setting {
      * Curseur personnalisé affiché sur ordinateur. Automatiquement désactivé sur les écrans tactiles et pour les personnes qui préfèrent réduire les animations.
      */
     cursorEffect?: ('ring' | 'trail') | null;
+    /**
+     * L’arrière-plan de toutes les pages. Les couleurs suivent la couleur principale et la couleur secondaire. Les animations sont automatiquement réduites pour les personnes qui le demandent.
+     */
+    backgroundStyle?: ('gradient' | 'photo' | 'spatial' | 'playground' | 'daylight' | 'colorBlocks') | null;
+    /**
+     * Utilisées dans l’ordre : la première derrière le haut de page, puis une par section (la liste recommence si elle est plus courte que la page). Elles sont fortement floutées, donc une image de 1600px de large suffit.
+     */
+    backgroundPhotos?:
+      | {
+          photo?: (number | null) | Media;
+          id?: string | null;
+        }[]
+      | null;
   };
   contactEmail?: string | null;
   socialLinks?:
@@ -1511,6 +1526,13 @@ export interface SettingsSelect<T extends boolean = true> {
         accentColor?: T;
         defaultTheme?: T;
         cursorEffect?: T;
+        backgroundStyle?: T;
+        backgroundPhotos?:
+          | T
+          | {
+              photo?: T;
+              id?: T;
+            };
       };
   contactEmail?: T;
   socialLinks?:

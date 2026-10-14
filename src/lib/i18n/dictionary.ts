@@ -16,6 +16,8 @@ export interface Dictionary {
   }
   about: {
     eyebrow: string
+    /** The dots under the swipeable About cards on phones. */
+    shelfNavLabel: string
   }
   projects: {
     eyebrow: string
@@ -34,6 +36,8 @@ export interface Dictionary {
     adjacentNavAriaLabel: string
     previousProjectLabel: string
     nextProjectLabel: string
+    /** The dots under the swipeable row of projects on phones. */
+    shelfNavLabel: string
   }
   experience: {
     eyebrow: string
@@ -42,6 +46,9 @@ export interface Dictionary {
     emptyState: string
     present: string
     fallbackCompany: string
+    /** The disclosure that folds a timeline entry's details on phones. */
+    showDetailsLabel: string
+    hideDetailsLabel: string
   }
   education: {
     eyebrow: string
@@ -56,6 +63,8 @@ export interface Dictionary {
     description: string
     emptyState: string
     visitAriaLabelSuffix: string
+    /** The dots under the swipeable skill categories on phones. */
+    shelfNavLabel: string
   }
   testimonials: {
     eyebrow: string
@@ -74,7 +83,19 @@ export interface Dictionary {
     formMessagePlaceholder: string
     submitLabel: string
     sendingLabel: string
+    /** The copy button beside the contact email. */
+    copyLabel: string
+    copiedLabel: string
+    copyFailedLabel: string
+    copyEmailAriaLabel: string
     errors: Record<string, string>
+    /** Shown under a field as soon as the visitor leaves it invalid. */
+    fieldErrors: {
+      name: string
+      email: string
+      emailFormat: string
+      message: string
+    }
   }
   journal: {
     eyebrow: string
@@ -91,6 +112,8 @@ export interface Dictionary {
     previousEntryLabel: string
     nextEntryLabel: string
     tagsAriaLabel: string
+    /** "{minutes}" is replaced by the estimate. */
+    readingTime: string
   }
   lightbox: {
     closeLabel: string
@@ -120,6 +143,7 @@ const dictionaries: Record<Locale, Dictionary> = {
     },
     about: {
       eyebrow: 'À propos',
+      shelfNavLabel: 'Aller à un encadré',
     },
     projects: {
       eyebrow: 'Travaux sélectionnés',
@@ -144,6 +168,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       adjacentNavAriaLabel: 'Navigation entre les projets',
       previousProjectLabel: 'Projet précédent',
       nextProjectLabel: 'Projet suivant',
+      shelfNavLabel: 'Aller à un projet',
     },
     experience: {
       eyebrow: 'Parcours',
@@ -152,6 +177,8 @@ const dictionaries: Record<Locale, Dictionary> = {
       emptyState: 'Aucune expérience n’a encore été publiée.',
       present: 'Aujourd’hui',
       fallbackCompany: 'Entreprise',
+      showDetailsLabel: 'Voir le détail',
+      hideDetailsLabel: 'Masquer le détail',
     },
     education: {
       eyebrow: 'Formation',
@@ -167,6 +194,7 @@ const dictionaries: Record<Locale, Dictionary> = {
         'Une palette d’outils affûtée pour le développement produit moderne, du frontend au delivery.',
       emptyState: 'Aucune compétence n’a encore été publiée.',
       visitAriaLabelSuffix: '(ouvre un nouvel onglet)',
+      shelfNavLabel: 'Aller à une catégorie',
     },
     testimonials: {
       eyebrow: 'Témoignages',
@@ -185,10 +213,20 @@ const dictionaries: Record<Locale, Dictionary> = {
       formMessagePlaceholder: 'Votre message…',
       submitLabel: 'Envoyer',
       sendingLabel: 'Envoi en cours…',
+      copyLabel: 'Copier',
+      copiedLabel: 'Copié',
+      copyFailedLabel: 'Copie impossible',
+      copyEmailAriaLabel: 'Copier l’adresse email',
       errors: {
         'missing-fields': 'Merci de renseigner tous les champs.',
         'invalid-email': 'Merci de saisir une adresse email valide.',
         'server-error': 'Une erreur est survenue. Merci de réessayer plus tard.',
+      },
+      fieldErrors: {
+        name: 'Merci d’indiquer votre nom.',
+        email: 'Merci d’indiquer votre email.',
+        emailFormat: 'Cette adresse email ne semble pas valide.',
+        message: 'Merci d’écrire votre message.',
       },
     },
     journal: {
@@ -207,6 +245,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       previousEntryLabel: 'Souvenir précédent',
       nextEntryLabel: 'Souvenir suivant',
       tagsAriaLabel: 'Étiquettes',
+      readingTime: '{minutes} min de lecture',
     },
     lightbox: {
       closeLabel: 'Fermer',
@@ -234,6 +273,7 @@ const dictionaries: Record<Locale, Dictionary> = {
     },
     about: {
       eyebrow: 'About',
+      shelfNavLabel: 'Jump to a card',
     },
     projects: {
       eyebrow: 'Selected work',
@@ -258,6 +298,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       adjacentNavAriaLabel: 'Project navigation',
       previousProjectLabel: 'Previous project',
       nextProjectLabel: 'Next project',
+      shelfNavLabel: 'Jump to a project',
     },
     experience: {
       eyebrow: 'Background',
@@ -267,6 +308,8 @@ const dictionaries: Record<Locale, Dictionary> = {
       emptyState: 'No experience entries have been published yet.',
       present: 'Present',
       fallbackCompany: 'Company',
+      showDetailsLabel: 'Show details',
+      hideDetailsLabel: 'Hide details',
     },
     education: {
       eyebrow: 'Education',
@@ -282,6 +325,7 @@ const dictionaries: Record<Locale, Dictionary> = {
         'A toolkit refined for modern product development across frontend, backend, and delivery.',
       emptyState: 'No skills have been published yet.',
       visitAriaLabelSuffix: '(opens in a new tab)',
+      shelfNavLabel: 'Jump to a category',
     },
     testimonials: {
       eyebrow: 'Testimonials',
@@ -300,10 +344,20 @@ const dictionaries: Record<Locale, Dictionary> = {
       formMessagePlaceholder: 'Your message…',
       submitLabel: 'Send inquiry',
       sendingLabel: 'Sending…',
+      copyLabel: 'Copy',
+      copiedLabel: 'Copied',
+      copyFailedLabel: 'Couldn’t copy',
+      copyEmailAriaLabel: 'Copy email address',
       errors: {
         'missing-fields': 'Please fill in all fields.',
         'invalid-email': 'Please enter a valid email address.',
         'server-error': 'Something went wrong. Please try again later.',
+      },
+      fieldErrors: {
+        name: 'Please enter your name.',
+        email: 'Please enter your email.',
+        emailFormat: 'This email address doesn’t look right.',
+        message: 'Please write your message.',
       },
     },
     journal: {
@@ -321,6 +375,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       previousEntryLabel: 'Previous memory',
       nextEntryLabel: 'Next memory',
       tagsAriaLabel: 'Tags',
+      readingTime: '{minutes} min read',
     },
     lightbox: {
       closeLabel: 'Close',

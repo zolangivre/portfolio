@@ -1,3 +1,7 @@
+import Image from 'next/image'
+import { ViewTransition } from 'react'
+
+import { CardVideo } from '@/components/ui/CardVideo'
 import { FadeImage } from '@/components/ui/FadeImage'
 import { MockupVideo, type MockupVideoLabels } from '@/components/ui/MockupVideo'
 import { asMediaDoc, getMediaUrl, isVideo } from '@/lib/media'
@@ -8,10 +12,15 @@ export type MockupFrame = 'phone' | 'desktop' | 'custom'
 /** What each frame asks of the media once the page's docs are resolved. */
 type FrameProps = {
   alt: string
+  /** The small version shown inside a project card. */
+  compact?: boolean
   darkSrc: string | null
   height: number
   /** Of the media actually shown; a screen recording is played, not shown. */
   mimeType?: string | null
+  /** Blurred previews (Payload, see placeholder.ts), light and dark. */
+  placeholder?: string | null
+  darkPlaceholder?: string | null
   priority?: boolean
   src: string
   videoLabels: MockupVideoLabels
@@ -33,17 +42,45 @@ type MockupMediaProps = FrameProps & {
 function MockupMedia({
   alt,
   className,
+  compact,
+  darkPlaceholder,
   darkSrc,
   height,
   mimeType,
+  placeholder,
   priority,
   sizes,
   src,
   videoLabels,
   width,
 }: MockupMediaProps) {
-  const renderOne = (mediaSrc: string, visibility: string, isLight: boolean) =>
-    isVideo(mimeType) ? (
+  const renderOne = (mediaSrc: string, visibility: string, isLight: boolean) => {
+    const preview = isLight ? placeholder : darkPlaceholder
+    const previewProps = preview ? { blurDataURL: preview, placeholder: 'blur' as const } : {}
+
+    return compact ? (
+      // In a card: no fade (the card has its own entrance) and a recording
+      // that only plays on hover — see CardVideo.
+      isVideo(mimeType) ? (
+        <CardVideo
+          ariaLabel={alt}
+          className={`${visibility} ${className}`}
+          height={height}
+          src={mediaSrc}
+          width={width}
+        />
+      ) : (
+        <Image
+          {...previewProps}
+          alt={alt}
+          className={`${visibility} ${className}`}
+          height={height}
+          sizes={sizes}
+          src={mediaSrc}
+          width={width}
+        />
+      )
+    ) : isVideo(mimeType) ? (
       <MockupVideo
         ariaLabel={alt}
         className={className}
@@ -55,6 +92,7 @@ function MockupMedia({
       />
     ) : (
       <FadeImage
+        {...previewProps}
         alt={alt}
         className={`${visibility} ${className}`}
         height={height}
@@ -64,6 +102,7 @@ function MockupMedia({
         width={width}
       />
     )
+  }
 
   return (
     <>
@@ -123,7 +162,12 @@ function PhoneFrame(props: FrameProps) {
         >
           {/* The phone is height-driven, so its width never tracks the
               viewport: ~237px at lg, ~202px at sm, ~167px below that. */}
-          <Screen {...props} sizes="(min-width: 1024px) 240px, (min-width: 640px) 205px, 170px" />
+          <Screen
+            {...props}
+            sizes={
+              props.compact ? '110px' : '(min-width: 1024px) 240px, (min-width: 640px) 205px, 170px'
+            }
+          />
         </div>
 
         {/* No Dynamic island drawn here: a simulator capture already has one,
@@ -160,7 +204,12 @@ function DesktopFrame(props: FrameProps) {
         >
           {/* The lid is 78% of the container and the screen sits 1.7% inside
               it, so the glass is ~75vw — ~874px at the widest container. */}
-          <Screen {...props} sizes="(min-width: 1200px) 880px, 75vw" />
+          <Screen
+            {...props}
+            sizes={
+              props.compact ? '(min-width: 720px) 300px, 75vw' : '(min-width: 1200px) 880px, 75vw'
+            }
+          />
         </div>
         <span
           aria-hidden="true"
@@ -198,12 +247,22 @@ function DesktopFrame(props: FrameProps) {
  * as a PNG on a transparent background, since it sits straight on the page.
  */
 function CustomFrame(props: FrameProps) {
+  // Wrapped so the frame is one box, like the drawn devices — a view
+  // transition needs a single element to morph.
   return (
-    <MockupMedia
-      {...props}
-      className="h-auto max-h-[26rem] w-auto max-w-full object-contain sm:max-h-[32rem] lg:max-h-[38rem]"
-      sizes="(min-width: 1200px) 1160px, 100vw"
-    />
+    <div className={props.compact ? 'h-full' : undefined}>
+      <MockupMedia
+        {...props}
+        className={
+          props.compact
+            ? 'h-full w-auto max-w-full object-contain'
+            : 'h-auto max-h-[26rem] w-auto max-w-full object-contain sm:max-h-[32rem] lg:max-h-[38rem]'
+        }
+        sizes={
+          props.compact ? '(min-width: 720px) 375px, 100vw' : '(min-width: 1200px) 1160px, 100vw'
+        }
+      />
+    </div>
   )
 }
 
@@ -222,12 +281,22 @@ const FRAMES: Record<
 }
 
 type DeviceMockupProps = {
+  /**
+   * `card` fills a project card's 16/10 media box instead of opening the
+   * project page; the recording then plays on hover only.
+   */
+  variant?: 'card' | 'page'
   /** Shown when the chosen upload carries no alt of its own. */
   fallbackAlt: string
   frame: MockupFrame
   image?: MediaRelation
   imageDark?: MediaRelation
   priority?: boolean
+  /**
+   * Shared by the card and the page of one project: navigating between them,
+   * the browser morphs this device from one into the other.
+   */
+  transitionName?: string
   /** For the play/pause button a screen recording comes with. */
   videoLabels: MockupVideoLabels
 }
@@ -236,7 +305,7 @@ type DeviceMockupProps = {
  * The first screen of a project shown inside the device it was built for —
  * an iPhone for mobile apps, a MacBook for the web — instead of a logo on
  * empty space. The device sits straight on the page, with no panel behind it.
- * Cards keep the cover image; this is the detail page's opener.
+ * The page's opener, and — compact — what a project card shows.
  *
  * Takes the uploads themselves rather than pre-resolved URLs, so that a
  * project with *only* a dark mockup still gets that file's alt, mime type and
@@ -248,6 +317,8 @@ export function DeviceMockup({
   image,
   imageDark,
   priority,
+  transitionName,
+  variant = 'page',
   videoLabels,
 }: DeviceMockupProps) {
   const light = asMediaDoc(image)
@@ -263,25 +334,43 @@ export function DeviceMockup({
   }
 
   const { Component, height, width } = FRAMES[frame]
+  const compact = variant === 'card'
+
+  const device = (
+    <Component
+      alt={primary.alt || fallbackAlt}
+      compact={compact}
+      darkPlaceholder={secondary && 'placeholder' in secondary ? secondary.placeholder : null}
+      darkSrc={getMediaUrl(secondary)}
+      height={primary.height ?? height}
+      mimeType={primary.mimeType}
+      placeholder={'placeholder' in primary ? primary.placeholder : null}
+      priority={priority}
+      src={src}
+      videoLabels={videoLabels}
+      width={primary.width ?? width}
+    />
+  )
 
   return (
     <div
-      className={`relative mt-8 flex w-full items-center justify-center ${
-        frame === 'phone'
-          ? 'h-[26rem] py-4 sm:h-[32rem] sm:py-6 lg:h-[38rem] lg:py-8'
-          : 'py-2 sm:py-4'
-      }`}
+      className={
+        compact
+          ? 'absolute inset-0 flex items-center justify-center p-[6%]'
+          : `relative mt-8 flex w-full items-center justify-center ${
+              frame === 'phone'
+                ? 'h-[26rem] py-4 sm:h-[32rem] sm:py-6 lg:h-[38rem] lg:py-8'
+                : 'py-2 sm:py-4'
+            }`
+      }
     >
-      <Component
-        alt={primary.alt || fallbackAlt}
-        darkSrc={getMediaUrl(secondary)}
-        height={primary.height ?? height}
-        mimeType={primary.mimeType}
-        priority={priority}
-        src={src}
-        videoLabels={videoLabels}
-        width={primary.width ?? width}
-      />
+      {transitionName ? (
+        <ViewTransition default="none" name={transitionName} share="media-morph">
+          {device}
+        </ViewTransition>
+      ) : (
+        device
+      )}
     </div>
   )
 }

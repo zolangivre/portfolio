@@ -5,6 +5,7 @@ import {
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
 import { adminGroups } from '@/lib/adminLabels'
+import { canHavePlaceholder, makePlaceholder } from '@/lib/placeholder'
 import { withUniqueSuffix } from '@/lib/uploadFilename'
 
 export const Media: CollectionConfig = {
@@ -41,6 +42,18 @@ export const Media: CollectionConfig = {
         req.file.name = withUniqueSuffix(req.file.name)
       },
     ],
+    // A new or replaced image gets its blurred preview (see placeholder.ts),
+    // made from the uploaded file while it's still in memory. Existing
+    // images are filled in by scripts/backfill-media-placeholders.ts.
+    beforeChange: [
+      async ({ data, req }) => {
+        if (req.file?.data && canHavePlaceholder(req.file.mimetype)) {
+          data.placeholder = await makePlaceholder(req.file.data)
+        }
+
+        return data
+      },
+    ],
     afterChange: [revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },
@@ -50,6 +63,13 @@ export const Media: CollectionConfig = {
       type: 'text',
       label: 'Texte alternatif',
       required: true,
+    },
+    {
+      // Generated, never typed: the blurred preview shown while the image
+      // loads. Hidden from the editor, still returned to the site.
+      name: 'placeholder',
+      type: 'text',
+      admin: { hidden: true },
     },
   ],
   upload: {

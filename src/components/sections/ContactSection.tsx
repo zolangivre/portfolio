@@ -1,6 +1,7 @@
 import Image from 'next/image'
 
 import { cardClassName } from '@/components/ui/Card'
+import { CopyButton } from '@/components/ui/CopyButton'
 import { Container } from '@/components/ui/Container'
 import { getMediaUrl } from '@/lib/media'
 import type { Dictionary } from '@/lib/i18n/dictionary'
@@ -38,12 +39,21 @@ export function ContactSection({ contact, dictionary, settings }: ContactSection
           <Reveal className={cardClassName({ className: 'p-8', interactive: false })}>
             <p className="eyebrow mb-0">{dictionary.contact.reachOut}</p>
             {email ? (
-              <a
-                className="mt-4 inline-flex text-xl font-semibold text-fg transition hover:text-accent"
-                href={`mailto:${email}`}
-              >
-                {email}
-              </a>
+              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+                <a
+                  className="inline-flex text-xl font-semibold text-fg transition hover:text-accent"
+                  href={`mailto:${email}`}
+                >
+                  {email}
+                </a>
+                <CopyButton
+                  ariaLabel={dictionary.contact.copyEmailAriaLabel}
+                  copiedLabel={dictionary.contact.copiedLabel}
+                  failedLabel={dictionary.contact.copyFailedLabel}
+                  label={dictionary.contact.copyLabel}
+                  value={email}
+                />
+              </div>
             ) : null}
             {socialLinks.length > 0 ? (
               <div className="mt-6 flex flex-wrap gap-4 text-sm text-fg-muted">

@@ -1,246 +1,716 @@
 @layer base {
-* {
-  box-sizing: border-box;
-}
-
-:root {
-  --max-width: 1200px;
-}
-
-html {
-  -webkit-font-smoothing: antialiased;
-  /* Intentional rather than the grey default flash: a faint accent tint. */
-  -webkit-tap-highlight-color: color-mix(in srgb, var(--accent) 15%, transparent);
-}
-
-/* No double-tap-to-zoom delay on anything tappable. */
-a,
-button,
-input,
-label,
-select,
-summary,
-textarea {
-  touch-action: manipulation;
-}
-
-body {
-  line-height: 1.65;
-  margin: 0;
-  min-height: 100vh;
-}
-
-img {
-  display: block;
-  height: auto;
-  max-width: 100%;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.skip-link {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-strong);
-  border-radius: 999px;
-  color: var(--fg);
-  font-size: var(--text-caption);
-  font-weight: 600;
-  left: 1.25rem;
-  padding: 0.6rem 1.1rem;
-  position: fixed;
-  top: -4rem;
-  transition: top var(--duration-fast) ease;
-  z-index: var(--z-skip-link);
-}
-
-.skip-link:focus-visible {
-  top: 1.25rem;
-}
-
-.ambient-background {
-  bottom: 0;
-  left: 0;
-  overflow: hidden;
-  pointer-events: none;
-  position: fixed;
-  right: 0;
-  top: 0;
-  z-index: -1;
-}
-
-/* Very slow, very quiet mesh-gradient layer so the page still feels alive
-   at rest, with no pointer/scroll interaction — sits beneath the blobs. */
-.ambient-mesh {
-  animation: ambient-mesh-drift 90s ease-in-out infinite;
-  background-image:
-    radial-gradient(at 20% 30%, var(--accent) 0%, transparent 55%),
-    radial-gradient(at 80% 70%, var(--accent-2) 0%, transparent 55%),
-    radial-gradient(at 50% 100%, var(--accent) 0%, transparent 60%);
-  background-size: 140% 140%;
-  inset: 0;
-  opacity: 0.05;
-  position: absolute;
-}
-
-:root.dark .ambient-mesh {
-  opacity: 0.08;
-}
-
-@keyframes ambient-mesh-drift {
-  0%,
-  100% {
-    background-position:
-      0% 0%,
-      100% 100%,
-      50% 100%;
+  * {
+    box-sizing: border-box;
   }
-  50% {
-    background-position:
-      10% 15%,
-      85% 80%,
-      55% 90%;
-  }
-}
 
-@media (prefers-reduced-motion: reduce) {
+  :root {
+    --max-width: 1200px;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    /* Intentional rather than the grey default flash: a faint accent tint. */
+    -webkit-tap-highlight-color: color-mix(in srgb, var(--accent) 15%, transparent);
+  }
+
+  /* No double-tap-to-zoom delay on anything tappable. */
+  a,
+  button,
+  input,
+  label,
+  select,
+  summary,
+  textarea {
+    touch-action: manipulation;
+  }
+
+  body {
+    line-height: 1.65;
+    margin: 0;
+    min-height: 100vh;
+  }
+
+  img {
+    display: block;
+    height: auto;
+    max-width: 100%;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .skip-link {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    color: var(--fg);
+    font-size: var(--text-caption);
+    font-weight: 600;
+    left: 1.25rem;
+    padding: 0.6rem 1.1rem;
+    position: fixed;
+    top: -4rem;
+    transition: top var(--duration-fast) ease;
+    z-index: var(--z-skip-link);
+  }
+
+  .skip-link:focus-visible {
+    top: 1.25rem;
+  }
+
+  .ambient-background {
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
+    pointer-events: none;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: -1;
+  }
+
+  /* Very quiet mesh-gradient layer beneath the blobs. Still: it used to drift
+   on a 90s loop, but `background-position` can't be composited, so every
+   step repainted a full-viewport, three-gradient layer, forever, on every
+   page. The blobs above carry the movement now (see below). */
   .ambient-mesh {
-    animation: none;
+    background-image:
+      radial-gradient(at 20% 30%, var(--accent) 0%, transparent 55%),
+      radial-gradient(at 80% 70%, var(--accent-2) 0%, transparent 55%),
+      radial-gradient(at 50% 100%, var(--accent) 0%, transparent 60%);
+    background-size: 140% 140%;
+    inset: 0;
+    opacity: 0.05;
+    position: absolute;
   }
-}
 
-.ambient-parallax {
-  inset: 0;
-  position: absolute;
-  transition: transform var(--duration-base) var(--ease-out-premium);
-  will-change: transform;
-}
+  :root.dark .ambient-mesh {
+    opacity: 0.08;
+  }
 
-.ambient-parallax-a {
-  transform: translate3d(calc(var(--pointer-x, 0) * 26px), calc(var(--pointer-y, 0) * 26px), 0);
-}
+  .ambient-parallax {
+    inset: 0;
+    position: absolute;
+    transition: transform var(--duration-base) var(--ease-out-premium);
+    will-change: transform;
+  }
 
-.ambient-parallax-b {
-  transform: translate3d(calc(var(--pointer-x, 0) * -20px), calc(var(--pointer-y, 0) * -20px), 0);
-}
+  .ambient-parallax-a {
+    transform: translate3d(calc(var(--pointer-x, 0) * 26px), calc(var(--pointer-y, 0) * 26px), 0);
+  }
 
-/* Hand-painted blobs instead of a technical grid or perfect circles — an
+  .ambient-parallax-b {
+    transform: translate3d(calc(var(--pointer-x, 0) * -20px), calc(var(--pointer-y, 0) * -20px), 0);
+  }
+
+  /* Hand-painted blobs instead of a technical grid or perfect circles — an
    irregular, animated border-radius so the shape itself feels drawn rather
    than generated. */
-.ambient-blob {
-  filter: blur(90px);
-  opacity: 0.34;
-  position: absolute;
-  /* transform only — border-radius is static since the "breathing shape"
+  .ambient-blob {
+    /* How strongly the blobs show: in full at the top of a page (the hero),
+     and once scrolled into the content — see the recede animation below.
+     Still pages (reduced motion, no scroll timelines) sit in between. */
+    --blob-hero: 0.62;
+    --blob-rest: 0.26;
+    filter: blur(90px);
+    opacity: 0.4;
+    position: absolute;
+    /* transform only — border-radius is static since the "breathing shape"
      was removed (see the keyframes note below). A will-change on a
      property that neither animates nor composites is a permanent hint the
      compositor has to honour for nothing. */
-  will-change: transform;
-}
+    will-change: transform;
+  }
 
-:root.dark .ambient-blob {
-  opacity: 0.22;
-}
+  :root.dark .ambient-blob {
+    --blob-hero: 0.46;
+    --blob-rest: 0.18;
+    opacity: 0.28;
+  }
 
-.ambient-blob-a {
-  animation: ambient-blob-drift-a 34s ease-in-out infinite;
-  background: var(--accent);
-  border-radius: 58% 42% 65% 35% / 45% 55% 45% 55%;
-  height: 46vw;
-  left: -12vw;
-  top: -14vw;
-  width: 46vw;
-}
+  .ambient-blob-a {
+    background: var(--accent);
+    border-radius: 58% 42% 65% 35% / 45% 55% 45% 55%;
+    height: 46vw;
+    left: -12vw;
+    top: -14vw;
+    width: 46vw;
+  }
 
-.ambient-blob-b {
-  animation: ambient-blob-drift-b 40s ease-in-out infinite;
-  background: var(--accent-2);
-  border-radius: 45% 55% 40% 60% / 55% 45% 62% 38%;
-  bottom: -16vw;
-  height: 38vw;
-  right: -10vw;
-  width: 38vw;
-}
+  .ambient-blob-b {
+    background: var(--accent-2);
+    border-radius: 45% 55% 40% 60% / 55% 45% 62% 38%;
+    bottom: -16vw;
+    height: 38vw;
+    right: -10vw;
+    width: 38vw;
+  }
 
-/*
- * transform-only now — this used to also morph border-radius every frame
- * for a "breathing" shape. border-radius can't be composited, so each step
- * forced a full repaint of this blur(90px), ~46vw layer; it ran forever, on
- * every page, whether or not anything else was happening on screen. That's
- * exactly the kind of always-on repaint Safari handles noticeably worse
- * than Chrome. The blob keeps its hand-painted, asymmetric silhouette (now
- * a static border-radius above) and still drifts/scales/rotates — it just
- * no longer reshapes mid-flight.
+  /*
+ * The hero is where the background speaks; the content is where it steps
+ * back ("dim to focus"). At the top of any page the blobs are large, close
+ * in and well lit around the opening; over the first screen of scrolling
+ * they recede — shrinking, fading and drifting out to the corners — so the
+ * sections you read sit on a calm ground. Scrolling back up brings them
+ * forward again. They don't move on their own: at rest, nothing does.
+ *
+ * Scroll-driven (the root scroller's first 100vh), run by the browser
+ * itself — no JS, and only opacity and transform, so the blur is rasterized
+ * once and composited. They're semi-transparent while they travel. Browsers
+ * without scroll timelines, and reduced motion, get the still middle state.
  */
-@keyframes ambient-blob-drift-a {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1) rotate(0deg);
+  @keyframes ambient-hero-recede-a {
+    from {
+      opacity: var(--blob-hero);
+      transform: translate(10vw, 8vh) scale(1.2);
+    }
+    to {
+      opacity: var(--blob-rest);
+      transform: translate(-4vw, -6vh) scale(0.9) rotate(-12deg);
+    }
   }
-  33% {
-    transform: translate(3vw, 2vw) scale(1.06) rotate(8deg);
-  }
-  66% {
-    transform: translate(-2vw, 3vw) scale(0.97) rotate(-6deg);
-  }
-}
 
-@keyframes ambient-blob-drift-b {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1) rotate(0deg);
+  @keyframes ambient-hero-recede-b {
+    from {
+      opacity: var(--blob-hero);
+      transform: translate(-8vw, -16vh) scale(1.18);
+    }
+    to {
+      opacity: var(--blob-rest);
+      transform: translate(4vw, 6vh) scale(0.9) rotate(14deg);
+    }
   }
-  50% {
-    transform: translate(-3vw, -3vw) scale(1.08) rotate(-9deg);
-  }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .ambient-blob {
-    animation: none;
-  }
-}
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .ambient-blob-a,
+      .ambient-blob-b {
+        /* Longhands throughout: the `animation` shorthand would reset the
+         timeline and range set here. */
+        animation-fill-mode: both;
+        animation-range: 0 100vh;
+        animation-timing-function: linear;
+        animation-timeline: scroll(root block);
+      }
 
-/* Soft breathing glow behind the hero photo. */
-@keyframes hero-photo-glow {
-  0%,
-  100% {
+      .ambient-blob-a {
+        animation-name: ambient-hero-recede-a;
+      }
+
+      .ambient-blob-b {
+        animation-name: ambient-hero-recede-b;
+      }
+    }
+  }
+
+  /*
+ * Section tints (AmbientBackground.tsx): as each section of the page
+ * reaches the middle of the screen, the background takes on its colour —
+ * a broad glow rising from the bottom and a softer one on the left — and
+ * cross-fades to the next section's as you go. Where you are reads at a
+ * glance, without a single label. The colours are all derived from the two
+ * accents set in the CMS, so they follow the site's palette whatever it is.
+ *
+ * Two layers take turns (only opacity animates); the gradient of a layer
+ * is only repainted while it's hidden, when it's handed the next colour.
+ */
+  :root {
+    --tint-projects: var(--accent);
+    --tint-experience: var(--accent-2);
+    --tint-education: color-mix(in oklch, var(--accent), var(--accent-2));
+    --tint-skills: color-mix(in oklch, var(--accent) 70%, var(--accent-2));
+    --tint-about: color-mix(in oklch, var(--accent-2) 70%, var(--accent));
+    --tint-contact: var(--accent);
+  }
+
+  /* Where relative colours are supported, two sections turn the accents a
+   little around the colour wheel, for more variety than a blend gives. */
+  @supports (color: oklch(from red l c h)) {
+    :root {
+      --tint-skills: oklch(from var(--accent) l c calc(h + 60));
+      --tint-about: oklch(from var(--accent-2) l c calc(h - 60));
+    }
+  }
+
+  .ambient-tint {
+    --tint-strength: 48%;
+    background:
+      radial-gradient(
+        90% 70% at 70% 105%,
+        color-mix(in srgb, var(--tint, transparent) var(--tint-strength), transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        55% 50% at 0% 35%,
+        color-mix(in srgb, var(--tint, transparent) calc(var(--tint-strength) * 0.6), transparent),
+        transparent 70%
+      );
+    inset: 0;
+    opacity: 0;
+    position: absolute;
+    transition: opacity 900ms var(--ease-in-out-premium);
+  }
+
+  :root.dark .ambient-tint {
+    --tint-strength: 36%;
+  }
+
+  .ambient-tint[data-on='true'] {
+    opacity: 1;
+  }
+
+  /* ── Photo background (PhotoBackground.tsx) ───────────────────────────
+ * The CMS photos, blurred into colour and light behind a veil of the page
+ * colour. The blur is a static filter: rasterized once per photo. Scaled up
+ * a touch so the blur's soft edges stay off screen.
+ */
+  .ambient-photo {
+    background-position: center;
+    background-size: cover;
+    filter: blur(36px) saturate(135%);
+    inset: 0;
+    opacity: 0;
+    position: absolute;
+    transform: scale(1.15);
+    transition: opacity 1100ms var(--ease-in-out-premium);
+  }
+
+  .ambient-photo[data-on='true'] {
+    opacity: 1;
+  }
+
+  .ambient-photo-veil {
+    background: color-mix(in srgb, var(--bg) 58%, transparent);
+    inset: 0;
+    position: absolute;
+  }
+
+  :root.dark .ambient-photo-veil {
+    background: color-mix(in srgb, var(--bg) 66%, transparent);
+  }
+
+  @media (pointer: coarse), (pointer: none) {
+    .ambient-photo {
+      filter: blur(24px) saturate(135%);
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    .ambient-photo-veil {
+      background: color-mix(in srgb, var(--bg) 85%, transparent);
+    }
+  }
+
+  /* ── Colour blocks (ColorBlocksBackground.tsx) ─────────────────────────
+ * One flat colour per section: the accents mixed into the page colour,
+ * richer behind the top of the page, soft under reading. All close in
+ * lightness, so moving between them never jumps in brightness.
+ */
+  :root {
+    --block-hero: color-mix(in oklch, var(--accent) 20%, var(--bg));
+    --block-default: color-mix(in oklch, var(--accent) 8%, var(--bg));
+    --block-projects: color-mix(in oklch, var(--tint-projects) 11%, var(--bg));
+    --block-experience: color-mix(in oklch, var(--tint-experience) 11%, var(--bg));
+    --block-education: color-mix(in oklch, var(--tint-education) 11%, var(--bg));
+    --block-skills: color-mix(in oklch, var(--tint-skills) 11%, var(--bg));
+    --block-about: color-mix(in oklch, var(--tint-about) 11%, var(--bg));
+    --block-contact: color-mix(in oklch, var(--tint-contact) 15%, var(--bg));
+  }
+
+  .ambient-block {
+    background-color: var(--block, var(--bg));
+    inset: 0;
+    opacity: 0;
+    position: absolute;
+    transition: opacity 900ms var(--ease-in-out-premium);
+  }
+
+  .ambient-block[data-on='true'] {
+    opacity: 1;
+  }
+
+  /* ── Spatial glass shapes (SpatialBackground.tsx) ──────────────────────
+ * Three layers, each as tall as the screen plus the distance it travels,
+ * sliding up at its own share of the scroll (--speed): far slow, near fast.
+ * Shapes are placed down each layer, so some are always in view.
+ */
+  .spatial-layer {
+    height: calc(100vh + var(--scroll-max, 0) * var(--speed) * 1px);
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+
+  .spatial-layer[data-depth='far'] {
+    --speed: 0.06;
+    filter: blur(3px);
+    opacity: 0.55;
+  }
+
+  .spatial-layer[data-depth='mid'] {
+    --speed: 0.16;
+    filter: blur(1px);
+    opacity: 0.75;
+  }
+
+  .spatial-layer[data-depth='near'] {
+    --speed: 0.32;
+    opacity: 0.9;
+  }
+
+  /* Glass: a translucent body, a bright rim where light enters at the top
+   and a deeper tone pooling at the bottom — no gradients, just light. */
+  .spatial-shape {
+    --shape-tone: var(--accent);
+    aspect-ratio: 1;
+    background: color-mix(in srgb, var(--shape-tone) 20%, transparent);
+    border: 1px solid rgb(255 255 255 / 0.5);
+    box-shadow:
+      inset 0 3px 8px rgb(255 255 255 / 0.6),
+      inset 0 -14px 28px color-mix(in srgb, var(--shape-tone) 38%, transparent),
+      0 30px 60px -30px rgb(var(--shadow-color) / 0.35);
+    position: absolute;
+    rotate: var(--shape-turn);
+  }
+
+  .spatial-shape[data-tone='accent-2'] {
+    --shape-tone: var(--accent-2);
+  }
+
+  :root.dark .spatial-shape {
+    background: color-mix(in srgb, var(--shape-tone) 16%, transparent);
+    border-color: rgb(255 255 255 / 0.12);
+    box-shadow:
+      inset 0 3px 8px rgb(255 255 255 / 0.14),
+      inset 0 -14px 28px color-mix(in srgb, var(--shape-tone) 30%, transparent),
+      0 30px 60px -30px rgb(0 0 0 / 0.6);
+  }
+
+  @keyframes spatial-drift {
+    to {
+      transform: translateY(calc(var(--scroll-max, 0) * var(--speed) * -1px));
+    }
+  }
+
+  @keyframes spatial-turn {
+    to {
+      rotate: calc(var(--shape-turn) + 30deg);
+    }
+  }
+
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .spatial-layer,
+      .spatial-shape {
+        animation-fill-mode: both;
+        animation-timeline: scroll(root block);
+        animation-timing-function: linear;
+      }
+
+      .spatial-layer {
+        animation-name: spatial-drift;
+      }
+
+      .spatial-shape {
+        animation-name: spatial-turn;
+      }
+    }
+  }
+
+  /* ── Playground (PlaygroundBackground.tsx) ─────────────────────────────
+ * Soft, solid "jelly" shapes — the only background you can touch. They
+ * fade away over the first screen of scrolling, so the content below sits
+ * on a calm page.
+ */
+  .playground-layer {
+    --playground-scale: 1;
+    inset: 0;
+    position: absolute;
+  }
+
+  /* Phones: no free band beside the text there — the shapes sit behind it,
+   so they're smaller and faded back enough to leave the words legible. */
+  @media (max-width: 719px) {
+    .playground-layer {
+      --playground-scale: 0.6;
+    }
+
+    /* Scoped through the layer to outrank the base rules further down. */
+    .playground-layer .playground-shape,
+    :root.dark .playground-layer .playground-shape {
+      opacity: 0.35;
+    }
+  }
+
+  .playground-shape {
+    --shape-tone: var(--accent);
+    background: color-mix(in srgb, var(--shape-tone) 62%, var(--bg));
+    box-shadow:
+      inset 0 6px 14px rgb(255 255 255 / 0.45),
+      inset 0 -12px 22px color-mix(in srgb, var(--shape-tone) 70%, black 10%),
+      0 24px 44px -22px rgb(var(--shadow-color) / 0.45);
+    height: calc(var(--shape-size) * var(--playground-scale));
+    left: 0;
+    opacity: 0.85;
+    position: absolute;
+    top: 0;
+    width: calc(var(--shape-size) * var(--playground-scale));
+    will-change: transform;
+  }
+
+  .playground-shape[data-tone='accent-2'] {
+    --shape-tone: var(--accent-2);
+  }
+
+  :root.dark .playground-shape {
+    background: color-mix(in srgb, var(--shape-tone) 48%, var(--bg));
+    box-shadow:
+      inset 0 6px 14px rgb(255 255 255 / 0.12),
+      inset 0 -12px 22px color-mix(in srgb, var(--shape-tone) 50%, black 30%),
+      0 24px 44px -22px rgb(0 0 0 / 0.6);
+    opacity: 0.75;
+  }
+
+  /* A page's own playground (the 404's) replaces the site-wide one while
+   it's on screen, rather than stacking a second set of shapes. */
+  body:has(.playground-layer[data-local]) .playground-layer:not([data-local]) {
+    visibility: hidden;
+  }
+
+  /* No text selection while a shape is being dragged across the hero. */
+  html[data-playground-grabbing] {
+    cursor: grabbing;
+    user-select: none;
+  }
+
+  @keyframes playground-fade {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .playground-layer {
+      animation: playground-fade linear both;
+      animation-range: 0 70vh;
+      animation-timeline: scroll(root block);
+    }
+  }
+
+  /* ── Daylight (DaylightBackground.tsx) ─────────────────────────────────
+ * The light of the visitor's hour: a wash of sky colour over the page and
+ * the sun (or moon) on its arc. Hidden until the browser has read the
+ * clock, then eased in.
+ */
+  [data-variant='daylight'] {
+    --sky: transparent;
+    --orb: transparent;
+    --orb-glow: transparent;
+    --sky-strength: 26%;
+  }
+
+  :root.dark [data-variant='daylight'] {
+    --sky-strength: 20%;
+  }
+
+  [data-variant='daylight'][data-phase='dawn'] {
+    --sky: #f6c3a4;
+    --orb: #ffd9b8;
+    --orb-glow: rgb(255 170 120 / 0.55);
+  }
+
+  [data-variant='daylight'][data-phase='morning'] {
+    --sky: #f3e3b5;
+    --orb: #fff1c9;
+    --orb-glow: rgb(255 214 120 / 0.5);
+  }
+
+  [data-variant='daylight'][data-phase='day'] {
+    --sky: #b9dcf3;
+    --orb: #fff8e1;
+    --orb-glow: rgb(255 236 170 / 0.55);
+  }
+
+  [data-variant='daylight'][data-phase='golden'] {
+    --sky: #f4b67e;
+    --orb: #ffd38a;
+    --orb-glow: rgb(255 160 70 / 0.55);
+  }
+
+  [data-variant='daylight'][data-phase='dusk'] {
+    --sky: #c9a3d6;
+    --orb: #ffb59a;
+    --orb-glow: rgb(240 120 140 / 0.45);
+  }
+
+  [data-variant='daylight'][data-phase='night'] {
+    --sky: #2b3a6b;
+    --orb: #eef1ff;
+    --orb-glow: rgb(200 210 255 / 0.35);
+    --sky-strength: 18%;
+  }
+
+  .daylight-sky {
+    background: color-mix(in srgb, var(--sky) var(--sky-strength), var(--bg));
+    inset: 0;
+    opacity: 0;
+    position: absolute;
+    transition: opacity 1200ms var(--ease-in-out-premium);
+  }
+
+  .daylight-orb {
+    background: var(--orb);
+    border-radius: 50%;
+    box-shadow:
+      0 0 60px 20px var(--orb-glow),
+      0 0 160px 60px color-mix(in srgb, var(--orb-glow) 50%, transparent);
+    height: 16vw;
+    left: var(--orb-x, 50%);
+    margin: -8vw 0 0 -8vw;
+    max-height: 220px;
+    max-width: 220px;
+    min-height: 110px;
+    min-width: 110px;
+    opacity: 0;
+    position: absolute;
+    top: var(--orb-y, 30%);
+    transition: opacity 1200ms var(--ease-in-out-premium);
+    width: 16vw;
+  }
+
+  /* The moon: smaller than the sun, a crescent cut by its own shadow. */
+  [data-phase='night'] .daylight-orb {
+    scale: 0.6;
+    box-shadow:
+      inset -28px -10px 0 0 color-mix(in srgb, var(--sky) 60%, var(--bg)),
+      0 0 60px 10px var(--orb-glow);
+  }
+
+  /* A scatter of stars at night: one element, its points drawn as shadows. */
+  .daylight-stars {
+    border-radius: 50%;
+    box-shadow:
+      8vw 12vh 0 0 rgb(255 255 255 / 0.7),
+      18vw 32vh 0 0 rgb(255 255 255 / 0.5),
+      27vw 8vh 0 0 rgb(255 255 255 / 0.6),
+      39vw 22vh 0 0 rgb(255 255 255 / 0.45),
+      52vw 6vh 0 0 rgb(255 255 255 / 0.7),
+      61vw 28vh 0 0 rgb(255 255 255 / 0.5),
+      70vw 44vh 0 0 rgb(255 255 255 / 0.4),
+      86vw 34vh 0 0 rgb(255 255 255 / 0.6),
+      93vw 10vh 0 0 rgb(255 255 255 / 0.5),
+      12vw 58vh 0 0 rgb(255 255 255 / 0.35),
+      44vw 64vh 0 0 rgb(255 255 255 / 0.3),
+      79vw 70vh 0 0 rgb(255 255 255 / 0.35);
+    height: 2px;
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    transition: opacity 1200ms var(--ease-in-out-premium);
+    width: 2px;
+  }
+
+  [data-variant='daylight'][data-phase] .daylight-sky,
+  [data-variant='daylight'][data-phase] .daylight-orb {
+    opacity: 1;
+  }
+
+  :root:not(.dark) [data-phase='night'] .daylight-stars {
     opacity: 0.35;
+    filter: invert(0.6);
   }
-  50% {
-    opacity: 0.65;
+
+  :root.dark [data-phase='night'] .daylight-stars {
+    opacity: 1;
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  [style*='hero-photo-glow'] {
-    animation: none !important;
-    opacity: 0.45 !important;
+  /* The sun sinks a little, and pales, as you scroll away from the top. */
+  @keyframes daylight-sink {
+    to {
+      opacity: 0.35;
+      transform: translateY(18vh);
+    }
   }
-}
 
-.ambient-grain {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 180px 180px;
-  inset: -10%;
-  mix-blend-mode: overlay;
-  opacity: 0.05;
-  position: absolute;
-}
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      [data-variant='daylight'][data-phase] .daylight-orb {
+        animation: daylight-sink linear both;
+        animation-range: 0 100vh;
+        animation-timeline: scroll(root block);
+      }
+    }
+  }
 
-:root.dark .ambient-grain {
-  mix-blend-mode: soft-light;
-  opacity: 0.09;
-}
+  /*
+ * Glass surfaces: cards and panels let the coloured background show through
+ * a little, so they read as panes floating over the light rather than flat
+ * white blocks. A faux glass — a translucent fill and a bright top edge
+ * where the light catches it, but no backdrop blur: a real blur under every
+ * card on the page would cost every scroll frame on a phone. At 78-80%
+ * opaque the text stays as legible as on a solid card.
+ */
+  :root {
+    --glass-bg: color-mix(in srgb, var(--bg-elevated) 78%, transparent);
+    --glass-edge: inset 0 1px 0 rgb(255 255 255 / 0.65);
+  }
 
-/*
+  :root.dark {
+    --glass-bg: color-mix(in srgb, var(--bg-elevated) 80%, transparent);
+    --glass-edge: inset 0 1px 0 rgb(255 255 255 / 0.07);
+  }
+
+  .glass-surface {
+    background-color: var(--glass-bg);
+    box-shadow: var(--glass-edge), var(--shadow-rest);
+  }
+
+  /* Asked for less transparency or more contrast: solid surfaces. */
+  @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    :root,
+    :root.dark {
+      --glass-bg: var(--bg-elevated);
+    }
+  }
+
+  /* Soft glow behind the hero photo. It used to breathe on a 6s loop — slow
+   oscillation near 0.2 Hz is the kind that unsettles — so it now rests, and
+   brightens when the pointer is on the photo. */
+  .hero-photo-glow {
+    opacity: 0.45;
+    transition: opacity var(--duration-base) var(--ease-out-premium);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .hero-photo:hover .hero-photo-glow {
+      opacity: 0.7;
+    }
+  }
+
+  .ambient-grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+    inset: -10%;
+    mix-blend-mode: overlay;
+    opacity: 0.05;
+    position: absolute;
+  }
+
+  :root.dark .ambient-grain {
+    mix-blend-mode: soft-light;
+    opacity: 0.09;
+  }
+
+  /*
  * Touch devices get the still version of the decor.
  *
  * Only the pointer parallax was gated on `(pointer: fine)` (in
@@ -251,41 +721,35 @@ a {
  *
  * The grain is almost all of it: `mix-blend-mode` over the full viewport
  * makes the compositor re-blend everything underneath on every frame
- * anything below it repaints. The mesh is the thing that keeps making it
- * repaint — `background-position` can't be composited, so each step of its
- * 90s loop repaints a full-viewport, three-gradient layer, forever, on
- * every page.
+ * anything below it repaints. (The mesh's 90s loop, which kept making it
+ * repaint, is gone everywhere now — see .ambient-mesh.)
  *
  * `(pointer: coarse), (pointer: none)` rather than `not (pointer: fine)`:
  * the comma form is the plainly-supported spelling everywhere `pointer`
  * exists, and a browser that doesn't know the feature at all just keeps
  * today's behaviour instead of dropping the block.
  */
-@media (pointer: coarse), (pointer: none) {
-  .ambient-grain {
-    display: none;
-  }
+  @media (pointer: coarse), (pointer: none) {
+    .ambient-grain {
+      display: none;
+    }
 
-  .ambient-mesh {
-    animation: none;
-  }
-
-  /* The blobs stay — they're the signature of this background, and at phone
+    /* The blobs stay — they're the signature of this background, and at phone
      widths they're cheap (46vw is ~190px there). Only the blur radius comes
      down: a 90px blur is far wider than the shape it's softening at that
      size, so 55px looks the same and rasterizes a much smaller kernel. */
-  .ambient-blob {
-    filter: blur(55px);
+    .ambient-blob {
+      filter: blur(55px);
+    }
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .ambient-parallax {
-    transition: none;
+  @media (prefers-reduced-motion: reduce) {
+    .ambient-parallax {
+      transition: none;
+    }
   }
-}
 
-/*
+  /*
  * `cursor` is an inherited property, so setting it once on the root hides
  * the OS cursor for the whole document. This used to be `:root * {}`, whose
  * universal rightmost selector has to be evaluated against every element on
@@ -296,81 +760,81 @@ a {
  * .nav-toggle, .category-filter-item, .media-gallery-item) plus Tailwind's
  * disabled:cursor-not-allowed on the contact form's submit button.
  */
-:root.has-custom-cursor,
-:root.has-custom-cursor a,
-:root.has-custom-cursor button,
-:root.has-custom-cursor input,
-:root.has-custom-cursor textarea,
-:root.has-custom-cursor select,
-:root.has-custom-cursor summary,
-:root.has-custom-cursor [contenteditable] {
-  cursor: none;
-}
+  :root.has-custom-cursor,
+  :root.has-custom-cursor a,
+  :root.has-custom-cursor button,
+  :root.has-custom-cursor input,
+  :root.has-custom-cursor textarea,
+  :root.has-custom-cursor select,
+  :root.has-custom-cursor summary,
+  :root.has-custom-cursor [contenteditable] {
+    cursor: none;
+  }
 
-/* Above the lightbox portal, which sits at z-index 9999. */
-.cursor-dot,
-.cursor-ring {
-  left: 0;
-  opacity: 0;
-  pointer-events: none;
-  position: fixed;
-  top: 0;
-  will-change: transform;
-  z-index: var(--z-cursor);
-}
+  /* Above the lightbox portal, which sits at z-index 9999. */
+  .cursor-dot,
+  .cursor-ring {
+    left: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: fixed;
+    top: 0;
+    will-change: transform;
+    z-index: var(--z-cursor);
+  }
 
-.cursor-dot.is-visible,
-.cursor-ring.is-visible {
-  opacity: 1;
-}
+  .cursor-dot.is-visible,
+  .cursor-ring.is-visible {
+    opacity: 1;
+  }
 
-.cursor-dot {
-  background: var(--accent);
-  border-radius: 999px;
-  height: 7px;
-  margin: -3.5px 0 0 -3.5px;
-  transition: opacity var(--duration-fast) ease;
-  width: 7px;
-}
+  .cursor-dot {
+    background: var(--accent);
+    border-radius: 999px;
+    height: 7px;
+    margin: -3.5px 0 0 -3.5px;
+    transition: opacity var(--duration-fast) ease;
+    width: 7px;
+  }
 
-.cursor-dot.is-hovering {
-  opacity: 0;
-}
+  .cursor-dot.is-hovering {
+    opacity: 0;
+  }
 
-.cursor-ring {
-  /* Position, direction-of-travel rotation and speed-based stretch are all
+  .cursor-ring {
+    /* Position, direction-of-travel rotation and speed-based stretch are all
      written as one combined transform string from CustomCursor.tsx's rAF
      loop; ::before below only handles the hover/press scale + glow, which
      can stay a CSS transition since it's driven by class toggles. */
-  height: 34px;
-  margin: -17px 0 0 -17px;
-  width: 34px;
-}
+    height: 34px;
+    margin: -17px 0 0 -17px;
+    width: 34px;
+  }
 
-.cursor-ring::before {
-  border: 1.5px solid var(--accent);
-  border-radius: 999px;
-  content: '';
-  inset: 0;
-  position: absolute;
-  transform: scale(1);
-  transition:
-    transform var(--duration-fast) var(--ease-out-premium),
-    background-color var(--duration-fast) ease,
-    border-color var(--duration-fast) ease;
-}
+  .cursor-ring::before {
+    border: 1.5px solid var(--accent);
+    border-radius: 999px;
+    content: '';
+    inset: 0;
+    position: absolute;
+    transform: scale(1);
+    transition:
+      transform var(--duration-fast) var(--ease-out-premium),
+      background-color var(--duration-fast) ease,
+      border-color var(--duration-fast) ease;
+  }
 
-.cursor-ring.is-hovering::before {
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
-  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-  transform: scale(var(--cursor-hover-scale, 1.55));
-}
+  .cursor-ring.is-hovering::before {
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+    transform: scale(var(--cursor-hover-scale, 1.55));
+  }
 
-.cursor-ring.is-pressed::before {
-  transform: scale(0.85);
-}
+  .cursor-ring.is-pressed::before {
+    transform: scale(0.85);
+  }
 
-/*
+  /*
  * The hover glow used to be the ::before's `box-shadow` itself transitioning
  * from a zero-size shadow to a lit one — every hover in/out over any link,
  * button or card (which given the custom cursor is constant) repainted this
@@ -378,745 +842,905 @@ a {
  * up across a page full of hoverable elements, especially stacked with the
  * card glow below. Fixed size, fading opacity only.
  */
-.cursor-ring::after {
-  border-radius: 999px;
-  box-shadow: 0 0 22px 4px color-mix(in srgb, var(--accent) 35%, transparent);
-  content: '';
-  inset: 0;
-  opacity: 0;
-  position: absolute;
-  transform: scale(1);
-  transition:
-    transform var(--duration-fast) var(--ease-out-premium),
-    opacity var(--duration-fast) ease;
-}
+  .cursor-ring::after {
+    border-radius: 999px;
+    box-shadow: 0 0 22px 4px color-mix(in srgb, var(--accent) 35%, transparent);
+    content: '';
+    inset: 0;
+    opacity: 0;
+    position: absolute;
+    transform: scale(1);
+    transition:
+      transform var(--duration-fast) var(--ease-out-premium),
+      opacity var(--duration-fast) ease;
+  }
 
-.cursor-ring.is-hovering::after {
-  opacity: 1;
-  transform: scale(var(--cursor-hover-scale, 1.55));
-}
+  .cursor-ring.is-hovering::after {
+    opacity: 1;
+    transform: scale(var(--cursor-hover-scale, 1.55));
+  }
 
-.cursor-ring.is-pressed::after {
-  transform: scale(0.85);
-}
+  .cursor-ring.is-pressed::after {
+    transform: scale(0.85);
+  }
 
-.cursor-trail {
-  opacity: 0;
-  transition: opacity var(--duration-fast) ease;
-}
+  .cursor-trail {
+    opacity: 0;
+    transition: opacity var(--duration-fast) ease;
+  }
 
-.cursor-trail.is-visible {
-  opacity: 1;
-}
+  .cursor-trail.is-visible {
+    opacity: 1;
+  }
 
-.cursor-trail-dot {
-  background: var(--accent);
-  border-radius: 999px;
-  left: 0;
-  pointer-events: none;
-  position: fixed;
-  top: 0;
-  z-index: var(--z-cursor);
-}
+  .cursor-trail-dot {
+    background: var(--accent);
+    border-radius: 999px;
+    left: 0;
+    pointer-events: none;
+    position: fixed;
+    top: 0;
+    z-index: var(--z-cursor);
+  }
 
-
-/* `overflow-x: clip` plutôt que `hidden` : `hidden` créerait un conteneur de
+  /* `overflow-x: clip` plutôt que `hidden` : `hidden` créerait un conteneur de
    défilement et casserait le `position: sticky` du header. `clip` se contente
    de rogner, donc les débordements purement décoratifs (halos floutés, blobs)
    ne peuvent plus créer de scroll horizontal / marge à droite sur mobile. */
-/* A column whose `main` takes up the slack: on a page shorter than the
+  /* A column whose `main` takes up the slack: on a page shorter than the
    viewport (404, error) the footer stays pinned to the bottom at its normal
    height, instead of ending mid-screen with an empty band underneath. */
-.site-shell {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  overflow-x: clip;
-}
+  .site-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-x: clip;
+  }
 
-/*
+  /*
  * Named ".page-container" rather than ".container" — Tailwind v4 generates
  * its own ".container" utility (with per-breakpoint max-widths) in
  * @layer utilities, which outranks anything in @layer base regardless of
  * specificity. Reusing that name would silently override this max-width.
  */
-.page-container {
-  margin: 0 auto;
-  max-width: var(--max-width);
-  padding-left: 1.25rem;
-  padding-right: 1.25rem;
-  width: 100%;
-}
+  .page-container {
+    margin: 0 auto;
+    max-width: var(--max-width);
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    width: 100%;
+  }
 
-/* Full-width shell: background, blur and border must live here, never on
-   .page-container, or scroll/theme effects get clipped to the content width.
-   `view-transition-name` opts the sticky header into its own transition
-   group (see globals.css) instead of being flattened into the root page
-   snapshot — Safari has documented issues compositing `backdrop-filter` and
-   `position: sticky` elements inside a view-transition root capture, which
-   showed up as flicker/ghosting around the navbar specifically. */
-.site-header {
-  background: transparent;
-  border-bottom: 1px solid transparent;
-  position: sticky;
-  top: 0;
-  transition: border-color var(--duration-base) ease;
-  view-transition-name: site-header;
-  width: 100%;
-  z-index: var(--z-header);
-  isolation: isolate;
-}
+  /* Full-width shell. `view-transition-name` opts the sticky header into its
+   own transition group (see globals.css) instead of being flattened into
+   the root page snapshot — Safari has documented issues compositing
+   `backdrop-filter` and `position: sticky` elements inside a
+   view-transition root capture, which showed up as flicker/ghosting around
+   the navbar specifically. */
+  .site-header {
+    background: transparent;
+    position: sticky;
+    top: 0;
+    view-transition-name: site-header;
+    width: 100%;
+    z-index: var(--z-header);
+    isolation: isolate;
+  }
 
-.site-header[data-scrolled='true'] {
-  border-bottom-color: var(--border);
-}
-
-/*
- * The tinted blur lives on its own layer (rather than directly on
- * .site-header) so showing/hiding it on scroll only ever animates
- * `opacity`. Animating `backdrop-filter` itself (blur radius 0 -> 20px, as
- * this used to do) makes Safari recompute the full backdrop capture and
- * blur convolution on every frame of the transition — a real source of
- * jank right as scrolling starts. Here backdrop-filter is a constant
- * blur(20px), so it's captured once; the layer is promoted at load instead
- * of being toggled with scroll state.
- *
- * That also happens to help the Chrome-specific issue this used to work
- * around: backdrop-filter depends on GPU compositing, and Chrome's GPU
- * process can drop or fail to promote it intermittently (hybrid-graphics
- * laptops, memory pressure, a stalled GPU process) with no error — the
- * element just renders as if backdrop-filter were `none`, while everything
- * else still paints fine via software. WebKit's macOS compositor doesn't
- * share this failure mode. A persistent (never toggled) layer gives Chrome
- * nothing to re-negotiate mid-scroll. It's not a full fix (nothing app-side
- * can force Chrome's GPU path to behave), so the tint alpha below is
- * deliberately high enough that the header still reads as solid even on
- * the frames where the blur silently no-ops.
+  /*
+ * Scroll edge: instead of a hard divider under a full-width bar, the page
+ * just softens as it slides up under the floating navigation — a short
+ * fade to the background colour across the header's height. Shown once
+ * scrolled; opacity is the only thing that animates.
  */
-.site-header::before {
-  background: color-mix(in srgb, var(--bg) 100%, transparent);
-  /* Pas de `-webkit-backdrop-filter` manuel ici non plus — voir .yarl__portal :
-     la déclaration préfixée écrasait la standard et le flou ne s'appliquait
-     plus du tout dans Chrome. Lightning CSS préfixe selon les cibles. */
-  backdrop-filter: blur(20px) saturate(160%);
-  content: '';
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  position: absolute;
-  transform: translateZ(0);
-  transition: opacity var(--duration-base) ease;
-  will-change: opacity;
-  z-index: -1;
-}
+  .site-header::before {
+    background: linear-gradient(
+      to bottom,
+      var(--bg) 0%,
+      color-mix(in srgb, var(--bg) 75%, transparent) 55%,
+      transparent
+    );
+    content: '';
+    inset: 0 0 -1rem;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    transition: opacity var(--duration-base) ease;
+    z-index: -1;
+  }
 
-.site-header[data-scrolled='true']::before {
-  opacity: 1;
-}
-
-.site-header-inner,
-.site-footer-inner {
-  align-items: center;
-  display: flex;
-  gap: 1rem;
-  justify-content: space-between;
-}
-
-.site-header-inner {
-  padding-top: 1.25rem;
-}
-
-.site-logo {
-  align-items: center;
-  display: inline-flex;
-  text-decoration: none;
-  transition: transform var(--duration-ui) var(--ease-out-premium);
-}
-
-.site-logo:hover {
-  transform: scale(1.05);
-}
-
-.site-logo-initials {
-  align-items: center;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  padding-right: 0.2em;
-  display: inline-block;
-  font-weight: 600;
-  gap: 0.1em;
-  line-height: 1;
-  font-family: var(--font-bagel-fat-one), var(--font-display), sans-serif;
-  font-size: 3rem;
-  letter-spacing: -0.2em;
-}
-
-.site-logo-cursor {
-  animation: logo-cursor-blink 1.1s step-end infinite;
-  background: var(--accent);
-  display: inline-block;
-  height: 1.1em;
-  width: 0.09em;
-}
-
-@keyframes logo-cursor-blink {
-  0%,
-  45% {
+  .site-header[data-scrolled='true']::before {
     opacity: 1;
   }
-  50%,
-  100% {
+
+  /*
+ * The floating glass navigation: once the page scrolls, the logo, links and
+ * switchers sit in a rounded pane of frosted glass rather than a strip
+ * across the top. It materializes — fades in while settling from a hair
+ * smaller — on opacity and transform only.
+ *
+ * Why it lives on a pseudo-element of the inner row, and stays on a layer
+ * that's never toggled: (1) the mobile drawer is `position: fixed` inside
+ * this row, and a transform or backdrop-filter on any of its ancestors
+ * would trap it; (2) animating `backdrop-filter` itself makes Safari redo
+ * the backdrop capture and blur every frame, a real source of jank right as
+ * scrolling starts — here the blur is constant and captured once; (3)
+ * Chrome's GPU process can silently drop backdrop-filter (hybrid-graphics
+ * laptops, memory pressure), so the tint is dense enough to read as a solid
+ * surface on the frames where the blur no-ops.
+ */
+  .site-header-inner {
+    isolation: isolate;
+    position: relative;
+  }
+
+  .site-header-inner::before {
+    /* Pas de `-webkit-backdrop-filter` manuel ici non plus — voir .yarl__portal :
+     la déclaration préfixée écrasait la standard et le flou ne s'appliquait
+     plus du tout dans Chrome. Lightning CSS préfixe selon les cibles. */
+    backdrop-filter: blur(20px) saturate(170%);
+    background: color-mix(in srgb, var(--bg-elevated) 80%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border-strong) 55%, transparent);
+    border-radius: 999px;
+    /* The bright inner top edge is light catching the glass; the drop shadow
+     lifts the pane off the page it floats over. */
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.4),
+      0 18px 40px -22px rgb(var(--shadow-color) / 0.45);
+    content: '';
+    /* Inside the container's side padding, so on a phone the pane clears the
+     screen edges; the logo still sits clear of the rounded ends. */
+    inset: 0.6rem 0.25rem -0.6rem;
     opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    transform: translateY(-0.35rem) scale(0.97);
+    transition:
+      opacity var(--duration-base) ease,
+      transform var(--duration-spring-move) var(--ease-spring-move);
+    z-index: -1;
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .site-logo-cursor {
-    animation: none;
+  /* Wider screens have margin to spare: the pane reaches past the content so
+   the logo and the switchers get breathing room from its rounded ends. */
+  @media (min-width: 720px) {
+    .site-header-inner::before {
+      inset: 0.6rem -0.9rem -0.6rem;
+    }
   }
-}
 
-.site-header-nav {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.25rem;
-}
+  :root.dark .site-header-inner::before {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.08),
+      0 18px 40px -22px rgb(0 0 0 / 0.7);
+  }
 
-.site-header-controls {
-  align-items: center;
-  display: flex;
-  gap: 0.75rem;
-}
+  .site-header[data-scrolled='true'] .site-header-inner::before {
+    opacity: 1;
+    transform: none;
+  }
 
-.site-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  justify-content: flex-end;
-}
+  /* Asked for less transparency: a solid pane, no blur. */
+  @media (prefers-reduced-transparency: reduce) {
+    .site-header-inner::before {
+      backdrop-filter: none;
+      background: var(--bg-elevated);
+    }
+  }
 
-.site-nav a,
-.site-footer a {
-  color: var(--fg-muted);
-  font-size: 0.95rem;
-  text-decoration: none;
-  transition: color var(--duration-fast) ease;
-}
+  /* Asked for more contrast: solid, with a defined edge. */
+  @media (prefers-contrast: more) {
+    .site-header-inner::before {
+      backdrop-filter: none;
+      background: var(--bg-elevated);
+      border-color: var(--border-strong);
+    }
+  }
 
-.site-nav a,
-.site-footer a {
-  position: relative;
-}
+  @media (prefers-reduced-motion: reduce) {
+    .site-header-inner::before {
+      transform: none;
+      transition: opacity var(--duration-fast) ease;
+    }
+  }
 
-.site-nav a::after,
-.site-footer a::after {
-  background: var(--accent);
-  border-radius: 999px;
-  bottom: -0.3rem;
-  content: '';
-  height: 2px;
-  left: 0;
-  position: absolute;
-  right: 0;
-  transform: scaleX(0);
-  transform-origin: center;
-  transition: transform var(--duration-fast) ease;
-}
-
-.site-nav a:hover,
-.site-footer a:hover {
-  color: var(--fg);
-}
-
-.site-nav a[aria-current] {
-  color: var(--accent);
-}
-
-.site-nav a[aria-current]::after,
-.site-nav a:hover::after,
-.site-footer a:hover::after {
-  transform: scaleX(1);
-}
-
-.link-underline {
-  position: relative;
-  transition: color var(--duration-fast) ease;
-}
-
-.link-underline::after {
-  background: currentColor;
-  border-radius: 999px;
-  bottom: -0.2rem;
-  content: '';
-  height: 1px;
-  left: 0;
-  position: absolute;
-  right: 0;
-  transform: scaleX(0);
-  transform-origin: center;
-  transition: transform var(--duration-fast) ease;
-}
-
-.link-underline:hover::after {
-  transform: scaleX(1);
-}
-
-.language-switcher,
-.theme-toggle {
-  display: inline-flex;
-  gap: 0.25rem;
-  border: 1px solid var(--border-strong);
-  border-radius: 999px;
-  padding: 0.25rem;
-}
-
-.language-switcher-item,
-.theme-toggle-item {
-  align-items: center;
-  border: none;
-  background: none;
-  border-radius: 999px;
-  color: var(--fg-muted);
-  cursor: pointer;
-  display: inline-flex;
-  font-size: var(--text-caption);
-  font-weight: 600;
-  justify-content: center;
-  letter-spacing: 0.06em;
-  padding: 0.3rem 0.65rem;
-  position: relative;
-  text-decoration: none;
-  /* `color` is the only thing these ever change (see :hover and
-     [data-active] below) — `all` made the engine watch every animatable
-     property, filters and box-shadows included, for nothing. */
-  transition: color var(--duration-fast) ease;
-}
-
-.theme-toggle-item {
-  padding: 0.35rem;
-  position: relative;
-}
-
-.theme-toggle-icon {
-  align-items: center;
-  display: inline-flex;
-  position: relative;
-  z-index: 1;
-}
-
-.theme-toggle-active {
-  background: var(--accent-soft);
-  border-radius: 999px;
-  inset: 0;
-  position: absolute;
-}
-
-.language-switcher-item:hover,
-.theme-toggle-item:hover {
-  color: var(--fg);
-}
-
-.language-switcher-item[data-active='true'],
-.theme-toggle-item[data-active='true'] {
-  color: var(--accent);
-}
-
-/* Background is now the animated .theme-toggle-active pill (shared-layout
-   element with its own layoutId per switcher) rather than a static color. */
-
-.nav-toggle {
-  align-items: center;
-  background: none;
-  border: 1px solid var(--border-strong);
-  border-radius: 999px;
-  cursor: pointer;
-  display: none;
-  flex-direction: column;
-  gap: 4px;
-  height: 2.75rem;
-  justify-content: center;
-  position: relative;
-  width: 2.75rem;
-  z-index: var(--z-drawer-toggle);
-}
-
-.nav-toggle-line {
-  background: var(--fg);
-  border-radius: 999px;
-  display: block;
-  height: 2px;
-  transition:
-    transform var(--duration-fast) ease,
-    opacity var(--duration-fast) ease;
-  width: 1.1rem;
-}
-
-.nav-toggle[data-open='true'] .nav-toggle-line:nth-child(1) {
-  transform: translateY(6px) rotate(45deg);
-}
-
-.nav-toggle[data-open='true'] .nav-toggle-line:nth-child(2) {
-  opacity: 0;
-}
-
-.nav-toggle[data-open='true'] .nav-toggle-line:nth-child(3) {
-  transform: translateY(-6px) rotate(-45deg);
-}
-
-.nav-scrim {
-  display: none;
-}
-
-@media (max-width: 880px) {
-  .nav-toggle {
+  .site-header-inner,
+  .site-footer-inner {
+    align-items: center;
     display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+  }
+
+  .site-header-inner {
+    padding-top: 1.25rem;
+  }
+
+  .site-logo {
+    align-items: center;
+    display: inline-flex;
+    text-decoration: none;
+    transition: transform var(--duration-ui) var(--ease-out-premium);
+  }
+
+  .site-logo:hover {
+    transform: scale(1.05);
+  }
+
+  .site-logo-initials {
+    align-items: center;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    padding-right: 0.2em;
+    display: inline-block;
+    font-weight: 600;
+    gap: 0.1em;
+    line-height: 1;
+    font-family: var(--font-bagel-fat-one), var(--font-display), sans-serif;
+    font-size: 3rem;
+    letter-spacing: -0.2em;
+  }
+
+  .site-logo-cursor {
+    animation: logo-cursor-blink 1.1s step-end infinite;
+    background: var(--accent);
+    display: inline-block;
+    height: 1.1em;
+    width: 0.09em;
+  }
+
+  @keyframes logo-cursor-blink {
+    0%,
+    45% {
+      opacity: 1;
+    }
+    50%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-logo-cursor {
+      animation: none;
+    }
   }
 
   .site-header-nav {
-    align-items: flex-start;
-    background: var(--bg-elevated);
-    border-left: 1px solid var(--border);
-    box-shadow: -20px 0 60px rgb(var(--shadow-color) / 0.25);
+    align-items: center;
     display: flex;
-    flex-direction: column;
-    gap: 1.75rem;
-    height: 100dvh;
-    overflow-y: auto;
-    /* Reaching the end of the drawer must not start scrolling the page. */
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-    /* Clear of the home indicator and a landscape notch. */
-    padding: 6rem calc(1.75rem + env(safe-area-inset-right))
-      calc(2rem + env(safe-area-inset-bottom)) 1.75rem;
-    position: fixed;
-    right: 0;
-    top: 0;
-    transform: translateX(100%);
-    /* Off-screen alone isn't closed: the links stayed in the tab order and
-       the accessibility tree. `visibility` takes them out, flipped only once
-       the slide-out has finished so the exit still animates. */
-    transition:
-      transform var(--duration-base) var(--ease-out-premium),
-      visibility 0s linear var(--duration-base);
-    visibility: hidden;
-    width: min(20rem, 86vw);
-    z-index: var(--z-drawer);
-  }
-
-  .site-header-nav[data-open='true'] {
-    transform: translateX(0);
-    transition: transform var(--duration-base) var(--ease-out-premium);
-    visibility: visible;
-  }
-
-  .site-nav {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 1.1rem;
-    justify-content: flex-start;
-    width: 100%;
-  }
-
-  .site-nav a {
-    font-size: 1.05rem;
-    padding: 0.35rem 0;
+    flex-wrap: wrap;
+    gap: 1.25rem;
   }
 
   .site-header-controls {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 1rem;
-    width: 100%;
+    align-items: center;
+    display: flex;
+    gap: 0.75rem;
   }
 
-  .nav-scrim {
-    background: rgb(0 0 0 / 0.4);
-    display: block;
-    inset: 0;
-    opacity: 0;
+  .site-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: flex-end;
+  }
+
+  .site-nav a,
+  .site-footer a {
+    color: var(--fg-muted);
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: color var(--duration-fast) ease;
+  }
+
+  .site-nav a,
+  .site-footer a {
+    position: relative;
+  }
+
+  .site-nav a::after,
+  .site-footer a::after {
+    background: var(--accent);
+    border-radius: 999px;
+    bottom: -0.3rem;
+    content: '';
+    height: 2px;
+    left: 0;
+    position: absolute;
+    right: 0;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform var(--duration-fast) ease;
+  }
+
+  .site-nav a:hover,
+  .site-footer a:hover {
+    color: var(--fg);
+  }
+
+  .site-nav a[aria-current] {
+    color: var(--accent);
+  }
+
+  .site-nav a[aria-current]::after,
+  .site-nav a:hover::after,
+  .site-footer a:hover::after {
+    transform: scaleX(1);
+  }
+
+  /* The gliding underline of the desktop header (NavIndicator.tsx) stands in
+   for the current link's own underline there; the phone drawer, with its
+   stacked links, keeps the per-link one. */
+  .site-header .site-nav {
+    position: relative;
+  }
+
+  .site-nav-indicator {
+    background: var(--accent);
+    border-radius: 999px;
+    bottom: -0.3rem;
+    height: 2px;
+    left: 0;
     pointer-events: none;
-    position: fixed;
-    transition: opacity var(--duration-base) ease;
-    z-index: var(--z-scrim);
+    position: absolute;
   }
 
-  .nav-scrim[data-open='true'] {
-    opacity: 1;
-    pointer-events: auto;
+  @media (width > 880px) {
+    .site-header .site-nav a[aria-current]::after {
+      transform: scaleX(0);
+    }
+  }
+
+  @media (max-width: 880px) {
+    .site-nav-indicator {
+      display: none;
+    }
+  }
+
+  .link-underline {
+    position: relative;
+    transition: color var(--duration-fast) ease;
+  }
+
+  .link-underline::after {
+    background: currentColor;
+    border-radius: 999px;
+    bottom: -0.2rem;
+    content: '';
+    height: 1px;
+    left: 0;
+    position: absolute;
+    right: 0;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform var(--duration-fast) ease;
+  }
+
+  .link-underline:hover::after {
+    transform: scaleX(1);
+  }
+
+  .language-switcher,
+  .theme-toggle {
+    display: inline-flex;
+    gap: 0.25rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    padding: 0.25rem;
   }
 
   .language-switcher-item,
   .theme-toggle-item {
-    min-height: 44px;
-    min-width: 44px;
+    align-items: center;
+    border: none;
+    background: none;
+    border-radius: 999px;
+    color: var(--fg-muted);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: var(--text-caption);
+    font-weight: 600;
+    justify-content: center;
+    letter-spacing: 0.06em;
+    padding: 0.3rem 0.65rem;
+    position: relative;
+    text-decoration: none;
+    /* `color` and the press `scale` are all these ever change (see :hover,
+     :active and [data-active]) — `all` made the engine watch every
+     animatable property, filters and box-shadows included, for nothing. */
+    transition:
+      color var(--duration-fast) ease,
+      scale var(--duration-ui) var(--ease-bounce);
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .site-header-nav,
+  .theme-toggle-item {
+    padding: 0.35rem;
+    position: relative;
+  }
+
+  .theme-toggle-icon {
+    align-items: center;
+    display: inline-flex;
+    position: relative;
+    z-index: 1;
+  }
+
+  .theme-toggle-active {
+    background: var(--accent-soft);
+    border-radius: 999px;
+    inset: 0;
+    position: absolute;
+  }
+
+  .language-switcher-item:hover,
+  .theme-toggle-item:hover {
+    color: var(--fg);
+  }
+
+  .language-switcher-item[data-active='true'],
+  .theme-toggle-item[data-active='true'] {
+    color: var(--accent);
+  }
+
+  /* Background is now the animated .theme-toggle-active pill (shared-layout
+   element with its own layoutId per switcher) rather than a static color. */
+
+  .nav-toggle {
+    align-items: center;
+    background: none;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    cursor: pointer;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    height: 2.75rem;
+    justify-content: center;
+    position: relative;
+    transition: scale 100ms ease-out;
+    width: 2.75rem;
+    z-index: var(--z-drawer-toggle);
+  }
+
+  /* Heard on the press, not the release. */
+  .nav-toggle:active {
+    scale: 0.92;
+  }
+
   .nav-toggle-line {
-    transition: none;
+    background: var(--fg);
+    border-radius: 999px;
+    display: block;
+    height: 2px;
+    transition:
+      transform var(--duration-fast) ease,
+      opacity var(--duration-fast) ease;
+    width: 1.1rem;
+  }
+
+  .nav-toggle[data-open='true'] .nav-toggle-line:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+  }
+
+  .nav-toggle[data-open='true'] .nav-toggle-line:nth-child(2) {
+    opacity: 0;
+  }
+
+  .nav-toggle[data-open='true'] .nav-toggle-line:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
   }
 
   .nav-scrim {
-    transition: opacity var(--duration-fast) ease;
+    display: none;
   }
-}
 
-/* Desktop-only section rail: a thread of soft dots in the page margin,
+  @media (max-width: 880px) {
+    .nav-toggle {
+      display: flex;
+    }
+
+    .site-header-nav {
+      align-items: flex-start;
+      background: var(--bg-elevated);
+      border-left: 1px solid var(--border);
+      /* The first shadow is a solid strip of drawer past its right edge: the
+       spring's overshoot and the rubber-band pull it left of `right: 0`, and
+       that must reveal more drawer, not the page. */
+      box-shadow:
+        4rem 0 0 var(--bg-elevated),
+        -20px 0 60px rgb(var(--shadow-color) / 0.25);
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+      height: 100dvh;
+      overflow-y: auto;
+      /* Reaching the end of the drawer must not start scrolling the page. */
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      /* Clear of the home indicator and a landscape notch. */
+      padding: 6rem calc(1.75rem + env(safe-area-inset-right))
+        calc(2rem + env(safe-area-inset-bottom)) 1.75rem;
+      position: fixed;
+      right: 0;
+      top: 0;
+      /* Vertical pans scroll the drawer natively; horizontal ones reach
+       MobileNavToggle as pointer events for swipe-to-dismiss. Position and
+       opacity are inline styles from its spring. */
+      touch-action: pan-y;
+      width: min(20rem, 86vw);
+      z-index: var(--z-drawer);
+    }
+
+    /* Off-screen alone isn't closed: the links stayed in the tab order and
+     the accessibility tree. `visibility` takes them out, flipped by
+     MobileNavToggle only once the slide-out has finished. */
+    .site-header-nav[data-visible='false'] {
+      visibility: hidden;
+    }
+
+    /* A mouse swipe across a link would otherwise start a native link drag. */
+    .site-header-nav a {
+      -webkit-user-drag: none;
+    }
+
+    .site-nav {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 1.1rem;
+      justify-content: flex-start;
+      width: 100%;
+    }
+
+    .site-nav a {
+      font-size: 1.05rem;
+      padding: 0.35rem 0;
+    }
+
+    .site-header-controls {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    /* Opacity tracks the drawer's position (inline, from MobileNavToggle),
+     so it dims in step with a drag rather than on its own timer. */
+    .nav-scrim {
+      background: rgb(0 0 0 / 0.4);
+      display: block;
+      inset: 0;
+      pointer-events: none;
+      position: fixed;
+      z-index: var(--z-scrim);
+    }
+
+    .nav-scrim[data-open='true'] {
+      pointer-events: auto;
+    }
+
+    .language-switcher-item,
+    .theme-toggle-item {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
+  /* Above the drawer breakpoint the panel is plain inline header content;
+   the drawer's inline transform/opacity must not reach it. */
+  @media (width > 880px) {
+    .site-header-nav {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-toggle-line {
+      transition: none;
+    }
+  }
+
+  /* Desktop-only section rail: a thread of soft dots in the page margin,
    driven by the same NavScrollSpy pass that highlights the header nav (it
    targets any ".site-nav a", so this list is picked up for free). */
-.index-rail {
-  display: none;
-}
-
-@media (min-width: 1536px) {
   .index-rail {
-    display: block;
-    left: 2rem;
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: var(--z-rail);
+    display: none;
   }
-}
 
-.index-rail ol {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  position: relative;
-}
+  @media (min-width: 1536px) {
+    .index-rail {
+      display: block;
+      left: 2rem;
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: var(--z-rail);
+    }
+  }
 
-.index-rail ol::before {
-  background: var(--border);
-  bottom: 0.5rem;
-  content: '';
-  left: 0.75rem;
-  position: absolute;
-  top: 0.5rem;
-  width: 1px;
-}
+  .index-rail ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: relative;
+  }
 
-.index-rail a {
-  align-items: center;
-  color: var(--fg-subtle);
-  display: flex;
-  gap: 0.7rem;
-  padding: 0.4rem 0 0.4rem 0.5rem;
-  position: relative;
-}
+  .index-rail ol::before {
+    background: var(--border);
+    bottom: 0.5rem;
+    content: '';
+    left: 0.75rem;
+    position: absolute;
+    top: 0.5rem;
+    width: 1px;
+  }
 
-.index-rail-num {
-  background: var(--bg);
-  border: 1.5px solid var(--fg-subtle);
-  border-radius: 999px;
-  height: 0.5rem;
-  transition:
-    background-color var(--duration-fast) var(--ease-bounce),
-    border-color var(--duration-fast) var(--ease-bounce),
-    transform var(--duration-fast) var(--ease-bounce);
-  width: 0.5rem;
-}
+  .index-rail a {
+    align-items: center;
+    color: var(--fg-subtle);
+    display: flex;
+    gap: 0.7rem;
+    padding: 0.4rem 0 0.4rem 0.5rem;
+    position: relative;
+  }
 
-.index-rail a:hover .index-rail-num,
-.index-rail a:focus-visible .index-rail-num {
-  border-color: var(--accent);
-  transform: scale(1.2);
-}
-
-.index-rail a[aria-current] .index-rail-num {
-  background: var(--accent);
-  border-color: var(--accent);
-  transform: scale(1.3);
-}
-
-.index-rail-label {
-  color: var(--fg-muted);
-  font-size: var(--text-caption);
-  max-width: 9rem;
-  opacity: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transform: translateX(-4px);
-  transition:
-    opacity var(--duration-fast) ease,
-    transform var(--duration-fast) ease,
-    color var(--duration-fast) ease;
-  white-space: nowrap;
-}
-
-.index-rail a:hover .index-rail-label,
-.index-rail a:focus-visible .index-rail-label,
-.index-rail a[aria-current] .index-rail-label {
-  color: var(--fg);
-  opacity: 1;
-  transform: translateX(0);
-}
-
-@media (prefers-reduced-motion: reduce) {
   .index-rail-num {
+    background: var(--bg);
+    border: 1.5px solid var(--fg-subtle);
+    border-radius: 999px;
+    height: 0.5rem;
     transition:
-      background-color var(--duration-fast) ease,
-      border-color var(--duration-fast) ease;
+      background-color var(--duration-fast) var(--ease-bounce),
+      border-color var(--duration-fast) var(--ease-bounce),
+      transform var(--duration-fast) var(--ease-bounce);
+    width: 0.5rem;
   }
 
-  .index-rail-label,
+  .index-rail a:hover .index-rail-num,
+  .index-rail a:focus-visible .index-rail-num {
+    border-color: var(--accent);
+    transform: scale(1.2);
+  }
+
+  .index-rail a[aria-current] .index-rail-num {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: scale(1.3);
+  }
+
+  .index-rail-label {
+    color: var(--fg-muted);
+    font-size: var(--text-caption);
+    max-width: 9rem;
+    opacity: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transform: translateX(-4px);
+    transition:
+      opacity var(--duration-fast) ease,
+      transform var(--duration-fast) ease,
+      color var(--duration-fast) ease;
+    white-space: nowrap;
+  }
+
   .index-rail a:hover .index-rail-label,
   .index-rail a:focus-visible .index-rail-label,
   .index-rail a[aria-current] .index-rail-label {
-    transform: none;
-    transition:
-      opacity var(--duration-fast) ease,
-      color var(--duration-fast) ease;
+    color: var(--fg);
+    opacity: 1;
+    transform: translateX(0);
   }
-}
 
-main {
-  display: flex;
-  flex: 1 0 auto;
-  flex-direction: column;
-}
+  @media (prefers-reduced-motion: reduce) {
+    .index-rail-num {
+      transition:
+        background-color var(--duration-fast) ease,
+        border-color var(--duration-fast) ease;
+    }
 
-.hero-section,
-.content-section {
-  padding-bottom: 4.5rem;
-  padding-top: 4.5rem;
-  width: 100%;
-}
+    .index-rail-label,
+    .index-rail a:hover .index-rail-label,
+    .index-rail a:focus-visible .index-rail-label,
+    .index-rail a[aria-current] .index-rail-label {
+      transform: none;
+      transition:
+        opacity var(--duration-fast) ease,
+        color var(--duration-fast) ease;
+    }
+  }
 
-.hero-section {
-  align-items: center;
-  display: grid;
-  min-height: 78vh;
-  padding-top: 3rem;
-}
+  main {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+  }
 
-.hero-copy {
-  max-width: 780px;
-}
+  .hero-section,
+  .content-section {
+    padding-bottom: 4.5rem;
+    padding-top: 4.5rem;
+    width: 100%;
+  }
 
-.eyebrow {
-  color: var(--accent);
-  font-size: var(--text-caption);
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  margin: 0 0 0.9rem;
-  text-transform: uppercase;
-}
+  .hero-section {
+    align-items: center;
+    display: grid;
+    min-height: 78vh;
+    padding-top: 3rem;
+  }
 
-h1,
-h2,
-h3,
-h4,
-p {
-  margin-top: 0;
-}
+  .hero-copy {
+    max-width: 780px;
+  }
 
-h1,
-h2,
-h3,
-h4 {
-  font-family: var(--font-display), sans-serif;
-  font-weight: 700;
-  letter-spacing: -0.05em;
-  line-height: 1.1;
-}
+  .eyebrow {
+    color: var(--accent);
+    font-size: var(--text-caption);
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    margin: 0 0 0.9rem;
+    text-transform: uppercase;
+  }
 
-/* Not h1: every h1 here is typed in character by character, and balancing
+  h1,
+  h2,
+  h3,
+  h4,
+  p {
+    margin-top: 0;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display), sans-serif;
+    font-weight: 700;
+  }
+
+  /* Running text: no lone word stranded on a paragraph's last line. */
+  p,
+  li,
+  blockquote,
+  figcaption {
+    text-wrap: pretty;
+  }
+
+  /* Not h1: every h1 here is typed in character by character, and balancing
    would re-break its lines on each new letter. */
-h2,
-h3,
-h4 {
-  text-wrap: balance;
-}
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
 
-h4 {
-  margin-bottom: 0.5rem;
-}
+  /* Tracking and leading follow size: display sizes tighten (letters drift
+   apart as they grow), card-sized headings stay near neutral so the
+   rounded face doesn't clot, and get room to wrap onto a second line. */
+  h4 {
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
+  }
 
-h1 {
-  font-size: clamp(2.7rem, 7vw, 4rem);
-  margin-bottom: 1.2rem;
-  /* max-width: 900px; */
-}
+  h1 {
+    font-size: clamp(2.7rem, 7vw, 4rem);
+    letter-spacing: -0.045em;
+    line-height: 1.05;
+    margin-bottom: 1.2rem;
+    /* max-width: 900px; */
+  }
 
-/* Hero title only (the name) — every other h1 keeps the 4rem default above,
+  /* Hero title only (the name) — every other h1 keeps the 4rem default above,
    and this is the one place the playful Bagel Fat One face shows up (it only
    ships a single weight, so it's reset to 400 instead of inheriting the
    h1/h2/h3 700 above, and tracking is loosened — the -0.2em used for the
    compact logo mark would collapse a full name into itself at this size). */
-#hero-title {
-  align-items: center;
-  display: inline-flex;
-  flex-wrap: wrap;
-  font-family: var(--font-bagel-fat-one), var(--font-display), sans-serif;
-  font-size: clamp(2.7rem, 7vw, 5.4rem);
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  max-width: 900px;
-}
-
-.hero-title-cursor {
-  animation: logo-cursor-blink 1.1s step-end infinite;
-  background: var(--accent);
-  display: inline-block;
-  height: 0.8em;
-  margin-left: 0.08em;
-  width: 0.06em;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-title-cursor {
-    animation: none;
+  #hero-title {
+    align-items: center;
+    display: inline-flex;
+    flex-wrap: wrap;
+    font-family: var(--font-bagel-fat-one), var(--font-display), sans-serif;
+    font-size: clamp(2.7rem, 7vw, 5.4rem);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    max-width: 900px;
   }
-}
 
-h2 {
-  font-size: clamp(1.8rem, 4vw, 2.8rem);
-  margin-bottom: 0.95rem;
-}
+  /* The typed name over an invisible copy of the whole name (HeroSection):
+   both in one grid cell, so the box is always the finished width. */
+  .hero-title-stack {
+    display: inline-grid;
+  }
 
-/* Same size as the card titles (`text-xl`), so every h3 reads as one level. */
-h3 {
-  font-size: 1.25rem;
-  margin-bottom: 0.5rem;
-}
+  .hero-title-stack > * {
+    grid-area: 1 / 1;
+  }
 
-.hero-copy p:not(.eyebrow) {
-  color: var(--fg-muted);
-  font-size: var(--text-lead);
-  max-width: 700px;
-}
+  .hero-title-ghost {
+    /* Room for the cursor that follows the typed copy. */
+    padding-right: 0.14em;
+    visibility: hidden;
+  }
 
-.section-header p:not(.eyebrow) {
-  color: var(--fg-muted);
-  font-size: var(--text-lead);
-}
+  /* Phones and tablets: the title line above the name is centred with the
+   rest of the identity, its lines balanced to even lengths. The extra left
+   padding matches the tracking every letter carries after it — the last
+   one included — which would otherwise pull the centred block to the left. */
+  @media (max-width: 1023px) {
+    .hero-eyebrow {
+      align-self: center;
+      padding-left: 0.2em;
+      text-align: center;
+      text-wrap: balance;
+    }
+  }
 
-.section-header {
-  margin-bottom: 2rem;
-}
+  .hero-title-cursor {
+    animation: logo-cursor-blink 1.1s step-end infinite;
+    background: var(--accent);
+    display: inline-block;
+    height: 0.8em;
+    margin-left: 0.08em;
+    width: 0.06em;
+  }
 
-.project-grid,
-.skills-grid {
-  display: grid;
-  gap: 1.1rem;
-  grid-template-columns: 1fr;
-}
+  @media (prefers-reduced-motion: reduce) {
+    .hero-title-cursor {
+      animation: none;
+    }
+  }
 
-.skill-group {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-group);
-  box-shadow: var(--shadow-rest);
-}
+  h2 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+    margin-bottom: 0.95rem;
+  }
 
-/*
+  /* Same size as the card titles (`text-xl`), so every h3 reads as one level. */
+  h3 {
+    font-size: 1.25rem;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-copy p:not(.eyebrow) {
+    color: var(--fg-muted);
+    font-size: var(--text-lead);
+    max-width: 700px;
+  }
+
+  .section-header p:not(.eyebrow) {
+    color: var(--fg-muted);
+    font-size: var(--text-lead);
+  }
+
+  .section-header {
+    margin-bottom: 2rem;
+  }
+
+  .project-grid,
+  .skills-grid {
+    display: grid;
+    gap: 1.1rem;
+    grid-template-columns: 1fr;
+  }
+
+  .skill-group {
+    background: var(--glass-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-group);
+    box-shadow: var(--glass-edge), var(--shadow-rest);
+  }
+
+  /*
  * Shared hover glow + lift for the grid cards (projects, journal,
  * testimonials, point groups, prev/next nav) — each used to carry its own
  * `hover:shadow-[0_25px_60px_-15px_var(--accent-soft-border)]` Tailwind
@@ -1142,102 +1766,198 @@ h3 {
  * `group-hover/card:` and `group-has-focus-visible/card:`, with
  * `group/card` on the wrapper.
  */
-.card-glow {
-  position: relative;
-}
+  .card-glow {
+    position: relative;
+  }
 
-.card-glow::after {
-  border-radius: inherit;
-  box-shadow: var(--shadow-glow);
-  content: '';
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  position: absolute;
-  transition:
-    opacity var(--duration-ui) var(--ease-out-premium),
-    transform var(--duration-ui) var(--ease-out-premium);
-}
+  .card-glow::after {
+    border-radius: inherit;
+    box-shadow: var(--shadow-glow);
+    content: '';
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    transition:
+      opacity var(--duration-ui) var(--ease-out-premium),
+      transform var(--duration-ui) var(--ease-out-premium);
+  }
 
-/*
- * `.timeline-item` (experience, education) lifts through the same class,
- * hovered via its `.timeline-row`, so the movement is defined once: 3px, the
- * shared premium easing, and plain `transform` — not Tailwind v4's
- * standalone `translate` property, which composites differently.
+  /*
+ * The lift on hover is for cards that are links (projects, journal,
+ * previous/next): 3px, the shared premium easing, and plain `transform` —
+ * not Tailwind v4's standalone `translate` property, which composites
+ * differently. Cards you can't click don't move: a lift would promise a
+ * click that goes nowhere.
  */
-.card-lift {
-  transition:
-    border-color var(--duration-ui) var(--ease-out-premium),
-    transform var(--duration-ui) var(--ease-out-premium);
-}
+  .card-lift {
+    transition:
+      border-color var(--duration-ui) var(--ease-out-premium),
+      transform var(--duration-ui) var(--ease-out-premium),
+      scale var(--duration-ui) var(--ease-bounce);
+  }
 
-/*
+  /*
+ * Press feedback, on the press itself rather than the release: the card
+ * dips while the finger or button is down and springs back after. Keyed to
+ * the card's main link (`data-card-link`), so pressing one of the small
+ * links at its foot (GitHub, the live site) doesn't squash the whole card.
+ * `scale` composes with the hover lift's `transform` instead of fighting it.
+ */
+  .card-glow:has([data-card-link]:active) > .card-lift {
+    scale: 0.98;
+    transition:
+      border-color var(--duration-ui) var(--ease-out-premium),
+      transform var(--duration-ui) var(--ease-out-premium),
+      scale 100ms ease-out;
+  }
+
+  /*
+ * Apple TV's focus effect, driven by CardTilt.tsx: the card leans toward the
+ * pointer (inline `rotate`, seen through the frame's perspective) and a soft
+ * sheen follows it. The sheen is a 2x-size radial highlight that only ever
+ * translates — no gradient is repainted as the pointer moves.
+ */
+  .card-glow:has([data-card-link]) {
+    perspective: 1200px;
+  }
+
+  /*
+ * Safari stops clipping a card to its rounded corners once part of it sits
+ * on a GPU layer of its own — a video, an image fading in, the tilt —
+ * leaving square corners, for as long as the hover lasts or for good.
+ * `overflow: hidden` and `clip-path` don't help; a mask (fully opaque, so
+ * it hides nothing) makes it clip the card as one piece. A mask also cuts
+ * off the card's drop shadow, so that moves to the frame around it, which
+ * doesn't tilt anyway — a shadow stays on the ground.
+ */
+  .card-glow:has([data-card-link]) > .card-lift {
+    mask-image: linear-gradient(#000 0 0);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .card-glow:has([data-card-link]):has(> .glass-surface) {
+    box-shadow: var(--shadow-rest);
+  }
+
+  .card-glow:has([data-card-link]) > .glass-surface {
+    box-shadow: var(--glass-edge);
+  }
+
+  .card-glow:has([data-card-link]) > .card-lift::before {
+    background: radial-gradient(closest-side, rgb(255 255 255 / 0.55), transparent);
+    content: '';
+    inset: -50%;
+    mix-blend-mode: soft-light;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    transition: opacity var(--duration-ui) ease;
+    translate: var(--sheen-x, 0) var(--sheen-y, 0);
+    z-index: 2;
+  }
+
+  .card-glow:has([data-card-link]) > .card-lift[data-tilting]::before {
+    opacity: 1;
+  }
+
+  /* The accent halo behind a hovered card stays flat while the card leans, so
+   the two drift apart: while it tilts, the sheen is the hover feedback and
+   the halo stays off. It still shows for keyboard focus, and on a hover
+   that doesn't tilt (reduced motion). */
+  .card-glow:has(> .card-lift[data-tilting])::after {
+    opacity: 0;
+  }
+
+  /* The same dip for the small controls: filters, switchers, gallery tiles. */
+  .category-filter-item:active,
+  .language-switcher-item:active,
+  .theme-toggle-item:active,
+  .media-gallery-item:active {
+    scale: 0.94;
+    transition-duration: 100ms;
+    transition-timing-function: ease-out;
+  }
+
+  .media-gallery-item:active {
+    scale: 0.97;
+  }
+
+  /*
  * Only a real pointer triggers hover, so a tap on a touch screen doesn't
  * leave a card lifted and lit until the next tap elsewhere. Focus uses
  * `:focus-visible` for the same reason: it matches keyboard focus on every
  * device, but not the focus a click or tap leaves behind on a link.
  */
-@media (hover: hover) and (pointer: fine) {
-  .card-glow:hover::after {
+  @media (hover: hover) and (pointer: fine) {
+    .card-glow:hover::after {
+      opacity: 1;
+    }
+  }
+
+  .card-glow:has(:focus-visible)::after {
     opacity: 1;
   }
-}
 
-.card-glow:has(:focus-visible)::after {
-  opacity: 1;
-}
-
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .card-glow:hover::after,
-  .card-glow:hover > .card-lift,
-  .timeline-row:hover > .card-lift {
-    transform: translateY(-3px);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .card-glow:has(:focus-visible)::after,
-  .card-glow:has(:focus-visible) > .card-lift,
-  .timeline-row:has(:focus-visible) > .card-lift {
-    transform: translateY(-3px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .card-glow::after {
-    transition: opacity var(--duration-fast) ease;
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .card-glow:hover::after,
+    .card-glow:hover > .card-lift {
+      transform: translateY(-3px);
+    }
   }
 
-  .card-lift {
-    transition: border-color var(--duration-fast) ease;
+  @media (prefers-reduced-motion: no-preference) {
+    .card-glow:has(:focus-visible)::after,
+    .card-glow:has(:focus-visible) > .card-lift {
+      transform: translateY(-3px);
+    }
   }
-}
 
-.skill-group {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding: 1.25rem;
-}
+  @media (prefers-reduced-motion: reduce) {
+    .card-glow::after {
+      transition: opacity var(--duration-fast) ease;
+    }
 
-/* Moves like the grid cards (.card-lift): same 3px lift, duration and
+    .card-lift {
+      transition: border-color var(--duration-fast) ease;
+    }
+  }
+
+  .skill-group {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1.25rem;
+  }
+
+  /* Moves like the grid cards (.card-lift): same 3px lift, duration and
    easing — only its glow is the smaller one, to suit the tile's size. */
-.skill-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-tile);
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  height: 100%;
-  padding: 1rem;
-  position: relative;
-  transition:
-    border-color var(--duration-ui) var(--ease-out-premium),
-    transform var(--duration-ui) var(--ease-out-premium);
-}
+  .skill-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-tile);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    height: 100%;
+    padding: 1rem;
+    position: relative;
+    transition:
+      border-color var(--duration-ui) var(--ease-out-premium),
+      transform var(--duration-ui) var(--ease-out-premium),
+      scale var(--duration-ui) var(--ease-bounce);
+  }
 
-/*
+  /* Tiles that are links dip on the press, like every other clickable thing
+   on the site. */
+  a.skill-card:active {
+    scale: 0.96;
+    transition-duration: 100ms;
+    transition-timing-function: ease-out;
+  }
+
+  /*
  * The hover glow used to be `.skill-card:hover`'s own `box-shadow`
  * transitioning in — animating box-shadow forces a repaint of the blurred
  * region on every frame, and this is a grid of many cards the pointer
@@ -1245,468 +1965,663 @@ h3 {
  * whether it's visible, so it lives on its own layer and only `opacity`
  * (compositable) animates.
  */
-.skill-card::after {
-  border-radius: inherit;
-  box-shadow: var(--shadow-glow-sm);
-  content: '';
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  position: absolute;
-  transition: opacity var(--duration-ui) var(--ease-out-premium);
-}
+  .skill-card::after {
+    border-radius: inherit;
+    box-shadow: var(--shadow-glow-sm);
+    content: '';
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    transition: opacity var(--duration-ui) var(--ease-out-premium);
+  }
 
-.skill-card-icon {
-  transition: transform var(--duration-ui) var(--ease-bounce);
-}
+  .skill-card-icon {
+    transition: transform var(--duration-ui) var(--ease-bounce);
+  }
 
-.skill-card-link-icon {
-  color: var(--fg-subtle);
-  opacity: 0;
-  transition: opacity var(--duration-fast) ease-out;
-}
+  .skill-card-link-icon {
+    color: var(--fg-subtle);
+    opacity: 0;
+    transition: opacity var(--duration-fast) ease-out;
+  }
 
-/* Only the tiles that are links react to hover — a lift on a plain tile
+  /* Only the tiles that are links react to hover — a lift on a plain tile
    would promise a click that goes nowhere. */
-@media (hover: hover) and (pointer: fine) {
-  a.skill-card:hover {
+  @media (hover: hover) and (pointer: fine) {
+    a.skill-card:hover {
+      border-color: var(--accent-soft-border);
+      transform: translateY(-3px);
+    }
+
+    a.skill-card:hover::after {
+      opacity: 1;
+    }
+
+    a.skill-card:hover .skill-card-icon {
+      transform: scale(1.1);
+    }
+
+    a.skill-card:hover .skill-card-link-icon {
+      opacity: 1;
+    }
+  }
+
+  .skill-card:focus-visible {
     border-color: var(--accent-soft-border);
     transform: translateY(-3px);
   }
 
-  a.skill-card:hover::after {
+  .skill-card:focus-visible::after {
     opacity: 1;
   }
 
-  a.skill-card:hover .skill-card-icon {
+  .skill-card:focus-visible .skill-card-icon {
     transform: scale(1.1);
   }
 
-  a.skill-card:hover .skill-card-link-icon {
+  .skill-card:focus-visible .skill-card-link-icon {
     opacity: 1;
   }
-}
 
-.skill-card:focus-visible {
-  border-color: var(--accent-soft-border);
-  transform: translateY(-3px);
-}
+  @media (prefers-reduced-motion: reduce) {
+    .skill-card {
+      transition: border-color var(--duration-fast) ease;
+    }
 
-.skill-card:focus-visible::after {
-  opacity: 1;
-}
+    .skill-card::after,
+    .skill-card-link-icon {
+      transition: opacity var(--duration-fast) ease;
+    }
 
-.skill-card:focus-visible .skill-card-icon {
-  transform: scale(1.1);
-}
+    .skill-card-icon {
+      transition: none;
+    }
 
-.skill-card:focus-visible .skill-card-link-icon {
-  opacity: 1;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .skill-card {
-    transition: border-color var(--duration-fast) ease;
+    a.skill-card:hover,
+    .skill-card:focus-visible,
+    a.skill-card:hover .skill-card-icon,
+    .skill-card:focus-visible .skill-card-icon {
+      transform: none;
+    }
   }
 
-  .skill-card::after,
-  .skill-card-link-icon {
-    transition: opacity var(--duration-fast) ease;
-  }
-
-  .skill-card-icon {
-    transition: none;
-  }
-
-  a.skill-card:hover,
-  .skill-card:focus-visible,
-  a.skill-card:hover .skill-card-icon,
-  .skill-card:focus-visible .skill-card-icon {
-    transform: none;
-  }
-}
-
-.skill-card-float {
-  animation: skill-card-float 5s ease-in-out infinite;
-  display: block;
-}
-
-@keyframes skill-card-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-3px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .skill-card-float {
-    animation: none;
-  }
-}
-
-/*
+  /*
  * Timeline (Experience/Education): a single left-aligned rail at every
  * width, with `.timeline-row` entries stacked full-width beside it — no
  * alternating left/right columns, so there's no half-empty gap next to each
  * card.
  */
-.timeline {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  padding-left: 2.25rem;
-  position: relative;
-}
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding-left: 2.25rem;
+    position: relative;
+  }
 
-.timeline-rail {
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    var(--border-strong) 4%,
-    var(--border-strong) 96%,
-    transparent
-  );
-  bottom: 0;
-  left: 7px;
-  position: absolute;
-  top: 0;
-  width: 2px;
-}
+  .timeline-rail {
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      var(--border-strong) 4%,
+      var(--border-strong) 96%,
+      transparent
+    );
+    bottom: 0;
+    left: 7px;
+    position: absolute;
+    top: 0;
+    width: 2px;
+  }
 
-.timeline-row {
-  position: relative;
-}
+  .timeline-row {
+    position: relative;
+  }
 
-.timeline-row::before {
-  background: var(--bg-elevated);
-  border: 2px solid var(--accent);
-  border-radius: 999px;
-  box-shadow: 0 0 0 4px var(--accent-soft);
-  content: '';
-  height: 12px;
-  left: -2.25rem;
-  position: absolute;
-  top: 1.9rem;
-  transition:
-    box-shadow var(--duration-ui) var(--ease-out-premium),
-    transform var(--duration-ui) var(--ease-out-premium);
-  width: 12px;
-  z-index: 1;
-}
+  .timeline-row::before {
+    background: var(--bg-elevated);
+    border: 2px solid var(--accent);
+    border-radius: 999px;
+    box-shadow: 0 0 0 4px var(--accent-soft);
+    content: '';
+    height: 12px;
+    left: -2.25rem;
+    position: absolute;
+    top: 1.9rem;
+    transition:
+      box-shadow var(--duration-ui) var(--ease-out-premium),
+      transform var(--duration-ui) var(--ease-out-premium);
+    width: 12px;
+    z-index: 1;
+  }
 
-@media (hover: hover) and (pointer: fine) {
-  .timeline-row:hover::before {
+  /* No hover state: an entry isn't a link. Keyboard focus on a link inside
+   it (the company's site, a store page…) still marks where you are. */
+  .timeline-row:has(:focus-visible)::before {
     box-shadow: 0 0 0 6px var(--accent-soft);
     transform: scale(1.15);
   }
-}
 
-.timeline-row:has(:focus-visible)::before {
-  box-shadow: 0 0 0 6px var(--accent-soft);
-  transform: scale(1.15);
-}
+  @media (prefers-reduced-motion: reduce) {
+    .timeline-rail {
+      transform: scaleY(1) !important;
+    }
 
-@media (prefers-reduced-motion: reduce) {
-  .timeline-rail {
-    transform: scaleY(1) !important;
+    .timeline-row::before {
+      transition: none;
+    }
   }
 
-  .timeline-row::before {
-    transition: none;
-  }
-}
-
-/* Sur mobile la colonne est trop étroite pour "payer" les 2.25rem réservés au
+  /* Sur mobile la colonne est trop étroite pour "payer" les 2.25rem réservés au
    rail : on retire le fil et ses pastilles (orphelines sans le fil) et on rend
    la largeur aux cartes. */
-@media (max-width: 720px) {
-  .timeline {
-    padding-left: 0;
+  @media (max-width: 720px) {
+    .timeline {
+      padding-left: 0;
+    }
+
+    .timeline-rail,
+    .timeline-row::before {
+      display: none;
+    }
   }
 
-  .timeline-rail,
-  .timeline-row::before {
-    display: none;
+  .timeline-item {
+    background: var(--glass-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-panel);
+    box-shadow: var(--glass-edge), var(--shadow-rest);
+    padding: 1.75rem;
+    position: relative;
   }
-}
 
-.timeline-item {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-panel);
-  box-shadow: var(--shadow-rest);
-  padding: 1.75rem;
-  position: relative;
-}
-
-/* Same idea as .skill-card::after: the colored hover shadow fades in on its
+  /* Same idea as .skill-card::after: the colored hover shadow fades in on its
    own layer instead of animating box-shadow itself, so the resting ambient
    shadow above never needs to repaint. */
-.timeline-item::after {
-  border-radius: inherit;
-  box-shadow: var(--shadow-glow);
-  content: '';
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  position: absolute;
-  transition: opacity var(--duration-ui) var(--ease-out-premium);
-}
+  .timeline-item::after {
+    border-radius: inherit;
+    box-shadow: var(--shadow-glow);
+    content: '';
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    transition: opacity var(--duration-ui) var(--ease-out-premium);
+  }
 
-/* Triggered from the row like the grid cards (see .card-glow): the lift
-   itself comes from `.card-lift`. */
-@media (hover: hover) and (pointer: fine) {
-  .timeline-row:hover > .timeline-item {
+  /* Lit for keyboard focus on a link inside the entry — never on hover,
+   since the entry itself isn't clickable. */
+  .timeline-row:has(:focus-visible) > .timeline-item {
     border-color: var(--accent-soft-border);
   }
 
-  .timeline-row:hover > .timeline-item::after {
+  .timeline-row:has(:focus-visible) > .timeline-item::after {
     opacity: 1;
   }
-}
 
-.timeline-row:has(:focus-visible) > .timeline-item {
-  border-color: var(--accent-soft-border);
-}
-
-.timeline-row:has(:focus-visible) > .timeline-item::after {
-  opacity: 1;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .timeline-item::after {
-    transition: opacity var(--duration-fast) ease;
+  @media (prefers-reduced-motion: reduce) {
+    .timeline-item::after {
+      transition: opacity var(--duration-fast) ease;
+    }
   }
-}
 
-.timeline-meta {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  margin-bottom: 0.85rem;
-}
-
-.timeline-company,
-.empty-state,
-.site-footer {
-  color: var(--fg-muted);
-}
-
-.timeline-company {
-  margin-bottom: 0;
-}
-
-.timeline-body {
-  margin-top: 1.1rem;
-}
-
-.empty-state {
-  border: 1px dashed var(--border-strong);
-  border-radius: var(--radius-inset);
-  margin: 0;
-  padding: 1.25rem;
-}
-
-.site-footer {
-  border-top: 1px solid var(--border);
-  width: 100%;
-}
-
-.site-footer-inner {
-  padding-bottom: 1.5rem;
-  padding-top: 1.5rem;
-}
-
-.site-footer p {
-  margin: 0;
-}
-
-@media (min-width: 720px) {
-  .project-grid,
-  .skills-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .timeline-meta {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 0.85rem;
   }
-}
 
-@media (min-width: 1024px) {
-  .project-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .timeline-company,
+  .empty-state,
+  .site-footer {
+    color: var(--fg-muted);
   }
-}
 
-@media (max-width: 639px) {
+  .timeline-company {
+    margin-bottom: 0;
+  }
+
+  .timeline-body {
+    margin-top: 1.1rem;
+  }
+
+  .empty-state {
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-inset);
+    margin: 0;
+    padding: 1.25rem;
+  }
+
+  .site-footer {
+    border-top: 1px solid var(--border);
+    width: 100%;
+  }
+
   .site-footer-inner {
-    align-items: flex-start;
-    flex-direction: column;
+    padding-bottom: 1.5rem;
+    padding-top: 1.5rem;
+  }
+
+  .site-footer p {
+    margin: 0;
+  }
+
+  /*
+ * Phones: a grid of parallel items — the projects, the skill categories,
+ * the About cards — becomes a shelf you swipe through (App Store style),
+ * instead of a long stack of tall cards down the page. It's native
+ * scrolling with scroll-snap, so the platform supplies the momentum, the
+ * settle onto a card and the rubber-band at either end; a flick can carry
+ * past several cards. The row bleeds to the screen edges (the container's
+ * gutter turns into its padding) and each card leaves the next one peeking
+ * in, which is what says "there's more this way". Shelf.tsx adds the
+ * dots under it.
+ */
+  /* Phones only — declared before the query below so it can turn them on. */
+  .shelf-dots {
+    display: none;
+  }
+
+  @media (max-width: 719px) {
+    .shelf {
+      display: flex;
+      gap: 0.9rem;
+      margin-inline: -1.25rem;
+      overflow-x: auto;
+      /* Reaching the last card must not turn into the browser's swipe-back. */
+      overscroll-behavior-x: contain;
+      /* Room for the cards' shadows, which the scroller would otherwise clip. */
+      padding: 0.5rem 1.25rem 1.75rem;
+      scroll-padding-inline: 1.25rem;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+
+    .shelf::-webkit-scrollbar {
+      display: none;
+    }
+
+    .shelf > * {
+      /* Sized off the screen rather than a percentage of the scroller: the
+       gutter on the left, then ~2rem of the next card showing on the right. */
+      flex: 0 0 calc(100vw - 4.25rem);
+      /* Otherwise a flex item never gets narrower than its widest unbreakable
+       content (a row of chips) and swallows the peek. */
+      min-width: 0;
+      scroll-snap-align: start;
+    }
+
+    .shelf-dots {
+      display: flex;
+      justify-content: center;
+      margin-top: -0.5rem;
+    }
+
+    /* Skill categories hold anything from two tiles to ten: each card keeps
+     its own height instead of all stretching to the tallest. */
+    .skills-grid.shelf {
+      align-items: flex-start;
+    }
+
+    /* Two compact tiles to a row inside a category card. */
+    .shelf .skill-card {
+      font-size: 0.875rem;
+      padding: 0.65rem 0.75rem;
+    }
+  }
+
+  /* The 404's invitation to play: no shapes move under reduced motion, and
+   a phone only nudges them, so it's for a mouse with motion on. */
+  @media (prefers-reduced-motion: reduce), (hover: none) {
+    .notfound-hint {
+      display: none;
+    }
+  }
+
+  /* Copy button beside the contact email (CopyButton.tsx). */
+  .copy-button {
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    color: var(--fg-muted);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: var(--text-caption);
+    font-weight: 600;
+    gap: 0.4rem;
+    min-height: 2.25rem;
+    padding: 0.35rem 0.85rem;
+    transition:
+      background-color var(--duration-fast) ease,
+      border-color var(--duration-fast) ease,
+      color var(--duration-fast) ease,
+      scale var(--duration-ui) var(--ease-bounce);
+  }
+
+  .copy-button:hover {
+    border-color: var(--accent-soft-border);
+    color: var(--fg);
+  }
+
+  .copy-button:active {
+    scale: 0.94;
+    transition-duration: 100ms;
+  }
+
+  .copy-button[data-status='copied'] {
+    background: var(--accent-soft);
+    border-color: var(--accent-soft-border);
+    color: var(--accent);
+  }
+
+  .copy-button[data-status='failed'] {
+    color: var(--danger);
+  }
+
+  /*
+ * Timeline details (TimelineDetails.tsx): on phones an entry's description
+ * is folded under its opening paragraph, fading out, with a button to open
+ * the rest. The height animation itself is driven from JS (a spring); this
+ * is only the resting fold. From 720px everything shows and the button is
+ * gone.
+ */
+  .timeline-details-toggle {
+    display: none;
+  }
+
+  @media (max-width: 719px) {
+    .timeline-details-body {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .timeline-details[data-foldable='true'] .timeline-details-body[data-folded='true'] {
+      mask-image: linear-gradient(to bottom, #000 calc(100% - 2.5rem), transparent);
+      max-height: var(--fold-height, 7rem);
+    }
+
+    .timeline-details[data-foldable='true'] .timeline-details-toggle {
+      align-items: center;
+      background: none;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      display: inline-flex;
+      font-size: var(--text-caption);
+      font-weight: 600;
+      gap: 0.35rem;
+      margin-top: 0.5rem;
+      min-height: 44px;
+      padding: 0;
+      transition: scale var(--duration-ui) var(--ease-bounce);
+    }
+
+    .timeline-details-toggle:active {
+      scale: 0.94;
+      transition-duration: 100ms;
+    }
+
+    .timeline-details-toggle svg {
+      transition: rotate var(--duration-ui) var(--ease-out-premium);
+    }
+
+    .timeline-details-toggle[aria-expanded='true'] svg {
+      rotate: 180deg;
+    }
+  }
+
+  /* The About cards (judo, way of working…): a shelf on phones (above), a
+   grid of two from 720px — the same breakpoint as the other shelves. */
+  .about-points {
+    flex: 1;
+  }
+
+  @media (min-width: 720px) {
+    .about-points {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* Each dot is a 24px target around a 6px mark; the current one stretches
+   into a short bar, as on iOS. */
+  .shelf-dot {
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    height: 1.5rem;
+    justify-content: center;
+    min-width: 1.25rem;
+    padding: 0;
+  }
+
+  .shelf-dot::before {
+    background: var(--border-strong);
+    border-radius: 999px;
+    content: '';
+    height: 6px;
+    transition:
+      width var(--duration-ui) var(--ease-spring-move),
+      background-color var(--duration-ui) ease;
+    width: 6px;
+  }
+
+  .shelf-dot[data-active='true']::before {
+    background: var(--accent);
+    width: 18px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shelf-dot::before {
+      transition: background-color var(--duration-fast) ease;
+    }
+  }
+
+  @media (min-width: 720px) {
+    .project-grid,
+    .skills-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .project-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 639px) {
+    .site-footer-inner {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .category-filter-item {
+      min-height: 44px;
+    }
+
+    h1 {
+      max-width: 100%;
+    }
+  }
+
+  .category-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 2.5rem;
   }
 
   .category-filter-item {
-    min-height: 44px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--bg-elevated);
+    color: var(--fg-muted);
+    cursor: pointer;
+    font-size: var(--text-caption);
+    font-weight: 600;
+    /* The accent pill (.category-filter-active) slides underneath the label. */
+    isolation: isolate;
+    letter-spacing: 0.04em;
+    padding: 0.5rem 1.1rem;
+    position: relative;
+    /* Same as the language/theme items: list what :hover, :active and
+     [data-active] below actually change rather than transitioning `all`.
+     The label's colour takes about as long as the pill takes to arrive
+     under it. Scale: a quick dip on press, a springy release. */
+    transition:
+      border-color var(--duration-fast) ease,
+      color var(--duration-ui) ease,
+      scale var(--duration-ui) var(--ease-bounce);
   }
 
-  h1 {
-    max-width: 100%;
+  .category-filter-item:hover {
+    color: var(--fg);
+    border-color: var(--accent-soft-border);
   }
-}
 
-.category-filter {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  margin-bottom: 2.5rem;
-}
+  .category-filter-item[data-active='true'] {
+    border-color: var(--accent);
+    color: var(--accent-fg);
+  }
 
-.category-filter-item {
-  border: 1px solid var(--border-strong);
-  border-radius: 999px;
-  background: var(--bg-elevated);
-  color: var(--fg-muted);
-  cursor: pointer;
-  font-size: var(--text-caption);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 0.5rem 1.1rem;
-  /* Same as the language/theme items: list what :hover and [data-active]
-     below actually change rather than transitioning `all`. */
-  transition:
-    background-color var(--duration-fast) ease,
-    border-color var(--duration-fast) ease,
-    color var(--duration-fast) ease;
-}
+  /* The one moving pill, shared by every filter button (layoutId in
+   JournalGrid): it covers the button's border so the edge doesn't show. */
+  .category-filter-active {
+    background: var(--accent);
+    border-radius: 999px;
+    inset: -1px;
+    position: absolute;
+    z-index: -1;
+  }
 
-.category-filter-item:hover {
-  color: var(--fg);
-  border-color: var(--accent-soft-border);
-}
+  .rich-text {
+    color: var(--fg-muted);
+    font-size: var(--text-lead);
+    line-height: 1.85;
+  }
 
-.category-filter-item[data-active='true'] {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-fg);
-}
+  .rich-text > * + * {
+    margin-top: 1.3em;
+  }
 
-.rich-text {
-  color: var(--fg-muted);
-  font-size: var(--text-lead);
-  line-height: 1.85;
-}
+  .rich-text h1,
+  .rich-text h2,
+  .rich-text h3 {
+    color: var(--fg);
+    margin-top: 1.6em;
+  }
 
-.rich-text > * + * {
-  margin-top: 1.3em;
-}
+  .rich-text a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color var(--duration-fast) ease;
+  }
 
-.rich-text h1,
-.rich-text h2,
-.rich-text h3 {
-  color: var(--fg);
-  margin-top: 1.6em;
-}
+  .rich-text a:hover {
+    color: var(--accent-strong);
+  }
 
-.rich-text a {
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  transition: color var(--duration-fast) ease;
-}
+  .rich-text ul,
+  .rich-text ol {
+    padding-left: 1.4em;
+  }
 
-.rich-text a:hover {
-  color: var(--accent-strong);
-}
+  .rich-text ul {
+    list-style-type: disc;
+  }
 
-.rich-text ul,
-.rich-text ol {
-  padding-left: 1.4em;
-}
+  .rich-text ol {
+    list-style-type: decimal;
+  }
 
-.rich-text ul {
-  list-style-type: disc;
-}
+  .rich-text li + li {
+    margin-top: 0.4em;
+  }
 
-.rich-text ol {
-  list-style-type: decimal;
-}
+  .rich-text blockquote {
+    border-left: 3px solid var(--accent-soft-border);
+    color: var(--fg-muted);
+    font-style: italic;
+    padding-left: 1.2em;
+  }
 
-.rich-text li + li {
-  margin-top: 0.4em;
-}
-
-.rich-text blockquote {
-  border-left: 3px solid var(--accent-soft-border);
-  color: var(--fg-muted);
-  font-style: italic;
-  padding-left: 1.2em;
-}
-
-.media-gallery {
-  column-count: 2;
-  column-gap: 0.75rem;
-  margin-top: 2.5rem;
-}
-
-@media (min-width: 720px) {
   .media-gallery {
-    column-count: 3;
+    column-count: 2;
+    column-gap: 0.75rem;
+    margin-top: 2.5rem;
   }
-}
 
-.media-gallery-item {
-  background: none;
-  border: none;
-  border-radius: var(--radius-inset);
-  break-inside: avoid;
-  cursor: zoom-in;
-  display: block;
-  margin-bottom: 0.75rem;
-  outline-offset: 4px;
-  overflow: hidden;
-  padding: 0;
-  position: relative;
-  transition: transform var(--duration-ui) var(--ease-out-premium);
-  width: 100%;
-}
+  @media (min-width: 720px) {
+    .media-gallery {
+      column-count: 3;
+    }
+  }
 
-.media-gallery-item img,
-.media-gallery-item video {
-  display: block;
-  height: auto;
-  width: 100%;
-}
+  .media-gallery-item {
+    background: none;
+    border: none;
+    border-radius: var(--radius-inset);
+    break-inside: avoid;
+    cursor: zoom-in;
+    display: block;
+    margin-bottom: 0.75rem;
+    outline-offset: 4px;
+    overflow: hidden;
+    padding: 0;
+    position: relative;
+    transition:
+      transform var(--duration-ui) var(--ease-out-premium),
+      scale var(--duration-ui) var(--ease-bounce);
+    width: 100%;
+  }
 
-.media-gallery-item:hover,
-.media-gallery-item:focus-visible {
-  transform: scale(1.03);
-}
+  .media-gallery-item img,
+  .media-gallery-item video {
+    display: block;
+    height: auto;
+    width: 100%;
+  }
 
-.media-gallery-play-badge {
-  transition: transform var(--duration-ui) var(--ease-out-premium);
-}
+  .media-gallery-item:hover,
+  .media-gallery-item:focus-visible {
+    transform: scale(1.03);
+  }
 
-.media-gallery-item:hover .media-gallery-play-badge,
-.media-gallery-item:focus-visible .media-gallery-play-badge {
-  transform: scale(1.08);
-}
+  .media-gallery-play-badge {
+    transition: transform var(--duration-ui) var(--ease-out-premium);
+  }
 
-.media-gallery-overlay {
-  background: linear-gradient(to top, rgb(0 0 0 / 0.55), transparent 60%);
-  bottom: 0;
-  left: 0;
-  opacity: 0;
-  position: absolute;
-  right: 0;
-  top: 0;
-  transition: opacity var(--duration-ui) var(--ease-out-premium);
-}
+  .media-gallery-item:hover .media-gallery-play-badge,
+  .media-gallery-item:focus-visible .media-gallery-play-badge {
+    transform: scale(1.08);
+  }
 
-.media-gallery-item:hover .media-gallery-overlay,
-.media-gallery-item:focus-visible .media-gallery-overlay {
-  opacity: 1;
-}
+  .media-gallery-overlay {
+    background: linear-gradient(to top, rgb(0 0 0 / 0.55), transparent 60%);
+    bottom: 0;
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: opacity var(--duration-ui) var(--ease-out-premium);
+  }
 
-/*
+  .media-gallery-item:hover .media-gallery-overlay,
+  .media-gallery-item:focus-visible .media-gallery-overlay {
+    opacity: 1;
+  }
+
+  /*
  * The tint and blur belong on the portal — the element that fades — not on
  * .yarl__container inside it. An ancestor with opacity < 1 (or a transform)
  * becomes the backdrop root, so a backdrop-filter below it samples an empty
@@ -1719,72 +2634,79 @@ h3 {
  * transform here would keep it a backdrop root permanently. The scale moved
  * onto the slide, which sits above the blur.
  */
-.yarl__portal {
-  /* Deux réglages liés : le rayon fait le flou, l'alpha de la teinte décide
+  .yarl__portal {
+    /* Deux réglages liés : le rayon fait le flou, l'alpha de la teinte décide
      de combien on en voit. À 82% il ne restait que 18% de la page visible et
      le flou ne se lisait pas ; à 66% l'arrière-plan devient un vrai verre
      dépoli tout en restant assez sombre pour que la photo passe devant. */
-  /* Surtout ne pas ajouter `-webkit-backdrop-filter` à la main : Lightning CSS
+    /* Surtout ne pas ajouter `-webkit-backdrop-filter` à la main : Lightning CSS
      considère les deux comme la même propriété, la dernière écrase l'autre, et
      on se retrouve avec la seule version préfixée — que Chrome ignore. Il
      ajoute le préfixe tout seul selon les cibles browserslist. */
-  backdrop-filter: blur(28px) saturate(140%);
-  background-color: color-mix(in srgb, var(--yarl__color_backdrop) 66%, transparent);
-  transition: opacity var(--yarl__fade_animation_duration, 0.25s)
-    var(--yarl__fade_animation_timing_function, ease) !important;
-  /* Promoted once and never toggled, so the blur is captured a single time
+    backdrop-filter: blur(28px) saturate(140%);
+    background-color: color-mix(in srgb, var(--yarl__color_backdrop) 66%, transparent);
+    transition: opacity var(--yarl__fade_animation_duration, 0.25s)
+      var(--yarl__fade_animation_timing_function, ease) !important;
+    /* Promoted once and never toggled, so the blur is captured a single time
      (see .site-header::before for why that matters on this page). */
-  transform: translateZ(0);
-}
-
-.yarl__slide {
-  transform: scale(0.94);
-  transition: transform var(--duration-base) var(--ease-out-premium);
-}
-
-.yarl__portal_open .yarl__slide {
-  transform: scale(1);
-}
-
-/* The lightbox backdrop is near-black in both themes, so its buttons must
-   always be light — var(--fg) would turn them dark in light mode. */
-:root {
-  --yarl__color_backdrop: color-mix(in srgb, var(--bg) 4%, black 96%);
-  /* The tint lives on .yarl__portal instead — see above. */
-  --yarl__container_background_color: transparent;
-  --yarl__color_button: rgba(255, 255, 255, 0.85);
-  --yarl__color_button_active: var(--accent);
-  --yarl__color_button_disabled: rgba(255, 255, 255, 0.35);
-  /* Le fond laisse passer la page floutée, qui peut être claire par endroits :
-     une ombre douce garde les boutons blancs lisibles partout. */
-  --yarl__button_filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.55));
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .media-gallery-item {
-    transition: none;
+    transform: translateZ(0);
   }
 
-  .yarl__slide,
+  .yarl__slide {
+    transform: scale(0.94);
+    transition: transform var(--duration-base) var(--ease-out-premium);
+  }
+
   .yarl__portal_open .yarl__slide {
+    transform: scale(1);
+  }
+
+  /* The photo is already flying in from its tile (MediaGallery's view
+   transition) — a scale on top would land it short, then jump. */
+  .yarl__portal.is-morphing .yarl__slide {
     transform: none;
     transition: none;
   }
-}
 
-/* Movement that had no reduced variant of its own (the global safety net
+  /* The lightbox backdrop is near-black in both themes, so its buttons must
+   always be light — var(--fg) would turn them dark in light mode. */
+  :root {
+    --yarl__color_backdrop: color-mix(in srgb, var(--bg) 4%, black 96%);
+    /* The tint lives on .yarl__portal instead — see above. */
+    --yarl__container_background_color: transparent;
+    --yarl__color_button: rgba(255, 255, 255, 0.85);
+    --yarl__color_button_active: var(--accent);
+    --yarl__color_button_disabled: rgba(255, 255, 255, 0.35);
+    /* Le fond laisse passer la page floutée, qui peut être claire par endroits :
+     une ombre douce garde les boutons blancs lisibles partout. */
+    --yarl__button_filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.55));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .media-gallery-item {
+      transition: none;
+    }
+
+    .yarl__slide,
+    .yarl__portal_open .yarl__slide {
+      transform: none;
+      transition: none;
+    }
+  }
+
+  /* Movement that had no reduced variant of its own (the global safety net
    used to flatten every transition — see globals.css). */
-@media (prefers-reduced-motion: reduce) {
-  .skip-link,
-  .site-logo,
-  .site-nav a::after,
-  .site-footer a::after,
-  .link-underline::after {
-    transition: none;
-  }
+  @media (prefers-reduced-motion: reduce) {
+    .skip-link,
+    .site-logo,
+    .site-nav a::after,
+    .site-footer a::after,
+    .link-underline::after {
+      transition: none;
+    }
 
-  .site-logo:hover {
-    transform: none;
+    .site-logo:hover {
+      transform: none;
+    }
   }
-}
 }

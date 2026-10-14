@@ -115,6 +115,61 @@ export const GlobalSettings: GlobalConfig = {
               'Curseur personnalisé affiché sur ordinateur. Automatiquement désactivé sur les écrans tactiles et pour les personnes qui préfèrent réduire les animations.',
           },
         },
+        {
+          name: 'backgroundStyle',
+          type: 'select',
+          label: 'Fond du site',
+          defaultValue: 'gradient',
+          options: [
+            {
+              label: 'Lueurs colorées (lumineuses en haut de page, une teinte par section)',
+              value: 'gradient',
+            },
+            {
+              label: 'Photos floutées (vos photos en fond, une par section)',
+              value: 'photo',
+            },
+            {
+              label: 'Formes en verre en profondeur (parallaxe au défilement)',
+              value: 'spatial',
+            },
+            {
+              label: 'Formes à manipuler en haut de page (à pousser et lancer)',
+              value: 'playground',
+            },
+            {
+              label: 'Lumière selon l’heure du visiteur (aube, jour, soir, nuit)',
+              value: 'daylight',
+            },
+            {
+              label: 'Aplats de couleur par section',
+              value: 'colorBlocks',
+            },
+          ],
+          admin: {
+            description:
+              'L’arrière-plan de toutes les pages. Les couleurs suivent la couleur principale et la couleur secondaire. Les animations sont automatiquement réduites pour les personnes qui le demandent.',
+          },
+        },
+        {
+          name: 'backgroundPhotos',
+          type: 'array',
+          label: 'Photos du fond',
+          labels: { plural: 'Photos', singular: 'Photo' },
+          admin: {
+            condition: (_, siblingData) => siblingData?.backgroundStyle === 'photo',
+            description:
+              'Utilisées dans l’ordre : la première derrière le haut de page, puis une par section (la liste recommence si elle est plus courte que la page). Elles sont fortement floutées, donc une image de 1600px de large suffit.',
+          },
+          fields: [
+            {
+              name: 'photo',
+              type: 'upload',
+              relationTo: 'media',
+              label: 'Photo',
+            },
+          ],
+        },
       ],
     },
     {

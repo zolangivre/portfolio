@@ -11,6 +11,7 @@ import { IndexRail } from '@/components/layout/IndexRail'
 import { MotionProvider } from '@/components/providers/MotionProvider'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { AmbientBackground } from '@/components/ui/AmbientBackground'
+import { CardTilt } from '@/components/ui/CardTilt'
 import { CursorEffects } from '@/components/ui/CursorEffects'
 import { getDictionary } from '@/lib/i18n/dictionary'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
@@ -135,6 +136,11 @@ export default async function LocaleLayout(props: {
 
   const themeStyle = buildThemeStyle(settings?.theme?.primaryColor, settings?.theme?.accentColor)
   const photoUrl = getMediaUrl(settings?.photo)
+  const backgroundPhotos = (settings?.theme?.backgroundPhotos ?? []).flatMap((row) => {
+    const url = getMediaUrl(row.photo)
+
+    return url ? [url] : []
+  })
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Person',
@@ -175,8 +181,12 @@ export default async function LocaleLayout(props: {
           enableSystem
         >
           <MotionProvider>
-            <AmbientBackground />
+            <AmbientBackground
+              photos={backgroundPhotos}
+              variant={settings?.theme?.backgroundStyle}
+            />
             <CursorEffects effect={settings?.theme?.cursorEffect} />
+            <CardTilt />
             <IndexRail
               dictionary={dictionary}
               locale={locale}
