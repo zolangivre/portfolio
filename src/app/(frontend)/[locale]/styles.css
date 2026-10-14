@@ -1828,17 +1828,15 @@
  * leaving square corners, for as long as the hover lasts or for good.
  * `overflow: hidden` and `clip-path` don't help; a mask (fully opaque, so
  * it hides nothing) makes it clip the card as one piece. A mask also cuts
- * off the card's drop shadow, so that moves to the frame around it, which
- * doesn't tilt anyway — a shadow stays on the ground.
+ * off the card's drop shadow, and these cards go without one: moved to the
+ * frame around them, it stayed put while the card leaned or lifted, and on
+ * the light theme it showed as grey smudges around the bottom corners. The
+ * border marks the card's edge, the halo answers the hover.
  */
   .card-glow:has([data-card-link]) > .card-lift {
     mask-image: linear-gradient(#000 0 0);
     overflow: hidden;
     position: relative;
-  }
-
-  .card-glow:has([data-card-link]):has(> .glass-surface) {
-    box-shadow: var(--shadow-rest);
   }
 
   .card-glow:has([data-card-link]) > .glass-surface {
@@ -2282,39 +2280,35 @@
   }
 
   /* Copy button beside the contact email (CopyButton.tsx). */
+  /* Just the icon: no fill, no outline. The box around it stays a full
+     2.5rem so it's still an easy target for a thumb. */
   .copy-button {
     align-items: center;
-    background: var(--surface);
-    border: 1px solid var(--border-strong);
+    background: none;
+    border: 0;
     border-radius: 999px;
     color: var(--fg-muted);
     cursor: pointer;
     display: inline-flex;
-    font-size: var(--text-caption);
-    font-weight: 600;
-    gap: 0.4rem;
-    min-height: 2.25rem;
-    padding: 0.35rem 0.85rem;
+    height: 2.5rem;
+    justify-content: center;
+    padding: 0;
     transition:
-      background-color var(--duration-fast) ease,
-      border-color var(--duration-fast) ease,
       color var(--duration-fast) ease,
       scale var(--duration-ui) var(--ease-bounce);
+    width: 2.5rem;
   }
 
   .copy-button:hover {
-    border-color: var(--accent-soft-border);
-    color: var(--fg);
+    color: var(--accent);
   }
 
   .copy-button:active {
-    scale: 0.94;
+    scale: 0.88;
     transition-duration: 100ms;
   }
 
   .copy-button[data-status='copied'] {
-    background: var(--accent-soft);
-    border-color: var(--accent-soft-border);
     color: var(--accent);
   }
 

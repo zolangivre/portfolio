@@ -84,7 +84,6 @@ export interface Dictionary {
     submitLabel: string
     sendingLabel: string
     /** The copy button beside the contact email. */
-    copyLabel: string
     copiedLabel: string
     copyFailedLabel: string
     copyEmailAriaLabel: string
@@ -213,7 +212,6 @@ const dictionaries: Record<Locale, Dictionary> = {
       formMessagePlaceholder: 'Votre message…',
       submitLabel: 'Envoyer',
       sendingLabel: 'Envoi en cours…',
-      copyLabel: 'Copier',
       copiedLabel: 'Copié',
       copyFailedLabel: 'Copie impossible',
       copyEmailAriaLabel: 'Copier l’adresse email',
@@ -344,7 +342,6 @@ const dictionaries: Record<Locale, Dictionary> = {
       formMessagePlaceholder: 'Your message…',
       submitLabel: 'Send inquiry',
       sendingLabel: 'Sending…',
-      copyLabel: 'Copy',
       copiedLabel: 'Copied',
       copyFailedLabel: 'Couldn’t copy',
       copyEmailAriaLabel: 'Copy email address',
