@@ -15,9 +15,17 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 // Production runs with R2, and the storage plugin adds its own columns
 // (`prefix`, `_objectkey`) to `media` and `videos`. Without a key the plugin
-// is off and those columns would read as extra. A placeholder is enough: the
-// plugin only shapes the schema at startup, nothing here uploads.
-process.env.R2_ACCESS_KEY_ID ||= 'schema-drift-check'
+// is off and those columns would read as extra. Placeholders are enough: the
+// plugin only shapes the schema at startup, nothing here uploads. They are
+// set unconditionally, so a real key exported in the shell can never point
+// this run at the production bucket.
+Object.assign(process.env, {
+  R2_ACCESS_KEY_ID: 'schema-drift-check',
+  R2_ACCOUNT_ID: 'schema-drift-check',
+  R2_BUCKET: 'schema-drift-check',
+  R2_PUBLIC_URL: 'http://127.0.0.1/schema-drift-check',
+  R2_SECRET_ACCESS_KEY: 'schema-drift-check',
+})
 const { default: configPromise } = await import('@/payload.config')
 const config = await configPromise
 
@@ -28,10 +36,13 @@ const config = await configPromise
  * (20260716_110000_order_ascending_semantics). Counting them would also make
  * every change to a default text (rich text defaults are stored as JSON)
  * need a migration. A new column's default is still checked: it's part of
- * its `ADD COLUMN`.
+ * its `ADD COLUMN`. The pattern matches the whole statement, so one that
+ * does anything besides changing a single default is still reported.
  */
 const isDefaultOnly = (statement: string) =>
-  /ALTER COLUMN "[^"]+" (SET|DROP) DEFAULT/.test(statement)
+  /^ALTER TABLE "[^"]+" ALTER COLUMN "[^"]+" (SET DEFAULT [^;]*|DROP DEFAULT);?$/s.test(
+    statement.trim(),
+  )
 
 let payload: Payload
 
