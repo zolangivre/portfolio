@@ -156,12 +156,16 @@ jobs:
           GH_TOKEN: ${{ steps.sweep.outputs.github_token }}
         run: |
           branch=chore/security-sweep
+          body=.security/pr-body.md
+          # hashFiles() is only a pre-filter: it also matches an empty file,
+          # which would wipe the PR description.
+          [ -s "$body" ] || { echo "$body is missing or empty" >&2; exit 1; }
           if ! git ls-remote --exit-code --heads "https://github.com/${GITHUB_REPOSITORY}.git" "$branch" >/dev/null; then
             echo "The sweep pushed nothing: no PR to open."
           elif [ "$(gh pr view "$branch" --json state -q .state 2>/dev/null || true)" = "OPEN" ]; then
-            gh pr edit "$branch" --body-file .security/pr-body.md
+            gh pr edit "$branch" --body-file "$body"
           else
-            gh pr create --base staging --head "$branch" --title "fix(deps): security sweep" --body-file .security/pr-body.md
+            gh pr create --base staging --head "$branch" --title "fix(deps): security sweep" --body-file "$body"
           fi
 
       - if: steps.decide.outputs.run == 'true'
