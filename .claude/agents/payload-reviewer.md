@@ -1,6 +1,6 @@
 ---
 name: payload-reviewer
-description: Reviews Payload CMS changes for access-control holes and schema/migration drift. Use proactively after editing collections, globals, fields, hooks, access rules, server actions or migrations, and before opening a PR that touches them.
+description: Back-end reviewer. Reviews Payload CMS and server changes for access-control holes, schema/migration drift, stale cache after a save, and unsafe queries, server actions or hooks. Use proactively after editing collections, globals, fields, hooks, access rules, queries, server actions or migrations, and before opening a PR that touches them.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---
@@ -50,6 +50,37 @@ lacks a migration.
   plus `payload_locked_documents_rels.<slug>_id` for a new collection.
 - Localized content: a field made `localized` needs its data moved into
   `_locales` for the default locale `fr`.
+
+## 3. Cache and revalidation
+
+Pages are cached until a Payload save busts them by tag (`src/lib/cache.ts`,
+`src/hooks/revalidateSite.ts`). A missed tag means an edit never shows on the site.
+
+- Every query in `src/lib/queries` wraps `unstable_cache` and lists in its
+  tags **every** slug its result inlines. With `depth: 2`, a relation or upload
+  added to a collection adds its target's tag (see `PROJECT_TAGS` in
+  `projects.ts`). A new relation field with no new tag is a finding.
+- A collection or global the site renders has the revalidation hooks
+  (`afterChange` + `afterDelete` for collections, `afterChange` for globals)
+  and an entry in `cacheTags`, spelled as its slug.
+- A new environment where the hook can't run (scripts, `payload migrate`)
+  passes `context: { disableRevalidate: true }` for bulk writes.
+
+## 4. Queries, server actions and hooks
+
+- Site queries on collections with `visibility` filter
+  `visibility: { equals: 'public' }`, in the list **and** the by-slug query.
+  A by-slug page that skips it serves a private document to anyone with the URL.
+- Queries pass `locale`, and the cache key includes it, or one locale's
+  content is served to the other.
+- Server actions in `src/lib/actions` (`'use server'`) are public endpoints:
+  validate every field, cap lengths to match the collection's `maxLength`,
+  keep the honeypot, and return a typed error state instead of throwing.
+- Hooks that call external services (`notifyNewMessage`, Resend) must not make
+  the save fail when the service is down or the env var is missing, and must
+  escape any user text they put in HTML.
+- New env vars are read server-side only (no `NEXT_PUBLIC_` on a secret) and
+  are added to `.env.example`.
 
 You may run read-only commands (`git`, `grep`, `pnpm payload migrate:status`).
 Don't modify files or the database.
