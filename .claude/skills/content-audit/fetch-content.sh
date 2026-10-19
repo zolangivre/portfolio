@@ -13,13 +13,14 @@ set -euo pipefail
 
 site=${1:-https://www.zolangivre.com}
 out=${2:-plans/.content-audit}
+[[ $site =~ ^https://[A-Za-z0-9.-]+(:[0-9]+)?$ ]] || { echo "invalid site URL: $site" >&2; exit 1; }
 mkdir -p "$out/raw"
 
 globals=(hero about contact footer navigation sections-content settings)
 collections=(projects experiences education skills technologies companies schools categories testimonials journal)
 
 fetch() {
-  curl -fsS --max-time 30 "$site/api/$1?locale=all&depth=0&limit=200" >"$out/raw/$2.json"
+  curl -fsS --max-time 30 --proto '=https' --url "$site/api/$1?locale=all&depth=0&limit=200" >"$out/raw/$2.json"
 }
 
 for slug in "${globals[@]}"; do fetch "globals/$slug" "globals-$slug"; done

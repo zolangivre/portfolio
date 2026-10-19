@@ -13,28 +13,35 @@ set -euo pipefail
 
 site=${1:-https://www.zolangivre.com}
 out=${2:-plans/.health/links.tsv}
+[[ $site =~ ^https://[A-Za-z0-9.-]+(:[0-9]+)?$ ]] || { echo "invalid site URL: $site" >&2; exit 1; }
 mkdir -p "$(dirname "$out")"
-host=$(printf '%s' "$site" | sed -E 's#^https?://##; s#/.*##')
+host=${site#https://}
+
+# URLs come from the sitemap and from content: only well-formed http(s)
+# ones go further, and curl gets them through --url, restricted to
+# http(s) even across redirects, so none can act as an option or a file:// read.
+urls() { grep -E '^https?://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+$' || true; }
 
 check() {
   local kind=$1 url=$2 result
   result=$(curl -sS -o /dev/null -L --max-time 20 -A 'Mozilla/5.0 (site-health)' \
-    -w '%{http_code}\t%{time_total}' "$url" 2>/dev/null) || result=$'000\t0'
+    --proto '=http,https' --proto-redir '=http,https' \
+    -w '%{http_code}\t%{time_total}' --url "$url" 2>/dev/null) || result=$'000\t0'
   printf '%s\t%s\t%s\n' "$kind" "$result" "$url"
 }
 
-pages=$(curl -fsS --max-time 20 "$site/sitemap.xml" | grep -o '<loc>[^<]*</loc>' | sed 's/<[^>]*>//g')
+pages=$(curl -fsS --max-time 20 --proto '=https' --url "$site/sitemap.xml" | grep -o '<loc>[^<]*</loc>' | sed 's/<[^>]*>//g' | urls)
 
 # Every http(s) string in the globals and public collections, minus this site.
 external=$(
   for path in globals/hero globals/about globals/contact globals/footer globals/navigation globals/settings projects experiences education companies schools journal; do
-    curl -fsS --max-time 20 "$site/api/$path?locale=all&depth=1&limit=200" || true
-  done | grep -oE 'https?://[^"\\ ]+' | grep -v "://$host" | grep -v '://www.w3.org/' | sort -u
+    curl -fsS --max-time 20 --proto '=https' --url "$site/api/$path?locale=all&depth=1&limit=200" || true
+  done | grep -oE 'https?://[^"\\[:space:]]+' | grep -vF "://$host" | grep -v '://www.w3.org/' | urls | sort -u
 )
 
 {
-  for url in $pages; do check page "$url"; done
-  for url in $external; do check external "$url"; done
+  while IFS= read -r url; do [ -n "$url" ] && check page "$url"; done <<<"$pages"
+  while IFS= read -r url; do [ -n "$url" ] && check external "$url"; done <<<"$external"
 } >"$out"
 
 pages_n=$(grep -c '^page' "$out" || true)

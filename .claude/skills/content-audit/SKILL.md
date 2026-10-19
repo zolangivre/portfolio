@@ -19,7 +19,7 @@ It never writes to Payload: the texts are pasted into the admin by hand.
 ## 1. Collect
 
 ```sh
-bash .claude/skills/content-audit/fetch-content.sh $ARGUMENTS
+bash .claude/skills/content-audit/fetch-content.sh "$ARGUMENTS"
 ```
 
 It reads every global and public collection with `locale=all` and writes

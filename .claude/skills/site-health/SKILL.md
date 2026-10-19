@@ -41,7 +41,7 @@ project id and its `accountId` (the team id). Then:
 ## 2. Pages and links
 
 ```sh
-bash .claude/skills/site-health/check-links.sh <site>
+bash .claude/skills/site-health/check-links.sh "<site>"
 ```
 
 It writes `plans/.health/links.tsv` (kind, status, seconds, URL): every page
