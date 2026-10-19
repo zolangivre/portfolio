@@ -16,6 +16,11 @@ describes the change, e.g. `add_project_tagline`).
 
 ## 1. Work out the exact SQL
 
+- Start with the drift test, which gives Drizzle's own SQL for the change:
+  `pnpm exec vitest run --project int tests/int/schemaDrift.int.spec.ts`.
+  Its failure message lists every statement the migrations are missing. Use
+  it as the base, then check it against the rules below (it doesn't make
+  anything idempotent, and it never backfills data).
 - Read the config change (`git diff -- src/collections src/globals src/fields src/payload.config.ts`).
 - Find how Payload names what you are adding. Look at the regenerated
   `src/payload-types.ts` and at earlier migrations that touched similar
@@ -33,7 +38,7 @@ describes the change, e.g. `add_project_tagline`).
 - Name: `src/migrations/YYYYMMDD_HHMMSS_<slug>.ts`, using the current UTC
   date/time (`date -u +%Y%m%d_%H%M%S`). It must sort after the latest file.
 - Copy the structure of the most recent migration: `import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'`, then `up` and `down`, each calling `db.execute(sql\`…\`)`.
-- Open with a doc comment explaining *why* the change exists, in the same tone as the existing ones.
+- Open with a doc comment explaining _why_ the change exists, in the same tone as the existing ones.
 - Make `up` idempotent where Postgres allows it (`IF NOT EXISTS`, `DO $$ BEGIN … EXCEPTION WHEN duplicate_object THEN null; END $$;` for constraints and enums).
 - `down` must exactly undo `up`. If `up` moves data, `down` moves it back.
 - Data that would be lost (dropped columns, type changes) has to be copied first. Say so in the comment.
@@ -52,7 +57,8 @@ Run, in order, and stop at the first failure:
 2. `pnpm payload migrate:down` then `pnpm payload migrate` to check that `down` really reverses `up`.
 3. `pnpm test:int` drops the test DB, rebuilds it from the migrations alone,
    and `tests/int/schema.int.spec.ts` reads every collection and global in
-   every locale. A missing table or column fails here.
+   every locale. `tests/int/schemaDrift.int.spec.ts` then asks Drizzle what
+   it would still change. A missing table, column, enum or index fails here.
 4. `pnpm exec tsc --noEmit`
 
 Report what each step printed. If something fails, fix the migration rather
