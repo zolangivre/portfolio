@@ -20,7 +20,13 @@ host=${site#https://}
 # URLs come from the sitemap and from content: only well-formed http(s)
 # ones go further, and curl gets them through --url, restricted to
 # http(s) even across redirects, so none can act as an option or a file:// read.
-urls() { grep -E '^https?://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+$' || true; }
+# Hosts that can only be local are dropped too (IP literals, localhost,
+# .local, .internal): a link in the content must not make this script probe
+# the machine or network it runs on.
+urls() {
+  grep -E '^https?://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+$' |
+    grep -vEi '^https?://([^/@]*@)?(\[|[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+([:/]|$)|localhost([:/]|$)|[^/]*\.(local|internal|localhost)([:/]|$))' || true
+}
 
 check() {
   local kind=$1 url=$2 result
