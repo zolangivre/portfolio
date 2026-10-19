@@ -1,0 +1,140 @@
+name: Security sweep
+
+# Every morning, and by hand: Claude clears what Dependabot and CodeQL leave
+# open. Dependabot opens version PRs on its own (dependabot.yml) but can't fix
+# a vulnerable transitive dependency whose parent pins it, and CodeQL only
+# reports. The sweep (.claude/skills/security-sweep) fixes what it can on one
+# branch and opens or updates a single PR against staging, checked by CI like
+# any other. It never merges and never dismisses an alert: it proposes, with
+# the command to run.
+#
+# It only starts Claude when something changed since the last sweep (a new
+# alert, a closed one, a new push on a red Dependabot PR): the fetch step
+# fingerprints the open set, and a cache entry per fingerprint records that
+# it was handled. Entries expire after 7 days unused, so an unchanged set is
+# looked at again at most once a week. Run it by hand to force a sweep.
+#
+# Requires:
+# - the Claude GitHub App (`/install-github-app` in Claude Code). Its token
+#   pushes the branch and opens the PR: a PR opened with GITHUB_TOKEN would
+#   not trigger CI;
+# - secret CLAUDE_CODE_OAUTH_TOKEN (`claude setup-token`);
+# - secret SECURITY_ALERTS_TOKEN: a fine-grained PAT on this repository only,
+#   read-only "Dependabot alerts" and "Code scanning alerts". GITHUB_TOKEN
+#   can't read Dependabot alerts. Only the fetch step sees it, never Claude.
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-sweep
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    name: Security sweep
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: read
+      # Exchanged for the Claude GitHub App token, which does the writing.
+      id-token: write
+    # pnpm test:int, same as the integration job in ci.yml (.env.test).
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: payload-portfolio-test
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      # Every action is pinned to a commit: this workflow hands a write token
+      # to an agent, and a tag can be moved to any code. Dependabot
+      # (github-actions) bumps the SHAs and the version comments.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: staging
+          fetch-depth: 0
+
+      - name: Fetch open alerts
+        id: alerts
+        env:
+          ALERTS_TOKEN: ${{ secrets.SECURITY_ALERTS_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: sh .claude/skills/security-sweep/fetch-alerts.sh .security
+
+      - name: Already handled?
+        id: seen
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .security
+          key: security-sweep-${{ steps.alerts.outputs.fingerprint }}
+          lookup-only: true
+
+      - name: Decide
+        id: decide
+        env:
+          TOTAL: ${{ steps.alerts.outputs.total }}
+          CACHE_HIT: ${{ steps.seen.outputs.cache-hit }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$TOTAL" = "0" ]; then
+            echo "Nothing open."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          elif [ "$EVENT" != "workflow_dispatch" ] && [ "$CACHE_HIT" = "true" ]; then
+            echo "Same open set as the last sweep."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.decide.outputs.run == 'true'
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - if: steps.decide.outputs.run == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # Install scripts only run for the packages in pnpm.onlyBuiltDependencies,
+      # so a compromised dependency can't run code at install time with this
+      # job's tokens.
+      - if: steps.decide.outputs.run == 'true'
+        name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - if: steps.decide.outputs.run == 'true'
+        name: Sweep
+        uses: anthropics/claude-code-action@58985842b834ed26087302ba27d07bc24ca8697a # v1.0.244
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          base_branch: staging
+          prompt: /security-sweep --pr
+          # The deny list backs up the skill's "never" rules; the App token's
+          # permissions and branch protection on staging/main are the real limit.
+          claude_args: >-
+            --max-turns 120
+            --allowedTools "Read,Edit,Write,Glob,Grep,Agent,Bash(pnpm *),Bash(git *),Bash(gh *),Bash(jq *),Bash(sh .claude/skills/security-sweep/*)"
+            --disallowedTools "Bash(gh pr merge*),Bash(gh api -X PATCH*),Bash(gh api --method PATCH*),Bash(git push origin staging*),Bash(git push origin main*),Bash(git commit --no-verify*)"
+
+      - if: steps.decide.outputs.run == 'true'
+        name: Remember this set as handled
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .security
+          key: security-sweep-${{ steps.alerts.outputs.fingerprint }}
