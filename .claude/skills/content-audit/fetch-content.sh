@@ -27,11 +27,22 @@ for slug in "${globals[@]}"; do fetch "globals/$slug" "globals-$slug"; done
 for slug in "${collections[@]}"; do fetch "$slug" "collections-$slug"; done
 
 # A localized field comes back as {"fr": …, "en": …}. Rich text (Lexical) is
-# reduced to its text, one paragraph per line.
+# reduced to its text, one paragraph per line and one list item per "- "
+# line. A localized array of blocks (About's point groups) becomes each
+# block's title followed by its content.
 jq -s '
+  def nodetext: [.. | .text? | strings] | join("");
   def plain:
     if type == "object" and has("root") then
-      [.root.children[]? | [.. | .text? | strings] | join("")] | join("\n")
+      [.root.children[]?
+        | if .type == "list" then ([.children[]? | "- " + nodetext] | join("\n"))
+          else nodetext end]
+      | join("\n")
+    elif type == "array" then
+      [.[] | if type == "object" then
+          ([(.title // empty), ((.content // .text // empty) | plain)] | join("\n"))
+        else tostring end]
+      | join("\n\n")
     elif type == "string" or type == "null" then .
     else tojson end;
   def doclabel($doc):
