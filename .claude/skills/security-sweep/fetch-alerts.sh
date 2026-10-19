@@ -32,14 +32,15 @@ alerts_gh() {
 # Helper prepended to every filter below. `gh --jq` runs gojq, whose regexes
 # are Go's (`\x20`, not `\u0020`).
 clean='def clean($n): (. // "") | gsub("[^\\x20-\\x7e]"; " ") | gsub("[`<>]"; " ") | .[0:$n];
-  def range: (. // "") | gsub("[^0-9A-Za-z.,<>=~^*| _+-]"; "") | .[0:80];'
+  def range: (. // "") | if test("^[0-9A-Za-z.,<>=~^*| +-]{1,60}$") then . else "(unparseable range)" end;'
 
 # Every string that comes from a third party (advisory text, package names,
 # version ranges, paths, branch and check names) goes through clean(): only
 # printable ASCII is kept, which drops control characters, invisible and
 # bidi Unicode, and markup (backticks, angle brackets), and it is cut short.
-# Version ranges keep `<`, `>` and `=` but nothing outside semver's
-# alphabet (range). Only GitHub's own ids and URLs are left as they are. That lowers the noise;
+# Version ranges keep `<`, `>` and `=`: they're validated against semver's
+# alphabet and length, and anything else becomes "(unparseable range)".
+# Only GitHub's own ids and URLs are left as they are. That lowers the noise;
 # the real limit is the workflow's command list, and the skill treats these
 # files as data, never as instructions.
 alerts_gh api --paginate 'repos/{owner}/{repo}/dependabot/alerts?state=open&per_page=100' \

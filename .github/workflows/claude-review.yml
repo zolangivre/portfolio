@@ -54,6 +54,13 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      # The reviewers' instructions, skills and Claude settings come from
+      # staging, not from the PR: a PR that edits .claude/ must not rewrite
+      # the rules of its own review. (A change to .claude/ is reviewed with
+      # the current rules, and takes effect once merged.)
+      - name: Use the reviewers from staging
+        run: git checkout origin/staging -- .claude
+
       # Read-only review: the reviewers can read the checkout and its git
       # history, and the session can only comment. No install, so no
       # dependency code runs. The deny list keeps reads away from anything
@@ -95,4 +102,4 @@ jobs:
           claude_args: >-
             --max-turns 40
             --allowedTools "Read(./**),Glob,Grep,Agent,Bash(git diff *),Bash(git log *),Bash(git show *),Bash(gh pr view *),Bash(gh pr diff *),Bash(gh pr comment *),mcp__github_inline_comment__create_inline_comment"
-            --disallowedTools "Read(//proc/**),Read(//sys/**),Read(//etc/**),Read(//run/**),Read(//tmp/**),Read(//home/runner/work/_temp/**),Read(~/.*/**),Bash(*--no-index*),Bash(*/proc/*),Bash(*environ*),Bash(*_temp*),Bash(*$(*),Bash(*`*),Bash(*../*),Bash(*--body-file /*),Bash(*--body-file ~*),Bash(*-F /*),Bash(*-F ~*),Bash(*--output*),Bash(*>*)"
+            --disallowedTools "Read(//proc/**),Read(//sys/**),Read(//etc/**),Read(//run/**),Read(//tmp/**),Read(//home/runner/work/_temp/**),Read(~/.*/**),Bash(*--no-index*),Bash(*/proc/*),Bash(*environ*),Bash(*_temp*),Bash(*$(*),Bash(*`*),Bash(*../*),Bash(*--body-file /*),Bash(*--body-file ~*),Bash(*--body-file=*),Bash(*-F /*),Bash(*-F ~*),Bash(*-F=*),Bash(*-F/*),Bash(*-F~*),Bash(*--output*),Bash(*>*)"
