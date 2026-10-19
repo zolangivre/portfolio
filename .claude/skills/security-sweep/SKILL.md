@@ -22,7 +22,9 @@ kinds of problem are left over, and they're what this sweep handles:
 - **CI** (`--pr`, how `.github/workflows/security-sweep.yml` runs it): this
   session holds a token that can write to the repo, so **no dependency code
   runs here**. No tests, no lint, no build, installs with `--ignore-scripts`.
-  The PR's own CI, which only has a read-only token, does the verifying.
+  The PR's own CI, which only has a read-only token, does the verifying. The
+  workflow allows an exact list of commands: use them as written in this file,
+  and read the `.security/` JSON files with Read rather than `jq`.
   Anything that needs more (a workflow or `.claude/` file to change, a fix to
   push onto a Dependabot branch) is reported for a local sweep instead.
 
@@ -112,13 +114,16 @@ Find why: `gh run list --branch <branch>`, then `gh run view <id> --log-failed`.
 - **Big change** (a major with a migration guide, a Payload schema change):
   don't fix. Comment on the PR with the failing job, the error, the change
   needed, and suggest turning it into a plan.
-- **Unrelated or flaky failure**: rerun once (`gh run rerun <id> --failed`) and note it.
+- **Unrelated or flaky failure**: in local mode, rerun once
+  (`gh run rerun <id> --failed`). In CI mode, just report it: rerunning CI is
+  a person's call.
 
 ## 2. Apply and prove
 
-- After any `package.json` change, install with the cooldown:
-  `pnpm install --config.minimum-release-age=4320` (add `--ignore-scripts` in
-  CI mode). The lockfile is generated, and the hooks won't let you edit it by hand.
+- After any `package.json` change, install with the cooldown. Local mode:
+  `pnpm install --config.minimum-release-age=4320`. CI mode, exactly:
+  `pnpm install --ignore-scripts --config.minimum-release-age=4320`. The
+  lockfile is generated, and the hooks won't let you edit it by hand.
 - Check the lockfile diff: only the targeted packages, plus their own
   dependencies, may change version. Anything else means the install
   re-resolved too much: undo and narrow the override.

@@ -29,15 +29,21 @@ alerts_gh() {
   fi
 }
 
+# Helper prepended to every filter below. `gh --jq` runs gojq, whose regexes
+# are Go's: `\x00`, not `\u0000`.
+clean='def clean($n): gsub("[\\x00-\\x1f`<>]"; " ") | .[0:$n];'
+
 # Free text (advisory summaries, rule descriptions, PR titles) is written by
-# third parties and read by an agent: it's cut short, and the skill treats
-# these files as data, never as instructions.
+# third parties and read by an agent: control characters and markup
+# (backticks, angle brackets) are blanked and the text is cut short. That
+# only lowers the noise: the real limit is the workflow's command list, and
+# the skill treats these files as data, never as instructions.
 alerts_gh api --paginate 'repos/{owner}/{repo}/dependabot/alerts?state=open&per_page=100' \
-  --jq '.[] | {
+  --jq "$clean"' .[] | {
     number,
     severity: .security_advisory.severity,
     ghsa: .security_advisory.ghsa_id,
-    summary: (.security_advisory.summary // "" | .[0:200]),
+    summary: (.security_advisory.summary // "" | clean(200)),
     package: .dependency.package.name,
     scope: .dependency.scope,
     relationship: .dependency.relationship,
@@ -48,15 +54,15 @@ alerts_gh api --paginate 'repos/{owner}/{repo}/dependabot/alerts?state=open&per_
 jq -s . <"$out/.dependabot.raw" >"$out/dependabot-alerts.json"
 
 alerts_gh api --paginate 'repos/{owner}/{repo}/code-scanning/alerts?state=open&per_page=100' \
-  --jq '.[] | {
+  --jq "$clean"' .[] | {
     number,
     rule: .rule.id,
     severity: (.rule.security_severity_level // .rule.severity),
-    description: (.rule.description // "" | .[0:200]),
+    description: (.rule.description // "" | clean(200)),
     tool: .tool.name,
     path: .most_recent_instance.location.path,
     line: .most_recent_instance.location.start_line,
-    message: (.most_recent_instance.message.text // "" | .[0:300]),
+    message: (.most_recent_instance.message.text // "" | clean(300)),
     url: .html_url
   }' >"$out/.code-scanning.raw"
 jq -s . <"$out/.code-scanning.raw" >"$out/code-scanning-alerts.json"
@@ -65,9 +71,9 @@ jq -s . <"$out/.code-scanning.raw" >"$out/code-scanning-alerts.json"
 # count: CI hasn't had its say yet.
 gh pr list --author app/dependabot --state open \
   --json number,title,headRefName,headRefOid,url,statusCheckRollup \
-  --jq '[.[] | {
+  --jq "$clean"' [.[] | {
     number, url,
-    title: (.title | .[0:120]),
+    title: (.title // "" | clean(120)),
     branch: .headRefName,
     head: .headRefOid,
     failing: [.statusCheckRollup[]?

@@ -23,8 +23,9 @@ name: Security sweep
 #   pushes the branch and opens the PR: a PR opened with GITHUB_TOKEN would
 #   not trigger CI. Give it no "Dependabot alerts" or "Code scanning alerts"
 #   write access, so dismissing an alert is impossible whatever it runs;
-# - branch protection on staging and main (PR required): the agent's command
-#   list below is the first limit, the server-side rules the real one;
+# - branch protection on staging and main (PR with one approving review): the
+#   agent's command list below is the first limit, the server-side rules the
+#   real one. Whatever the agent manages to write, it lands in a PR you review;
 # - secret CLAUDE_CODE_OAUTH_TOKEN (`claude setup-token`);
 # - secret SECURITY_ALERTS_TOKEN: a fine-grained PAT on this repository only,
 #   read-only "Dependabot alerts" and "Code scanning alerts". GITHUB_TOKEN
@@ -61,6 +62,9 @@ jobs:
         with:
           ref: staging
           fetch-depth: 0
+          # The agent can read .git/config: don't leave a token in it. The
+          # Claude action sets up its own credentials for the push.
+          persist-credentials: false
 
       # Fails the job if any call fails: a broken fetch must not look like
       # "nothing open".
@@ -110,9 +114,18 @@ jobs:
         name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      # Allow-list only: each command the CI mode of the skill needs, nothing
-      # broader. Edits are limited to package.json and src/; workflow and
-      # .claude/ fixes are left to a local sweep.
+      # `prepare` sets the hooks path, but --ignore-scripts skips it: without
+      # this, commit-msg (Conventional Commits) wouldn't check the agent's commits.
+      - if: steps.decide.outputs.run == 'true'
+        name: Enable git hooks
+        run: git config core.hooksPath .githooks
+
+      # Allow-list only: each command the CI mode of the skill needs, written
+      # out in full where a trailing argument could change its meaning (the
+      # install could otherwise re-enable scripts). No jq or redirection, so
+      # Bash can't write files that Edit/Write may not: edits are limited to
+      # package.json and src/, and workflow or .claude/ fixes are left to a
+      # local sweep. No `gh run rerun`: rerunning CI is a person's call.
       - if: steps.decide.outputs.run == 'true'
         name: Sweep
         uses: anthropics/claude-code-action@58985842b834ed26087302ba27d07bc24ca8697a # v1.0.244
@@ -122,8 +135,8 @@ jobs:
           prompt: /security-sweep --pr
           claude_args: >-
             --max-turns 80
-            --allowedTools "Read,Glob,Grep,Agent,Edit(./package.json),Edit(./src/**),Write(./.security/pr-body.md),Bash(jq *),Bash(npm view *),Bash(pnpm why *),Bash(pnpm install --ignore-scripts *),Bash(git status*),Bash(git diff*),Bash(git log*),Bash(git fetch origin*),Bash(git switch -C chore/security-sweep*),Bash(git switch chore/security-sweep),Bash(git rebase origin/staging),Bash(git checkout -- *),Bash(git add *),Bash(git commit -m *),Bash(git commit -F *),Bash(git push --force-with-lease -u origin chore/security-sweep),Bash(gh pr list *),Bash(gh pr view *),Bash(gh pr create --base staging *),Bash(gh pr edit chore/security-sweep *),Bash(gh pr comment *),Bash(gh run list *),Bash(gh run view *),Bash(gh run rerun *)"
-            --disallowedTools "Bash(*--no-verify*),Edit(./.github/**),Edit(./.claude/**),Write(./.github/**),Write(./.claude/**)"
+            --allowedTools "Read,Glob,Grep,Agent,Edit(./package.json),Edit(./src/**),Write(./.security/pr-body.md),Bash(pnpm why *),Bash(pnpm install --ignore-scripts --config.minimum-release-age=4320),Bash(git status*),Bash(git diff*),Bash(git log*),Bash(git fetch origin*),Bash(git switch -C chore/security-sweep*),Bash(git switch chore/security-sweep),Bash(git rebase origin/staging),Bash(git checkout -- *),Bash(git add *),Bash(git commit -m *),Bash(git commit -F *),Bash(git push --force-with-lease -u origin chore/security-sweep),Bash(gh pr list *),Bash(gh pr view *),Bash(gh pr create --base staging *),Bash(gh pr edit chore/security-sweep *),Bash(gh pr comment *),Bash(gh run list *),Bash(gh run view *)"
+            --disallowedTools "Bash(*--no-verify*),Bash(*ignore-scripts=false*),Bash(*--no-ignore-scripts*),Bash(*--output*),Bash(*>*),Edit(./.github/**),Edit(./.claude/**),Write(./.github/**),Write(./.claude/**)"
 
       - if: steps.decide.outputs.run == 'true'
         name: Mark this set as handled
