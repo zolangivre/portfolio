@@ -165,10 +165,10 @@ One commit per kind of fix, Conventional format:
 
 - Local mode: stop here and print the report.
 - CI mode: `git push --force-with-lease -u origin chore/security-sweep`,
-  write the report to `.security/pr-body.md`, then run
-  `bash .claude/skills/security-sweep/open-pr.sh`: it opens the PR, or
-  updates its description if one is open. `--body-file` and `-F` are blocked
-  in CI; comments on Dependabot PRs use `gh pr comment <n> --body "…"`.
+  then write the report to `.security/pr-body.md`. The workflow's next step,
+  outside this session, opens the PR or updates its description with that
+  file. `--body-file` and `-F` are blocked in CI; comments on Dependabot PRs
+  use `gh pr comment <n> --body "…"`.
 
 ## Report (also the PR body)
 

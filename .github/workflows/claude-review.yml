@@ -54,17 +54,23 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      # Everything that instructs Claude comes from staging, not from the PR:
-      # .claude/ (agents, skills, settings, hooks) and every CLAUDE.md or
-      # AGENTS.md. A PR must not rewrite the rules of its own review, so the
-      # PR's copies are deleted first, files it added included. (A change to
-      # them is reviewed with the current rules, and takes effect once merged.)
+      # Everything that instructs or configures Claude comes from staging,
+      # not from the PR: .claude/ (agents, skills, settings, hooks), .mcp.json,
+      # and every CLAUDE.md or AGENTS.md. A PR must not rewrite the rules of
+      # its own review, so the PR's copies are deleted first, files and links
+      # it added included. (A change to them is reviewed with the current
+      # rules, and takes effect once merged.) The repo has no symlinks, so a
+      # PR that adds one stops here instead of pointing a name somewhere else.
       - name: Use the reviewers from staging
         run: |
-          rm -rf .claude
+          if git ls-files -s | awk '$1 == "120000" { print; found = 1 } END { exit !found }'; then
+            echo "This PR adds symlinks: not reviewed automatically." >&2
+            exit 1
+          fi
+          rm -rf .claude .mcp.json
           git checkout origin/staging -- .claude
-          find . -path ./.git -prune -o -type f \( -name CLAUDE.md -o -name CLAUDE.local.md -o -name AGENTS.md \) -print -exec rm -f {} +
-          git ls-tree -r --name-only -z origin/staging | grep -zE '(^|/)(CLAUDE|AGENTS)\.md$' | xargs -0 -r git checkout origin/staging --
+          find . -path ./.git -prune -o \( -name CLAUDE.md -o -name CLAUDE.local.md -o -name AGENTS.md \) \( -type f -o -type l \) -print -exec rm -f {} +
+          git ls-tree -r --name-only -z origin/staging | grep -zE '(^|/)(CLAUDE|AGENTS)\.md$|^\.mcp\.json$' | xargs -0 -r git checkout origin/staging --
 
       # Read-only review: the reviewers can read the checkout and its git
       # history, and the session can only comment. No install, so no
