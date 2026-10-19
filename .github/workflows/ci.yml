@@ -5,6 +5,12 @@ on:
     branches: [main, staging]
   pull_request:
 
+# Every job only checks out and tests the code. Without this block the token
+# gets the repository's default permissions, which can include write access.
+# The Playwright report upload uses the runner's own token, not this one.
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
