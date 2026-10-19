@@ -30,25 +30,29 @@ alerts_gh() {
 }
 
 # Helper prepended to every filter below. `gh --jq` runs gojq, whose regexes
-# are Go's: `\x00`, not `\u0000`.
-clean='def clean($n): gsub("[\\x00-\\x1f`<>]"; " ") | .[0:$n];'
+# are Go's (`\x20`, not `\u0020`).
+clean='def clean($n): (. // "") | gsub("[^\\x20-\\x7e]"; " ") | gsub("[`<>]"; " ") | .[0:$n];
+  def range: (. // "") | gsub("[^0-9A-Za-z.,<>=~^*| _+-]"; "") | .[0:80];'
 
-# Free text (advisory summaries, rule descriptions, PR titles) is written by
-# third parties and read by an agent: control characters and markup
-# (backticks, angle brackets) are blanked and the text is cut short. That
-# only lowers the noise: the real limit is the workflow's command list, and
-# the skill treats these files as data, never as instructions.
+# Every string that comes from a third party (advisory text, package names,
+# version ranges, paths, branch and check names) goes through clean(): only
+# printable ASCII is kept, which drops control characters, invisible and
+# bidi Unicode, and markup (backticks, angle brackets), and it is cut short.
+# Version ranges keep `<`, `>` and `=` but nothing outside semver's
+# alphabet (range). Only GitHub's own ids and URLs are left as they are. That lowers the noise;
+# the real limit is the workflow's command list, and the skill treats these
+# files as data, never as instructions.
 alerts_gh api --paginate 'repos/{owner}/{repo}/dependabot/alerts?state=open&per_page=100' \
   --jq "$clean"' .[] | {
     number,
     severity: .security_advisory.severity,
     ghsa: .security_advisory.ghsa_id,
-    summary: (.security_advisory.summary // "" | clean(200)),
-    package: .dependency.package.name,
+    summary: (.security_advisory.summary | clean(200)),
+    package: (.dependency.package.name | clean(120)),
     scope: .dependency.scope,
     relationship: .dependency.relationship,
-    vulnerable: .security_vulnerability.vulnerable_version_range,
-    patched: .security_vulnerability.first_patched_version.identifier,
+    vulnerable: (.security_vulnerability.vulnerable_version_range | range),
+    patched: (.security_vulnerability.first_patched_version.identifier | if . == null then null else range end),
     url: .html_url
   }' >"$out/.dependabot.raw"
 jq -s . <"$out/.dependabot.raw" >"$out/dependabot-alerts.json"
@@ -56,13 +60,13 @@ jq -s . <"$out/.dependabot.raw" >"$out/dependabot-alerts.json"
 alerts_gh api --paginate 'repos/{owner}/{repo}/code-scanning/alerts?state=open&per_page=100' \
   --jq "$clean"' .[] | {
     number,
-    rule: .rule.id,
+    rule: (.rule.id | clean(120)),
     severity: (.rule.security_severity_level // .rule.severity),
-    description: (.rule.description // "" | clean(200)),
+    description: (.rule.description | clean(200)),
     tool: .tool.name,
-    path: .most_recent_instance.location.path,
+    path: (.most_recent_instance.location.path | clean(200)),
     line: .most_recent_instance.location.start_line,
-    message: (.most_recent_instance.message.text // "" | clean(300)),
+    message: (.most_recent_instance.message.text | clean(300)),
     url: .html_url
   }' >"$out/.code-scanning.raw"
 jq -s . <"$out/.code-scanning.raw" >"$out/code-scanning-alerts.json"
@@ -73,12 +77,12 @@ gh pr list --author app/dependabot --state open \
   --json number,title,headRefName,headRefOid,url,statusCheckRollup \
   --jq "$clean"' [.[] | {
     number, url,
-    title: (.title // "" | clean(120)),
-    branch: .headRefName,
+    title: (.title | clean(120)),
+    branch: (.headRefName | clean(120)),
     head: .headRefOid,
     failing: [.statusCheckRollup[]?
       | select(.conclusion == "FAILURE" or .conclusion == "TIMED_OUT")
-      | .name]
+      | .name | clean(80)]
   } | select(.failing | length > 0)]' >"$out/dependabot-prs.json"
 
 rm -f "$out"/.*.raw

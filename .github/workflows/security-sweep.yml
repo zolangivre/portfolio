@@ -122,7 +122,11 @@ jobs:
 
       # Allow-list only: each command the CI mode of the skill needs, written
       # out in full where a trailing argument could change its meaning (the
-      # install could otherwise re-enable scripts). No jq or redirection, so
+      # install could otherwise re-enable scripts, a --body-file could publish
+      # any file). Reads stay inside the checkout: the deny list closes the
+      # paths and tricks (/proc, the action's temp dir, `git diff --no-index`,
+      # command substitution) that could reach a token, since anything the
+      # agent can read it could post on this public repository. No jq or redirection, so
       # Bash can't write files that Edit/Write may not: edits are limited to
       # package.json and src/, and workflow or .claude/ fixes are left to a
       # local sweep. No `gh run rerun`: rerunning CI is a person's call.
@@ -135,8 +139,8 @@ jobs:
           prompt: /security-sweep --pr
           claude_args: >-
             --max-turns 80
-            --allowedTools "Read,Glob,Grep,Agent,Edit(./package.json),Edit(./src/**),Write(./.security/pr-body.md),Bash(pnpm why *),Bash(pnpm install --ignore-scripts --config.minimum-release-age=4320),Bash(git status*),Bash(git diff*),Bash(git log*),Bash(git fetch origin*),Bash(git switch -C chore/security-sweep*),Bash(git switch chore/security-sweep),Bash(git rebase origin/staging),Bash(git checkout -- *),Bash(git add *),Bash(git commit -m *),Bash(git commit -F *),Bash(git push --force-with-lease -u origin chore/security-sweep),Bash(gh pr list *),Bash(gh pr view *),Bash(gh pr create --base staging *),Bash(gh pr edit chore/security-sweep *),Bash(gh pr comment *),Bash(gh run list *),Bash(gh run view *)"
-            --disallowedTools "Bash(*--no-verify*),Bash(*ignore-scripts=false*),Bash(*--no-ignore-scripts*),Bash(*--output*),Bash(*>*),Edit(./.github/**),Edit(./.claude/**),Write(./.github/**),Write(./.claude/**)"
+            --allowedTools "Read(./**),Glob,Grep,Agent,Edit(./package.json),Edit(./src/**),Write(./.security/pr-body.md),Bash(pnpm why *),Bash(pnpm install --ignore-scripts --config.minimum-release-age=4320),Bash(git status*),Bash(git diff*),Bash(git log*),Bash(git fetch origin*),Bash(git switch -C chore/security-sweep*),Bash(git switch chore/security-sweep),Bash(git rebase origin/staging),Bash(git checkout -- *),Bash(git add *),Bash(git commit -m *),Bash(git push --force-with-lease -u origin chore/security-sweep),Bash(gh pr list *),Bash(gh pr view *),Bash(gh pr create --base staging --title * --body-file .security/pr-body.md),Bash(gh pr edit chore/security-sweep --body-file .security/pr-body.md),Bash(gh pr comment *),Bash(gh run list *),Bash(gh run view *)"
+            --disallowedTools "Bash(*--no-verify*),Bash(*ignore-scripts=false*),Bash(*--no-ignore-scripts*),Read(//proc/**),Read(//sys/**),Read(//etc/**),Read(//run/**),Read(//tmp/**),Read(//home/runner/work/_temp/**),Read(~/.*/**),Bash(*--no-index*),Bash(*/proc/*),Bash(*environ*),Bash(*_temp*),Bash(*$(*),Bash(*`*),Bash(*../*),Bash(*--body-file /*),Bash(*--body-file ~*),Bash(*-F /*),Bash(*-F ~*),Bash(*--output*),Bash(*>*),Edit(./.github/**),Edit(./.claude/**),Write(./.github/**),Write(./.claude/**)"
 
       - if: steps.decide.outputs.run == 'true'
         name: Mark this set as handled
