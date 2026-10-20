@@ -4,9 +4,10 @@ name: Claude review
 # what they find as inline comments: payload-reviewer for the back end,
 # ui-reviewer for the front end (.claude/agents/). Same split as /ship-plan.
 #
-# When: once a PR is opened or marked ready, and again whenever the `review`
-# label is added (remove and re-add it to review new commits). Not on every
-# push, to keep the cost to one review per round.
+# When: only when the `review` label is added to the PR (remove and re-add it
+# to review new commits). Never on its own: each run uses the Claude
+# subscription's quota, and changes shipped with /ship-plan were already
+# reviewed by the same agents before their commit.
 #
 # Skipped: drafts, PRs from forks (no secrets, untrusted code), Dependabot
 # (its runs get no secrets either), release-please's version PR, the
@@ -18,7 +19,7 @@ name: Claude review
 on:
   pull_request:
     branches: [staging]
-    types: [opened, ready_for_review, reopened, labeled]
+    types: [labeled]
 
 permissions:
   contents: read
@@ -37,7 +38,7 @@ jobs:
         github.event.pull_request.user.login != 'dependabot[bot]' &&
         !startsWith(github.head_ref, 'release-please--') &&
         github.head_ref != 'chore/security-sweep' &&
-        (github.event.action != 'labeled' || github.event.label.name == 'review')
+        github.event.label.name == 'review'
       }}
     runs-on: ubuntu-latest
     timeout-minutes: 20

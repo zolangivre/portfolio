@@ -248,17 +248,20 @@ les applique lui-même.
 
 ## Les workflows GitHub
 
-| Workflow                                                        | Se lance                                                                              | Fait                                                                                                                                                                     |
-| --------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [`ci.yml`](../.github/workflows/ci.yml)                         | À chaque push et chaque PR                                                            | Lint, typecheck, tests unitaires, d'intégration (test de dérive compris) et e2e, et sur les PR la vérification des docs fr/en ci-dessous. Son token est en lecture seule |
-| [`claude-review.yml`](../.github/workflows/claude-review.yml)   | Quand une PR vers `staging` est ouverte ou marquée prête, ou reçoit le label `review` | Lance payload-reviewer et/ou ui-reviewer sur le diff, vérifie chaque remarque, poste celles qui sont confirmées en commentaires sur les lignes, plus un résumé           |
-| [`security-sweep.yml`](../.github/workflows/security-sweep.yml) | Chaque jour à 6 h UTC, et à la main depuis l'onglet Actions                           | Récupère les alertes ouvertes. Si la liste a changé depuis le dernier passage, lance `/security-sweep` en mode CI et ouvre ou met à jour une seule PR vers `staging`     |
-| [`release.yml`](../.github/workflows/release.yml)               | Push sur `staging`                                                                    | La PR de version de release-please (voir le README)                                                                                                                      |
+| Workflow                                                        | Se lance                                                              | Fait                                                                                                                                                                     |
+| --------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`ci.yml`](../.github/workflows/ci.yml)                         | À chaque push et chaque PR                                            | Lint, typecheck, tests unitaires, d'intégration (test de dérive compris) et e2e, et sur les PR la vérification des docs fr/en ci-dessous. Son token est en lecture seule |
+| [`claude-review.yml`](../.github/workflows/claude-review.yml)   | Quand une PR vers `staging` reçoit le label `review`, et seulement là | Lance payload-reviewer et/ou ui-reviewer sur le diff, vérifie chaque remarque, poste celles qui sont confirmées en commentaires sur les lignes, plus un résumé           |
+| [`security-sweep.yml`](../.github/workflows/security-sweep.yml) | Chaque jour à 6 h UTC, et à la main depuis l'onglet Actions           | Récupère les alertes ouvertes. Si la liste a changé depuis le dernier passage, lance `/security-sweep` en mode CI et ouvre ou met à jour une seule PR vers `staging`     |
+| [`release.yml`](../.github/workflows/release.yml)               | Push sur `staging`                                                    | La PR de version de release-please (voir le README)                                                                                                                      |
 
 La revue ignore les brouillons, les forks, Dependabot, release-please, la PR de
 release, la PR du balayage lui-même, et les PR qui ajoutent des liens
 symboliques. Pour faire relire de nouveaux commits sur une PR, retirer le label
-`review` puis le remettre.
+`review` puis le remettre. Elle ne tourne jamais toute seule : mets le label
+sur les PR faites à la main, les gros changements, et tout ce qui touche aux
+règles d'accès ou à la base. Un changement livré avec `/ship-plan` a déjà été
+relu par les mêmes agents.
 
 **La vérification des docs fr/en** fait échouer une PR qui modifie
 `README.md` ou un `docs/*.md` sans son jumeau `.fr.md`, ou l'inverse. Chaque
@@ -276,10 +279,10 @@ Deux workflows lancent Claude tout seuls, avec `CLAUDE_CODE_OAUTH_TOKEN`. Ils
 comptent donc dans les mêmes limites d'abonnement que ton propre usage de
 Claude :
 
-| Workflow             | Quand Claude tourne vraiment                                                                                                                                                                                     | Coût habituel                                                     |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `claude-review.yml`  | À chaque PR vers `staging` que tu ouvres (ou passes en prête, rouvres, ou labelles `review`). Pas aux nouveaux commits poussés dessus, et jamais sur Dependabot, release-please, la PR de release ni le balayage | Une session de revue par PR, plus longue si le diff est gros      |
-| `security-sweep.yml` | Démarre tous les jours à 06:00 UTC, mais Claude ne tourne que si l'ensemble des alertes ouvertes a changé depuis la dernière fois, ou quand tu le lances à la main                                               | Rien la plupart des jours ; une session quand les alertes bougent |
+| Workflow             | Quand Claude tourne vraiment                                                                                                                                       | Coût habituel                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `claude-review.yml`  | Seulement quand tu ajoutes le label `review` à une PR vers `staging`. Jamais tout seul, et jamais sur Dependabot, release-please, la PR de release ni le balayage  | Une session de revue par PR, plus longue si le diff est gros      |
+| `security-sweep.yml` | Démarre tous les jours à 06:00 UTC, mais Claude ne tourne que si l'ensemble des alertes ouvertes a changé depuis la dernière fois, ou quand tu le lances à la main | Rien la plupart des jours ; une session quand les alertes bougent |
 
 Tout le reste n'en consomme pas : `ci.yml` et `release.yml` n'appellent pas
 Claude, et les commandes ci-dessus ne tournent que quand tu les tapes, dans ta
