@@ -46,50 +46,50 @@ The database is exposed on `127.0.0.1:5432`, the site on port 3000. The containe
 
 ## Environment variables
 
-| Variable | Description |
-| --- | --- |
-| `DATABASE_URL` | PostgreSQL connection string |
-| `PAYLOAD_SECRET` | Payload secret key (sessions, tokens) |
-| `NEXT_PUBLIC_SITE_URL` | Public site URL (SEO, sitemap) |
-| `BLOB_READ_WRITE_TOKEN` | *Optional locally.* Vercel Blob token — without it, uploads go to local disk |
-| `RESEND_API_KEY` | *Optional.* Enables the contact-form email notification. Without it, messages are only stored in the admin |
-| `CONTACT_NOTIFICATION_FROM` | Sender address for that notification, on a domain verified with Resend |
-| `CONTACT_NOTIFICATION_TO` | Recipient. Defaults to Global Settings → contact email |
+| Variable                    | Description                                                                                                |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`              | PostgreSQL connection string                                                                               |
+| `PAYLOAD_SECRET`            | Payload secret key (sessions, tokens)                                                                      |
+| `NEXT_PUBLIC_SITE_URL`      | Public site URL (SEO, sitemap)                                                                             |
+| `BLOB_READ_WRITE_TOKEN`     | _Optional locally._ Vercel Blob token — without it, uploads go to local disk                               |
+| `RESEND_API_KEY`            | _Optional._ Enables the contact-form email notification. Without it, messages are only stored in the admin |
+| `CONTACT_NOTIFICATION_FROM` | Sender address for that notification, on a domain verified with Resend                                     |
+| `CONTACT_NOTIFICATION_TO`   | Recipient. Defaults to Global Settings → contact email                                                     |
 
 ## Scripts
 
-| Command | Action |
-| --- | --- |
-| `pnpm dev` | Development server |
-| `pnpm devsafe` | Same, after clearing the `.next` cache |
-| `pnpm build` / `pnpm start` | Production build and server |
-| `pnpm generate:types` | Regenerates `src/payload-types.ts` after a schema change |
-| `pnpm payload migrate` | Applies pending migrations |
-| `pnpm payload migrate:status` | Migration status |
-| `pnpm lint` | ESLint |
-| `pnpm test` | Unit, then integration (Vitest), then e2e (Playwright) |
-| `pnpm test:unit` / `pnpm test:int` / `pnpm test:e2e` | Each suite separately |
-| `pnpm test:e2e:ui` / `pnpm test:e2e:report` | Playwright UI mode / HTML report of the last e2e run |
-| `pnpm test:coverage` | Unit suite with coverage, failing under 90% on `src/lib`, `src/hooks`, the proxy and the sitemap |
+| Command                                              | Action                                                                                           |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `pnpm dev`                                           | Development server                                                                               |
+| `pnpm devsafe`                                       | Same, after clearing the `.next` cache                                                           |
+| `pnpm build` / `pnpm start`                          | Production build and server                                                                      |
+| `pnpm generate:types`                                | Regenerates `src/payload-types.ts` after a schema change                                         |
+| `pnpm payload migrate`                               | Applies pending migrations                                                                       |
+| `pnpm payload migrate:status`                        | Migration status                                                                                 |
+| `pnpm lint`                                          | ESLint                                                                                           |
+| `pnpm test`                                          | Unit, then integration (Vitest), then e2e (Playwright)                                           |
+| `pnpm test:unit` / `pnpm test:int` / `pnpm test:e2e` | Each suite separately                                                                            |
+| `pnpm test:e2e:ui` / `pnpm test:e2e:report`          | Playwright UI mode / HTML report of the last e2e run                                             |
+| `pnpm test:coverage`                                 | Unit suite with coverage, failing under 90% on `src/lib`, `src/hooks`, the proxy and the sitemap |
 
 ## Content model
 
 ### Collections
 
-| Collection | Purpose |
-| --- | --- |
-| **Projects** | Portfolio projects — rich description, cover image (+ dark variant), gallery, technologies, GitHub/live links, status, year, featured flag |
-| **Experiences** | Professional timeline — position, company, technologies, dates |
-| **Education** | Education timeline — degree, school, dates |
-| **Skills** | Skills grouped by category |
-| **Journal** | Personal entries with category, gallery and visibility |
-| **Technologies** | Reusable tech tags (logo, color, website) |
-| **Companies / Schools** | Company/school references (logo, website) |
-| **Categories** | Shared taxonomy (tech, project, journal) |
-| **Testimonials** | Testimonials |
-| **Messages** | Contact form submissions |
-| **Media** | Uploads (images, logos) |
-| **Users** | Admin accounts |
+| Collection              | Purpose                                                                                                                                    |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Projects**            | Portfolio projects — rich description, cover image (+ dark variant), gallery, technologies, GitHub/live links, status, year, featured flag |
+| **Experiences**         | Professional timeline — position, company, technologies, dates                                                                             |
+| **Education**           | Education timeline — degree, school, dates                                                                                                 |
+| **Skills**              | Skills grouped by category                                                                                                                 |
+| **Journal**             | Personal entries with category, gallery and visibility                                                                                     |
+| **Technologies**        | Reusable tech tags (logo, color, website)                                                                                                  |
+| **Companies / Schools** | Company/school references (logo, website)                                                                                                  |
+| **Categories**          | Shared taxonomy (tech, project, journal)                                                                                                   |
+| **Testimonials**        | Testimonials                                                                                                                               |
+| **Messages**            | Contact form submissions                                                                                                                   |
+| **Media**               | Uploads (images, logos)                                                                                                                    |
+| **Users**               | Admin accounts                                                                                                                             |
 
 ### Globals
 
@@ -108,7 +108,7 @@ pnpm payload migrate:status   # list pending migrations
 pnpm payload migrate          # apply them
 ```
 
-After any schema change: write/generate the matching migration, then run `pnpm generate:types`.
+After any schema change, write the matching migration by hand: `payload migrate:create` doesn't work in this repo (stale snapshots). `/new-migration` in Claude Code does it, and `tests/int/schemaDrift.int.spec.ts` fails with the missing SQL whenever the migrations lag behind the config. Then run `pnpm generate:types`.
 
 ## Tests
 
@@ -134,16 +134,20 @@ A failing e2e test keeps a video, a screenshot and a full trace (DOM, network an
 - **Release** ([`.github/workflows/release.yml`](.github/workflows/release.yml)) — see [Versioning](#versioning).
 - **Vercel** builds with `pnpm run ci` ([`vercel.json`](vercel.json)), which applies pending migrations to the production database before `next build` — the schema can never lag behind the deployed code. Only `main` (production) and `staging` (preview) are deployed: `git.deploymentEnabled` in the same file blocks every other branch (`feature/…`, Dependabot, the release-please version PR), so they trigger no build and no migration.
 
+## Agent workflows
+
+Claude Code commands, review subagents and two GitHub workflows (a daily security sweep, a review on pull requests) help ship changes, upgrades and fixes. They propose, and never merge or deploy. How each one works, when to use it and how to set it up: [docs/agent-workflows.md](docs/agent-workflows.md).
+
 ## Versioning
 
 [SemVer](https://semver.org) versions derived from commit messages ([Conventional Commits](https://www.conventionalcommits.org)), checked by `.githooks/commit-msg` (enabled by `pnpm install`):
 
-| Commit | Effect on the version |
-| --- | --- |
-| `fix: …`, `perf: …` | patch: 1.0.0 → 1.0.1 |
-| `feat: …` | minor: 1.0.0 → 1.1.0 |
-| `feat!: …` or `BREAKING CHANGE:` in the body | major: 1.0.0 → 2.0.0 |
-| `chore`, `refactor`, `docs`, `test`, `ci`… | none, left out of the CHANGELOG |
+| Commit                                       | Effect on the version           |
+| -------------------------------------------- | ------------------------------- |
+| `fix: …`, `perf: …`                          | patch: 1.0.0 → 1.0.1            |
+| `feat: …`                                    | minor: 1.0.0 → 1.1.0            |
+| `feat!: …` or `BREAKING CHANGE:` in the body | major: 1.0.0 → 2.0.0            |
+| `chore`, `refactor`, `docs`, `test`, `ci`…   | none, left out of the CHANGELOG |
 
 Same flow as patateprod-front and patateprod-back:
 
