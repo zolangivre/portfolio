@@ -123,7 +123,10 @@ jobs:
       # Allow-list only: each command the CI mode of the skill needs, written
       # out in full where a trailing argument could change its meaning (the
       # install could otherwise re-enable scripts, `git switch -C` another
-      # starting point). --body-file and -F are denied outright, since they
+      # starting point). Prefixes end with a space (`git diff *`, never
+      # `git diff*`, which also matches `git difftool --extcmd=…`), and the
+      # git options that run a program (--extcmd, --upload-pack, -c core.*…)
+      # are denied. --body-file and -F are denied outright, since they
       # could publish any file: the agent only writes .security/pr-body.md,
       # and the next step, outside the session, opens the PR with it.
       # Reads stay inside the checkout: the deny list closes the paths and
@@ -143,8 +146,8 @@ jobs:
           prompt: /security-sweep --pr
           claude_args: >-
             --max-turns 80
-            --allowedTools "Read(./**),Glob,Grep,Agent,Edit(./package.json),Edit(./src/**),Write(./.security/pr-body.md),Bash(pnpm why *),Bash(pnpm install --ignore-scripts --config.minimum-release-age=4320),Bash(git status*),Bash(git diff*),Bash(git log*),Bash(git fetch origin*),Bash(git switch -C chore/security-sweep),Bash(git switch chore/security-sweep),Bash(git rebase origin/staging),Bash(git checkout -- *),Bash(git add *),Bash(git commit -m *),Bash(git push --force-with-lease -u origin chore/security-sweep),Bash(gh pr list *),Bash(gh pr view *),Bash(gh pr comment *),Bash(gh run list *),Bash(gh run view *)"
-            --disallowedTools "Bash(*--no-verify*),Bash(*ignore-scripts=false*),Bash(*--no-ignore-scripts*),Read(//proc/**),Read(//sys/**),Read(//etc/**),Read(//run/**),Read(//tmp/**),Read(//home/runner/work/_temp/**),Read(~/.*/**),Bash(*--no-index*),Bash(*/proc/*),Bash(*environ*),Bash(*_temp*),Bash(*$(*),Bash(*`*),Bash(*../*),Bash(*--body-file*),Bash(* -F*),Bash(*--output*),Bash(*>*),Edit(./.github/**),Edit(./.claude/**),Write(./.github/**),Write(./.claude/**)"
+            --allowedTools "Read(./**),Glob,Grep,Agent,Edit(./package.json),Edit(./src/**),Write(./.security/pr-body.md),Bash(pnpm why *),Bash(pnpm install --ignore-scripts --config.minimum-release-age=4320),Bash(git status),Bash(git status --porcelain),Bash(git diff),Bash(git diff *),Bash(git log),Bash(git log *),Bash(git fetch origin),Bash(git fetch origin staging),Bash(git switch -C chore/security-sweep),Bash(git switch chore/security-sweep),Bash(git rebase origin/staging),Bash(git checkout -- *),Bash(git add *),Bash(git commit -m *),Bash(git push --force-with-lease -u origin chore/security-sweep),Bash(gh pr list *),Bash(gh pr view *),Bash(gh pr comment *),Bash(gh run list *),Bash(gh run view *)"
+            --disallowedTools "Bash(*--no-verify*),Bash(*difftool*),Bash(*--extcmd*),Bash(*--ext-diff*),Bash(*--upload-pack*),Bash(*--receive-pack*),Bash(*--exec*),Bash(git -c*),Bash(*core.*),Bash(*diff.external*),Bash(*ignore-scripts=false*),Bash(*--no-ignore-scripts*),Read(//proc/**),Read(//sys/**),Read(//etc/**),Read(//run/**),Read(//tmp/**),Read(//home/runner/work/_temp/**),Read(~/.*/**),Bash(*--no-index*),Bash(*/proc/*),Bash(*environ*),Bash(*_temp*),Bash(*$(*),Bash(*`*),Bash(*../*),Bash(*--body-file*),Bash(* -F*),Bash(*--output*),Bash(*>*),Edit(./.github/**),Edit(./.claude/**),Write(./.github/**),Write(./.claude/**)"
 
       # Opens the PR, or updates its description, with the App token the
       # sweep used (a PR opened with GITHUB_TOKEN wouldn't trigger CI). This
