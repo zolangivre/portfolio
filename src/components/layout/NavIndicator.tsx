@@ -32,19 +32,30 @@ export function NavIndicator() {
     const wide = window.matchMedia('(min-width: 881px)')
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
     let shown = false
+    let target = { left: Number.NaN, span: Number.NaN }
 
     const place = () => {
       const link = nav.querySelector<HTMLElement>('a[aria-current]')
 
       if (!link || !wide.matches) {
-        shown = false
-        animate(opacity, 0, { duration: 0.2 })
+        if (shown) {
+          shown = false
+          animate(opacity, 0, { duration: 0.2 })
+        }
 
         return
       }
 
       const left = link.getBoundingClientRect().left - nav.getBoundingClientRect().left
       const span = link.getBoundingClientRect().width
+
+      // Already heading there: restarting the spring would cut its momentum
+      // and stall the glide for a frame.
+      if (shown && left === target.left && span === target.span) {
+        return
+      }
+
+      target = { left, span }
 
       // Appearing, it starts under its link; only a move between links glides.
       if (!shown || reduceMotion.matches) {

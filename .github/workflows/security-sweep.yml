@@ -1,0 +1,182 @@
+name: Security sweep
+
+# Every morning, and by hand: Claude clears what Dependabot and CodeQL leave
+# open. Dependabot opens version PRs on its own (dependabot.yml) but can't fix
+# a vulnerable transitive dependency whose parent pins it, and CodeQL only
+# reports. The sweep (.claude/skills/security-sweep, CI mode) fixes what it
+# can on one branch and opens or updates a single PR against staging. It never
+# merges and never dismisses an alert: it proposes, with the command to run.
+#
+# No dependency code runs next to the write token: the agent installs with
+# --ignore-scripts and runs no tests. The PR it opens is checked by ci.yml,
+# whose token is read-only.
+#
+# It only starts Claude when something changed since the last sweep (a new
+# alert, a closed one, a new push on a red Dependabot PR): the fetch step
+# fingerprints the open set, and an empty cache entry per fingerprint records
+# that it was handled (the alert data itself is never cached). Entries expire
+# after 7 days unused, so an unchanged set is looked at again at most once a
+# week. Run it by hand to force a sweep.
+#
+# Requires:
+# - the Claude GitHub App (`/install-github-app` in Claude Code). Its token
+#   pushes the branch and opens the PR: a PR opened with GITHUB_TOKEN would
+#   not trigger CI. Give it no "Dependabot alerts" or "Code scanning alerts"
+#   write access, so dismissing an alert is impossible whatever it runs;
+# - branch protection on staging and main (PR with one approving review): the
+#   agent's command list below is the first limit, the server-side rules the
+#   real one. Whatever the agent manages to write, it lands in a PR you review;
+# - secret CLAUDE_CODE_OAUTH_TOKEN (`claude setup-token`);
+# - secret SECURITY_ALERTS_TOKEN: a fine-grained PAT on this repository only,
+#   read-only "Dependabot alerts" and "Code scanning alerts". GITHUB_TOKEN
+#   can't read Dependabot alerts. Only the fetch step sees it, never Claude.
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-sweep
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    name: Security sweep
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: read
+      # Exchanged for the Claude GitHub App token, which does the writing.
+      id-token: write
+    steps:
+      # Every action is pinned to a commit: this workflow hands a write token
+      # to an agent, and a tag can be moved to any code. Dependabot
+      # (github-actions) bumps the SHAs and the version comments.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: staging
+          fetch-depth: 0
+          # The agent can read .git/config: don't leave a token in it. The
+          # Claude action sets up its own credentials for the push.
+          persist-credentials: false
+
+      # Fails the job if any call fails: a broken fetch must not look like
+      # "nothing open".
+      - name: Fetch open alerts
+        id: alerts
+        env:
+          ALERTS_TOKEN: ${{ secrets.SECURITY_ALERTS_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: bash .claude/skills/security-sweep/fetch-alerts.sh .security
+
+      - name: Already handled?
+        id: seen
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .seen
+          key: security-sweep-${{ steps.alerts.outputs.fingerprint }}
+          lookup-only: true
+
+      - name: Decide
+        id: decide
+        env:
+          TOTAL: ${{ steps.alerts.outputs.total }}
+          CACHE_HIT: ${{ steps.seen.outputs.cache-hit }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$TOTAL" = "0" ]; then
+            echo "Nothing open."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          elif [ "$EVENT" != "workflow_dispatch" ] && [ "$CACHE_HIT" = "true" ]; then
+            echo "Same open set as the last sweep."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.decide.outputs.run == 'true'
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - if: steps.decide.outputs.run == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # For `pnpm why` only. --ignore-scripts: no package code runs in this job.
+      - if: steps.decide.outputs.run == 'true'
+        name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      # `prepare` sets the hooks path, but --ignore-scripts skips it: without
+      # this, commit-msg (Conventional Commits) wouldn't check the agent's commits.
+      - if: steps.decide.outputs.run == 'true'
+        name: Enable git hooks
+        run: git config core.hooksPath .githooks
+
+      # Allow-list only: each command the CI mode of the skill needs, written
+      # out in full where a trailing argument could change its meaning (the
+      # install could otherwise re-enable scripts, `git switch -C` another
+      # starting point). Prefixes end with a space (`git diff *`, never
+      # `git diff*`, which also matches `git difftool --extcmd=…`), and the
+      # git options that run a program (--extcmd, --upload-pack, -c core.*…)
+      # are denied. --body-file and -F are denied outright, since they
+      # could publish any file: the agent only writes .security/pr-body.md,
+      # and the next step, outside the session, opens the PR with it.
+      # Reads stay inside the checkout: the deny list closes the paths and
+      # tricks (/proc, the action's temp dir, `git diff --no-index`, command
+      # substitution) that could reach a token, since anything the agent can
+      # read it could post on this public repository. No jq or redirection, so
+      # Bash can't write files that Edit/Write may not: edits are limited to
+      # package.json and src/, and workflow or .claude/ fixes are left to a
+      # local sweep. No `gh run rerun`: rerunning CI is a person's call.
+      - if: steps.decide.outputs.run == 'true'
+        name: Sweep
+        id: sweep
+        uses: anthropics/claude-code-action@58985842b834ed26087302ba27d07bc24ca8697a # v1.0.244
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          base_branch: staging
+          prompt: /security-sweep --pr
+          claude_args: >-
+            --max-turns 80
+            --allowedTools "Read(./**),Glob,Grep,Agent,Edit(./package.json),Edit(./src/**),Write(./.security/pr-body.md),Bash(pnpm why *),Bash(pnpm install --ignore-scripts --config.minimum-release-age=4320),Bash(git status),Bash(git status --porcelain),Bash(git diff),Bash(git diff *),Bash(git log),Bash(git log *),Bash(git fetch origin),Bash(git fetch origin staging),Bash(git switch -C chore/security-sweep),Bash(git switch chore/security-sweep),Bash(git rebase origin/staging),Bash(git checkout -- *),Bash(git add *),Bash(git commit -m *),Bash(git push --force-with-lease -u origin chore/security-sweep),Bash(gh pr list *),Bash(gh pr view *),Bash(gh pr comment *),Bash(gh run list *),Bash(gh run view *)"
+            --disallowedTools "Bash(*--no-verify*),Bash(*difftool*),Bash(*--extcmd*),Bash(*--ext-diff*),Bash(*--upload-pack*),Bash(*--receive-pack*),Bash(*--exec*),Bash(git -c*),Bash(*core.*),Bash(*diff.external*),Bash(*ignore-scripts=false*),Bash(*--no-ignore-scripts*),Read(//proc/**),Read(//sys/**),Read(//etc/**),Read(//run/**),Read(//tmp/**),Read(//home/runner/work/_temp/**),Read(~/.*/**),Bash(*--no-index*),Bash(*/proc/*),Bash(*environ*),Bash(*_temp*),Bash(*$(*),Bash(*`*),Bash(*../*),Bash(*--body-file*),Bash(* -F*),Bash(*--output*),Bash(*>*),Edit(./.github/**),Edit(./.claude/**),Write(./.github/**),Write(./.claude/**)"
+
+      # Opens the PR, or updates its description, with the App token the
+      # sweep used (a PR opened with GITHUB_TOKEN wouldn't trigger CI). This
+      # runs outside the Claude session and reads one fixed file, so the
+      # agent never gets a command that publishes a file of its choosing.
+      - if: steps.decide.outputs.run == 'true' && hashFiles('.security/pr-body.md') != ''
+        name: Open or update the sweep PR
+        env:
+          GH_TOKEN: ${{ steps.sweep.outputs.github_token }}
+        run: |
+          branch=chore/security-sweep
+          body=.security/pr-body.md
+          # hashFiles() is only a pre-filter: it also matches an empty file,
+          # which would wipe the PR description.
+          [ -s "$body" ] || { echo "$body is missing or empty" >&2; exit 1; }
+          if ! git ls-remote --exit-code --heads "https://github.com/${GITHUB_REPOSITORY}.git" "$branch" >/dev/null; then
+            echo "The sweep pushed nothing: no PR to open."
+          elif [ "$(gh pr view "$branch" --json state -q .state 2>/dev/null || true)" = "OPEN" ]; then
+            gh pr edit "$branch" --body-file "$body"
+          else
+            gh pr create --base staging --head "$branch" --title "fix(deps): security sweep" --body-file "$body"
+          fi
+
+      - if: steps.decide.outputs.run == 'true'
+        name: Mark this set as handled
+        run: mkdir -p .seen && touch .seen/handled
+
+      - if: steps.decide.outputs.run == 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .seen
+          key: security-sweep-${{ steps.alerts.outputs.fingerprint }}

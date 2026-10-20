@@ -5,6 +5,12 @@ on:
     branches: [main, staging]
   pull_request:
 
+# Every job only checks out and tests the code. Without this block the token
+# gets the repository's default permissions, which can include write access.
+# The Playwright report upload uses the runner's own token, not this one.
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -47,6 +53,27 @@ jobs:
 
       - name: Typecheck
         run: pnpm exec tsc --noEmit
+
+  # README.md and the docs exist in English and French (<name>.fr.md): a PR
+  # that changes one language and not the other fails here. See the script
+  # for the `Docs-Sync: skip` escape hatch. Pull requests only, minus the same
+  # release PRs as above.
+  docs:
+    name: Docs fr/en in sync
+    if: >-
+      ${{ github.event_name == 'pull_request' &&
+          github.head_ref != 'staging' &&
+          !startsWith(github.head_ref, 'release-please--') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Check translated docs
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: bash .github/check-doc-pairs.sh "origin/$BASE_REF"
 
   unit:
     name: Unit tests

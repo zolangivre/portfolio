@@ -19,8 +19,8 @@ const localeLabels: Record<Locale, string> = {
 }
 
 // Each language named in itself, as a visitor looking for it would read it.
-// The visible code stays part of the label so voice control ("click EN")
-// still matches.
+// The label starts with the visible code ("EN, English") so voice control
+// ("click EN") still matches (WCAG 2.5.3, axe's label-content-name-mismatch).
 const localeNames: Record<Locale, string> = {
   fr: 'Français',
   en: 'English',
@@ -99,7 +99,7 @@ export function LanguageSwitcher({ dictionary, locale }: LanguageSwitcherProps) 
           // reload with an exit animation, it doesn't replace it.
           <a
             aria-current={entry === locale ? 'true' : undefined}
-            aria-label={`${localeNames[entry]} (${localeLabels[entry]})`}
+            aria-label={`${localeLabels[entry]}, ${localeNames[entry]}`}
             className="language-switcher-item"
             data-active={entry === locale}
             href={href}
