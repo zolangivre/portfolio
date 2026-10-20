@@ -42,7 +42,7 @@ test('the language switcher keeps the current page', async ({ page }) => {
   await openMenuIfCollapsed(page)
   await page
     .getByRole('group', { name: 'Changer de langue' })
-    .getByRole('link', { name: 'English (EN)' })
+    .getByRole('link', { name: 'EN, English' })
     .click()
 
   await expect(page).toHaveURL(`/en/projects/${alpha.slug}`)

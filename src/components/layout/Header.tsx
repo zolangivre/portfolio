@@ -46,9 +46,11 @@ export function Header({ dictionary, locale, navigation, sections, settings }: H
       <RouteScrollManager />
       <HashScrollHandler />
       <Container className="site-header-inner">
-        {/* The label has to contain the visible initials, or a voice-control
-            user saying what they see ("click ZG") can't reach the link. */}
-        <LogoLink ariaLabel={`${name} (${initials})`} className="site-logo" href={`/${locale}`}>
+        {/* The label starts with the visible initials, or a voice-control
+            user saying what they see ("click ZG") can't reach the link
+            (WCAG 2.5.3, axe's label-content-name-mismatch). The name follows
+            for screen readers: "ZG, Zolan Givre". */}
+        <LogoLink ariaLabel={`${initials}, ${name}`} className="site-logo" href={`/${locale}`}>
           <span className="site-logo-initials">{initials}</span>
         </LogoLink>
         <MobileNavToggle
