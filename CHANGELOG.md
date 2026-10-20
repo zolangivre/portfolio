@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.3.1](https://github.com/zolangivre/portfolio/compare/v1.3.0...v1.3.1) (2026-10-20)
+
+
+### Corrections
+
+* **a11y:** start the logo and language labels with their visible text ([652c41d](https://github.com/zolangivre/portfolio/commit/652c41d247ed7d63554a4b3df3fc3351de06f6c0))
+* **deps:** patch vulnerable transitive dependencies ([0e77d04](https://github.com/zolangivre/portfolio/commit/0e77d04209e82acd46e01feecdf456c7eccbc06f))
+* **deps:** patch vulnerable transitive dependencies and CI token permissions ([9079898](https://github.com/zolangivre/portfolio/commit/9079898beafcc7eabbb89fa7a6f36404bb1353f5))
+* improve navscroll ([9997451](https://github.com/zolangivre/portfolio/commit/9997451b24dd72b41f32aa8bea946d1a8995c578))
+* **migrations:** add the _parent_id indexes required by Payload 3.91 ([b8de27d](https://github.com/zolangivre/portfolio/commit/b8de27da3e30dbe5fabfb682e9bd7055b11051c2))
+
 ## [1.3.0](https://github.com/zolangivre/portfolio/compare/v1.2.0...v1.3.0) (2026-10-14)
 
 
