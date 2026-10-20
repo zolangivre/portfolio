@@ -54,6 +54,27 @@ jobs:
       - name: Typecheck
         run: pnpm exec tsc --noEmit
 
+  # README.md and the docs exist in English and French (<name>.fr.md): a PR
+  # that changes one language and not the other fails here. See the script
+  # for the `Docs-Sync: skip` escape hatch. Pull requests only, minus the same
+  # release PRs as above.
+  docs:
+    name: Docs fr/en in sync
+    if: >-
+      ${{ github.event_name == 'pull_request' &&
+          github.head_ref != 'staging' &&
+          !startsWith(github.head_ref, 'release-please--') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Check translated docs
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: bash .github/check-doc-pairs.sh "origin/$BASE_REF"
+
   unit:
     name: Unit tests
     if: *run-ci
