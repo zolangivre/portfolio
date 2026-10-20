@@ -36,6 +36,9 @@ après un changement de schéma.
 | Vérifier une branche avant d'ouvrir une PR                     | `/pre-pr` (ajouter `--e2e` pour les tests navigateur) | Un rapport, sans aucun changement                          |
 | Relire les textes fr/en du site                                | `/content-audit`                                      | Un fichier de textes dans `plans/`                         |
 | Vérifier que la production va bien                             | `/site-health`                                        | Un rapport dans `plans/`                                   |
+| Savoir si une PR Dependabot peut être mergée                   | `/triage-deps 79`                                     | Un verdict, rien n'est mergé                               |
+| Regarder staging avant une release                             | `/preview-check` (ou `/preview-check local`)          | Des captures et un rapport dans `plans/`                   |
+| Mettre staging en production                                   | `/release`, puis `/release verify` après le merge     | La PR de release, puis un rapport sur la prod              |
 | Faire relire une PR sur GitHub                                 | Ajouter le label `review` à la PR                     | Des commentaires sur les lignes de la PR                   |
 
 ## Les commandes
@@ -165,6 +168,61 @@ Lecture seule : aucun déploiement, retour en arrière ni changement de
 variable. Le vérificateur de liens ignore les hôtes locaux et ne suit pas les
 redirections.
 
+### `/triage-deps <numéro de PR>`
+
+Pour toute PR Dependabot, sauf Payload/Next/React (celles-là passent par
+`/upgrade-payload`). La commande lit tous les changelogs entre les deux
+versions et cherche dans le code les API qui ont changé. Elle merge ensuite
+la PR dans le `staging` actuel, sur une branche jetable, et lance toutes les
+vérifications, e2e compris. Pour un paquet qui tourne dans le navigateur
+(motion, next-themes, la lightbox), elle démarre aussi le build de production
+avec les données de test, et mesure les écrans concernés avec
+chrome-devtools : les apparitions qui finissent visibles, les valeurs liées
+au scroll, le mouvement réduit, la console.
+
+Le verdict est **mergeable**, **mergeable, à vérifier à l'œil** (avec les
+cinq minutes de choses à regarder sur staging) ou **bloquant**. Il dit aussi
+quand merger par rapport à la release en attente. La commande ne merge, ne
+pousse et ne commente rien, et te laisse sur un `staging` propre.
+
+### `/preview-check [local | URL]`
+
+Ce que les tests ne voient pas : une ombre perdue en mode sombre, un menu qui
+saute, un ressort qui n'a plus le même ressenti. Vercel ne déploie que
+`staging` et `main`, donc la commande compare **le déploiement de staging
+avec la production** :
+
+- des captures pleine page de l'accueil, d'un projet, du journal, d'un
+  article et de la 404, en fr/en, clair/sombre, ordinateur/mobile, côte à
+  côte ;
+- les interactions : menu mobile, thème, langue, filtres du journal,
+  inclinaison des cartes, barre de lecture, validation du formulaire de
+  contact (jamais envoyé) ;
+- le mouvement réduit, et la console sur chaque page.
+
+Avec `local`, elle vérifie la branche en cours sur le build de test, et ne
+cherche que les mises en page cassées. Les captures vont dans
+`plans/.preview/`. Lecture seule.
+
+### `/release` et `/release verify`
+
+Une release, c'est trois merges dans un ordre fixe, puis un déploiement qui
+lance `payload migrate` sur la base de production. `/release` :
+
+1. trie les PR ouvertes : part maintenant, a d'abord besoin d'un verdict,
+   attend ;
+2. vérifie que la CI de staging et son déploiement Vercel sont verts ;
+3. lit chaque migration qui va tourner sur la production ;
+4. ouvre ou met à jour la PR `staging → main`, construite à partir des
+   commits et de la PR release-please ;
+5. te donne l'ordre des merges. C'est toi qui merges.
+
+Après le merge, `/release verify` vérifie la production sur Vercel : le build
+est `READY`, `payload migrate` a appliqué chaque nouvelle migration, aucune
+nouvelle erreur d'exécution, chaque page principale répond 200, la release
+GitHub existe. Si la prod est cassée, elle le dit et explique comment revenir
+en arrière, sans le faire.
+
 ## Les sous-agents
 
 Tu les appelles rarement toi-même, puisque les commandes les lancent. Tu peux
@@ -190,21 +248,46 @@ les applique lui-même.
 
 ## Les workflows GitHub
 
-| Workflow                                                        | Se lance                                                                              | Fait                                                                                                                                                                 |
-| --------------------------------------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`ci.yml`](../.github/workflows/ci.yml)                         | À chaque push et chaque PR                                                            | Lint, typecheck, tests unitaires, d'intégration (test de dérive compris) et e2e. Son token est en lecture seule                                                      |
-| [`claude-review.yml`](../.github/workflows/claude-review.yml)   | Quand une PR vers `staging` est ouverte ou marquée prête, ou reçoit le label `review` | Lance payload-reviewer et/ou ui-reviewer sur le diff, vérifie chaque remarque, poste celles qui sont confirmées en commentaires sur les lignes, plus un résumé       |
-| [`security-sweep.yml`](../.github/workflows/security-sweep.yml) | Chaque jour à 6 h UTC, et à la main depuis l'onglet Actions                           | Récupère les alertes ouvertes. Si la liste a changé depuis le dernier passage, lance `/security-sweep` en mode CI et ouvre ou met à jour une seule PR vers `staging` |
-| [`release.yml`](../.github/workflows/release.yml)               | Push sur `staging`                                                                    | La PR de version de release-please (voir le README)                                                                                                                  |
+| Workflow                                                        | Se lance                                                              | Fait                                                                                                                                                                     |
+| --------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`ci.yml`](../.github/workflows/ci.yml)                         | À chaque push et chaque PR                                            | Lint, typecheck, tests unitaires, d'intégration (test de dérive compris) et e2e, et sur les PR la vérification des docs fr/en ci-dessous. Son token est en lecture seule |
+| [`claude-review.yml`](../.github/workflows/claude-review.yml)   | Quand une PR vers `staging` reçoit le label `review`, et seulement là | Lance payload-reviewer et/ou ui-reviewer sur le diff, vérifie chaque remarque, poste celles qui sont confirmées en commentaires sur les lignes, plus un résumé           |
+| [`security-sweep.yml`](../.github/workflows/security-sweep.yml) | Chaque jour à 6 h UTC, et à la main depuis l'onglet Actions           | Récupère les alertes ouvertes. Si la liste a changé depuis le dernier passage, lance `/security-sweep` en mode CI et ouvre ou met à jour une seule PR vers `staging`     |
+| [`release.yml`](../.github/workflows/release.yml)               | Push sur `staging`                                                    | La PR de version de release-please (voir le README)                                                                                                                      |
 
 La revue ignore les brouillons, les forks, Dependabot, release-please, la PR de
 release, la PR du balayage lui-même, et les PR qui ajoutent des liens
 symboliques. Pour faire relire de nouveaux commits sur une PR, retirer le label
-`review` puis le remettre.
+`review` puis le remettre. Elle ne tourne jamais toute seule : mets le label
+sur les PR faites à la main, les gros changements, et tout ce qui touche aux
+règles d'accès ou à la base. Un changement livré avec `/ship-plan` a déjà été
+relu par les mêmes agents.
+
+**La vérification des docs fr/en** fait échouer une PR qui modifie
+`README.md` ou un `docs/*.md` sans son jumeau `.fr.md`, ou l'inverse. Chaque
+`*.fr.md` suivi par git est apparié automatiquement. Pour un changement
+vraiment d'un seul côté (une coquille en français), ajoute une ligne
+`Docs-Sync: skip` dans un des messages de commit de la PR.
 
 **En mode CI, le balayage n'exécute aucun code de dépendance** : il installe
 avec `--ignore-scripts` et ne lance aucun test. La PR qu'il ouvre est vérifiée
 par `ci.yml`, dont le token est en lecture seule.
+
+### Ce qui consomme ton quota Claude
+
+Deux workflows lancent Claude tout seuls, avec `CLAUDE_CODE_OAUTH_TOKEN`. Ils
+comptent donc dans les mêmes limites d'abonnement que ton propre usage de
+Claude :
+
+| Workflow             | Quand Claude tourne vraiment                                                                                                                                       | Coût habituel                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `claude-review.yml`  | Seulement quand tu ajoutes le label `review` à une PR vers `staging`. Jamais tout seul, et jamais sur Dependabot, release-please, la PR de release ni le balayage  | Une session de revue par PR, plus longue si le diff est gros      |
+| `security-sweep.yml` | Démarre tous les jours à 06:00 UTC, mais Claude ne tourne que si l'ensemble des alertes ouvertes a changé depuis la dernière fois, ou quand tu le lances à la main | Rien la plupart des jours ; une session quand les alertes bougent |
+
+Tout le reste n'en consomme pas : `ci.yml` et `release.yml` n'appellent pas
+Claude, et les commandes ci-dessus ne tournent que quand tu les tapes, dans ta
+propre session. Pour en mettre un en pause : onglet Actions, ⋯ → Disable
+workflow.
 
 ### Ce qui protège ces workflows
 

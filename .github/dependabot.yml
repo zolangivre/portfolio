@@ -23,25 +23,28 @@ updates:
     commit-message:
       prefix: chore
       include: scope
-    # A package goes into the first group it matches.
+    # A package goes into the first group it matches. Scoped packages are
+    # matched with `@scope*`, as in GitHub's own examples: the `@scope/*` form
+    # matched nothing here (#51 bumped tailwindcss without @tailwindcss/postcss,
+    # #77 vitest without @vitest/coverage-v8, #76 payload without @payloadcms).
     groups:
       # Every @payloadcms/* package must match payload's exact version, and
       # payload only accepts some next/react versions: one PR for all of them.
       payload-next-react:
         patterns:
           - 'payload'
-          - '@payloadcms/*'
+          - '@payloadcms*'
           - 'next'
-          - '@next/*'
+          - '@next*'
           - 'eslint-config-next'
           - 'react'
           - 'react-dom'
           - '@types/react'
           - '@types/react-dom'
       vitest:
-        patterns: ['vitest', '@vitest/*']
+        patterns: ['vitest', '@vitest*']
       tailwind:
-        patterns: ['tailwindcss', '@tailwindcss/*']
+        patterns: ['tailwindcss', '@tailwindcss*']
       minor-and-patch:
         update-types: [minor, patch]
 
