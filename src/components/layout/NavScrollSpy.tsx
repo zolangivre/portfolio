@@ -66,28 +66,30 @@ export function NavScrollSpy() {
     // cached reference would go stale and permanently disconnected, leaving
     // the nav stuck with no active link until a hard refresh.
     function buildEntries(): SpyEntry[] {
-      return hashLinks
-        .map((link): SpyEntry | null => {
-          const hash = new URL(link.href, window.location.href).hash
-          const id = hash.slice(1)
+      return (
+        hashLinks
+          .map((link): SpyEntry | null => {
+            const hash = new URL(link.href, window.location.href).hash
+            const id = hash.slice(1)
 
-          return document.getElementById(id) ? { link, id } : null
-        })
-        .filter((entry): entry is SpyEntry => entry !== null)
-        // Nav order is CMS-authored and may differ from the page's section
-        // order; the "last section past the line" walk needs document order.
-        .sort((a, b) => {
-          const sectionA = document.getElementById(a.id)
-          const sectionB = document.getElementById(b.id)
+            return document.getElementById(id) ? { link, id } : null
+          })
+          .filter((entry): entry is SpyEntry => entry !== null)
+          // Nav order is CMS-authored and may differ from the page's section
+          // order; the "last section past the line" walk needs document order.
+          .sort((a, b) => {
+            const sectionA = document.getElementById(a.id)
+            const sectionB = document.getElementById(b.id)
 
-          if (!sectionA || !sectionB) {
-            return 0
-          }
+            if (!sectionA || !sectionB) {
+              return 0
+            }
 
-          return sectionA.compareDocumentPosition(sectionB) & Node.DOCUMENT_POSITION_FOLLOWING
-            ? -1
-            : 1
-        })
+            return sectionA.compareDocumentPosition(sectionB) & Node.DOCUMENT_POSITION_FOLLOWING
+              ? -1
+              : 1
+          })
+      )
     }
 
     function clear() {
@@ -137,9 +139,16 @@ export function NavScrollSpy() {
 
         // Every link pointing at the same section id is marked together —
         // the page can render more than one nav for the same sections (e.g.
-        // the header nav and the desktop index rail).
+        // the header nav and the desktop index rail). Only writes on a
+        // change: setAttribute with the same value still counts as a
+        // mutation, and NavIndicator would restart its glide every scrolled
+        // frame, crawling to its link in stutters.
         for (const { link, id } of entries) {
           if (id === activeId) {
+            if (link.getAttribute('aria-current') === 'location') {
+              continue
+            }
+
             link.setAttribute('aria-current', 'location')
           } else {
             link.removeAttribute('aria-current')
