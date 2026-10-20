@@ -1,5 +1,7 @@
 # Payload Portfolio
 
+**English** · [Français](README.fr.md)
+
 Bilingual (FR/EN) developer portfolio fully driven by a CMS: content, sections, theme and SEO are all managed from the Payload admin panel — no code changes needed.
 
 **Stack**: [Next.js 16](https://nextjs.org) (App Router) · [Payload CMS 3](https://payloadcms.com) · PostgreSQL · [Tailwind CSS 4](https://tailwindcss.com) · TypeScript · React 19 · [Motion](https://motion.dev)
@@ -15,8 +17,8 @@ Bilingual (FR/EN) developer portfolio fully driven by a CMS: content, sections, 
 - **Social preview cards** — every page generates its own 1200x630 OG image (`opengraph-image.tsx`) with the site's accent color, the page title and its metadata. An image chosen in a document's SEO tab overrides it
 - **Projects archive** — `/projects` lists every published project with a filter by technology, alongside the homepage section
 - **Contact notification** — an optional email (via Resend) the moment the contact form is submitted, so a message is not only visible in the admin panel
-- **Automatic revalidation** — every change in the admin regenerates the site (with 60s ISR as a safety net)
-- **Uploads** — local disk in development, [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) in production (automatic switch based on token presence)
+- **Automatic revalidation** — saving in the admin invalidates exactly the pages that show that content, by cache tag, in both locales (with a 24h revalidation as a safety net)
+- **Uploads** — local disk in development, [Cloudflare R2](https://developers.cloudflare.com/r2/) in production through `@payloadcms/storage-s3` (switched on by `R2_ACCESS_KEY_ID`). Files are served straight from the bucket's public domain, not through a Vercel function. Images are resized to 1920px max and converted to WebP on upload; videos go straight from the browser to R2 through a pre-signed URL, so they skip Vercel's 4.5 MB request limit
 
 ## Quick start
 
@@ -46,50 +48,55 @@ The database is exposed on `127.0.0.1:5432`, the site on port 3000. The containe
 
 ## Environment variables
 
-| Variable | Description |
-| --- | --- |
-| `DATABASE_URL` | PostgreSQL connection string |
-| `PAYLOAD_SECRET` | Payload secret key (sessions, tokens) |
-| `NEXT_PUBLIC_SITE_URL` | Public site URL (SEO, sitemap) |
-| `BLOB_READ_WRITE_TOKEN` | *Optional locally.* Vercel Blob token — without it, uploads go to local disk |
-| `RESEND_API_KEY` | *Optional.* Enables the contact-form email notification. Without it, messages are only stored in the admin |
-| `CONTACT_NOTIFICATION_FROM` | Sender address for that notification, on a domain verified with Resend |
-| `CONTACT_NOTIFICATION_TO` | Recipient. Defaults to Global Settings → contact email |
+| Variable                    | Description                                                                                                |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`              | PostgreSQL connection string                                                                               |
+| `PAYLOAD_SECRET`            | Payload secret key (sessions, tokens)                                                                      |
+| `NEXT_PUBLIC_SITE_URL`      | Public site URL (SEO, sitemap)                                                                             |
+| `R2_ACCESS_KEY_ID`          | _Optional locally._ R2 API token key: switches uploads to Cloudflare R2. Without it, they go to local disk |
+| `R2_SECRET_ACCESS_KEY`      | Secret of that R2 API token                                                                                |
+| `R2_ACCOUNT_ID`             | Cloudflare account ID (builds the R2 endpoint)                                                             |
+| `R2_BUCKET`                 | R2 bucket name                                                                                             |
+| `R2_PUBLIC_URL`             | Public custom domain of the bucket: media URLs are built from it                                           |
+| `RESEND_API_KEY`            | _Optional._ Enables the contact-form email notification. Without it, messages are only stored in the admin |
+| `CONTACT_NOTIFICATION_FROM` | Sender address for that notification, on a domain verified with Resend                                     |
+| `CONTACT_NOTIFICATION_TO`   | Recipient. Defaults to Global Settings → contact email                                                     |
 
 ## Scripts
 
-| Command | Action |
-| --- | --- |
-| `pnpm dev` | Development server |
-| `pnpm devsafe` | Same, after clearing the `.next` cache |
-| `pnpm build` / `pnpm start` | Production build and server |
-| `pnpm generate:types` | Regenerates `src/payload-types.ts` after a schema change |
-| `pnpm payload migrate` | Applies pending migrations |
-| `pnpm payload migrate:status` | Migration status |
-| `pnpm lint` | ESLint |
-| `pnpm test` | Unit, then integration (Vitest), then e2e (Playwright) |
-| `pnpm test:unit` / `pnpm test:int` / `pnpm test:e2e` | Each suite separately |
-| `pnpm test:e2e:ui` / `pnpm test:e2e:report` | Playwright UI mode / HTML report of the last e2e run |
-| `pnpm test:coverage` | Unit suite with coverage, failing under 90% on `src/lib`, `src/hooks`, the proxy and the sitemap |
+| Command                                              | Action                                                                                           |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `pnpm dev`                                           | Development server                                                                               |
+| `pnpm devsafe`                                       | Same, after clearing the `.next` cache                                                           |
+| `pnpm build` / `pnpm start`                          | Production build and server                                                                      |
+| `pnpm generate:types`                                | Regenerates `src/payload-types.ts` after a schema change                                         |
+| `pnpm payload migrate`                               | Applies pending migrations                                                                       |
+| `pnpm payload migrate:status`                        | Migration status                                                                                 |
+| `pnpm lint`                                          | ESLint                                                                                           |
+| `pnpm test`                                          | Unit, then integration (Vitest), then e2e (Playwright)                                           |
+| `pnpm test:unit` / `pnpm test:int` / `pnpm test:e2e` | Each suite separately                                                                            |
+| `pnpm test:e2e:ui` / `pnpm test:e2e:report`          | Playwright UI mode / HTML report of the last e2e run                                             |
+| `pnpm test:coverage`                                 | Unit suite with coverage, failing under 90% on `src/lib`, `src/hooks`, the proxy and the sitemap |
 
 ## Content model
 
 ### Collections
 
-| Collection | Purpose |
-| --- | --- |
-| **Projects** | Portfolio projects — rich description, cover image (+ dark variant), gallery, technologies, GitHub/live links, status, year, featured flag |
-| **Experiences** | Professional timeline — position, company, technologies, dates |
-| **Education** | Education timeline — degree, school, dates |
-| **Skills** | Skills grouped by category |
-| **Journal** | Personal entries with category, gallery and visibility |
-| **Technologies** | Reusable tech tags (logo, color, website) |
-| **Companies / Schools** | Company/school references (logo, website) |
-| **Categories** | Shared taxonomy (tech, project, journal) |
-| **Testimonials** | Testimonials |
-| **Messages** | Contact form submissions |
-| **Media** | Uploads (images, logos) |
-| **Users** | Admin accounts |
+| Collection              | Purpose                                                                                                                                    |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Projects**            | Portfolio projects — rich description, cover image (+ dark variant), gallery, technologies, GitHub/live links, status, year, featured flag |
+| **Experiences**         | Professional timeline — position, company, technologies, dates                                                                             |
+| **Education**           | Education timeline — degree, school, dates                                                                                                 |
+| **Skills**              | Skills grouped by category                                                                                                                 |
+| **Journal**             | Personal entries with category, gallery and visibility                                                                                     |
+| **Technologies**        | Reusable tech tags (logo, color, website)                                                                                                  |
+| **Companies / Schools** | Company/school references (logo, website)                                                                                                  |
+| **Categories**          | Shared taxonomy (tech, project, journal)                                                                                                   |
+| **Testimonials**        | Testimonials                                                                                                                               |
+| **Messages**            | Contact form submissions                                                                                                                   |
+| **Media**               | Uploads (images, logos)                                                                                                                    |
+| **Videos**              | Screen recordings, uploaded from the browser straight to R2                                                                                |
+| **Users**               | Admin accounts                                                                                                                             |
 
 ### Globals
 
@@ -108,7 +115,7 @@ pnpm payload migrate:status   # list pending migrations
 pnpm payload migrate          # apply them
 ```
 
-After any schema change: write/generate the matching migration, then run `pnpm generate:types`.
+After any schema change, write the matching migration by hand: `payload migrate:create` doesn't work in this repo (stale snapshots). `/new-migration` in Claude Code does it, and `tests/int/schemaDrift.int.spec.ts` fails with the missing SQL whenever the migrations lag behind the config. Then run `pnpm generate:types`.
 
 ## Tests
 
@@ -134,16 +141,20 @@ A failing e2e test keeps a video, a screenshot and a full trace (DOM, network an
 - **Release** ([`.github/workflows/release.yml`](.github/workflows/release.yml)) — see [Versioning](#versioning).
 - **Vercel** builds with `pnpm run ci` ([`vercel.json`](vercel.json)), which applies pending migrations to the production database before `next build` — the schema can never lag behind the deployed code. Only `main` (production) and `staging` (preview) are deployed: `git.deploymentEnabled` in the same file blocks every other branch (`feature/…`, Dependabot, the release-please version PR), so they trigger no build and no migration.
 
+## Agent workflows
+
+Claude Code commands, review subagents and two GitHub workflows (a daily security sweep, a review on pull requests) help ship changes, upgrades and fixes. They propose, and never merge or deploy. How each one works, when to use it and how to set it up: [docs/agent-workflows.md](docs/agent-workflows.md).
+
 ## Versioning
 
 [SemVer](https://semver.org) versions derived from commit messages ([Conventional Commits](https://www.conventionalcommits.org)), checked by `.githooks/commit-msg` (enabled by `pnpm install`):
 
-| Commit | Effect on the version |
-| --- | --- |
-| `fix: …`, `perf: …` | patch: 1.0.0 → 1.0.1 |
-| `feat: …` | minor: 1.0.0 → 1.1.0 |
-| `feat!: …` or `BREAKING CHANGE:` in the body | major: 1.0.0 → 2.0.0 |
-| `chore`, `refactor`, `docs`, `test`, `ci`… | none, left out of the CHANGELOG |
+| Commit                                       | Effect on the version           |
+| -------------------------------------------- | ------------------------------- |
+| `fix: …`, `perf: …`                          | patch: 1.0.0 → 1.0.1            |
+| `feat: …`                                    | minor: 1.0.0 → 1.1.0            |
+| `feat!: …` or `BREAKING CHANGE:` in the body | major: 1.0.0 → 2.0.0            |
+| `chore`, `refactor`, `docs`, `test`, `ci`…   | none, left out of the CHANGELOG |
 
 Same flow as patateprod-front and patateprod-back:
 
@@ -151,7 +162,7 @@ Same flow as patateprod-front and patateprod-back:
 2. To release, merge that PR into `staging`: the `vX.Y.Z` tag and the GitHub Release are created.
 3. Merge `staging` → `main`: Vercel deploys once, with the right version number.
 
-Merge `staging` → `main` right after the version PR: a commit pushed in between would go to production under that number without appearing in its CHANGELOG. First version: 1.0.0 (`initial-version` in `release-please-config.json`); `package.json` stays at `0.0.0` until then.
+Merge `staging` → `main` right after the version PR: a commit pushed in between would go to production under that number without appearing in its CHANGELOG. First version: 1.0.0 (`initial-version` in `release-please-config.json`).
 
 ## Deployment
 
@@ -159,7 +170,9 @@ Designed for [Vercel](https://vercel.com) with a [Neon](https://neon.tech) datab
 
 1. Create the Vercel project and connect the repo
 2. Set `DATABASE_URL`, `PAYLOAD_SECRET` and `NEXT_PUBLIC_SITE_URL`
-3. Connect a Vercel Blob store (adds `BLOB_READ_WRITE_TOKEN` automatically)
+3. Create a [Cloudflare R2](https://developers.cloudflare.com/r2/) bucket, an R2 API token with read and write access to it, and a public custom domain for the bucket. Set the five `R2_*` variables
+4. On the bucket, add a CORS rule that allows `PUT` from the site's origins: videos are uploaded from the browser
+5. _Optional:_ set `RESEND_API_KEY` and `CONTACT_NOTIFICATION_FROM` for the contact-form email
 
 Migrations run automatically during each deploy (`pnpm run ci`). Never point `pnpm dev` at the production database — dev push mode would bypass the migration history.
 

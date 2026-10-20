@@ -1,0 +1,275 @@
+# Workflows d'agents
+
+[English](agent-workflows.md) · **Français**
+
+Comment Claude Code est configuré pour travailler sur ce dépôt : ce que fait
+chaque pièce, quand l'utiliser, et ce qui reste à faire à la main. Tout ce qui
+est décrit ici propose des changements à relire. Rien ne merge, ne déploie ni
+n'écrit dans le CMS de production tout seul.
+
+Il y a trois niveaux :
+
+- **Des commandes** à lancer dans Claude Code (`/ship-plan`, `/security-sweep`…).
+  Chacune est un skill dans [`.claude/skills/`](../.claude/skills/).
+- **Des sous-agents** que ces commandes appellent pour un second avis : deux
+  reviewers et un rédacteur de tests, dans [`.claude/agents/`](../.claude/agents/).
+  Ils démarrent sans le contexte de la conversation, donc ils jugent le diff,
+  pas le raisonnement qui l'a produit.
+- **Des workflows GitHub** qui font une partie de ce travail sans toi : un
+  balayage de sécurité quotidien et une revue des pull requests, dans
+  [`.github/workflows/`](../.github/workflows/).
+
+En dessous, trois hooks dans [`.claude/settings.json`](../.claude/settings.json)
+s'appliquent à chaque fichier que Claude modifie. Le premier bloque les
+modifications des `.env*`, du lockfile et des fichiers générés, le deuxième
+formate le fichier avec Prettier, et le troisième régénère `payload-types.ts`
+après un changement de schéma.
+
+## En un coup d'œil
+
+| Tu veux…                                                       | Lancer                                                | Où ça s'arrête                                             |
+| -------------------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------- |
+| Livrer un changement que tu as planifié                        | `/ship-plan 007`                                      | Un commit local, avant le push                             |
+| Traiter les alertes de sécurité                                | `/security-sweep`                                     | Un commit local, ou une PR quand c'est la CI qui le lance  |
+| Mettre à jour Payload (ou réparer la PR Payload de Dependabot) | `/upgrade-payload 3.92.0` ou `/upgrade-payload 123`   | Un commit local, avant le push                             |
+| Modifier le schéma de la base                                  | `/new-migration add_project_tagline`                  | Un fichier de migration, prouvé par une migration complète |
+| Vérifier une branche avant d'ouvrir une PR                     | `/pre-pr` (ajouter `--e2e` pour les tests navigateur) | Un rapport, sans aucun changement                          |
+| Relire les textes fr/en du site                                | `/content-audit`                                      | Un fichier de textes dans `plans/`                         |
+| Vérifier que la production va bien                             | `/site-health`                                        | Un rapport dans `plans/`                                   |
+| Faire relire une PR sur GitHub                                 | Ajouter le label `review` à la PR                     | Des commentaires sur les lignes de la PR                   |
+
+## Les commandes
+
+### `/ship-plan NNN` : du plan au commit
+
+La boucle principale, pour n'importe quel changement. Tu écris le plan, Claude
+fait le reste et s'arrête avant que quoi que ce soit ne quitte ta machine.
+
+```mermaid
+flowchart LR
+  P[plans/NNN-*.md] --> T[test-writer :<br/>tests en échec]
+  T --> I[implémentation]
+  I --> V[lint, types,<br/>tests]
+  V --> R[payload-reviewer<br/>ui-reviewer]
+  R -->|remarques| I
+  R --> C[commit,<br/>plan supprimé]
+```
+
+1. **Écrire le plan** dans `plans/`, à partir de
+   [`plan-template.md`](../.claude/skills/ship-plan/plan-template.md). Les
+   sections **Target** (ce qui doit être vrai à la fin) et **Vérification**
+   (comment le prouver) sont obligatoires. **Décisions ouvertes** liste ce que
+   Claude doit te demander au lieu de le deviner.
+2. **Lancer `/ship-plan NNN`.** La commande lit les **Décisions** de
+   `plans/README.md` (elles s'imposent au plan), crée une branche depuis
+   `staging`, et fait écrire les tests par `test-writer` à partir de la Target,
+   avant que le code n'existe : ils échouent d'abord. Ensuite elle implémente,
+   lance les vérifications, et fait relire le diff par les reviewers. Chaque
+   remarque est corrigée, rejetée avec une raison, ou reportée dans le backlog.
+3. **Lire le rapport.** Il liste ce qu'il te reste à vérifier à l'œil : le
+   ressenti d'une animation, le mobile sur un vrai téléphone, le mode sombre,
+   les deux langues.
+4. **Pousser et ouvrir la PR** avec la commande qu'il te donne.
+
+`plans/` est ignoré par git exprès, puisque le dépôt est public. Une fois un
+plan livré, son résumé vit dans le message du commit (`Plan: NNN`). Le fichier
+est supprimé, et ce qu'il laissait de côté passe dans le **Backlog** de
+`plans/README.md`.
+
+### `/security-sweep` : ce que Dependabot et CodeQL laissent ouvert
+
+Dependabot ouvre les PR de mise à jour tout seul. Il ne sait pas corriger une
+dépendance **transitive** vulnérable dont le parent impose l'ancienne version,
+et CodeQL se contente de signaler. Le balayage s'occupe des deux, et des PR
+Dependabot dont la CI est rouge :
+
+- **Alertes transitives** : une surcharge `pnpm.overrides` limitée à la plage
+  vulnérable et épinglée sur la première version corrigée
+  (`"undici@<7.29.1": "7.29.1"`), installée avec un délai minimum de 3 jours
+  après publication, comme le délai de Dependabot.
+- **Aucun correctif possible** (pas de version corrigée, ou seulement en
+  changeant de version majeure) : une proposition de rejet de l'alerte, avec sa
+  raison et la commande `gh api` exacte. Il ne rejette jamais rien lui-même.
+- **Alertes CodeQL** : la plus petite modification de code qui satisfait la règle.
+- **PR Dependabot en échec** : un petit correctif poussé sur la branche de la
+  PR, ou un diagnostic en commentaire si le changement est plus gros.
+
+Il ne touche jamais aux versions de `payload`, `@payloadcms/*`, `next` et
+`react` : elles relèvent de `/upgrade-payload`. Les alertes Dependabot se
+ferment quand le correctif arrive sur `main`, pas au merge de la PR du balayage.
+
+En local, la commande fait la boucle complète, vérifications comprises. Le
+workflow quotidien lance le même skill en mode CI (voir
+[Les workflows GitHub](#les-workflows-github)).
+
+### `/upgrade-payload <version | numéro de PR>`
+
+Une mise à jour de Payload peut modifier la base sans aucun changement de
+config de notre côté : la 3.90 a ajouté des colonnes, la 3.91 seize index.
+Vercel lance `payload migrate` à chaque déploiement, donc une migration
+manquante casse le site, pas seulement un test.
+
+La commande lit les notes de version pour ce qui concerne ce projet, régénère
+les types et l'import map de l'admin, et lance le test de dérive du schéma
+(voir plus bas). À partir de son résultat, elle écrit la migration, puis lance
+toutes les vérifications, e2e compris, et payload-reviewer. Une nouvelle
+version majeure (4.x) devient un plan à la place.
+
+Avec un numéro de PR, elle travaille sur la PR `payload-next-react` de
+Dependabot. Cette PR peut être incomplète : pour la 3.91, elle montait `payload`
+mais pas `@payloadcms/*`.
+
+### `/new-migration <slug>`
+
+`payload migrate:create` ne fonctionne pas dans ce dépôt : ses instantanés sont
+périmés. Les migrations s'écrivent à la main, et c'est ce que fait cette
+commande. Elle part du SQL affiché par le test de dérive, le rend idempotent,
+écrit un `down` qui l'annule, l'enregistre dans `src/migrations/index.ts`, et
+le prouve avec `migrate`, `migrate:down`, `migrate`, puis les tests
+d'intégration.
+
+### `/pre-pr [--e2e]`
+
+Les mêmes vérifications que la CI, en local : lint, typecheck, couverture des
+tests unitaires, intégration, et e2e avec `--e2e`. Elle vérifie aussi les
+messages de commit (release-please ignore les autres), qu'un changement de
+schéma s'accompagne d'une migration, et que les types générés sont à jour.
+Elle fait un rapport et ne modifie rien.
+
+### `/content-audit [URL du site]`
+
+Lit tous les globals et collections publiques via l'API publique de Payload,
+dans les deux langues à la fois, et vérifie :
+
+- les champs remplis dans une seule langue, et les textes restés non traduits ;
+- les coquilles et la typographie française et anglaise ;
+- les noms et intitulés de poste écrits de façon différente selon les pages ;
+- les descriptions SEO manquantes ;
+- les informations dépassées par rapport à ton profil.
+
+Elle écrit `plans/textes-audit-<date>.md`, où chaque bloc est le texte complet
+d'un champ, prêt à coller dans l'admin. Elle n'écrit jamais dans Payload. Les
+médias ne sont pas publics, donc les textes alternatifs des images ne sont pas
+couverts.
+
+### `/site-health [URL du site]`
+
+Un bilan hebdomadaire de la production, comparé au précédent :
+
+- les déploiements, les erreurs d'exécution et le trafic, via le connecteur Vercel ;
+- chaque page du sitemap et chaque lien externe du contenu ;
+- Lighthouse et les Core Web Vitals sur trois pages, via chrome-devtools.
+
+Elle écrit `plans/sante-<date>.md` et ajoute les vrais problèmes au Backlog.
+Lecture seule : aucun déploiement, retour en arrière ni changement de
+variable. Le vérificateur de liens ignore les hôtes locaux et ne suit pas les
+redirections.
+
+## Les sous-agents
+
+Tu les appelles rarement toi-même, puisque les commandes les lancent. Tu peux
+quand même en demander un directement, par exemple « demande à
+payload-reviewer de relire cette branche ».
+
+| Agent                                                       | Regarde                                                                                                                                                                                                                                    | Écrit                                                                  |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| [`payload-reviewer`](../.claude/agents/payload-reviewer.md) | Le back-end : règles d'accès (les API REST et GraphQL sont publiques), schéma comparé aux migrations, tags de cache et revalidation, `visibility` et `locale` dans les requêtes, server actions, hooks qui appellent des services externes | Rien, il fait un rapport                                               |
+| [`ui-reviewer`](../.claude/agents/ui-reviewer.md)           | Le front-end : les deux langues, les tokens d'animation et le mouvement réduit, le survol sur écran tactile, l'accessibilité, la direction artistique arrondie du site, la frontière serveur/client                                        | Rien, il fait un rapport                                               |
+| [`test-writer`](../.claude/agents/test-writer.md)           | La Target d'un plan                                                                                                                                                                                                                        | Des tests sous `tests/`, au niveau le plus bas qui suffit à la prouver |
+
+## Le test de dérive du schéma
+
+[`tests/int/schemaDrift.int.spec.ts`](../tests/int/schemaDrift.int.spec.ts)
+tourne avec les tests d'intégration, en local comme en CI. Il construit la base
+à partir des seules migrations, demande à Drizzle ce qu'il changerait pour
+qu'elle corresponde à la config, et échoue en affichant ce SQL. Un changement
+de schéma sans sa migration fait donc échouer la CI, qu'il vienne de ta config
+ou d'une mise à jour de Payload, et le message d'échec est le point de départ
+de la migration. Les valeurs par défaut des colonnes sont ignorées : Payload
+les applique lui-même.
+
+## Les workflows GitHub
+
+| Workflow                                                        | Se lance                                                                              | Fait                                                                                                                                                                 |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`ci.yml`](../.github/workflows/ci.yml)                         | À chaque push et chaque PR                                                            | Lint, typecheck, tests unitaires, d'intégration (test de dérive compris) et e2e. Son token est en lecture seule                                                      |
+| [`claude-review.yml`](../.github/workflows/claude-review.yml)   | Quand une PR vers `staging` est ouverte ou marquée prête, ou reçoit le label `review` | Lance payload-reviewer et/ou ui-reviewer sur le diff, vérifie chaque remarque, poste celles qui sont confirmées en commentaires sur les lignes, plus un résumé       |
+| [`security-sweep.yml`](../.github/workflows/security-sweep.yml) | Chaque jour à 6 h UTC, et à la main depuis l'onglet Actions                           | Récupère les alertes ouvertes. Si la liste a changé depuis le dernier passage, lance `/security-sweep` en mode CI et ouvre ou met à jour une seule PR vers `staging` |
+| [`release.yml`](../.github/workflows/release.yml)               | Push sur `staging`                                                                    | La PR de version de release-please (voir le README)                                                                                                                  |
+
+La revue ignore les brouillons, les forks, Dependabot, release-please, la PR de
+release, la PR du balayage lui-même, et les PR qui ajoutent des liens
+symboliques. Pour faire relire de nouveaux commits sur une PR, retirer le label
+`review` puis le remettre.
+
+**En mode CI, le balayage n'exécute aucun code de dépendance** : il installe
+avec `--ignore-scripts` et ne lance aucun test. La PR qu'il ouvre est vérifiée
+par `ci.yml`, dont le token est en lecture seule.
+
+### Ce qui protège ces workflows
+
+Les deux confient un token capable d'écrire dans le dépôt à un agent qui lit
+du texte écrit par des tiers (alertes, contenu des PR), sur un dépôt public.
+Une série de revues de sécurité automatiques, et CodeQL, les ont façonnés :
+
+- Claude ne peut lancer qu'une liste précise de commandes. Tout ce qui pourrait
+  publier un fichier, lancer un programme via git ou lire hors du dépôt est
+  interdit (`--body-file`, `difftool`, `/proc`, substitution de commande…).
+- La revue charge ses règles (`.claude/`, tous les `CLAUDE.md` et `AGENTS.md`)
+  depuis `staging` : une PR ne peut pas réécrire sa propre revue.
+- Le token des alertes ne sert qu'à l'étape de collecte, jamais à Claude. Le
+  texte des alertes est nettoyé et traité comme une donnée, pas comme une
+  instruction.
+- Chaque action est épinglée sur un commit précis, et Dependabot tient ces
+  épinglages à jour.
+
+Les vraies limites sont côté GitHub : la protection des branches et les
+permissions de l'app. Voir l'installation ci-dessous.
+
+## Installation
+
+Ce qui doit exister pour que la partie GitHub fonctionne :
+
+1. **L'app GitHub Claude** sur ce dépôt : `/install-github-app` dans Claude
+   Code, ou https://github.com/apps/claude. Ne pas ajouter les workflows
+   qu'elle propose : ce dépôt a les siens.
+2. **Le secret `CLAUDE_CODE_OAUTH_TOKEN`** : `claude setup-token`, connecté avec
+   le compte claude.ai qui a l'abonnement Pro ou Max, puis
+   `gh secret set CLAUDE_CODE_OAUTH_TOKEN -R zolangivre/portfolio`. Les passages
+   consomment le quota de cet abonnement.
+3. **Le secret `SECURITY_ALERTS_TOKEN`** : un token d'accès personnel à
+   granularité fine (fine-grained), limité à ce dépôt, avec **Dependabot
+   alerts** et **Code scanning alerts** en lecture seule, et rien d'autre.
+   `GITHUB_TOKEN` ne peut pas lire les alertes Dependabot. Ce token expire, et
+   à ce moment-là le balayage échoue dès sa première étape.
+4. **Le label `review`.**
+5. **La protection des branches** `staging` et `main` (Settings → Rules →
+   Rulesets) : exiger une PR avec une approbation, exiger les quatre jobs de la
+   CI, bloquer les force-push, avec **Repository admin** dans la liste de
+   contournement (bypass list). GitHub ne te laisse pas approuver tes propres
+   PR : sans ce contournement, tu ne pourrais plus merger les tiennes. L'app
+   Claude, elle, ne peut pas contourner ces règles.
+6. **Les workflows sur `main`.** L'action Claude ne lance qu'un workflow dont le
+   fichier est identique sur la branche par défaut, et les workflows planifiés
+   ne tournent que depuis celle-ci. Tant qu'une release ne les a pas amenés sur
+   `main`, les deux workflows s'arrêtent en quelques secondes sans rien faire.
+
+## Dépannage
+
+| Symptôme                                                                                                  | Cause                                                                                                                       |
+| --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Le job de revue réussit en quelques secondes et ne poste rien ; le log dit « Workflow validation failed » | Le workflow n'est pas encore identique sur `main`, ou la PR le modifie. Dans les deux cas, c'est normal                     |
+| Le balayage échoue à « Fetch open alerts »                                                                | `SECURITY_ALERTS_TOKEN` manque ou a expiré                                                                                  |
+| Le balayage tourne mais ne fait rien                                                                      | La liste des alertes ouvertes n'a pas changé depuis le dernier passage. Le lancer à la main pour forcer                     |
+| Le test de dérive échoue                                                                                  | Il manque une migration. Le message d'erreur donne le SQL ; lancer `/new-migration`                                         |
+| Tous les tests e2e échouent avec « Executable doesn't exist »                                             | Playwright a été mis à jour : `pnpm exec playwright install chromium`                                                       |
+| Les tests d'intégration ou e2e n'arrivent pas à se connecter                                              | Postgres ne tourne pas : `docker compose up -d postgres`                                                                    |
+| `claude setup-token` dit qu'il faut un abonnement Pro ou Max                                              | Le navigateur est connecté à un compte claude.ai sans abonnement. Se connecter avec celui qui l'a (une fenêtre privée aide) |
+
+## Modifier un workflow
+
+Le comportement de chaque commande est dans son `SKILL.md`, et celui de chaque
+agent dans son fichier `.md` : ils se modifient comme du code, dans une PR. Une
+modification de `.claude/` s'applique à la revue GitHub une fois mergée dans
+`staging`. Une modification d'un fichier de workflow s'applique une fois arrivée
+sur `main`.
