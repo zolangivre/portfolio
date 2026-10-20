@@ -33,6 +33,9 @@ generated files, one formats the file with Prettier, and one regenerates
 | Check a branch before opening a PR               | `/pre-pr` (add `--e2e` for the browser tests)       | A report, no changes                        |
 | Proofread the site's fr/en copy                  | `/content-audit`                                    | A texts file in `plans/`                    |
 | Check that production is healthy                 | `/site-health`                                      | A report in `plans/`                        |
+| Decide on a Dependabot PR                        | `/triage-deps 79`                                   | A verdict, nothing merged                   |
+| Look at staging before releasing                 | `/preview-check` (or `/preview-check local`)        | Screenshots and a report in `plans/`        |
+| Ship staging to production                       | `/release`, then `/release verify` after the merge  | The release PR; then a production report    |
 | Get a PR reviewed on GitHub                      | Add the `review` label to the PR                    | Inline comments on the PR                   |
 
 ## Commands
@@ -151,6 +154,54 @@ It writes `plans/sante-<date>.md` and adds real problems to the Backlog.
 Read-only: no deploy, rollback or env change. The link checker skips local
 hosts and doesn't follow redirects.
 
+### `/triage-deps <PR number>`
+
+For any Dependabot PR except Payload/Next/React (those go to
+`/upgrade-payload`). It reads every changelog between the two versions,
+searches the code for the APIs that changed, then merges the PR into current
+`staging` on a throwaway branch and runs every check, e2e included. For a
+package that runs in the browser (motion, next-themes, the lightbox) it also
+starts the seeded production build and measures the affected screens with
+chrome-devtools: reveals that end visible, scroll-driven values, reduced
+motion, console.
+
+The verdict is **mergeable**, **mergeable, check by eye** (with the five
+minutes of things to look at on staging) or **blocking**, plus when to merge
+it relative to the pending release. It never merges, pushes or comments, and
+leaves you on a clean `staging`.
+
+### `/preview-check [local | URL]`
+
+What the tests can't see: a shadow lost in dark mode, a menu that jumps, a
+spring that feels different. Vercel only deploys `staging` and `main`, so it
+compares the **staging deployment with production**:
+
+- full-page screenshots of the home, a project, the journal, an entry and the
+  404, in fr/en, light/dark, desktop/mobile, side by side;
+- the interactions: mobile menu, theme, language, journal filters, card
+  tilt, reading progress, contact form validation (never sent);
+- reduced motion, and the console on every page.
+
+With `local`, it checks the current branch on the seeded build instead, for
+broken layout only. Screenshots go to `plans/.preview/`. Read-only.
+
+### `/release` and `/release verify`
+
+A release is three merges in a fixed order, then a deploy that runs
+`payload migrate` on production. `/release`:
+
+1. sorts the open PRs into ships now / needs a verdict first / waits;
+2. checks that staging's CI and its Vercel deployment are green;
+3. reads every migration that will run against production;
+4. opens or updates the `staging → main` PR, built from the commits and the
+   release-please PR;
+5. gives you the merge order. You merge.
+
+After the merge, `/release verify` checks production on Vercel: the build is
+`READY`, `payload migrate` applied each new migration, no new runtime error,
+every main page answers 200, the GitHub release exists. If production is
+broken it says so and how to roll back, but doesn't.
+
 ## Subagents
 
 You rarely call these yourself, since the commands launch them. You can still
@@ -176,7 +227,7 @@ ignored: Payload applies them itself.
 
 | Workflow                                                        | Runs                                                                      | Does                                                                                                                                            |
 | --------------------------------------------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`ci.yml`](../.github/workflows/ci.yml)                         | Every push and PR                                                         | Lint, typecheck, unit, integration (drift test included), e2e. The token is read-only                                                           |
+| [`ci.yml`](../.github/workflows/ci.yml)                         | Every push and PR                                                         | Lint, typecheck, unit, integration (drift test included), e2e, and on PRs the fr/en docs check below. The token is read-only                    |
 | [`claude-review.yml`](../.github/workflows/claude-review.yml)   | A PR into `staging` is opened or marked ready, or gets the `review` label | Runs payload-reviewer and/or ui-reviewer on the diff, checks each finding, posts the confirmed ones as inline comments, plus a summary          |
 | [`security-sweep.yml`](../.github/workflows/security-sweep.yml) | Daily at 06:00 UTC, and by hand from the Actions tab                      | Fetches the open alerts. If the set changed since the last run, runs `/security-sweep` in CI mode and opens or updates one PR against `staging` |
 | [`release.yml`](../.github/workflows/release.yml)               | Push to `staging`                                                         | release-please's version PR (see the README)                                                                                                    |
@@ -185,9 +236,28 @@ The review skips drafts, forks, Dependabot, release-please, the release PR,
 the sweep's own PR, and PRs that add symlinks. To review new commits on a PR,
 remove the `review` label and add it again.
 
+**The fr/en docs check** fails a PR that changes `README.md` or a
+`docs/*.md` without its `.fr.md` twin, or the reverse. Every tracked
+`*.fr.md` is paired automatically. For a change that really is one-sided (a
+French typo), add a `Docs-Sync: skip` line to one of the PR's commit messages.
+
 **In CI mode the sweep runs no dependency code**: it installs with
 `--ignore-scripts` and runs no tests. The PR it opens is verified by
 `ci.yml`, whose token is read-only.
+
+### What uses your Claude quota
+
+Two workflows run Claude on their own, with `CLAUDE_CODE_OAUTH_TOKEN`, so
+they count against the same subscription limits as your own use of Claude:
+
+| Workflow             | When Claude actually runs                                                                                                                                                         | Typical cost                                    |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `claude-review.yml`  | Each PR into `staging` you open (or mark ready, reopen, or label `review`). Not on new commits pushed to it, and never on Dependabot, release-please, the release PR or the sweep | One review session per PR, longer for big diffs |
+| `security-sweep.yml` | Starts every day at 06:00 UTC, but Claude only runs when the set of open alerts changed since the last run, or when you start it by hand                                          | Most days nothing; a session when alerts move   |
+
+Everything else uses none: `ci.yml` and `release.yml` don't call Claude, and
+the commands above only run when you type them, inside your own session. To
+pause one, disable it in the Actions tab (⋯ → Disable workflow).
 
 ### What protects these workflows
 
