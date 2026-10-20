@@ -24,6 +24,7 @@ import * as migration_20260930_120000_payload_3_90_schema from './20260930_12000
 import * as migration_20261009_120000_add_hero_availability from './20261009_120000_add_hero_availability';
 import * as migration_20261014_120000_add_background_style from './20261014_120000_add_background_style';
 import * as migration_20261014_180000_add_media_placeholder from './20261014_180000_add_media_placeholder';
+import * as migration_20261019_120000_payload_3_91_schema from './20261019_120000_payload_3_91_schema';
 
 export const migrations = [
   {
@@ -155,5 +156,10 @@ export const migrations = [
     up: migration_20261014_180000_add_media_placeholder.up,
     down: migration_20261014_180000_add_media_placeholder.down,
     name: '20261014_180000_add_media_placeholder'
+  },
+  {
+    up: migration_20261019_120000_payload_3_91_schema.up,
+    down: migration_20261019_120000_payload_3_91_schema.down,
+    name: '20261019_120000_payload_3_91_schema'
   },
 ];
