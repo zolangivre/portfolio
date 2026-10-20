@@ -1,5 +1,7 @@
 # Agent workflows
 
+**English** · [Français](agent-workflows.fr.md)
+
 How Claude Code is set up to work on this repo: what each piece does, when to
 use it, and what you still do by hand. Everything here proposes changes for
 you to review. Nothing merges, deploys or writes to the production CMS by
