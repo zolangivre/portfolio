@@ -17,21 +17,24 @@ out=${2:-plans/.health/links.tsv}
 mkdir -p "$(dirname "$out")"
 host=${site#https://}
 
-# URLs come from the sitemap and from content: only well-formed http(s)
-# ones go further, and curl gets them through --url, restricted to
-# http(s) even across redirects, so none can act as an option or a file:// read.
-# Hosts that can only be local are dropped too (IP literals, localhost,
-# .local, .internal): a link in the content must not make this script probe
-# the machine or network it runs on.
+# URLs come from the sitemap and from content. Only well-formed http(s) URLs
+# whose host is a domain name ending in a letters-only TLD go further: that
+# rules out every spelling of an IP address (127.0.0.1, 127.1, 2130706433,
+# 0x7f.0.1, [::1]), `localhost`, and user@host forms, and .local, .internal
+# and .localhost names are dropped too, so a link in the content can't make
+# this script probe the machine or network it runs on. curl gets each URL
+# through --url (never read as an option), http(s) only, and doesn't follow
+# redirects: a redirect could lead to a host no one checked, so a 3xx counts
+# as the link answering.
 urls() {
-  grep -E '^https?://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+$' |
-    grep -vEi '^https?://([^/@]*@)?(\[|[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+([:/]|$)|localhost([:/]|$)|[^/]*\.(local|internal|localhost)([:/]|$))' || true
+  grep -E '^https?://[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}(:[0-9]+)?([/?#][A-Za-z0-9._~:/?#@!$&()*+,;=%-]*)?$' |
+    grep -vEi '^https?://[^/?#]*\.(local|internal|localhost)(:[0-9]+)?([/?#]|$)' || true
 }
 
 check() {
   local kind=$1 url=$2 result
-  result=$(curl -sS -o /dev/null -L --max-time 20 -A 'Mozilla/5.0 (site-health)' \
-    --proto '=http,https' --proto-redir '=http,https' \
+  result=$(curl -sS -o /dev/null --max-time 20 -A 'Mozilla/5.0 (site-health)' \
+    --proto '=http,https' \
     -w '%{http_code}\t%{time_total}' --url "$url" 2>/dev/null) || result=$'000\t0'
   printf '%s\t%s\t%s\n' "$kind" "$result" "$url"
 }
