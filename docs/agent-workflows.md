@@ -229,7 +229,7 @@ ignored: Payload applies them itself.
 | --------------------------------------------------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`ci.yml`](../.github/workflows/ci.yml)                         | Every push and PR                                          | Lint, typecheck, unit, integration (drift test included), e2e, and on PRs the fr/en docs check below. The token is read-only                    |
 | [`claude-review.yml`](../.github/workflows/claude-review.yml)   | A PR into `staging` gets the `review` label, and only then | Runs payload-reviewer and/or ui-reviewer on the diff, checks each finding, posts the confirmed ones as inline comments, plus a summary          |
-| [`security-sweep.yml`](../.github/workflows/security-sweep.yml) | Daily at 06:00 UTC, and by hand from the Actions tab       | Fetches the open alerts. If the set changed since the last run, runs `/security-sweep` in CI mode and opens or updates one PR against `staging` |
+| [`security-sweep.yml`](../.github/workflows/security-sweep.yml) | Nightly at 00:17 UTC, and by hand from the Actions tab     | Fetches the open alerts. If the set changed since the last run, runs `/security-sweep` in CI mode and opens or updates one PR against `staging` |
 | [`release.yml`](../.github/workflows/release.yml)               | Push to `staging`                                          | release-please's version PR (see the README)                                                                                                    |
 
 The review skips drafts, forks, Dependabot, release-please, the release PR,
@@ -253,10 +253,10 @@ French typo), add a `Docs-Sync: skip` line to one of the PR's commit messages.
 Two workflows run Claude on their own, with `CLAUDE_CODE_OAUTH_TOKEN`, so
 they count against the same subscription limits as your own use of Claude:
 
-| Workflow             | When Claude actually runs                                                                                                                           | Typical cost                                    |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| `claude-review.yml`  | Only when you add the `review` label to a PR into `staging`. Never on its own, and never on Dependabot, release-please, the release PR or the sweep | One review session per PR, longer for big diffs |
-| `security-sweep.yml` | Starts every day at 06:00 UTC, but Claude only runs when the set of open alerts changed since the last run, or when you start it by hand            | Most days nothing; a session when alerts move   |
+| Workflow             | When Claude actually runs                                                                                                                                                              | Typical cost                                    |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `claude-review.yml`  | Only when you add the `review` label to a PR into `staging`. Never on its own, and never on Dependabot, release-please, the release PR or the sweep                                    | One review session per PR, longer for big diffs |
+| `security-sweep.yml` | Starts every night at 00:17 UTC (02:17 in Paris in summer, 01:17 in winter), but Claude only runs when the set of open alerts changed since the last run, or when you start it by hand | Most days nothing; a session when alerts move   |
 
 Everything else uses none: `ci.yml` and `release.yml` don't call Claude, and
 the commands above only run when you type them, inside your own session. To
