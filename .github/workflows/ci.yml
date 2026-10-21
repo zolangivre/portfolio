@@ -131,7 +131,12 @@ jobs:
   integration:
     name: Integration tests
     needs: changes
-    if: needs.changes.outputs.site == 'true'
+    # Fail closed: skipped only when Changes ran, succeeded and said "false".
+    # If it failed, the tests run anyway; if it was skipped (the release PRs
+    # above), so are they.
+    if: >-
+      ${{ !cancelled() && needs.changes.result != 'skipped' &&
+          !(needs.changes.result == 'success' && needs.changes.outputs.site == 'false') }}
     runs-on: ubuntu-latest
     # Matches .env.test, so the suite runs with no CI-specific config. The
     # database starts empty: the suite's global setup builds it from the
@@ -170,7 +175,12 @@ jobs:
   e2e:
     name: E2E tests
     needs: changes
-    if: needs.changes.outputs.site == 'true'
+    # Fail closed: skipped only when Changes ran, succeeded and said "false".
+    # If it failed, the tests run anyway; if it was skipped (the release PRs
+    # above), so are they.
+    if: >-
+      ${{ !cancelled() && needs.changes.result != 'skipped' &&
+          !(needs.changes.result == 'success' && needs.changes.outputs.site == 'false') }}
     runs-on: ubuntu-latest
     # Matches .env.e2e. The Playwright web server (tests/e2e/serve.ts) builds
     # the database from the migrations, seeds it, then runs `next build` and
