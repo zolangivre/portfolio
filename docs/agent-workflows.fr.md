@@ -103,10 +103,11 @@ ferment quand le correctif arrive sur `main`, pas au merge de la PR du balayage.
 
 En local, la commande fait la boucle complète, vérifications comprises. Le
 workflow quotidien lance le même skill en mode CI (voir
-[Les workflows GitHub](#les-workflows-github)). Son rapport est sur la page du
-run dans l'onglet Actions (**Summary**), à chaque fois que Claude a tourné.
-C'est là qu'apparaissent les propositions de fermeture quand il n'y avait rien
-à corriger, et donc pas de PR.
+[Les workflows GitHub](#les-workflows-github)). Quand il a
+corrigé quelque chose, sa PR porte le rapport. Quand il n'y avait rien à
+corriger, le **Summary** du run indique seulement combien d'alertes restent :
+les résumés de run sont publics sur ce dépôt, les alertes Dependabot non, donc
+les propositions de fermeture s'obtiennent avec un `/security-sweep` en local.
 
 ### `/upgrade-payload <version | numéro de PR>`
 

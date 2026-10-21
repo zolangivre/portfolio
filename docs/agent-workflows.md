@@ -95,10 +95,11 @@ those belong to `/upgrade-payload`. Dependabot alerts close once the fix
 reaches `main`, not when the sweep's PR merges.
 
 Run it locally for the full loop, checks included. The daily workflow runs
-the same skill in CI mode (see [GitHub workflows](#github-workflows)). Its
-report is on the run's page in the Actions tab (**Summary**), every time
-Claude ran. That's where dismissal proposals show when there was nothing to
-fix, and so no PR.
+the same skill in CI mode (see [GitHub workflows](#github-workflows)). When it
+fixed something, its PR carries the report. When there was nothing it could
+fix, the run's **Summary** says how many alerts are left and nothing more:
+run summaries are public on this repository and Dependabot alerts aren't, so
+the dismissal proposals come from a local `/security-sweep`.
 
 ### `/upgrade-payload <version | PR number>`
 
