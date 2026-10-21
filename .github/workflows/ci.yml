@@ -75,6 +75,38 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
         run: bash .github/check-doc-pairs.sh "origin/$BASE_REF"
 
+  # Decides whether the integration and e2e tests (about 5 minutes) need to
+  # run. On a pull request whose files can't change the site (docs, Markdown,
+  # .claude/, GitHub config other than this file), they are skipped: see
+  # .github/ci-site-changed.sh, which lists what is safe rather than what is
+  # risky. Pushes to staging and main always run everything — that's what
+  # Vercel deploys. A skipped job counts as passed for required checks, which
+  # skipping the whole workflow with `paths:` wouldn't.
+  changes:
+    name: Changes
+    if: *run-ci
+    runs-on: ubuntu-latest
+    outputs:
+      site: ${{ steps.decide.outputs.site }}
+    steps:
+      - uses: actions/checkout@v7
+        if: github.event_name == 'pull_request'
+        with:
+          fetch-depth: 0
+
+      - name: Decide which tests to run
+        id: decide
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            bash .github/ci-site-changed.sh "origin/$BASE_REF"
+          else
+            echo "site=true" >> "$GITHUB_OUTPUT"
+            echo "Push to $GITHUB_REF_NAME: running every test." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
   unit:
     name: Unit tests
     if: *run-ci
@@ -98,7 +130,8 @@ jobs:
 
   integration:
     name: Integration tests
-    if: *run-ci
+    needs: changes
+    if: needs.changes.outputs.site == 'true'
     runs-on: ubuntu-latest
     # Matches .env.test, so the suite runs with no CI-specific config. The
     # database starts empty: the suite's global setup builds it from the
@@ -136,7 +169,8 @@ jobs:
 
   e2e:
     name: E2E tests
-    if: *run-ci
+    needs: changes
+    if: needs.changes.outputs.site == 'true'
     runs-on: ubuntu-latest
     # Matches .env.e2e. The Playwright web server (tests/e2e/serve.ts) builds
     # the database from the migrations, seeds it, then runs `next build` and
