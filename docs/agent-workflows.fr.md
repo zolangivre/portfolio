@@ -326,12 +326,18 @@ Ce qui doit exister pour que la partie GitHub fonctionne :
    `GITHUB_TOKEN` ne peut pas lire les alertes Dependabot. Ce token expire, et
    à ce moment-là le balayage échoue dès sa première étape.
 4. **Le label `review`.**
-5. **La protection des branches** `staging` et `main` (Settings → Rules →
-   Rulesets) : exiger une PR avec une approbation, exiger les quatre jobs de la
-   CI, bloquer les force-push, avec **Repository admin** dans la liste de
-   contournement (bypass list). GitHub ne te laisse pas approuver tes propres
-   PR : sans ce contournement, tu ne pourrais plus merger les tiennes. L'app
-   Claude, elle, ne peut pas contourner ces règles.
+5. **La protection des branches** : une seule règle, `staging and main`, dans
+   Settings → Rules → Rulesets. Elle exige une PR, **sans approbation** : GitHub
+   ne te laisse pas approuver tes propres PR, donc une approbation bloquerait
+   tous les merges. Elle exige que les checks de la CI passent : Changes, Lint &
+   typecheck, Unit tests, Integration tests, E2E tests, Docs fr/en in sync. Un
+   job sauté par sa condition (une PR de doc, une PR de release) compte comme
+   réussi, donc rien ne reste bloqué en attente. Les branches n'ont pas besoin
+   d'être à jour avant le merge, sinon chaque PR Dependabot devrait être
+   rebasée dès que `staging` bouge. Le force push et la suppression sont
+   bloqués. **Repository admin** est dans la liste de contournement, pour les
+   urgences ; chaque contournement est enregistré. L'app Claude, elle, ne peut
+   pas contourner ces règles.
 6. **Les workflows sur `main`.** L'action Claude ne lance qu'un workflow dont le
    fichier est identique sur la branche par défaut, et les workflows planifiés
    ne tournent que depuis celle-ci. Tant qu'une release ne les a pas amenés sur
