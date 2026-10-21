@@ -252,7 +252,7 @@ les applique lui-même.
 | --------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [`ci.yml`](../.github/workflows/ci.yml)                         | À chaque push et chaque PR                                            | Lint, typecheck, tests unitaires, d'intégration (test de dérive compris) et e2e, et sur les PR la vérification des docs fr/en ci-dessous. Son token est en lecture seule |
 | [`claude-review.yml`](../.github/workflows/claude-review.yml)   | Quand une PR vers `staging` reçoit le label `review`, et seulement là | Lance payload-reviewer et/ou ui-reviewer sur le diff, vérifie chaque remarque, poste celles qui sont confirmées en commentaires sur les lignes, plus un résumé           |
-| [`security-sweep.yml`](../.github/workflows/security-sweep.yml) | Chaque jour à 6 h UTC, et à la main depuis l'onglet Actions           | Récupère les alertes ouvertes. Si la liste a changé depuis le dernier passage, lance `/security-sweep` en mode CI et ouvre ou met à jour une seule PR vers `staging`     |
+| [`security-sweep.yml`](../.github/workflows/security-sweep.yml) | Chaque nuit à 0 h 17 UTC, et à la main depuis l'onglet Actions        | Récupère les alertes ouvertes. Si la liste a changé depuis le dernier passage, lance `/security-sweep` en mode CI et ouvre ou met à jour une seule PR vers `staging`     |
 | [`release.yml`](../.github/workflows/release.yml)               | Push sur `staging`                                                    | La PR de version de release-please (voir le README)                                                                                                                      |
 
 La revue ignore les brouillons, les forks, Dependabot, release-please, la PR de
@@ -279,10 +279,10 @@ Deux workflows lancent Claude tout seuls, avec `CLAUDE_CODE_OAUTH_TOKEN`. Ils
 comptent donc dans les mêmes limites d'abonnement que ton propre usage de
 Claude :
 
-| Workflow             | Quand Claude tourne vraiment                                                                                                                                       | Coût habituel                                                     |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| `claude-review.yml`  | Seulement quand tu ajoutes le label `review` à une PR vers `staging`. Jamais tout seul, et jamais sur Dependabot, release-please, la PR de release ni le balayage  | Une session de revue par PR, plus longue si le diff est gros      |
-| `security-sweep.yml` | Démarre tous les jours à 06:00 UTC, mais Claude ne tourne que si l'ensemble des alertes ouvertes a changé depuis la dernière fois, ou quand tu le lances à la main | Rien la plupart des jours ; une session quand les alertes bougent |
+| Workflow             | Quand Claude tourne vraiment                                                                                                                                                                            | Coût habituel                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `claude-review.yml`  | Seulement quand tu ajoutes le label `review` à une PR vers `staging`. Jamais tout seul, et jamais sur Dependabot, release-please, la PR de release ni le balayage                                       | Une session de revue par PR, plus longue si le diff est gros      |
+| `security-sweep.yml` | Démarre chaque nuit à 0 h 17 UTC (2 h 17 à Paris l'été, 1 h 17 l'hiver), mais Claude ne tourne que si l'ensemble des alertes ouvertes a changé depuis la dernière fois, ou quand tu le lances à la main | Rien la plupart des jours ; une session quand les alertes bougent |
 
 Tout le reste n'en consomme pas : `ci.yml` et `release.yml` n'appellent pas
 Claude, et les commandes ci-dessus ne tournent que quand tu les tapes, dans ta
