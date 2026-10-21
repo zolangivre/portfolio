@@ -103,7 +103,10 @@ ferment quand le correctif arrive sur `main`, pas au merge de la PR du balayage.
 
 En local, la commande fait la boucle complète, vérifications comprises. Le
 workflow quotidien lance le même skill en mode CI (voir
-[Les workflows GitHub](#les-workflows-github)).
+[Les workflows GitHub](#les-workflows-github)). Son rapport est sur la page du
+run dans l'onglet Actions (**Summary**), à chaque fois que Claude a tourné.
+C'est là qu'apparaissent les propositions de fermeture quand il n'y avait rien
+à corriger, et donc pas de PR.
 
 ### `/upgrade-payload <version | numéro de PR>`
 

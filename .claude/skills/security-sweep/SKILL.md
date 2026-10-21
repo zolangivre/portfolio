@@ -164,10 +164,12 @@ One commit per kind of fix, Conventional format:
 ## 6. Deliver
 
 - Local mode: stop here and print the report.
-- CI mode: `git push --force-with-lease -u origin chore/security-sweep`,
-  then write the report to `.security/pr-body.md`. The workflow's next step,
-  outside this session, opens the PR or updates its description with that
-  file. `--body-file` and `-F` are blocked in CI; comments on Dependabot PRs
+- CI mode: if there are commits, `git push --force-with-lease -u origin chore/security-sweep`.
+  Then write the report to `.security/pr-body.md` **in every case**, even
+  when nothing was fixed: a run with only dismissal proposals has no PR, and
+  the report is the only place they show. The workflow's next steps, outside
+  this session, put it in the run's summary, and open the PR or update its
+  description with it only if this run pushed. `--body-file` and `-F` are blocked in CI; comments on Dependabot PRs
   use `gh pr comment <n> --body "…"`.
 
 ## Report (also the PR body)

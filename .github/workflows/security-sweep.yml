@@ -140,6 +140,15 @@ jobs:
       # Bash can't write files that Edit/Write may not: edits are limited to
       # package.json and src/, and workflow or .claude/ fixes are left to a
       # local sweep. No `gh run rerun`: rerunning CI is a person's call.
+      # Where the sweep branch stands before Claude runs, so the PR step can
+      # tell whether this run pushed anything. Empty when it doesn't exist.
+      - if: steps.decide.outputs.run == 'true'
+        name: Sweep branch before
+        id: before
+        run: |
+          sha="$(git ls-remote --heads "https://github.com/${GITHUB_REPOSITORY}.git" chore/security-sweep | cut -f1)"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
       - if: steps.decide.outputs.run == 'true'
         name: Sweep
         id: sweep
@@ -157,18 +166,33 @@ jobs:
       # sweep used (a PR opened with GITHUB_TOKEN wouldn't trigger CI). This
       # runs outside the Claude session and reads one fixed file, so the
       # agent never gets a command that publishes a file of its choosing.
+      # The report, on the run's page (Summary), whatever happens next: a run
+      # with only dismissal proposals opens no PR, and this is the only place
+      # they show. Same text the PR would carry, so nothing new is published.
+      - if: steps.decide.outputs.run == 'true' && !cancelled()
+        name: Report in the run summary
+        run: |
+          body=.security/pr-body.md
+          if [ -s "$body" ]; then
+            cat "$body" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "The sweep wrote no report: read the Sweep step's log." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - if: steps.decide.outputs.run == 'true' && hashFiles('.security/pr-body.md') != ''
         name: Open or update the sweep PR
         env:
           GH_TOKEN: ${{ steps.sweep.outputs.github_token }}
+          BEFORE: ${{ steps.before.outputs.sha }}
         run: |
           branch=chore/security-sweep
           body=.security/pr-body.md
           # hashFiles() is only a pre-filter: it also matches an empty file,
           # which would wipe the PR description.
           [ -s "$body" ] || { echo "$body is missing or empty" >&2; exit 1; }
-          if ! git ls-remote --exit-code --heads "https://github.com/${GITHUB_REPOSITORY}.git" "$branch" >/dev/null; then
-            echo "The sweep pushed nothing: no PR to open."
+          after="$(git ls-remote --heads "https://github.com/${GITHUB_REPOSITORY}.git" "$branch" | cut -f1)"
+          if [ -z "$after" ] || [ "$after" = "$BEFORE" ]; then
+            echo "The sweep pushed nothing this run: no PR to open or update. The report is in the run summary."
           elif [ "$(gh pr view "$branch" --json state -q .state 2>/dev/null || true)" = "OPEN" ]; then
             gh pr edit "$branch" --body-file "$body"
           else
