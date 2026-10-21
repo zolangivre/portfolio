@@ -296,11 +296,16 @@ What has to exist for the GitHub side to work:
    alerts** read-only and nothing else. `GITHUB_TOKEN` can't read Dependabot
    alerts. It expires, and when it does the sweep fails at its first step.
 4. **The `review` label.**
-5. **Branch protection** on `staging` and `main` (Settings → Rules →
-   Rulesets): require a PR with one approval, require the four CI checks, block
-   force pushes, with **Repository admin** on the bypass list. GitHub won't let
-   you approve your own PR, so without the bypass you couldn't merge yours.
-   The Claude app can't bypass it.
+5. **Branch protection**: one ruleset, `staging and main`, in Settings →
+   Rules → Rulesets. It requires a PR, with **no approval**: GitHub won't let
+   you approve your own PR, so one approval would block every merge. It
+   requires the CI checks to pass: Changes, Lint & typecheck, Unit tests,
+   Integration tests, E2E tests, Docs fr/en in sync. A job skipped by its
+   condition (a docs-only PR, a release PR) counts as passed, so nothing waits
+   forever. Branches don't have to be up to date before merging, or every
+   Dependabot PR would need a rebase each time `staging` moves. Force pushes
+   and deletion are blocked. **Repository admin** is on the bypass list, for
+   emergencies; a bypass is logged. The Claude app can't bypass it.
 6. **The workflows on `main`.** Claude's action only runs a workflow whose
    file is identical on the default branch, and scheduled workflows only run
    from it. Until a release brings them to `main`, both workflows exit in a few
