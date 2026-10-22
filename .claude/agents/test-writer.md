@@ -16,12 +16,12 @@ call (function signatures, labels, roles), not to mirror their logic.
 
 ## Pick the layer
 
-| Layer | Where                     | For                                                                                                                                                                                                            | Run with                                    |
-| ----- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| unit  | `tests/unit/*.spec.ts`    | pure logic in `src/lib`, `src/hooks`, `src/proxy.ts`, `src/app/sitemap.ts`. Node, any I/O mocked with `vi.mock`.                                                                                               | `pnpm test:unit <file>`                     |
-| int   | `tests/int/*.int.spec.ts` | anything that needs real Payload: access rules (Local API with `overrideAccess: false`), schema, hooks against the DB. A new collection gets an entry in `collectionPolicy` in `access.int.spec.ts`.           | `pnpm test:int <file>`                      |
-| dom   | `tests/dom/*.spec.tsx`    | a component's own behaviour (state, ARIA, keyboard) with Testing Library in jsdom. The folder doesn't exist yet: create it for the first one.                                                                  | `pnpm exec vitest run --project dom <file>` |
-| e2e   | `tests/e2e/*.e2e.spec.ts` | visitor flows on the real production build. Seeded content lives in `fixtures.ts` (values) and `prepare.ts` (seeding); add to both if you need new content. Phone-only behaviour goes in `mobile.e2e.spec.ts`. | `pnpm test:e2e <file> --project=chromium`   |
+| Layer | Where                     | For                                                                                                                                                                                                            | Run with                                  |
+| ----- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| unit  | `tests/unit/*.spec.ts`    | pure logic in `src/lib`, `src/hooks`, `src/proxy.ts`, `src/app/sitemap.ts`. Node, any I/O mocked with `vi.mock`.                                                                                               | `pnpm test:unit <file>`                   |
+| int   | `tests/int/*.int.spec.ts` | anything that needs real Payload: access rules (Local API with `overrideAccess: false`), schema, hooks against the DB. A new collection gets an entry in `collectionPolicy` in `access.int.spec.ts`.           | `pnpm test:int <file>`                    |
+| dom   | `tests/dom/*.spec.tsx`    | a component's own behaviour (state, ARIA, keyboard) with Testing Library in jsdom.                                                                                                                             | `pnpm test:dom <file>`                    |
+| e2e   | `tests/e2e/*.e2e.spec.ts` | visitor flows on the real production build. Seeded content lives in `fixtures.ts` (values) and `prepare.ts` (seeding); add to both if you need new content. Phone-only behaviour goes in `mobile.e2e.spec.ts`. | `pnpm test:e2e <file> --project=chromium` |
 
 Use the lowest layer that can prove the Target. What can't be tested at all
 (animation feel, visual taste) goes in your report under "à vérifier à l'œil",
