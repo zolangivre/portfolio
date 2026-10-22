@@ -43,9 +43,6 @@ importers:
       cross-env:
         specifier: ^10.1.0
         version: 10.1.0
-      dotenv:
-        specifier: 16.4.7
-        version: 16.4.7
       graphql:
         specifier: ^16.8.1
         version: 16.14.2
@@ -104,6 +101,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: 5.0.5
         version: 5.0.5(vitest@5.0.5)
+      dotenv:
+        specifier: 16.4.7
+        version: 16.4.7
       eslint:
         specifier: ^9.16.0
         version: 9.39.4(jiti@2.7.0)
