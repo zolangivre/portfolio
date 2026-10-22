@@ -23,6 +23,12 @@ updates:
     commit-message:
       prefix: chore
       include: scope
+    # @types/node follows the Node version the site runs on (24.x on Vercel
+    # and in CI): types for a newer major would accept APIs that crash in
+    # production. Its major is bumped by hand along with the runtime.
+    ignore:
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
     # A package goes into the first group it matches. Scoped packages are
     # matched with `@scope*`, as in GitHub's own examples: the `@scope/*` form
     # matched nothing here (#51 bumped tailwindcss without @tailwindcss/postcss,

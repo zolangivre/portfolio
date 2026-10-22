@@ -64,19 +64,19 @@ La base est exposée sur `127.0.0.1:5432`, le site sur le port 3000. Le `DATABAS
 
 ## Scripts
 
-| Commande                                             | Action                                                                                                 |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `pnpm dev`                                           | Serveur de développement                                                                               |
-| `pnpm devsafe`                                       | Pareil, après avoir vidé le cache `.next`                                                              |
-| `pnpm build` / `pnpm start`                          | Build et serveur de production                                                                         |
-| `pnpm generate:types`                                | Régénère `src/payload-types.ts` après un changement de schéma                                          |
-| `pnpm payload migrate`                               | Applique les migrations en attente                                                                     |
-| `pnpm payload migrate:status`                        | État des migrations                                                                                    |
-| `pnpm lint`                                          | ESLint                                                                                                 |
-| `pnpm test`                                          | Tests unitaires, puis d'intégration (Vitest), puis e2e (Playwright)                                    |
-| `pnpm test:unit` / `pnpm test:int` / `pnpm test:e2e` | Chaque suite séparément                                                                                |
-| `pnpm test:e2e:ui` / `pnpm test:e2e:report`          | Mode UI de Playwright / rapport HTML du dernier passage e2e                                            |
-| `pnpm test:coverage`                                 | Tests unitaires avec couverture, en échec sous 90 % sur `src/lib`, `src/hooks`, le proxy et le sitemap |
+| Commande                                                               | Action                                                                                                 |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `pnpm dev`                                                             | Serveur de développement                                                                               |
+| `pnpm devsafe`                                                         | Pareil, après avoir vidé le cache `.next`                                                              |
+| `pnpm build` / `pnpm start`                                            | Build et serveur de production                                                                         |
+| `pnpm generate:types`                                                  | Régénère `src/payload-types.ts` après un changement de schéma                                          |
+| `pnpm payload migrate`                                                 | Applique les migrations en attente                                                                     |
+| `pnpm payload migrate:status`                                          | État des migrations                                                                                    |
+| `pnpm lint`                                                            | ESLint                                                                                                 |
+| `pnpm test`                                                            | Tests unitaires, de composants, puis d'intégration (Vitest), puis e2e (Playwright)                     |
+| `pnpm test:unit` / `pnpm test:dom` / `pnpm test:int` / `pnpm test:e2e` | Chaque suite séparément                                                                                |
+| `pnpm test:e2e:ui` / `pnpm test:e2e:report`                            | Mode UI de Playwright / rapport HTML du dernier passage e2e                                            |
+| `pnpm test:coverage`                                                   | Tests unitaires avec couverture, en échec sous 90 % sur `src/lib`, `src/hooks`, le proxy et le sitemap |
 
 ## Modèle de contenu
 
@@ -121,11 +121,12 @@ Après tout changement de schéma, la migration s'écrit à la main : `payload m
 
 - **Unitaires** (`tests/unit`) : logique pure, sans base de données. Toute entrée/sortie est simulée.
 - **Intégration** (`tests/int`) : la vraie API locale de Payload, sur une base jetable `payload-portfolio-test` configurée dans [`.env.test`](.env.test). Postgres la crée au premier lancement ; chaque passage la supprime et la reconstruit avec `payload migrate:fresh`, ce qui prouve aussi que les migrations construisent toujours un schéma qui fonctionne en partant de zéro. La suite refuse de démarrer si `DATABASE_URL` n'est pas une base locale nommée `*-test`, et ne lit jamais `.env`.
-- **Composants** (`tests/dom`) : composants React avec Testing Library, dans jsdom.
+- **Composants** (`tests/dom`) : composants React et hooks côté client avec Testing Library, dans jsdom : état, ARIA, minuteurs. Tournent avec les tests unitaires dans la CI.
 - **E2E** (`tests/e2e`) : le site et l'admin via Playwright, sur un build de production (`next build && next start` sur le port 3100) et sa propre base `payload-portfolio-e2e-test`, configurée dans [`.env.e2e`](.env.e2e). [`tests/e2e/serve.ts`](tests/e2e/serve.ts) reconstruit la base à partir des migrations, y charge le contenu de [`tests/e2e/fixtures.ts`](tests/e2e/fixtures.ts), puis build dans `.next-e2e` : un dossier séparé, pour qu'un build e2e et un build classique ne partagent jamais de cache de données. Les tests qui modifient du contenu le font via l'API REST, puis le remettent en place. Deux projets Playwright : Chromium sur ordinateur lance tout ; `mobile-safari` (iPhone 15 sous WebKit) lance les tests de navigation et du menu mobile. Lancer `pnpm exec playwright install chromium webkit` une fois avant le premier passage en local.
 
 ```bash
 pnpm test:unit        # aucune préparation
+pnpm test:dom         # composants dans jsdom, aucune préparation
 pnpm test:int         # Postgres local nécessaire (docker compose up postgres)
 pnpm test:e2e         # Postgres local nécessaire ; build le site d'abord (~2 min)
 pnpm test:e2e:serve   # garder un serveur prêt sur :3100, que test:e2e réutilise
