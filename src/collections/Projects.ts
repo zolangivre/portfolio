@@ -48,6 +48,7 @@ export const Projects: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
+      maxLength: 60,
       label: 'Titre',
       required: true,
       localized: true,
@@ -63,6 +64,7 @@ export const Projects: CollectionConfig = {
     {
       name: 'shortDescription',
       type: 'textarea',
+      maxLength: 280,
       label: 'Description courte',
       required: true,
       localized: true,

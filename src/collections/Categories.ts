@@ -31,6 +31,7 @@ export const Categories: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
+      maxLength: 40,
       label: 'Nom',
       required: true,
       localized: true,

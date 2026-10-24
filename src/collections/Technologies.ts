@@ -31,6 +31,7 @@ export const Technologies: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
+      maxLength: 32,
       label: 'Nom',
       required: true,
     },
