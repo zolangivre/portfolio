@@ -1,6 +1,6 @@
 ---
 name: upgrade-payload
-description: Upgrade Payload (with the Next/React versions it requires) safely, from Dependabot's payload-next-react PR or by hand. Reads the release notes, regenerates types and import map, finds the columns Payload adds on its own with the schema drift test, writes the migration, and runs every check. Stops before pushing.
+description: Upgrade Payload (with the Next/React versions it requires) safely, from Dependabot's payload-next-react PR or by hand. Reads the release notes, regenerates types and import map, finds the columns Payload adds on its own with the schema drift test, writes the migration, runs every check, then ships it with /ship (PR into staging, CI followed). Never merges.
 disable-model-invocation: true
 argument-hint: <Dependabot PR number | target Payload version, e.g. 3.91.0>
 ---
@@ -130,8 +130,10 @@ Commit in Conventional format, separately:
 - in a manual upgrade, `chore(deps): upgrade Payload to <version>` for
   `package.json`, the lockfile, the types and the import map.
 
-Stop there. Don't push. Give the command: `git push` (Dependabot branch) or
-`git push -u origin HEAD && gh pr create --base staging --fill`.
+Then read `.claude/skills/ship/SKILL.md` and follow it from step 4 (the
+checks and commits are done): push, PR into `staging` (on a Dependabot
+branch, its existing PR), CI followed until it's green. The merge stays with
+Zolan.
 
 ## Report
 
@@ -139,6 +141,7 @@ Stop there. Don't push. Give the command: `git push` (Dependabot branch) or
 - What the release notes change for this project (a short list, with links).
 - The migration: the SQL, and why no backfill is needed (or how it's done).
 - Checks: a table, step / ✅ ❌ / detail.
+- The PR link and its CI state.
 - To check by hand after the `staging` deploy, since nothing local covers it:
   the Vercel build log shows `payload migrate` applied the migration; uploading
   an image and a video in the admin (R2, presigned uploads); editing rich text
