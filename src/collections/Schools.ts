@@ -29,6 +29,7 @@ export const Schools: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
+      maxLength: 100,
       label: 'Nom',
       required: true,
     },

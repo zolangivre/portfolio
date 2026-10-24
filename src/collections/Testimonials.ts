@@ -29,6 +29,7 @@ export const Testimonials: CollectionConfig = {
     {
       name: 'author',
       type: 'text',
+      maxLength: 60,
       label: 'Auteur',
       required: true,
       admin: {
@@ -38,6 +39,7 @@ export const Testimonials: CollectionConfig = {
     {
       name: 'role',
       type: 'text',
+      maxLength: 80,
       label: 'Poste',
       admin: {
         description: 'Intitulé du poste, par exemple « Product Manager ».',
@@ -58,6 +60,7 @@ export const Testimonials: CollectionConfig = {
     {
       name: 'quote',
       type: 'textarea',
+      maxLength: 800,
       label: 'Témoignage',
       required: true,
       localized: true,

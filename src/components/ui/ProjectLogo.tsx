@@ -1,5 +1,4 @@
-import Image from 'next/image'
-
+import { SafeImage } from '@/components/ui/SafeImage'
 import { getMediaUrl } from '@/lib/media'
 import type { Media } from '@/payload-types'
 
@@ -28,7 +27,7 @@ export function ProjectLogo({ className, image, imageDark, size }: ProjectLogoPr
   }
 
   const render = (doc: typeof light, src: string, visibility: string) => (
-    <Image
+    <SafeImage
       alt=""
       className={`${visibility} w-auto object-contain ${className}`}
       height={doc?.height ?? 640}

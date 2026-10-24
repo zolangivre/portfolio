@@ -31,7 +31,11 @@ export function TestimonialsSection({
         {testimonials.length > 0 ? (
           <RevealGroup className="project-grid" scale={0.96}>
             {testimonials.map((testimonial) => (
-              <TestimonialCard key={testimonial.id} testimonial={testimonial} />
+              <TestimonialCard
+                dictionary={dictionary}
+                key={testimonial.id}
+                testimonial={testimonial}
+              />
             ))}
           </RevealGroup>
         ) : (

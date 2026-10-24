@@ -29,6 +29,7 @@ export const Companies: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
+      maxLength: 80,
       label: 'Nom',
       required: true,
     },

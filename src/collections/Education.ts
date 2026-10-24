@@ -43,6 +43,7 @@ export const Education: CollectionConfig = {
     {
       name: 'degree',
       type: 'text',
+      maxLength: 120,
       label: 'Diplôme',
       required: true,
       localized: true,
@@ -50,6 +51,7 @@ export const Education: CollectionConfig = {
     {
       name: 'fieldOfStudy',
       type: 'text',
+      maxLength: 120,
       label: 'Domaine d’études',
       localized: true,
     },

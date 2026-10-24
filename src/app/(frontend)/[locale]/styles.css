@@ -1569,6 +1569,10 @@
   .hero-section {
     align-items: center;
     display: grid;
+    /* minmax(0, …): an implicit track grows to its widest unbreakable
+       content (a URL in the description), which pushed the whole hero past
+       a 320px screen. */
+    grid-template-columns: minmax(0, 1fr);
     min-height: 78vh;
     padding-top: 3rem;
   }
@@ -2223,6 +2227,16 @@
     display: none;
   }
 
+  /* Past a dozen cards the dots stop fitting a phone's width; Shelf.tsx
+   shows "3 / 24" instead, in the same slot. */
+  .shelf-counter {
+    color: var(--fg-muted);
+    font-size: var(--text-caption);
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 0;
+    padding-block: 0.15rem;
+  }
+
   @media (max-width: 719px) {
     .shelf {
       display: flex;
@@ -2374,11 +2388,16 @@
     flex: 1;
   }
 
+  /* Two columns while each keeps at least 16rem; one otherwise (beside the
+   portrait at a large text size, where two were squeezed to a word wide). */
   @media (min-width: 720px) {
     .about-points {
       display: grid;
       gap: 1rem;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(
+        auto-fit,
+        minmax(min(100%, max(16rem, calc((100% - 1rem) / 2))), 1fr)
+      );
     }
   }
 
@@ -2415,6 +2434,48 @@
   @media (prefers-reduced-motion: reduce) {
     .shelf-dot::before {
       transition: background-color var(--duration-fast) ease;
+    }
+  }
+
+  /* A wrapping row of short items split by dots (a project's category ·
+   year · status). Each item carries its dot in the gap before it; an item
+   that opens a line starts at the row's left edge, so its dot falls just
+   outside the row and is clipped — no line starts or ends on a separator.
+   Left-aligned rows only. */
+  .dot-list {
+    --dot-gap: 1rem;
+    column-gap: var(--dot-gap);
+    display: flex;
+    flex-wrap: wrap;
+    overflow-x: clip;
+  }
+
+  .dot-list > * {
+    position: relative;
+  }
+
+  .dot-list > *::before {
+    /* Decorative: an empty alt keeps screen readers from reading it. */
+    content: var(--dot, '·') / '';
+    left: calc(-0.5 * var(--dot-gap));
+    position: absolute;
+    translate: -50% 0;
+  }
+
+  /* The hero's highlights are centred below lg, where a dot would open the
+   second line: spacing alone separates them there. */
+  .hero-highlights {
+    --dot: '•';
+    --dot-gap: 2.25rem;
+  }
+
+  @media (max-width: 1023px) {
+    .hero-highlights {
+      --dot-gap: 1.25rem;
+    }
+
+    .hero-highlights > *::before {
+      content: none;
     }
   }
 
@@ -2500,6 +2561,10 @@
     color: var(--fg-muted);
     font-size: var(--text-lead);
     line-height: 1.85;
+    /* A pasted URL has no break opportunity of its own: break it only where
+       it would otherwise overflow, and let it count as narrow when the
+       layout measures its min-content. */
+    overflow-wrap: anywhere;
   }
 
   .rich-text > * + * {
