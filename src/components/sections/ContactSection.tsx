@@ -1,14 +1,13 @@
-import Image from 'next/image'
-
 import { cardClassName } from '@/components/ui/Card'
 import { CopyButton } from '@/components/ui/CopyButton'
 import { Container } from '@/components/ui/Container'
+import { SafeImage } from '@/components/ui/SafeImage'
 import { getMediaUrl } from '@/lib/media'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Contact, Setting } from '@/payload-types'
 
 import { ContactForm } from './ContactForm'
-import { BuiltInSocialIcon } from '../ui/SocialIcons'
+import { BuiltInSocialIcon, socialLinkLabel } from '../ui/SocialIcons'
 import { Reveal } from '../ui/Reveal'
 import { SectionHeader } from '../ui/SectionHeader'
 
@@ -19,11 +18,10 @@ type ContactSectionProps = {
 }
 
 export function ContactSection({ contact, dictionary, settings }: ContactSectionProps) {
-  const title = contact?.title ?? 'Let’s build something meaningful.'
+  const title = contact?.title || dictionary.contact.fallbackTitle
   const email = settings?.contactEmail
   const socialLinks = settings?.socialLinks ?? []
-  const successMessage =
-    contact?.successMessage ?? 'Thanks for reaching out — I’ll get back to you shortly.'
+  const successMessage = contact?.successMessage || dictionary.contact.fallbackSuccessMessage
 
   return (
     <section aria-labelledby="contact-title" className="content-section" id="contact">
@@ -35,13 +33,16 @@ export function ContactSection({ contact, dictionary, settings }: ContactSection
           title={title}
         />
 
-        <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+        {/* minmax(0, …): a track never widens to fit a long unbroken email. */}
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
           <Reveal className={cardClassName({ className: 'p-8', interactive: false })}>
             <p className="eyebrow mb-0">{dictionary.contact.reachOut}</p>
             {email ? (
-              <div className="mt-4 flex flex-wrap items-center gap-x-1 gap-y-2">
+              // The address wraps within its own box (anywhere, since it has
+              // no spaces) so the copy button stays beside it.
+              <div className="mt-4 flex items-center gap-x-1">
                 <a
-                  className="inline-flex text-xl font-semibold text-fg transition hover:text-accent"
+                  className="min-w-0 text-xl font-semibold text-fg wrap-anywhere transition hover:text-accent"
                   href={`mailto:${email}`}
                 >
                   {email}
@@ -61,7 +62,7 @@ export function ContactSection({ contact, dictionary, settings }: ContactSection
 
                   return (
                     <a
-                      className="group inline-flex items-center gap-2 capitalize transition hover:text-accent"
+                      className="group inline-flex items-center gap-2 transition hover:text-accent"
                       href={link.url}
                       key={link.id ?? link.url}
                       rel="noreferrer"
@@ -69,9 +70,10 @@ export function ContactSection({ contact, dictionary, settings }: ContactSection
                     >
                       <span className="inline-flex transition group-hover:-translate-y-0.5 group-hover:scale-110">
                         {iconUrl ? (
-                          <Image
+                          <SafeImage
                             alt=""
                             className="h-4 w-4 object-contain"
+                            fallback={<BuiltInSocialIcon platform={link.platform} />}
                             height={16}
                             src={iconUrl}
                             width={16}
@@ -80,7 +82,7 @@ export function ContactSection({ contact, dictionary, settings }: ContactSection
                           <BuiltInSocialIcon platform={link.platform} />
                         )}
                       </span>
-                      {link.platform}
+                      {socialLinkLabel(link.platform, link.url)}
                     </a>
                   )
                 })}

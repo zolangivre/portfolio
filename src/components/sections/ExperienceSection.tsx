@@ -1,8 +1,8 @@
-import Image from 'next/image'
-
 import { Container } from '@/components/ui/Container'
 import { Pill } from '@/components/ui/Pill'
+import { SafeImage } from '@/components/ui/SafeImage'
 import { TechChip } from '@/components/ui/TechChip'
+import { formatMonthRange } from '@/lib/dates'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
 import { getMediaUrl } from '@/lib/media'
@@ -20,16 +20,6 @@ type ExperienceSectionProps = {
   dictionary: Dictionary
   experiences: Experience[]
   locale: Locale
-}
-
-function formatDate(value: string | null | undefined, locale: Locale, present: string) {
-  if (!value) {
-    return present
-  }
-
-  return new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric' }).format(
-    new Date(value),
-  )
 }
 
 export function ExperienceSection({
@@ -68,8 +58,12 @@ export function ExperienceSection({
                   <article className="timeline-item">
                     <div className="timeline-meta">
                       <Pill tone="accent">
-                        {formatDate(experience.startDate, locale, dictionary.experience.present)} –{' '}
-                        {formatDate(experience.endDate, locale, dictionary.experience.present)}
+                        {formatMonthRange(
+                          experience.startDate,
+                          experience.endDate,
+                          locale,
+                          dictionary.experience.present,
+                        )}
                       </Pill>
                       {experience.employmentType ? (
                         <span className="text-label uppercase text-fg-subtle">
@@ -78,11 +72,13 @@ export function ExperienceSection({
                       ) : null}
                     </div>
                     <h3>{experience.position}</h3>
-                    <div className="timeline-company flex flex-wrap items-center gap-2">
+                    {/* No wrap: a long name breaks beside the logo rather than
+                        dropping below it and leaving the logo alone on a line. */}
+                    <div className="timeline-company flex items-start gap-2">
                       {companyLogoUrl ? (
-                        <Image
+                        <SafeImage
                           alt=""
-                          className="h-5 w-5 shrink-0 object-contain"
+                          className="mt-0.5 h-5 w-5 shrink-0 object-contain"
                           height={20}
                           src={companyLogoUrl}
                           width={20}
@@ -90,7 +86,7 @@ export function ExperienceSection({
                       ) : null}
                       {company?.website ? (
                         <a
-                          className="transition hover:text-accent"
+                          className="min-w-0 transition hover:text-accent"
                           href={company.website}
                           rel="noreferrer"
                           target="_blank"
@@ -98,7 +94,9 @@ export function ExperienceSection({
                           {company.name}
                         </a>
                       ) : (
-                        <span>{company?.name ?? dictionary.experience.fallbackCompany}</span>
+                        <span className="min-w-0">
+                          {company?.name ?? dictionary.experience.fallbackCompany}
+                        </span>
                       )}
                     </div>
                     {/* Shown on the page rather than in a `title` tooltip, which

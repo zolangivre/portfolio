@@ -274,6 +274,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                   <TechChip
                     key={typeof technology === 'object' && technology ? technology.id : index}
                     technology={technology}
+                    wrap
                   />
                 ))}
               </ul>

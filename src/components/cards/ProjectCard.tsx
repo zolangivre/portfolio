@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { ViewTransition } from 'react'
 
@@ -6,6 +5,7 @@ import { cardClassName, cardFrameClassName } from '@/components/ui/Card'
 import { DeviceMockup } from '@/components/ui/DeviceMockup'
 import { Pill } from '@/components/ui/Pill'
 import { ProjectLogo } from '@/components/ui/ProjectLogo'
+import { SafeImage } from '@/components/ui/SafeImage'
 import { TechChip } from '@/components/ui/TechChip'
 import { getMediaUrl, getRelationUrl } from '@/lib/media'
 import type { Dictionary } from '@/lib/i18n/dictionary'
@@ -73,7 +73,7 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
             <ViewTransition default="none" name={transitionName} share="media-morph">
               <div className="relative aspect-16/10 overflow-hidden rounded-t-card bg-surface">
                 {imageUrl ? (
-                  <Image
+                  <SafeImage
                     alt={imageAlt}
                     className={`h-full w-full object-contain ${darkImageUrl ? ' dark:hidden' : ''}`}
                     height={640}
@@ -83,7 +83,7 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
                   />
                 ) : null}
                 {darkImageUrl ? (
-                  <Image
+                  <SafeImage
                     alt={imageAlt}
                     className="hidden h-full w-full object-contain dark:block"
                     height={640}
@@ -99,7 +99,7 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
 
           <div className="flex flex-1 flex-col p-6 sm:p-7">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-              <div className="flex min-w-0 items-center gap-3">
+              <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
                 {/* The logo moves here when the media area shows the device. */}
                 {hasMockup ? (
                   <ProjectLogo
@@ -109,7 +109,13 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
                     size={96}
                   />
                 ) : null}
-                <h3 className="mb-0 text-xl font-semibold text-fg">{project.title}</h3>
+                {/* A title that doesn't fit beside the logo drops under it;
+                    one that doesn't fit the card at all ("BagBuddyMarket-
+                    placeDashboard", or a large text size) breaks inside it
+                    instead of running under its edge. */}
+                <h3 className="mb-0 min-w-0 text-xl font-semibold text-fg wrap-break-word">
+                  {project.title}
+                </h3>
               </div>
               {project.featured ? (
                 <Pill className="shrink-0" tone="accent">
@@ -119,13 +125,11 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
             </div>
 
             {categoryLabel || project.year || statusLabel ? (
-              <p className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-label uppercase text-fg-subtle">
+              // The dots live in CSS (.dot-list), so a wrapped line never
+              // starts or ends on one.
+              <p className="dot-list mb-4 items-center gap-y-1 text-label uppercase text-fg-subtle">
                 {categoryLabel ? <span>{categoryLabel}</span> : null}
-                {categoryLabel && project.year ? <span aria-hidden="true">·</span> : null}
                 {project.year ? <span>{project.year}</span> : null}
-                {(categoryLabel || project.year) && statusLabel ? (
-                  <span aria-hidden="true">·</span>
-                ) : null}
                 {statusLabel ? <span>{statusLabel}</span> : null}
               </p>
             ) : null}
