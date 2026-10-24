@@ -4,14 +4,15 @@
 
 Comment Claude Code est configuré pour travailler sur ce dépôt : ce que fait
 chaque pièce, quand l'utiliser, et ce qui reste à faire à la main. Tout ce qui
-est décrit ici propose des changements à relire. Rien ne merge, ne déploie ni
-n'écrit dans le CMS de production tout seul.
+est décrit ici propose des changements à relire. Les commandes poussent une
+branche de travail et ouvrent une PR vers `staging` ; le merge, c'est toi.
+Rien ne merge, ne déploie ni n'écrit dans le CMS de production tout seul.
 
 Il y a trois niveaux :
 
-- **Des commandes** à lancer dans Claude Code (`/ship-plan`, `/security-sweep`…).
+- **Des commandes** à lancer dans Claude Code (`/feature`, `/ship`, `/security-sweep`…).
   Chacune est un skill dans [`.claude/skills/`](../.claude/skills/).
-- **Des sous-agents** que ces commandes appellent pour un second avis : deux
+- **Des sous-agents** que ces commandes appellent pour un second avis : trois
   reviewers et un rédacteur de tests, dans [`.claude/agents/`](../.claude/agents/).
   Ils démarrent sans le contexte de la conversation, donc ils jugent le diff,
   pas le raisonnement qui l'a produit.
@@ -19,19 +20,48 @@ Il y a trois niveaux :
   balayage de sécurité quotidien et une revue des pull requests, dans
   [`.github/workflows/`](../.github/workflows/).
 
-En dessous, trois hooks dans [`.claude/settings.json`](../.claude/settings.json)
-s'appliquent à chaque fichier que Claude modifie. Le premier bloque les
-modifications des `.env*`, du lockfile et des fichiers générés, le deuxième
-formate le fichier avec Prettier, et le troisième régénère `payload-types.ts`
-après un changement de schéma.
+En dessous, des hooks dans [`.claude/settings.json`](../.claude/settings.json)
+(scripts dans [`.claude/hooks/`](../.claude/hooks/)) :
+
+- **`guard-git`** lit chaque commande shell que Claude lance et refuse un push
+  sur `staging` ou `main`, un push forcé, un merge (`gh pr merge`, l'API de
+  merge), `--no-verify`, `reset --hard` et `pnpm version`. Le ruleset laisse
+  Repository admin contourner ses règles, et le `gh` de Claude tourne avec ton
+  token admin : c'est ce hook qui garde le merge entre tes mains.
+- **`protect-files`** bloque les modifications des `.env*`, du lockfile, des
+  fichiers générés (`payload-types.ts`, l'import map), et de ce que gère
+  release-please (`CHANGELOG.md`, son manifeste, la `version` de
+  `package.json`).
+- **`format`** passe `eslint --fix` puis Prettier sur chaque fichier que Claude
+  modifie. Les erreurs de lint qui restent reviennent tout de suite à Claude,
+  elles n'attendent jamais la CI.
+- **`generate-types`** régénère `payload-types.ts` après un changement de
+  schéma.
+- **`turn-checks`**, quand Claude s'apprête à s'arrêter : lance les tests
+  unitaires liés aux fichiers qu'il a modifiés (`vitest related`, une ou deux
+  secondes), et s'il a changé la config Claude (skills, agents, hooks) sans
+  toucher à ce guide, lui demande de le vérifier. Un échec renvoie Claude au
+  travail une fois, jamais en boucle. Désactivable le temps d'une session avec
+  `CLAUDE_TURN_CHECKS=off` dans l'`env` de `.claude/settings.local.json`.
+
+Un skill n'est pas une commande : **`i18n-copy`**, les règles du texte visible
+(le dictionnaire dans les deux langues, les champs localisés du CMS,
+`maxLength`, les dates, la typographie française). Claude le charge tout seul
+dès qu'il touche à un texte d'interface.
 
 ## En un coup d'œil
 
 | Tu veux…                                                       | Lancer                                                | Où ça s'arrête                                             |
 | -------------------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------- |
-| Livrer un changement que tu as planifié                        | `/ship-plan 007`                                      | Un commit local, avant le push                             |
+| Construire quelque chose à partir d'une demande                | `/feature ajouter un temps de lecture aux articles`   | Une PR vers `staging`, CI verte                            |
+| Livrer le travail en cours                                     | `/ship` (`--draft` pour une PR en brouillon)          | Une PR vers `staging`, CI verte                            |
+| Livrer un changement que tu as planifié                        | `/ship-plan 007` (`--local` : arrêt avant le push)    | Une PR vers `staging`, CI verte                            |
+| Corriger un bug                                                | `/bug les dates des projets ont un mois d'avance`     | Une PR vers `staging`, CI verte                            |
+| Réparer un test instable                                       | `/flaky` (ou `/flaky e2e --repeat 20`)                | Une PR vers `staging`, CI verte                            |
+| Auditer SEO, accessibilité et vitesse, puis corriger           | `/audit` (ou `/audit seo`, `/audit --local`)          | Un rapport, puis une PR par correction choisie             |
+| Nettoyer les branches et worktrees mergés                      | `/menage` (ou `/menage --dry-run`)                    | Une liste ; ne supprime que ce que tu confirmes            |
 | Traiter les alertes de sécurité                                | `/security-sweep`                                     | Un commit local, ou une PR quand c'est la CI qui le lance  |
-| Mettre à jour Payload (ou réparer la PR Payload de Dependabot) | `/upgrade-payload 3.92.0` ou `/upgrade-payload 123`   | Un commit local, avant le push                             |
+| Mettre à jour Payload (ou réparer la PR Payload de Dependabot) | `/upgrade-payload 3.92.0` ou `/upgrade-payload 123`   | Une PR vers `staging`, CI verte                            |
 | Modifier le schéma de la base                                  | `/new-migration add_project_tagline`                  | Un fichier de migration, prouvé par une migration complète |
 | Vérifier une branche avant d'ouvrir une PR                     | `/pre-pr` (ajouter `--e2e` pour les tests navigateur) | Un rapport, sans aucun changement                          |
 | Relire les textes fr/en du site                                | `/content-audit`                                      | Un fichier de textes dans `plans/`                         |
@@ -43,10 +73,65 @@ après un changement de schéma.
 
 ## Les commandes
 
-### `/ship-plan NNN` : du plan au commit
+### `/feature <demande>` : de la demande à la PR
 
-La boucle principale, pour n'importe quel changement. Tu écris le plan, Claude
-fait le reste et s'arrête avant que quoi que ce soit ne quitte ta machine.
+La boucle qui te prend le moins de temps. Tu dis ce que tu veux avec tes mots ;
+Claude revient deux fois : une pour que tu approuves le plan, une avec une PR
+dont la CI est verte.
+
+```mermaid
+flowchart LR
+  A[demande] --> Q[questions,<br/>s'il y en a]
+  Q --> P[plan dans plans/,<br/>tu approuves]
+  P --> S[boucle ship-plan :<br/>tests, code, vérifs, revue]
+  S --> L[regard sur les écrans :<br/>390 et 1280 px,<br/>clair/sombre, fr/en]
+  L --> SH["/ship : PR,<br/>CI suivie"]
+  SH --> M[tu relis<br/>et tu merges]
+```
+
+1. **Lancer `/feature <demande>`** sur un arbre de travail propre. La commande
+   lit les **Décisions** de `plans/README.md`, explore le code, et ne te
+   demande que ce que le code et les conventions ne tranchent pas (une
+   formulation, un choix visuel).
+2. **Approuver le plan.** Elle écrit `plans/NNN-*.md` à partir du modèle et te
+   le montre en mode plan. Rien ne change avant ton accord.
+3. **Elle construit** en suivant `/ship-plan` (plus bas) : tests d'abord, code,
+   vérifications, reviewers. Puis, si le changement se voit sur le site, elle
+   lance la branche, regarde chaque écran touché, et garde des captures pour
+   la PR.
+4. **Elle livre** en suivant `/ship` : la PR vers `staging`, la CI suivie et
+   corrigée jusqu'au vert.
+5. **Tu relis et tu merges.** Le rapport liste ce qu'il reste à vérifier à
+   l'œil et les captures à glisser dans la PR (`gh` ne téléverse pas d'images).
+
+### `/ship [--draft]` : du travail en cours à la PR
+
+Tout ce qui n'est pas commité, ou commité mais pas poussé : un correctif fait
+en conversation, la fin de `/feature`, de `/ship-plan` ou de `/upgrade-payload`.
+
+1. Sur `staging` avec des modifications, la commande crée une branche de
+   travail en les gardant. Des modifications sans rapport deviennent des
+   branches et des PR séparées.
+2. Elle lance les vérifications de `/pre-pr`, et corrige ce qui échoue.
+3. Elle commite au format Conventional, par unité logique, en ajoutant les
+   fichiers par leur chemin.
+4. Elle pousse la branche et ouvre une PR vers `staging` (ou met à jour la PR
+   qui existe déjà pour la branche), en anglais, sans rien de privé : le dépôt
+   est public. Elle n'ajoute pas le label `review`, puisque les reviewers ont
+   déjà tourné.
+5. Elle suit la CI en tâche de fond. Un échec causé par la branche est corrigé
+   et poussé ; un échec d'infrastructure est relancé une fois ; un échec venu
+   d'ailleurs est signalé, pas corrigé ici. Trois tours au plus.
+
+Elle ne merge jamais. Quand assez de choses se sont accumulées sur `staging`,
+`/release` ouvre la PR `staging → main`.
+
+### `/ship-plan NNN [--local]` : du plan à la PR
+
+La boucle principale, pour tout changement dont tu as écrit le plan
+(`/feature` l'écrit pour toi). Claude fait le reste et termine par `/ship`.
+Avec `--local`, elle s'arrête au commit, avant que quoi que ce soit ne quitte
+ta machine.
 
 ```mermaid
 flowchart LR
@@ -56,6 +141,7 @@ flowchart LR
   V --> R[payload-reviewer<br/>ui-reviewer]
   R -->|remarques| I
   R --> C[commit,<br/>plan supprimé]
+  C --> SH["/ship : PR,<br/>CI suivie"]
 ```
 
 1. **Écrire le plan** dans `plans/`, à partir de
@@ -72,12 +158,64 @@ flowchart LR
 3. **Lire le rapport.** Il liste ce qu'il te reste à vérifier à l'œil : le
    ressenti d'une animation, le mobile sur un vrai téléphone, le mode sombre,
    les deux langues.
-4. **Pousser et ouvrir la PR** avec la commande qu'il te donne.
+4. **Relire et merger la PR** qu'elle a ouverte, une fois sa CI verte.
 
 `plans/` est ignoré par git exprès, puisque le dépôt est public. Une fois un
 plan livré, son résumé vit dans le message du commit (`Plan: NNN`). Le fichier
 est supprimé, et ce qu'il laissait de côté passe dans le **Backlog** de
 `plans/README.md`.
+
+### `/bug <description>` : du bug à la PR
+
+Un bug est corrigé quand un test qui le reproduisait passe. `/bug` reformule
+le bug, le reproduit par un test qui échoue au niveau le plus bas possible
+(unitaire, intégration, dom, e2e), corrige la **cause** (et le même motif
+ailleurs, quand c'est sûr), vérifie que le test échoue de nouveau sans le
+correctif, puis lance les vérifications et les reviewers, et livre avec
+`/ship` : un commit `fix(…)` dont le corps nomme la cause et le test. Elle ne
+te demande quelque chose que si elle n'arrive pas à reproduire, ou si le
+correctif devient un plan (une migration, beaucoup de fichiers, un choix de
+comportement). Un hotfix direct sur `main`, seulement avec ton accord.
+
+### `/flaky [e2e|unit|int] [--repeat N]`
+
+La CI relance deux fois un test e2e en échec : un test instable y paraît vert
+jusqu'au jour où il échoue trois fois. `/flaky` les repère dans l'historique de
+la CI (runs relancés sur le même commit, tests réussis à la relance) et en les
+répétant en local sans relance, trouve la cause (contenu de test partagé entre
+specs, animation d'entrée encore en cours, ordre des tests), corrige le test
+(ou l'app via `/bug` si c'est une vraie course), le prouve par N passages verts
+d'affilée, et livre. Elle n'augmente jamais `retries` et ne saute jamais un
+test. Les cas connus sont gardés dans le skill. Les échecs `mobile-safari`
+s'étudient depuis la CI, puisque WebKit ne s'installe pas ici.
+
+### `/audit [--local] [seo|a11y|perf] [chemin…]`
+
+Là où `/site-health` surveille la production chaque semaine et compare,
+`/audit` creuse une fois, puis corrige :
+
+- **SEO**, page par page dans les deux langues : canonical égal à l'URL de la
+  page, `hreflang` vers la même page dans l'autre langue, titres et
+  descriptions, images Open Graph qui répondent, JSON-LD, robots et sitemap
+  (chaque URL en 200), vraies 404, l'admin hors de l'index, redirection
+  permanente de `zolangivre.com` vers `www` ;
+- **accessibilité** : Lighthouse, l'arbre d'accessibilité, les contrastes avec
+  l'accent du CMS dans les deux thèmes, le mouvement réduit ;
+- **performance** : Lighthouse et traces, mobile puis desktop.
+
+Tu choisis les corrections dans le rapport ; chaque thème devient une branche
+et une PR, avec la mesure avant → après. `--local` audite le build de
+production de la branche, avec le contenu de test, au lieu de la production.
+
+### `/menage [--dry-run]`
+
+Chaque `/feature`, `/bug` et `/ship` laisse une branche derrière lui, et le
+dépôt ne les supprime pas au merge. `/menage` liste les branches locales
+mergées (ou dont la PR a été mergée sur GitHub), les branches distantes de PR
+mergées ou fermées, les worktrees abandonnés et les PR sans activité depuis
+30 jours, puis ne supprime que ce que tu confirmes. Il ne touche jamais à
+`main`, `staging`, la branche courante, les branches des bots, ni à une
+branche dont des commits ne sont poussés nulle part.
 
 ### `/security-sweep` : ce que Dependabot et CodeQL laissent ouvert
 
@@ -119,8 +257,8 @@ manquante casse le site, pas seulement un test.
 La commande lit les notes de version pour ce qui concerne ce projet, régénère
 les types et l'import map de l'admin, et lance le test de dérive du schéma
 (voir plus bas). À partir de son résultat, elle écrit la migration, puis lance
-toutes les vérifications, e2e compris, et payload-reviewer. Une nouvelle
-version majeure (4.x) devient un plan à la place.
+toutes les vérifications, e2e compris, et payload-reviewer, et termine par
+`/ship`. Une nouvelle version majeure (4.x) devient un plan à la place.
 
 Avec un numéro de PR, elle travaille sur la PR `payload-next-react` de
 Dependabot. Cette PR peut être incomplète : pour la 3.91, elle montait `payload`
@@ -233,11 +371,12 @@ Tu les appelles rarement toi-même, puisque les commandes les lancent. Tu peux
 quand même en demander un directement, par exemple « demande à
 payload-reviewer de relire cette branche ».
 
-| Agent                                                       | Regarde                                                                                                                                                                                                                                    | Écrit                                                                  |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| [`payload-reviewer`](../.claude/agents/payload-reviewer.md) | Le back-end : règles d'accès (les API REST et GraphQL sont publiques), schéma comparé aux migrations, tags de cache et revalidation, `visibility` et `locale` dans les requêtes, server actions, hooks qui appellent des services externes | Rien, il fait un rapport                                               |
-| [`ui-reviewer`](../.claude/agents/ui-reviewer.md)           | Le front-end : les deux langues, les tokens d'animation et le mouvement réduit, le survol sur écran tactile, l'accessibilité, la direction artistique arrondie du site, la frontière serveur/client                                        | Rien, il fait un rapport                                               |
-| [`test-writer`](../.claude/agents/test-writer.md)           | La Target d'un plan                                                                                                                                                                                                                        | Des tests sous `tests/`, au niveau le plus bas qui suffit à la prouver |
+| Agent                                                       | Regarde                                                                                                                                                                                                                                                    | Écrit                                                                  |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| [`payload-reviewer`](../.claude/agents/payload-reviewer.md) | Le back-end : règles d'accès (les API REST et GraphQL sont publiques), schéma comparé aux migrations, tags de cache et revalidation, `visibility` et `locale` dans les requêtes, server actions, hooks qui appellent des services externes                 | Rien, il fait un rapport                                               |
+| [`ui-reviewer`](../.claude/agents/ui-reviewer.md)           | Le front-end : les deux langues, les tokens d'animation et le mouvement réduit, le survol sur écran tactile, l'accessibilité, la direction artistique arrondie du site, la frontière serveur/client                                                        | Rien, il fait un rapport                                               |
+| [`test-writer`](../.claude/agents/test-writer.md)           | La Target d'un plan                                                                                                                                                                                                                                        | Des tests sous `tests/`, au niveau le plus bas qui suffit à la prouver |
+| [`webkit-reviewer`](../.claude/agents/webkit-reviewer.md)   | Safari et iOS, que seule la CI peut lancer : transitions de vue, coins arrondis rognés, `backdrop-filter`, `100vh` et éléments fixes, scroll-snap, support des fonctionnalités, vidéo, focus ; et les résultats `mobile-safari` du run de CI de la branche | Rien, il fait un rapport                                               |
 
 ## Le test de dérive du schéma
 
