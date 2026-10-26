@@ -22,9 +22,8 @@
 # through. This hook is the barrier for Claude.
 #
 # Wrappers are seen through (env, sudo -u x, timeout -s KILL 30, xargs -n 1,
-# npx, pnpm exec, bash -c "…"). A quoted argument holding a shell separator in
-# a push, merge or api command is refused, since the split below can't place
-# it.
+# npx, pnpm --filter x exec, bash -c "…"), and the command is read twice: split
+# everywhere, and split with its quoted strings set aside (see `segments`).
 #
 # It guards against mistakes, not against a deliberate workaround: the shell
 # isn't really parsed (aliases, variables and functions get through), and
@@ -127,20 +126,16 @@ case "$cmd" in
     ;;
 esac
 
-# The split below doesn't know quotes: a separator inside a quoted argument
-# (`git push origin "x;y" main`) would cut the command in the wrong place and
-# hide what follows. On a git push, a gh merge or a gh api call, that's
-# refused rather than guessed.
-while IFS= read -r line; do
-  printf '%s' "$line" | grep -qE '(^|[^[:alnum:]_./-])(git|gh)[[:space:]]' || continue
-  printf '%s' "$line" | grep -qE '(^|[[:space:]])(push|merge|api)([[:space:]]|$)' || continue
-  printf '%s' "$line" | grep -oE "\"[^\"]*\"|'[^']*'" | grep -q '[;&|(){}`$]' &&
-    block "une chaîne entre guillemets contient un séparateur du shell (; & | \$( …) dans une commande git push / gh : le garde-fou ne peut pas la lire sûrement. Écris-la sans, ou passe le texte par un fichier (--body-file, -F)."
-done <<<"$cmd"
-
 # Une ligne par commande simple : les séparateurs du shell (dont `&` de fond)
 # deviennent des sauts de ligne.
-segments="$(printf '%s\n' "$cmd" | awk '{ gsub(/&&|\|\||;|\||&|\$\(|`|\(|\)|\{|\}/, "\n") } 1')"
+split_segments() { awk '{ gsub(/&&|\|\||;|\||&|\$\(|`|\(|\)|\{|\}/, "\n") } 1'; }
+# Two readings, each checked: the first splits everywhere, quotes included, so
+# what runs inside `bash -c "… && git push …"` is seen; the second replaces
+# every quoted string with a token first, so a separator inside a quoted
+# argument (`git push origin "x;y" main`, `git commit -m "a; b" --no-verify`)
+# can't cut the real command short and hide its tail.
+segments="$(printf '%s\n' "$cmd" | split_segments)
+$(printf '%s\n' "$cmd" | sed -E "s/\"[^\"]*\"/Q/g; s/'[^']*'/Q/g" | split_segments)"
 
 check_push() {
   local force=0 skip=0 t r dst
@@ -248,6 +243,19 @@ check_git() {
 
 # gh pr [options] merge, même avec des options entre `pr` et `merge`
 # (gh pr -R o/r merge 12) ; merge par l'API REST ou GraphQL.
+# The first word after a package manager's own options (`pnpm --filter web
+# exec …`, `pnpm -s version`): sets pm_at to its index in w.
+pm_sub() {
+  pm_at=$(($1 + 1))
+  while [ "$pm_at" -lt "${#w[@]}" ]; do
+    case "${w[$pm_at]}" in
+      --filter | -F | -C | --dir | --cwd | --prefix | --workspace) pm_at=$((pm_at + 2)) ;;
+      -*) pm_at=$((pm_at + 1)) ;;
+      *) return ;;
+    esac
+  done
+}
+
 check_gh() {
   local t inpr=0 skip=0 api=0 write=0 refs=0
   [ "${1:-}" = api ] && api=1
@@ -293,15 +301,23 @@ while IFS= read -r seg; do
         bash | sh | zsh | -c | -lc | -ic | npx | bunx) i=$((i + 1)) ;;
       # Runners: `pnpm exec gh …`, `npm exec -- git …`, `yarn dlx …`.
       npm | pnpm | yarn)
-        case "${w[$((i + 1))]:-}" in
-          exec | dlx | x) i=$((i + 2)) ;;
+        pm_sub "$i"
+        case "${w[$pm_at]:-}" in
+          exec | dlx | x) i=$((pm_at + 1)) ;;
           *) break ;;
         esac
         ;;
       # A wrapper's options, and their value for those that take one
       # (`sudo -u root git …`, `xargs -n 1 git …`, `timeout -s KILL 30 git …`).
+      # The value is skipped only if it isn't itself a command this hook
+      # reads: `sudo -s git push …` (-s takes no value) still lands on git.
       -u | -g | -C | -h | -p | -s | -k | -n | -I | -P | -L | -d | -E | -S | \
-        --user | --group | --signal | --kill-after) i=$((i + 2)) ;;
+        --user | --group | --signal | --kill-after)
+        case "${w[$((i + 1))]##*/}" in
+          git | gh | npm | pnpm | yarn | npx | bunx | bash | sh | zsh | env | sudo | xargs | timeout | nice) i=$((i + 1)) ;;
+          *) i=$((i + 2)) ;;
+        esac
+        ;;
       -*) i=$((i + 1)) ;;
       *) break ;;
     esac
@@ -311,10 +327,8 @@ while IFS= read -r seg; do
     git) check_git "${w[@]:$((i + 1))}" ;;
     gh) check_gh "${w[@]:$((i + 1))}" ;;
     npm | pnpm | yarn)
-      # The subcommand is the first word after the options (`pnpm -s version`).
-      j=$((i + 1))
-      while [ "$j" -lt "${#w[@]}" ] && [ "${w[$j]#-}" != "${w[$j]}" ]; do j=$((j + 1)); done
-      [ "${w[$j]:-}" = version ] &&
+      pm_sub "$i"
+      [ "${w[$pm_at]:-}" = version ] &&
         block "${w[$i]##*/} version : la version et le CHANGELOG sont gérés par release-please, à partir des messages de commit."
       ;;
   esac
