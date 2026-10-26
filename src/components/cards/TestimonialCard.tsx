@@ -1,13 +1,16 @@
 import { cardClassName } from '@/components/ui/Card'
+import { ClampedText } from '@/components/ui/ClampedText'
 import { FadeImage } from '@/components/ui/FadeImage'
 import { getMediaUrl } from '@/lib/media'
+import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Testimonial } from '@/payload-types'
 
 type TestimonialCardProps = {
+  dictionary: Dictionary
   testimonial: Testimonial
 }
 
-export function TestimonialCard({ testimonial }: TestimonialCardProps) {
+export function TestimonialCard({ dictionary, testimonial }: TestimonialCardProps) {
   const avatarUrl = getMediaUrl(testimonial.avatar)
   const company =
     typeof testimonial.company === 'object' && testimonial.company ? testimonial.company.name : null
@@ -22,7 +25,13 @@ export function TestimonialCard({ testimonial }: TestimonialCardProps) {
           interactive: false,
         })}
       >
-        <p className="text-base leading-7 text-fg-muted">“{testimonial.quote}”</p>
+        <ClampedText
+          className="text-base leading-7 text-fg-muted"
+          lessLabel={dictionary.testimonials.readLessLabel}
+          moreLabel={dictionary.testimonials.readMoreLabel}
+        >
+          “{testimonial.quote}”
+        </ClampedText>
         <div className="mt-6 flex items-center gap-3">
           {avatarUrl ? (
             <FadeImage

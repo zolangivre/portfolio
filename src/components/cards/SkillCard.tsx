@@ -1,5 +1,4 @@
-import Image from 'next/image'
-
+import { SafeImage } from '@/components/ui/SafeImage'
 import { getMediaUrl } from '@/lib/media'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Skill } from '@/payload-types'
@@ -14,9 +13,9 @@ export function SkillCard({ dictionary, skill }: SkillCardProps) {
 
   const content = (
     <div className="flex items-center justify-between gap-2">
-      <div className="flex items-center gap-2.5">
+      <div className="flex min-w-0 items-center gap-2.5">
         {logoUrl ? (
-          <Image
+          <SafeImage
             alt=""
             className={`skill-card-icon h-6 w-6 shrink-0 object-contain${skill.invertLogoInDarkMode ? ' dark:invert' : ''}`}
             height={24}
@@ -24,7 +23,7 @@ export function SkillCard({ dictionary, skill }: SkillCardProps) {
             width={24}
           />
         ) : null}
-        <span className="font-medium text-fg">{skill.name}</span>
+        <span className="min-w-0 font-medium text-fg wrap-break-word">{skill.name}</span>
       </div>
 
       {skill.url ? (

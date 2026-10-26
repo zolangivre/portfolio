@@ -54,7 +54,7 @@ export function PointGroupCard({ content, delay, title }: PointGroupCardProps) {
       <div
         className={cardClassName({ className: 'h-full p-8', interactive: false, tone: 'accent' })}
       >
-        <motion.p className="eyebrow mb-0" variants={itemVariants}>
+        <motion.p className="eyebrow mb-0 wrap-break-word" variants={itemVariants}>
           {title}
         </motion.p>
         {content ? (

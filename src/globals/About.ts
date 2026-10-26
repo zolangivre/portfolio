@@ -65,6 +65,7 @@ export const About: GlobalConfig = {
         {
           name: 'title',
           type: 'text',
+          maxLength: 80,
           label: 'Titre',
           required: true,
         },

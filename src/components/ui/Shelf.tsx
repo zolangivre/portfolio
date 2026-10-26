@@ -2,9 +2,14 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 
+/** More cards than this, and the dots give way to a "3 / 24" counter. */
+const MAX_DOTS = 10
+
 type ShelfProps = {
   /** The `.shelf` row — a grid that becomes a swipeable row on phones. */
   children: ReactNode
+  /** On the wrapper — e.g. to size it as a flex item next to something else. */
+  className?: string
   navLabel: string
   /** One per card, in order: what each dot is announced as. */
   titles: string[]
@@ -20,7 +25,7 @@ type ShelfProps = {
  * iOS. This adds the page dots under it: where you are in the row, and a
  * way to jump. Hidden from 720px, where the grid is a grid again.
  */
-export function Shelf({ children, navLabel, titles }: ShelfProps) {
+export function Shelf({ children, className, navLabel, titles }: ShelfProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const [active, setActive] = useState(0)
 
@@ -86,9 +91,15 @@ export function Shelf({ children, navLabel, titles }: ShelfProps) {
   }
 
   return (
-    <div ref={rootRef}>
+    <div className={className} ref={rootRef}>
       {children}
-      {titles.length > 1 ? (
+      {titles.length > MAX_DOTS ? (
+        // Past a dozen, dots stop fitting a phone's width (and stop being
+        // countable): where you are, as a number, in the same slot.
+        <p aria-hidden="true" className="shelf-dots shelf-counter">
+          {active + 1} / {titles.length}
+        </p>
+      ) : titles.length > 1 ? (
         <div aria-label={navLabel} className="shelf-dots" role="group">
           {titles.map((title, index) => (
             <button

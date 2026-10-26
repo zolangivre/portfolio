@@ -43,6 +43,7 @@ export const Experiences: CollectionConfig = {
     {
       name: 'position',
       type: 'text',
+      maxLength: 100,
       label: 'Poste',
       required: true,
       localized: true,
@@ -50,6 +51,7 @@ export const Experiences: CollectionConfig = {
     {
       name: 'employmentType',
       type: 'text',
+      maxLength: 40,
       label: 'Type de contrat',
       localized: true,
     },

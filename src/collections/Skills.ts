@@ -30,6 +30,7 @@ export const Skills: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
+      maxLength: 32,
       label: 'Nom',
       required: true,
     },

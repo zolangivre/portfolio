@@ -35,6 +35,7 @@ export const Hero: GlobalConfig = {
         {
           name: 'label',
           type: 'text',
+          maxLength: 90,
           label: 'Texte',
           localized: true,
           admin: {
@@ -47,6 +48,7 @@ export const Hero: GlobalConfig = {
     {
       name: 'eyebrow',
       type: 'text',
+      maxLength: 90,
       label: 'Surtitre / rôle',
       localized: true,
       defaultValue: 'Full-stack developer',
@@ -54,6 +56,7 @@ export const Hero: GlobalConfig = {
     {
       name: 'title',
       type: 'text',
+      maxLength: 60,
       label: 'Titre',
       required: true,
       localized: true,
@@ -78,6 +81,7 @@ export const Hero: GlobalConfig = {
         {
           name: 'value',
           type: 'text',
+          maxLength: 60,
           label: 'Texte',
           required: true,
         },
@@ -91,6 +95,7 @@ export const Hero: GlobalConfig = {
         {
           name: 'label',
           type: 'text',
+          maxLength: 40,
           label: 'Libellé',
           localized: true,
           defaultValue: 'View projects',
@@ -111,6 +116,7 @@ export const Hero: GlobalConfig = {
         {
           name: 'label',
           type: 'text',
+          maxLength: 40,
           label: 'Libellé',
           localized: true,
           defaultValue: 'Let’s talk',
@@ -135,6 +141,7 @@ export const Hero: GlobalConfig = {
         {
           name: 'label',
           type: 'text',
+          maxLength: 40,
           label: 'Libellé',
           localized: true,
           defaultValue: 'Download CV',
