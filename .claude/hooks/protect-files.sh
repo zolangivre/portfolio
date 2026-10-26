@@ -3,6 +3,11 @@
 # generated files and what release-please owns. Each has a proper way to
 # change it, given in the reason.
 input=$(cat)
+# Without jq nothing below can be read: refuse rather than let everything by.
+command -v jq >/dev/null || {
+  echo "Bloqué (protect-files) : jq est introuvable, le garde-fou ne peut pas lire le fichier visé." >&2
+  exit 2
+}
 file=$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty')
 
 deny() {
@@ -31,7 +36,9 @@ case "$file" in
   */package.json)
     # Only the version field: release-please bumps it in its version PR.
     if printf '%s' "$input" | jq -e '
-        [.tool_input.old_string, .tool_input.new_string] | map(select(. != null))
+        [.tool_input.old_string, .tool_input.new_string,
+         (.tool_input.edits // [] | .[] | .old_string, .new_string)]
+        | map(select(. != null))
         | join("\n") | test("\"version\"\\s*:")' >/dev/null; then
       deny "Le champ version de package.json est géré par release-please."
     fi

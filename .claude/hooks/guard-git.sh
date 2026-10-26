@@ -7,7 +7,9 @@
 #                      (--force, -f, +refspec), --all / --mirror.
 #                      --force-with-lease is allowed: after rebasing a work
 #                      branch.
-#   gh pr merge        merging stays with Zolan (same for gh api …/merge).
+#   gh pr merge        merging stays with Zolan; so does gh api on …/merge,
+#                      …/merges and merge-upstream, and a gh api write to
+#                      git/refs (moving a branch without a PR).
 #   git commit -n      --no-verify skips the commit-msg hook.
 #   git reset --hard   loses uncommitted work; so do git clean -f,
 #   git clean -f       git checkout -f / -- . / *, git restore . and
@@ -18,6 +20,11 @@
 # but Repository admin is on its bypass list, and Claude's `gh` runs with
 # Zolan's admin token: `gh pr merge --admin` or a direct push would go
 # through. This hook is the barrier for Claude.
+#
+# Wrappers are seen through (env, sudo -u x, timeout -s KILL 30, xargs -n 1,
+# npx, pnpm exec, bash -c "…"). A quoted argument holding a shell separator in
+# a push, merge or api command is refused, since the split below can't place
+# it.
 #
 # It guards against mistakes, not against a deliberate workaround: the shell
 # isn't really parsed (aliases, variables and functions get through), and
@@ -50,9 +57,20 @@ cmd="$(printf '%s\n' "$cmd" | awk '
     if (line == end) { end = ""; held = "" }
     next
   }
-  { print }
-  match($0, /(^|[^<])<<-?[ \t]*["\047]?[A-Za-z_][A-Za-z0-9_]*["\047]?/) {
-    tag = substr($0, RSTART, RLENGTH)
+  # A « <<EOF » inside a quoted string is text, not a heredoc: look for the
+  # opener on a copy of the line without its quoted strings (the quotes of
+  # the tag itself, <<'EOF', are dropped first so the tag survives).
+  {
+    print
+    q0 = $0
+    while (match(q0, /<<-?[ \t]*["\047][A-Za-z_][A-Za-z0-9_]*["\047]/)) {
+      t = substr(q0, RSTART, RLENGTH); gsub(/["\047]/, "", t)
+      q0 = substr(q0, 1, RSTART - 1) t substr(q0, RSTART + RLENGTH)
+    }
+    gsub(/"[^"]*"/, "", q0); gsub(/\047[^\047]*\047/, "", q0)
+  }
+  match(q0, /(^|[^<])<<-?[ \t]*[A-Za-z_][A-Za-z0-9_]*/) {
+    tag = substr(q0, RSTART, RLENGTH)
     sub(/^[^<]/, "", tag)
     pstrip = (tag ~ /^<<-/)
     gsub(/^<<-?[ \t]*["\047]?|["\047]$/, "", tag)
@@ -108,6 +126,17 @@ case "$cmd" in
       block "merge par l'API GitHub : le merge reste à l'utilisateur."
     ;;
 esac
+
+# The split below doesn't know quotes: a separator inside a quoted argument
+# (`git push origin "x;y" main`) would cut the command in the wrong place and
+# hide what follows. On a git push, a gh merge or a gh api call, that's
+# refused rather than guessed.
+while IFS= read -r line; do
+  printf '%s' "$line" | grep -qE '(^|[^[:alnum:]_./-])(git|gh)[[:space:]]' || continue
+  printf '%s' "$line" | grep -qE '(^|[[:space:]])(push|merge|api)([[:space:]]|$)' || continue
+  printf '%s' "$line" | grep -oE "\"[^\"]*\"|'[^']*'" | grep -q '[;&|(){}`$]' &&
+    block "une chaîne entre guillemets contient un séparateur du shell (; & | \$( …) dans une commande git push / gh : le garde-fou ne peut pas la lire sûrement. Écris-la sans, ou passe le texte par un fichier (--body-file, -F)."
+done <<<"$cmd"
 
 # Une ligne par commande simple : les séparateurs du shell (dont `&` de fond)
 # deviennent des sauts de ligne.
@@ -220,12 +249,18 @@ check_git() {
 # gh pr [options] merge, même avec des options entre `pr` et `merge`
 # (gh pr -R o/r merge 12) ; merge par l'API REST ou GraphQL.
 check_gh() {
-  local t inpr=0 skip=0
+  local t inpr=0 skip=0 api=0 write=0 refs=0
+  [ "${1:-}" = api ] && api=1
   for t in "$@"; do
     case "$t" in
-      */merge | */merge/* | */merge\?* | *mergePullRequest* | *mergeBranch*)
+      # PR merge, branch merge (POST /merges), fork sync (merge-upstream).
+      */merge | */merge/* | */merge\?* | */merges | */merges/* | */merges\?* | \
+        *merge-upstream* | *mergePullRequest* | *mergeBranch*)
         block "merge par l'API GitHub : le merge reste à l'utilisateur."
         ;;
+      *git/refs*) refs=1 ;;
+      -X | --method | -f | -F | --field | --raw-field | --input) write=1 ;;
+      -XPOST | -XPATCH | -XPUT | -XDELETE | --method=*) write=1 ;;
     esac
     if [ "$skip" = 1 ]; then skip=0; continue; fi
     if [ "$inpr" = 1 ]; then
@@ -239,6 +274,10 @@ check_gh() {
       inpr=1
     fi
   done
+  # Moving a branch by its ref skips the PR altogether (a GET stays allowed).
+  [ "$api" = 1 ] && [ "$refs" = 1 ] && [ "$write" = 1 ] &&
+    block "gh api en écriture sur git/refs : une branche ne bouge que par une PR."
+  return 0
 }
 
 while IFS= read -r seg; do
@@ -251,7 +290,19 @@ while IFS= read -r seg; do
     case "${w[$i]}" in
       *=* | env | command | builtin | time | nohup | sudo | exec | xargs | eval | \
         then | do | else | elif | if | while | until | ! | timeout | nice | stdbuf | [0-9]* | \
-        bash | sh | zsh | -c | -lc | -ic) i=$((i + 1)) ;;
+        bash | sh | zsh | -c | -lc | -ic | npx | bunx) i=$((i + 1)) ;;
+      # Runners: `pnpm exec gh …`, `npm exec -- git …`, `yarn dlx …`.
+      npm | pnpm | yarn)
+        case "${w[$((i + 1))]:-}" in
+          exec | dlx | x) i=$((i + 2)) ;;
+          *) break ;;
+        esac
+        ;;
+      # A wrapper's options, and their value for those that take one
+      # (`sudo -u root git …`, `xargs -n 1 git …`, `timeout -s KILL 30 git …`).
+      -u | -g | -C | -h | -p | -s | -k | -n | -I | -P | -L | -d | -E | -S | \
+        --user | --group | --signal | --kill-after) i=$((i + 2)) ;;
+      -*) i=$((i + 1)) ;;
       *) break ;;
     esac
   done
@@ -260,7 +311,10 @@ while IFS= read -r seg; do
     git) check_git "${w[@]:$((i + 1))}" ;;
     gh) check_gh "${w[@]:$((i + 1))}" ;;
     npm | pnpm | yarn)
-      [ "${w[$((i + 1))]:-}" = version ] &&
+      # The subcommand is the first word after the options (`pnpm -s version`).
+      j=$((i + 1))
+      while [ "$j" -lt "${#w[@]}" ] && [ "${w[$j]#-}" != "${w[$j]}" ]; do j=$((j + 1)); done
+      [ "${w[$j]:-}" = version ] &&
         block "${w[$i]##*/} version : la version et le CHANGELOG sont gérés par release-please, à partir des messages de commit."
       ;;
   esac

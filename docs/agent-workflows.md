@@ -23,7 +23,8 @@ Underneath, hooks in [`.claude/settings.json`](../.claude/settings.json)
 
 - **`guard-git`** reads every shell command Claude runs and refuses a push to
   `staging` or `main`, a forced push, a merge (`gh pr merge`, the merge API),
-  `--no-verify`, `reset --hard` and `pnpm version`. The ruleset lets
+  moving a branch through the API, `--no-verify`, `reset --hard` and
+  `pnpm version`, wrappers included (`sudo`, `npx`, `pnpm exec`, `bash -c`). The ruleset lets
   Repository admin bypass its rules, and Claude's `gh` runs with your admin
   token, so this hook is what keeps the merge in your hands.
 - **`protect-files`** blocks edits to `.env*`, the lockfile, generated files

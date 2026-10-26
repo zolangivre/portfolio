@@ -22,7 +22,14 @@ input=$(cat)
 [ "${CLAUDE_TURN_CHECKS:-}" = "off" ] && exit 0
 repo=$(cd "$CLAUDE_PROJECT_DIR" && pwd -P) || exit 0
 session=$(printf '%s' "$input" | jq -r '.session_id // "default"')
-state="${TMPDIR:-/tmp}/payload-portfolio-claude"
+# The id ends up in a file name: keep it to safe characters.
+case "$session" in "" | *[!A-Za-z0-9_-]*) session=default ;; esac
+# A private directory of this user's (macOS's TMPDIR already is); never a
+# symlink someone else planted.
+state="${TMPDIR:-/tmp}/payload-portfolio-claude-$(id -u)"
+[ -L "$state" ] && exit 0
+mkdir -p -m 700 "$state" 2>/dev/null
+[ -d "$state" ] && [ -O "$state" ] || exit 0
 list="$state/turn-$session.txt"
 # Created at the turn's first edit: a guide newer than it was changed this
 # turn, even through a shell command the record step never sees.
@@ -35,7 +42,6 @@ case "$mode" in
       "$repo"/* | "$CLAUDE_PROJECT_DIR"/*) ;;
       *) exit 0 ;;
     esac
-    mkdir -p "$state"
     [ -e "$start" ] || touch "$start"
     grep -qxF "$f" "$list" 2>/dev/null || printf '%s\n' "$f" >>"$list"
     ;;
