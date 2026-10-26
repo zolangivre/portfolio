@@ -102,8 +102,8 @@ importers:
         specifier: 5.0.5
         version: 5.0.5(vitest@5.0.5)
       dotenv:
-        specifier: 16.4.7
-        version: 16.4.7
+        specifier: 18.0.8
+        version: 18.0.8
       eslint:
         specifier: ^9.16.0
         version: 9.39.4(jiti@2.7.0)
