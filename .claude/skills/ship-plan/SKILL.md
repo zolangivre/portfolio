@@ -1,19 +1,22 @@
 ---
 name: ship-plan
-description: Take one plan from plans/ through the whole agent loop (branch, tests first, implement, verify, independent review by subagents, fix, commit, retire the plan) and stop before pushing.
+description: Take one plan from plans/ through the whole agent loop (branch, tests first, implement, verify, independent review by subagents, fix, commit, retire the plan), then ship it with /ship — push, PR into staging, CI followed until green. With --local, stops before pushing. Never merges.
 disable-model-invocation: true
-argument-hint: <plan number, e.g. 007>
+argument-hint: <plan number, e.g. 007> [--local]
 ---
 
 # Ship a plan
 
-Plan to ship: `plans/$ARGUMENTS-*.md`. If `$ARGUMENTS` is empty, list the
-plans whose Status isn't DONE and ask which one. New plans start from
+Arguments: `$ARGUMENTS`. Plan to ship: `plans/NNN-*.md`, `NNN` being the
+number in the arguments. If there's none, list the plans whose Status isn't
+DONE and ask which one. `--local` stops after the commit, before anything
+leaves the machine. New plans start from
 [plan-template.md](plan-template.md).
 
-The loop is: **spec → tests → implement → verify → review → fix → deliver**.
-Tests and reviews are done by subagents with a fresh context, so they judge
-against the plan, not your reasoning. Nothing leaves the machine: no push, no PR.
+The loop is: **spec → tests → implement → verify → review → fix → deliver →
+ship**. Tests and reviews are done by subagents with a fresh context, so they
+judge against the plan, not your reasoning. The last step pushes the branch
+and opens the PR into `staging`; the merge stays with Zolan.
 
 `/plans` is gitignored: a plan exists nowhere but on this disk. That's why
 step 7 copies what's worth keeping into the commit and `plans/README.md`
@@ -101,6 +104,10 @@ Pick the reviewers from `git diff --name-only staging...HEAD` plus uncommitted f
   `src/payload.config.ts`, `src/proxy.ts`.
 - **ui-reviewer** (front end): `src/components`, `src/app/(frontend)`, any
   `.css`, `src/lib/motion`, `src/lib/i18n`.
+- **webkit-reviewer** (Safari / iOS, which only CI can run): the diff touches
+  motion or view transitions, scrolling or shelves, the header or the mobile
+  menu, a modal or the lightbox, video, focus handling, or CSS with
+  `position`, `overflow`, `backdrop-filter`, viewport units or `:has()`.
 
 Launch the ones that apply **in the same message** so they run in parallel.
 They don't see this conversation, so each prompt says: the plan path, that the
@@ -130,7 +137,11 @@ you fixed, and stop there: two rounds at most.
    One commit unless the plan has clearly separate steps.
 4. Once the commit has succeeded, delete the plan file and remove its row
    from the table in `plans/README.md`.
-5. Stop. Don't push or open the PR.
+5. With `--local`, stop here. Otherwise read `.claude/skills/ship/SKILL.md`
+   and follow it from step 4 (the checks and the commit are done): push, PR
+   into `staging`, CI followed until it's green. The PR body carries the
+   report's tests and its "check by eye" list. Called from `/feature`, skip
+   this: `/feature` looks at the screens first, then ships.
 
 ## Report
 
@@ -139,5 +150,5 @@ you fixed, and stop there: two rounds at most.
 - Reviewer findings: fixed, rejected (why), deferred (now in the Backlog).
 - What a person must still check by eye: animation feel, mobile on a real
   device, dark mode, both locales.
-- The commands to ship it:
-  `git push -u origin HEAD && gh pr create --base staging --fill`
+- The PR link and its CI state. With `--local`, say to run `/ship` when
+  ready.
