@@ -64,19 +64,19 @@ The database is exposed on `127.0.0.1:5432`, the site on port 3000. The containe
 
 ## Scripts
 
-| Command                                              | Action                                                                                           |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `pnpm dev`                                           | Development server                                                                               |
-| `pnpm devsafe`                                       | Same, after clearing the `.next` cache                                                           |
-| `pnpm build` / `pnpm start`                          | Production build and server                                                                      |
-| `pnpm generate:types`                                | Regenerates `src/payload-types.ts` after a schema change                                         |
-| `pnpm payload migrate`                               | Applies pending migrations                                                                       |
-| `pnpm payload migrate:status`                        | Migration status                                                                                 |
-| `pnpm lint`                                          | ESLint                                                                                           |
-| `pnpm test`                                          | Unit, then integration (Vitest), then e2e (Playwright)                                           |
-| `pnpm test:unit` / `pnpm test:int` / `pnpm test:e2e` | Each suite separately                                                                            |
-| `pnpm test:e2e:ui` / `pnpm test:e2e:report`          | Playwright UI mode / HTML report of the last e2e run                                             |
-| `pnpm test:coverage`                                 | Unit suite with coverage, failing under 90% on `src/lib`, `src/hooks`, the proxy and the sitemap |
+| Command                                                                | Action                                                                                           |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `pnpm dev`                                                             | Development server                                                                               |
+| `pnpm devsafe`                                                         | Same, after clearing the `.next` cache                                                           |
+| `pnpm build` / `pnpm start`                                            | Production build and server                                                                      |
+| `pnpm generate:types`                                                  | Regenerates `src/payload-types.ts` after a schema change                                         |
+| `pnpm payload migrate`                                                 | Applies pending migrations                                                                       |
+| `pnpm payload migrate:status`                                          | Migration status                                                                                 |
+| `pnpm lint`                                                            | ESLint                                                                                           |
+| `pnpm test`                                                            | Unit, components, then integration (Vitest), then e2e (Playwright)                               |
+| `pnpm test:unit` / `pnpm test:dom` / `pnpm test:int` / `pnpm test:e2e` | Each suite separately                                                                            |
+| `pnpm test:e2e:ui` / `pnpm test:e2e:report`                            | Playwright UI mode / HTML report of the last e2e run                                             |
+| `pnpm test:coverage`                                                   | Unit suite with coverage, failing under 90% on `src/lib`, `src/hooks`, the proxy and the sitemap |
 
 ## Content model
 
@@ -121,11 +121,12 @@ After any schema change, write the matching migration by hand: `payload migrate:
 
 - **Unit** (`tests/unit`) — pure logic, no database. Anything with I/O is mocked.
 - **Integration** (`tests/int`) — the real Payload Local API against a throwaway `payload-portfolio-test` database, configured in [`.env.test`](.env.test). Postgres creates it on first run; every run drops it and rebuilds it with `payload migrate:fresh`, so the suite also proves the migrations still build a working schema from scratch. It refuses to start unless `DATABASE_URL` is a local database named `*-test`, and never reads `.env`.
-- **Component** (`tests/dom`) — React components with Testing Library in jsdom.
+- **Component** (`tests/dom`) — React components and client hooks with Testing Library in jsdom: state, ARIA, timers. Runs with the unit tests in CI.
 - **E2E** (`tests/e2e`) — frontend and admin via Playwright, against a production build (`next build && next start` on port 3100) and its own `payload-portfolio-e2e-test` database, configured in [`.env.e2e`](.env.e2e). [`tests/e2e/serve.ts`](tests/e2e/serve.ts) rebuilds the database from the migrations, seeds the content in [`tests/e2e/fixtures.ts`](tests/e2e/fixtures.ts), then builds into `.next-e2e` — a separate directory, so an e2e build and a regular build never share a data cache. Specs that edit content do it through the REST API and put it back. Two Playwright projects: desktop Chromium runs everything; `mobile-safari` (iPhone 15 on WebKit) runs the navigation and mobile-menu specs. Run `pnpm exec playwright install chromium webkit` once before the first local run.
 
 ```bash
 pnpm test:unit        # no setup needed
+pnpm test:dom         # components in jsdom, no setup needed
 pnpm test:int         # needs local Postgres (docker compose up postgres)
 pnpm test:e2e         # needs local Postgres; builds the site first (~2 min)
 pnpm test:e2e:serve   # keep a seeded server up on :3100 — test:e2e reuses it

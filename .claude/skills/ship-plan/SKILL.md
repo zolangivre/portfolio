@@ -87,7 +87,7 @@ Run, and fix until green:
 2. `pnpm exec tsc --noEmit`
 3. `pnpm test:coverage` (unit tests, 90% thresholds)
 4. `pnpm test:int` if the diff touches the schema, access rules, hooks or migrations.
-5. `pnpm exec vitest run --project dom` if `tests/dom/` exists.
+5. `pnpm test:dom`
 6. Each new or changed e2e file: `pnpm test:e2e <file> --project=chromium`
    (WebKit doesn't install on this Mac; CI runs it).
 
