@@ -17,6 +17,7 @@ const fetchEducation = unstable_cache(
       limit: 50,
       locale,
       sort: '_order',
+      where: { _status: { equals: 'published' } },
     })
 
     return education.docs
@@ -29,14 +30,12 @@ const fetchEducation = unstable_cache(
   },
 )
 
-export const getEducation = cache(
-  async (locale: Locale = defaultLocale): Promise<Education[]> => {
-    try {
-      return await fetchEducation(locale)
-    } catch (error) {
-      console.error('Failed to load education from Payload.', error)
+export const getEducation = cache(async (locale: Locale = defaultLocale): Promise<Education[]> => {
+  try {
+    return await fetchEducation(locale)
+  } catch (error) {
+    console.error('Failed to load education from Payload.', error)
 
-      return []
-    }
-  },
-)
+    return []
+  }
+})

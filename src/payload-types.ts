@@ -82,6 +82,7 @@ export interface Config {
     messages: Message;
     journal: Journal;
     'payload-kv': PayloadKv;
+    'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -103,6 +104,7 @@ export interface Config {
     messages: MessagesSelect<false> | MessagesSelect<true>;
     journal: JournalSelect<false> | JournalSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -137,7 +139,13 @@ export interface Config {
   };
   user: User;
   jobs: {
-    tasks: unknown;
+    tasks: {
+      schedulePublish: TaskSchedulePublish;
+      inline: {
+        input: unknown;
+        output: unknown;
+      };
+    };
     workflows: unknown;
   };
 }
@@ -237,7 +245,7 @@ export interface Video {
   focalY?: number | null;
 }
 /**
- * Projets du portfolio affichés dans la section projets. Glissez-déposez les lignes pour choisir leur ordre sur le site.
+ * Projets du portfolio affichés dans la section projets. Glissez-déposez les lignes pour choisir leur ordre sur le site. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "projects".
@@ -312,10 +320,6 @@ export interface Project {
   githubUrl?: string | null;
   liveUrl?: string | null;
   featured?: boolean | null;
-  /**
-   * Les projets privés restent dans le CMS mais ne sont jamais affichés sur le site.
-   */
-  visibility: 'public' | 'private';
   year?: number | null;
   status?: ('live' | 'in-progress' | 'archived') | null;
   category?: (number | null) | Category;
@@ -329,6 +333,7 @@ export interface Project {
   };
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * Étiquettes de technologies utilisées par les projets et les expériences.
@@ -370,7 +375,7 @@ export interface Category {
   createdAt: string;
 }
 /**
- * Entrées de la frise des expériences professionnelles. Glissez-déposez les lignes pour choisir leur ordre sur le site.
+ * Entrées de la frise des expériences professionnelles. Glissez-déposez les lignes pour choisir leur ordre sur le site. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "experiences".
@@ -403,6 +408,7 @@ export interface Experience {
   currentlyWorking?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * Entreprises référencées par les expériences professionnelles.
@@ -459,7 +465,7 @@ export interface School {
   createdAt: string;
 }
 /**
- * Entrées de la frise des formations. Glissez-déposez les lignes pour choisir leur ordre sur le site.
+ * Entrées de la frise des formations. Glissez-déposez les lignes pour choisir leur ordre sur le site. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "education".
@@ -491,6 +497,7 @@ export interface Education {
   currentlyStudying?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * Citations de clients et de collègues affichées dans la section témoignages. Glissez-déposez les lignes pour choisir leur ordre sur le site.
@@ -532,7 +539,7 @@ export interface Message {
   createdAt: string;
 }
 /**
- * Récits personnels, hors technique : voyages, sport, réussites, événements, découvertes. Glissez-déposez les lignes pour choisir leur ordre sur le site.
+ * Récits personnels, hors technique : voyages, sport, réussites, événements, découvertes. Glissez-déposez les lignes pour choisir leur ordre sur le site. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "journal".
@@ -570,10 +577,6 @@ export interface Journal {
       }[]
     | null;
   featured?: boolean | null;
-  /**
-   * Les entrées privées restent dans le CMS mais ne sont jamais affichées sur le site.
-   */
-  visibility: 'public' | 'private';
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -584,6 +587,7 @@ export interface Journal {
   };
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -601,6 +605,98 @@ export interface PayloadKv {
     | number
     | boolean
     | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs".
+ */
+export interface PayloadJob {
+  id: number;
+  /**
+   * Input data provided to the job
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  taskStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  completedAt?: string | null;
+  totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
+  hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
+  error?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Task execution log
+   */
+  log?:
+    | {
+        executedAt: string;
+        completedAt: string;
+        taskSlug: 'inline' | 'schedulePublish';
+        taskID: string;
+        input?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        state: 'failed' | 'succeeded';
+        error?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  taskSlug?: ('inline' | 'schedulePublish') | null;
+  queue?: string | null;
+  waitUntil?: string | null;
+  processing?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -790,7 +886,6 @@ export interface ProjectsSelect<T extends boolean = true> {
   githubUrl?: T;
   liveUrl?: T;
   featured?: T;
-  visibility?: T;
   year?: T;
   status?: T;
   category?: T;
@@ -803,6 +898,7 @@ export interface ProjectsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -821,6 +917,7 @@ export interface ExperiencesSelect<T extends boolean = true> {
   currentlyWorking?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -904,6 +1001,7 @@ export interface EducationSelect<T extends boolean = true> {
   currentlyStudying?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -954,7 +1052,6 @@ export interface JournalSelect<T extends boolean = true> {
         id?: T;
       };
   featured?: T;
-  visibility?: T;
   meta?:
     | T
     | {
@@ -964,6 +1061,7 @@ export interface JournalSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -972,6 +1070,37 @@ export interface JournalSelect<T extends boolean = true> {
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs_select".
+ */
+export interface PayloadJobsSelect<T extends boolean = true> {
+  input?: T;
+  taskStatus?: T;
+  completedAt?: T;
+  totalTried?: T;
+  hasError?: T;
+  error?: T;
+  log?:
+    | T
+    | {
+        executedAt?: T;
+        completedAt?: T;
+        taskSlug?: T;
+        taskID?: T;
+        input?: T;
+        output?: T;
+        state?: T;
+        error?: T;
+        id?: T;
+      };
+  taskSlug?: T;
+  queue?: T;
+  waitUntil?: T;
+  processing?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1733,6 +1862,39 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSchedulePublish".
+ */
+export interface TaskSchedulePublish {
+  input: {
+    type?: ('publish' | 'unpublish') | null;
+    locale?: string | null;
+    doc?:
+      | ({
+          relationTo: 'projects';
+          value: number | Project;
+        } | null)
+      | ({
+          relationTo: 'experiences';
+          value: number | Experience;
+        } | null)
+      | ({
+          relationTo: 'education';
+          value: number | Education;
+        } | null)
+      | ({
+          relationTo: 'journal';
+          value: number | Journal;
+        } | null);
+    global?: string | null;
+    user?: {
+      relationTo: 'users';
+      value: number | User;
+    } | null;
+  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

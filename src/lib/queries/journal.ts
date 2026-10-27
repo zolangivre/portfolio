@@ -23,7 +23,7 @@ const fetchJournalEntries = unstable_cache(
       locale,
       sort: '_order',
       where: {
-        visibility: { equals: 'public' },
+        _status: { equals: 'published' },
         ...(category ? { category: { equals: category } } : {}),
       },
     })
@@ -45,7 +45,7 @@ const fetchJournalEntry = unstable_cache(
       locale,
       where: {
         slug: { equals: slug },
-        visibility: { equals: 'public' },
+        _status: { equals: 'published' },
       },
     })
 

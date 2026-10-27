@@ -40,29 +40,34 @@ const payload = await getPayload({ config })
 const context = { disableRevalidate: true }
 
 type Localized = { en: string; fr: string }
+type Status = 'draft' | 'published'
 
 /**
  * Creates a doc in French, then fills in its English variant. `localized`
  * returns every localized field for one locale's text: an update in a new
  * locale has to satisfy that locale's required fields on its own.
+ *
+ * `status` is always passed: with drafts enabled a Local API create that
+ * doesn't say otherwise stores a draft, which the site would not show.
  */
 async function createLocalized(
   collection: CollectionSlug,
   data: Record<string, unknown>,
   localized: (text: string) => Record<string, unknown>,
   text: Localized,
+  status: Status,
 ) {
   const doc = await payload.create({
     collection,
     context,
-    data: { ...data, ...localized(text.fr) } as never,
+    data: { ...data, ...localized(text.fr), _status: status } as never,
     locale: 'fr',
   })
 
   await payload.update({
     collection,
     context,
-    data: localized(text.en) as never,
+    data: { ...localized(text.en), _status: status } as never,
     id: doc.id,
     locale: 'en',
   })
@@ -120,10 +125,10 @@ for (const project of [...projects].reverse()) {
     {
       slug: project.slug,
       technologies: project.technologies.map((name) => technologyIds.get(name)!),
-      visibility: 'public',
     },
     projectFields,
     project,
+    'published',
   )
 }
 
@@ -131,10 +136,10 @@ await createLocalized(
   'projects',
   {
     slug: privateProject.slug,
-    visibility: 'private',
   },
   projectFields,
   privateProject,
+  'draft',
 )
 
 // The journal categories come from the migrations.
@@ -151,9 +156,9 @@ const journalFields = (title: string) => ({
   title,
 })
 
-for (const [entry, visibility] of [
-  ...journalEntries.map((entry) => [entry, 'public'] as const),
-  [privateJournalEntry, 'private'] as const,
+for (const [entry, status] of [
+  ...journalEntries.map((entry) => [entry, 'published'] as const),
+  [privateJournalEntry, 'draft'] as const,
 ]) {
   await createLocalized(
     'journal',
@@ -161,10 +166,10 @@ for (const [entry, visibility] of [
       category: categoryId(entry.category),
       date: '2026-01-15T00:00:00.000Z',
       slug: entry.slug,
-      visibility,
     },
     journalFields,
     entry,
+    status,
   )
 }
 

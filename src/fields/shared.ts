@@ -1,4 +1,4 @@
-import type { CheckboxField, SelectField } from 'payload'
+import type { CheckboxField } from 'payload'
 
 /**
  * Field definitions used by more than one collection. Each is a factory rather
@@ -16,22 +16,4 @@ export const invertLogoInDarkModeField = (): CheckboxField => ({
     description:
       'Inverse les couleurs du logo quand le site est en mode sombre. À activer pour les logos noirs ou foncés, afin qu’ils restent visibles sur le thème sombre.',
   },
-})
-
-/**
- * Public/private switch for the collections the site renders. The description
- * is passed in whole — French agreement makes a shared template read worse
- * than the two sentences it would replace.
- */
-export const visibilityField = (description: string): SelectField => ({
-  name: 'visibility',
-  type: 'select',
-  label: 'Visibilité',
-  required: true,
-  defaultValue: 'public',
-  options: [
-    { label: 'Public', value: 'public' },
-    { label: 'Privé (masqué sur le site)', value: 'private' },
-  ],
-  admin: { description },
 })

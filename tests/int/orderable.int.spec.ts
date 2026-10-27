@@ -19,11 +19,11 @@ const createProject = async (slug: string) => {
   const doc = await payload.create({
     collection: 'projects',
     data: {
+      _status: 'published',
       description: textToLexicalParagraphs('Description.'),
       shortDescription: 'Short description.',
       slug,
       title: slug,
-      visibility: 'public',
     },
   })
   createdIds.push(doc.id)
