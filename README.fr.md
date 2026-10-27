@@ -144,7 +144,7 @@ Un test e2e en échec garde une vidéo, une capture d'écran et une trace compl�
 
 ## Workflows d'agents
 
-Des commandes Claude Code, des sous-agents de revue et deux workflows GitHub (un balayage de sécurité quotidien, une revue des pull requests) aident à livrer les changements, les mises à jour et les correctifs. Ils proposent, et ne mergent ni ne déploient jamais rien. Comment chacun fonctionne, quand l'utiliser et comment l'installer : [docs/agent-workflows.fr.md](docs/agent-workflows.fr.md).
+Des commandes Claude Code, des sous-agents de revue et deux workflows GitHub (un balayage de sécurité quotidien, une revue des pull requests) aident à livrer les changements, les mises à jour et les correctifs. Ils proposent, et ne mergent ni ne déploient jamais rien. Comment chacun fonctionne, quand l'utiliser et comment l'installer : [docs/ai/](docs/ai/README.fr.md). Tout le reste de ce qui tourne tout seul (CI, Dependabot, releases, le hook git) est dans [docs/](docs/README.fr.md).
 
 ## Versions
 
@@ -152,10 +152,10 @@ Versions [SemVer](https://semver.org) déduites des messages de commit ([Convent
 
 | Commit                                         | Effet sur la version       |
 | ---------------------------------------------- | -------------------------- |
-| `fix: …`, `perf: …`                            | patch : 1.0.0 → 1.0.1      |
+| `fix`, `perf`, `refactor`, `revert`            | patch : 1.0.0 → 1.0.1      |
 | `feat: …`                                      | mineure : 1.0.0 → 1.1.0    |
 | `feat!: …` ou `BREAKING CHANGE:` dans le corps | majeure : 1.0.0 → 2.0.0    |
-| `chore`, `refactor`, `docs`, `test`, `ci`…     | aucun, absent du CHANGELOG |
+| `chore`, `docs`, `test`, `ci`, `build`…        | aucun, absent du CHANGELOG |
 
 Même fonctionnement que patateprod-front et patateprod-back :
 
@@ -163,7 +163,7 @@ Même fonctionnement que patateprod-front et patateprod-back :
 2. Pour publier, merger cette PR dans `staging` : le tag `vX.Y.Z` et la Release GitHub sont créés.
 3. Merger `staging` → `main` : Vercel déploie une seule fois, avec le bon numéro de version.
 
-Merger `staging` → `main` juste après la PR de version : un commit poussé entre les deux partirait en production sous ce numéro sans apparaître dans son CHANGELOG. Première version : 1.0.0 (`initial-version` dans `release-please-config.json`).
+Merger `staging` → `main` juste après la PR de version : un commit poussé entre les deux partirait en production sous ce numéro sans apparaître dans son CHANGELOG. Première version : 1.0.0 (`initial-version` dans `release-please-config.json`). Plus de détails dans [docs/github/releases.fr.md](docs/github/releases.fr.md) et [docs/git-hooks.fr.md](docs/git-hooks.fr.md).
 
 ## Déploiement
 

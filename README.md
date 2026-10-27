@@ -144,7 +144,7 @@ A failing e2e test keeps a video, a screenshot and a full trace (DOM, network an
 
 ## Agent workflows
 
-Claude Code commands, review subagents and two GitHub workflows (a daily security sweep, a review on pull requests) help ship changes, upgrades and fixes. They propose, and never merge or deploy. How each one works, when to use it and how to set it up: [docs/agent-workflows.md](docs/agent-workflows.md).
+Claude Code commands, review subagents and two GitHub workflows (a daily security sweep, a review on pull requests) help ship changes, upgrades and fixes. They propose, and never merge or deploy. How each one works, when to use it and how to set it up: [docs/ai/](docs/ai/README.md). Everything else that runs on its own (CI, Dependabot, releases, the git hook) is in [docs/](docs/README.md).
 
 ## Versioning
 
@@ -152,10 +152,10 @@ Claude Code commands, review subagents and two GitHub workflows (a daily securit
 
 | Commit                                       | Effect on the version           |
 | -------------------------------------------- | ------------------------------- |
-| `fix: …`, `perf: …`                          | patch: 1.0.0 → 1.0.1            |
+| `fix`, `perf`, `refactor`, `revert`          | patch: 1.0.0 → 1.0.1            |
 | `feat: …`                                    | minor: 1.0.0 → 1.1.0            |
 | `feat!: …` or `BREAKING CHANGE:` in the body | major: 1.0.0 → 2.0.0            |
-| `chore`, `refactor`, `docs`, `test`, `ci`…   | none, left out of the CHANGELOG |
+| `chore`, `docs`, `test`, `ci`, `build`…      | none, left out of the CHANGELOG |
 
 Same flow as patateprod-front and patateprod-back:
 
@@ -163,7 +163,7 @@ Same flow as patateprod-front and patateprod-back:
 2. To release, merge that PR into `staging`: the `vX.Y.Z` tag and the GitHub Release are created.
 3. Merge `staging` → `main`: Vercel deploys once, with the right version number.
 
-Merge `staging` → `main` right after the version PR: a commit pushed in between would go to production under that number without appearing in its CHANGELOG. First version: 1.0.0 (`initial-version` in `release-please-config.json`).
+Merge `staging` → `main` right after the version PR: a commit pushed in between would go to production under that number without appearing in its CHANGELOG. First version: 1.0.0 (`initial-version` in `release-please-config.json`). More in [docs/github/releases.md](docs/github/releases.md) and [docs/git-hooks.md](docs/git-hooks.md).
 
 ## Deployment
 
