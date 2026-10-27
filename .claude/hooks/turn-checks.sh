@@ -8,8 +8,8 @@
 #    source files edited (fast: no database). The full suites stay with
 #    /pre-pr and CI.
 # 2. The agent guide: a change under .claude/ (skills, agents, hooks,
-#    settings) usually changes what docs/agent-workflows.md describes. If the
-#    guide wasn't touched in the same turn, Claude is asked to check it.
+#    settings) usually changes what docs/ai/ describes. If no file there was
+#    touched in the same turn, Claude is asked to check them.
 #
 # A failure on the first stop sends Claude back to work (exit 2). On the
 # second (`stop_hook_active`), it's only reported: no loop. The list is
@@ -74,8 +74,10 @@ $(printf '%s\n' "$out" | tail -n 40)"
 
     # 2. The agent guide.
     config=$(printf '%s\n' "$files" | grep -E '/\.claude/(skills|agents|hooks)/|/\.claude/settings\.json$' | grep -v '/\.claude/skills/payload/')
-    guide=$(printf '%s\n' "$files" | grep -E '/docs/agent-workflows(\.fr)?\.md$')
-    for doc in "$CLAUDE_PROJECT_DIR"/docs/agent-workflows.md "$CLAUDE_PROJECT_DIR"/docs/agent-workflows.fr.md; do
+    guide=$(printf '%s\n' "$files" | grep -E '/docs/ai/[^/]+\.md$')
+    # Globbing is off since step 1 (set -f): back on for this one pattern.
+    set +f
+    for doc in "$CLAUDE_PROJECT_DIR"/docs/ai/*.md; do
       [ -e "$start" ] && [ "$doc" -nt "$start" ] && guide=yes
     done
     if [ -n "$config" ] && [ -z "$guide" ]; then
@@ -83,7 +85,7 @@ $(printf '%s\n' "$out" | tail -n 40)"
 
 }The Claude setup changed this turn:
 $(printf '%s\n' "$config" | sed "s#^$CLAUDE_PROJECT_DIR/#  #")
-If that changes what someone can run or what happens on its own, update docs/agent-workflows.md and docs/agent-workflows.fr.md together (CI fails a PR that changes one only). If it doesn't, say so and stop."
+If that changes what someone can run or what happens on its own, update the matching page in docs/ai/ (skills.md, subagents.md, hooks-and-settings.md, github-agents.md or README.md) and its .fr.md twin together (CI fails a PR that changes one only). If it doesn't, say so and stop."
     fi
 
     [ -n "$problems" ] || exit 0
