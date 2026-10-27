@@ -4,7 +4,7 @@
 
 Tous les skills de [`.claude/skills/`](../../.claude/skills/). Seize sont des
 commandes que tu tapes (`/feature`, `/ship`…) : elles ne tournent que quand
-tu les lances. Deux sont chargés par Claude tout seul quand la tâche le
+tu les lances. Trois sont chargés par Claude tout seul quand la tâche le
 demande. Retour à la [vue d'ensemble](README.fr.md).
 
 - [En un coup d'œil](#en-un-coup-dœil)
@@ -14,7 +14,7 @@ demande. Retour à la [vue d'ensemble](README.fr.md).
 - [Dépendances et sécurité](#dépendances-et-sécurité) : `/security-sweep`, `/triage-deps`
 - [Release](#release) : `/release`, `/release verify`
 - [Ménage](#ménage) : `/menage`
-- [Les skills que Claude charge tout seul](#les-skills-que-claude-charge-tout-seul) : `payload`, `i18n-copy`
+- [Les skills que Claude charge tout seul](#les-skills-que-claude-charge-tout-seul) : `payload`, `i18n-copy`, `brand-guidelines`
 - [Comment les skills s'appellent entre eux](#comment-les-skills-sappellent-entre-eux)
 - [Anatomie d'un skill](#anatomie-dun-skill)
 
@@ -537,6 +537,25 @@ un champ du CMS affiché sur le site :
   en français ;
 - les dates via `Intl` et `formatMonthRange`, en UTC ; les pluriels via
   `Intl.PluralRules` ; la typographie française (’, « », espaces insécables).
+
+### `brand-guidelines`
+
+L'identité du site : personnalité, ton, couleur, typographie, formes,
+surfaces, composants, animations, fonds et images, chacun avec le token qui
+l'implémente. Claude le charge avant tout changement visuel, et avant de
+produire quelque chose qui doit ressembler au site hors du code (une
+bannière, une slide, une frame Figma). Tu peux aussi l'appeler avec
+`/brand-guidelines`. L'essentiel :
+
+- arrondi et artistique, jamais technique : pas de monospace, pas de
+  grilles, pas de rayon sous 16px ;
+- l'accent est le choix du propriétaire dans le CMS : uniquement des
+  tokens, jamais une teinte en dur, vérifié dans les deux thèmes avec un
+  accent chaud et un accent froid ;
+- Bagel Fat One pour le nom du hero et le logo seulement, Baloo 2 pour les
+  titres, Inter pour le reste ;
+- animations via les tokens, un léger enfoncement à chaque appui, plus rien
+  qui bouge en mouvement réduit.
 
 ## Comment les skills s'appellent entre eux
 

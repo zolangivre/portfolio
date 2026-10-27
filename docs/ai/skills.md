@@ -3,7 +3,7 @@
 **English** · [Français](skills.fr.md)
 
 Every skill in [`.claude/skills/`](../../.claude/skills/). Sixteen are
-commands you type (`/feature`, `/ship`…): they only run when you do. Two are
+commands you type (`/feature`, `/ship`…): they only run when you do. Three are
 loaded by Claude on its own when the task calls for them. Back to the
 [overview](README.md).
 
@@ -14,7 +14,7 @@ loaded by Claude on its own when the task calls for them. Back to the
 - [Dependencies and security](#dependencies-and-security): `/security-sweep`, `/triage-deps`
 - [Release](#release): `/release`, `/release verify`
 - [Housekeeping](#housekeeping): `/menage`
-- [Skills Claude loads on its own](#skills-claude-loads-on-its-own): `payload`, `i18n-copy`
+- [Skills Claude loads on its own](#skills-claude-loads-on-its-own): `payload`, `i18n-copy`, `brand-guidelines`
 - [How the skills call each other](#how-the-skills-call-each-other)
 - [Anatomy of a skill](#anatomy-of-a-skill)
 
@@ -492,6 +492,24 @@ field that renders on the site:
   `maxLength` the layout can hold; admin labels stay in French;
 - dates through `Intl` and `formatMonthRange`, in UTC; plurals through
   `Intl.PluralRules`; French typography (’, « », non-breaking spaces).
+
+### `brand-guidelines`
+
+The site's identity: personality, voice, colour, type, shape, surfaces,
+components, motion, backgrounds and imagery, each with the token that
+implements it. Claude loads it before any visual change, and before making
+anything that should look like the site outside the code (a banner, a
+slide, a Figma frame). You can also call it as `/brand-guidelines`. Its
+core:
+
+- rounded and artistic, never technical: no monospace, no grids, no radius
+  under 16px;
+- the accent is the owner's CMS choice: tokens only, never a hardcoded hue,
+  checked in both themes with a warm and a cool accent;
+- Bagel Fat One for the hero name and the logo only, Baloo 2 for headings,
+  Inter for the rest;
+- motion from the tokens, a dip on every press, nothing left moving under
+  reduced motion.
 
 ## How the skills call each other
 

@@ -40,9 +40,10 @@ flowchart TB
 - **Skills you type** (`/feature`, `/ship`, `/security-sweep`…): each one is a
   `SKILL.md` in [`.claude/skills/`](../../.claude/skills/). They only run
   when you type them. See [Skills](skills.md).
-- **Skills Claude loads on its own**: `payload` (the Payload CMS reference)
-  and `i18n-copy` (the rules for visible text). Claude reads them when the
-  task calls for them.
+- **Skills Claude loads on its own**: `payload` (the Payload CMS reference),
+  `i18n-copy` (the rules for visible text) and `brand-guidelines` (the
+  site's identity and visual system). Claude reads them when the task calls
+  for them.
 - **Subagents** the commands call for a second opinion, in
   [`.claude/agents/`](../../.claude/agents/). They start with a fresh
   context, so they judge the diff against the plan, not the reasoning that
