@@ -32,7 +32,7 @@ const fetchAllProjects = unstable_cache(
       depth: 2,
       limit: DEFAULT_LIMIT,
       locale,
-      sort: ['-featured', 'order', '-year', '-createdAt'],
+      sort: '_order',
       where: {
         visibility: { equals: 'public' },
       },

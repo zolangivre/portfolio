@@ -1,4 +1,4 @@
-import type { CheckboxField, NumberField, SelectField } from 'payload'
+import type { CheckboxField, SelectField } from 'payload'
 
 /**
  * Field definitions used by more than one collection. Each is a factory rather
@@ -34,18 +34,4 @@ export const visibilityField = (description: string): SelectField => ({
     { label: 'Privé (masqué sur le site)', value: 'private' },
   ],
   admin: { description },
-})
-
-/**
- * Manual sort position. `fallback` completes "Laissez vide pour classer …",
- * naming what each collection falls back to once the ordered entries run out.
- */
-export const orderField = (fallback: string): NumberField => ({
-  name: 'order',
-  type: 'number',
-  label: 'Ordre',
-  admin: {
-    step: 1,
-    description: `Ordre d’affichage : 1 s’affiche en premier, 2 en deuxième, etc. Laissez vide pour classer ${fallback}.`,
-  },
 })

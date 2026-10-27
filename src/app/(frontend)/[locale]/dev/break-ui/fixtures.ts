@@ -100,10 +100,10 @@ const tallPortrait = media(shape(600, 2000, '#e8590c'), 600, 2000)
 
 let categoryId = 9000
 
-function category(name: string, group: Category['group'], order: number | null): Category {
+function category(name: string, group: Category['group'], _order: string | null): Category {
   categoryId += 1
 
-  return { id: categoryId, name, slug: `bu-category-${categoryId}`, group, order, ...stamps }
+  return { id: categoryId, name, slug: `bu-category-${categoryId}`, group, _order, ...stamps }
 }
 
 let technologyId = 9000
@@ -259,8 +259,8 @@ const sectionsContent: SectionsContent = {
 // ---------------------------------------------------------------------------
 
 const projectCategories = {
-  long: category('Application mobile & plateforme web', 'project', 1),
-  short: category('Web', 'project', 2),
+  long: category('Application mobile & plateforme web', 'project', 'a1'),
+  short: category('Web', 'project', 'a2'),
 }
 
 let projectId = 9000
@@ -454,9 +454,9 @@ const education: Education[] = [
 // ---------------------------------------------------------------------------
 
 const skillCategories = {
-  long: category('DevOps, intégration et déploiement', 'tech', 1),
-  one: category('IA', 'tech', 2),
-  many: category('Front-end', 'tech', 3),
+  long: category('DevOps, intégration et déploiement', 'tech', 'a1'),
+  one: category('IA', 'tech', 'a2'),
+  many: category('Front-end', 'tech', 'a3'),
   noOrder: category('Bases de données', 'tech', null),
 }
 

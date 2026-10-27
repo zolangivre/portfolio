@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { orderField, visibilityField } from '@/fields/shared'
+import { visibilityField } from '@/fields/shared'
+import { prependToOrder } from '@/hooks/prependToOrder'
 import {
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
@@ -22,7 +23,7 @@ export const Projects: CollectionConfig = {
   },
   admin: {
     group: adminGroups.portfolio,
-    description: 'Projets du portfolio affichés dans la section projets.',
+    description: 'Projets du portfolio affichés dans la section projets. Glissez-déposez les lignes pour choisir leur ordre sur le site.',
     defaultColumns: [
       'coverImage',
       'title',
@@ -31,16 +32,16 @@ export const Projects: CollectionConfig = {
       'category',
       'visibility',
       'featured',
-      'order',
       'year',
     ],
     useAsTitle: 'title',
   },
-  defaultSort: 'order',
+  orderable: true,
   access: {
     read: readPublicOrAuthenticated,
   },
   hooks: {
+    beforeChange: [prependToOrder],
     afterChange: [revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },
@@ -174,7 +175,6 @@ export const Projects: CollectionConfig = {
     visibilityField(
       'Les projets privés restent dans le CMS mais ne sont jamais affichés sur le site.',
     ),
-    orderField('le projet après ceux qui sont ordonnés, du plus récent au plus ancien'),
     {
       name: 'year',
       type: 'number',

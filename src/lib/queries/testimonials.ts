@@ -16,7 +16,7 @@ const fetchTestimonials = unstable_cache(
       depth: 2,
       limit: 20,
       locale,
-      sort: ['-featured', '-order', '-createdAt'],
+      sort: '_order',
     })
 
     return testimonials.docs

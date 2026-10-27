@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { orderField, visibilityField } from '@/fields/shared'
+import { visibilityField } from '@/fields/shared'
+import { prependToOrder } from '@/hooks/prependToOrder'
 import {
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
@@ -17,15 +18,16 @@ export const Journal: CollectionConfig = {
   admin: {
     group: adminGroups.journal,
     description:
-      'Récits personnels, hors technique : voyages, sport, réussites, événements, découvertes.',
-    defaultColumns: ['coverImage', 'title', 'category', 'visibility', 'date', 'featured', 'order'],
+      'Récits personnels, hors technique : voyages, sport, réussites, événements, découvertes. Glissez-déposez les lignes pour choisir leur ordre sur le site.',
+    defaultColumns: ['coverImage', 'title', 'category', 'visibility', 'date', 'featured'],
     useAsTitle: 'title',
   },
-  defaultSort: 'order',
+  orderable: true,
   access: {
     read: readPublicOrAuthenticated,
   },
   hooks: {
+    beforeChange: [prependToOrder],
     afterChange: [revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },
@@ -125,9 +127,6 @@ export const Journal: CollectionConfig = {
     },
     visibilityField(
       'Les entrées privées restent dans le CMS mais ne sont jamais affichées sur le site.',
-    ),
-    orderField(
-      'l’entrée après celles qui sont ordonnées, de la date la plus récente à la plus ancienne',
     ),
   ],
   timestamps: true,

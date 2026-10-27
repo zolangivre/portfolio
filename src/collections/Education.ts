@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { orderField } from '@/fields/shared'
+import { prependToOrder } from '@/hooks/prependToOrder'
 import {
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
@@ -15,15 +15,16 @@ export const Education: CollectionConfig = {
   },
   admin: {
     group: adminGroups.portfolio,
-    description: 'Entrées de la frise des formations.',
-    defaultColumns: ['school', 'location', 'degree', 'startDate', 'endDate', 'order'],
+    description: 'Entrées de la frise des formations. Glissez-déposez les lignes pour choisir leur ordre sur le site.',
+    defaultColumns: ['school', 'location', 'degree', 'startDate', 'endDate'],
     useAsTitle: 'degree',
   },
-  defaultSort: 'order',
+  orderable: true,
   access: {
     read: () => true,
   },
   hooks: {
+    beforeChange: [prependToOrder],
     afterChange: [revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },
@@ -94,9 +95,6 @@ export const Education: CollectionConfig = {
       label: 'Formation en cours',
       defaultValue: false,
     },
-    orderField(
-      'l’entrée après celles qui sont ordonnées, de la date de début la plus récente à la plus ancienne',
-    ),
   ],
   timestamps: true,
 }

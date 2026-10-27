@@ -21,7 +21,7 @@ const fetchJournalEntries = unstable_cache(
       depth: 2,
       limit: DEFAULT_LIMIT,
       locale,
-      sort: ['-featured', 'order', '-date'],
+      sort: '_order',
       where: {
         visibility: { equals: 'public' },
         ...(category ? { category: { equals: category } } : {}),
