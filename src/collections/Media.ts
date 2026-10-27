@@ -19,7 +19,7 @@ export const Media: CollectionConfig = {
     description:
       'Images, logos et PDF réutilisables un peu partout sur le site. Les captures vidéo ont leur propre rubrique, « Vidéos ».',
     useAsTitle: 'alt',
-    defaultColumns: ['preview', 'filename', 'alt', 'updatedAt'],
+    defaultColumns: ['filename', 'alt', 'updatedAt'],
   },
   access: {
     // The files themselves are served straight from the R2 custom domain and
