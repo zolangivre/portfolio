@@ -198,7 +198,9 @@ The last step of `/feature`, `/ship-plan`, `/bug`, `/flaky` and
    repo is public: no secret, personal data or unfixed vulnerability. It
    doesn't add the `review` label, since the reviewers already ran.
 6. **CI** followed in the background. A cause in the branch is fixed and
-   pushed; an infrastructure failure (network, registry, runner) that's green
+   pushed, without weakening the check (no skip, retry, looser assertion,
+   `ts-ignore` or `eslint-disable`; it asks you if that's the only way);
+   an infrastructure failure (network, registry, runner) that's green
    on `staging` is rerun once; a cause outside the branch is reported, not
    fixed here. Three rounds at most.
 

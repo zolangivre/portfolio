@@ -147,6 +147,13 @@ On a failure:
    push, follow again. The fix commit takes the type that describes it
    (`test`, `refactor`, `style`, `chore`…), not `fix`: it repairs nothing
    that shipped, and a `fix` would show up in the changelog.
+   The fix makes the code right, never the check weaker: no `.skip` or
+   `.only`, no retries or longer timeout, no looser assertion, no
+   `@ts-ignore`, `@ts-expect-error`, `eslint-disable` or `any` to silence an
+   error, no edit to a lint, tsconfig, Vitest, Playwright or CI config to
+   get past it. When the test itself is wrong (it asserts the old behaviour
+   the branch meant to change), update it and say why in the commit body. If
+   weakening the check is the only way through, stop and ask.
 4. Cause outside the branch and lasting (a vulnerable dependency the branch
    doesn't touch, an unrelated flaky test, a failure that survives the
    rerun): don't fix it here. Report it and suggest a separate PR.

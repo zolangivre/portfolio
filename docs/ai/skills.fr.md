@@ -214,7 +214,9 @@ La dernière étape de `/feature`, `/ship-plan`, `/bug`, `/flaky` et
    vulnérabilité non corrigée. Il n'ajoute pas le label `review`, puisque les
    reviewers sont déjà passés.
 6. **CI** suivie en arrière-plan. Une cause dans la branche est corrigée et
-   poussée ; un échec d'infrastructure (réseau, registre, runner) vert sur
+   poussée, sans affaiblir le check (ni skip, ni retry, ni assertion
+   assouplie, ni `ts-ignore` ou `eslint-disable` ; il te demande si c'est la
+   seule issue) ; un échec d'infrastructure (réseau, registre, runner) vert sur
    `staging` est relancé une fois ; une cause hors de la branche est
    signalée, pas corrigée ici. Trois tours au plus.
 
