@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { orderField } from '@/fields/shared'
+import { prependToOrder } from '@/hooks/prependToOrder'
 import {
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
@@ -15,15 +15,16 @@ export const Experiences: CollectionConfig = {
   },
   admin: {
     group: adminGroups.portfolio,
-    description: 'Entrées de la frise des expériences professionnelles.',
-    defaultColumns: ['company', 'location', 'position', 'startDate', 'endDate', 'order'],
+    description: 'Entrées de la frise des expériences professionnelles. Glissez-déposez les lignes pour choisir leur ordre sur le site.',
+    defaultColumns: ['company', 'location', 'position', 'startDate', 'endDate'],
     useAsTitle: 'position',
   },
-  defaultSort: 'order',
+  orderable: true,
   access: {
     read: () => true,
   },
   hooks: {
+    beforeChange: [prependToOrder],
     afterChange: [revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },
@@ -102,9 +103,6 @@ export const Experiences: CollectionConfig = {
       label: 'Poste en cours',
       defaultValue: false,
     },
-    orderField(
-      'l’entrée après celles qui sont ordonnées, de la date de début la plus récente à la plus ancienne',
-    ),
   ],
   timestamps: true,
 }

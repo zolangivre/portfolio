@@ -237,13 +237,14 @@ export interface Video {
   focalY?: number | null;
 }
 /**
- * Projets du portfolio affichés dans la section projets.
+ * Projets du portfolio affichés dans la section projets. Glissez-déposez les lignes pour choisir leur ordre sur le site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "projects".
  */
 export interface Project {
   id: number;
+  _order?: string | null;
   title: string;
   slug: string;
   shortDescription: string;
@@ -315,10 +316,6 @@ export interface Project {
    * Les projets privés restent dans le CMS mais ne sont jamais affichés sur le site.
    */
   visibility: 'public' | 'private';
-  /**
-   * Ordre d’affichage : 1 s’affiche en premier, 2 en deuxième, etc. Laissez vide pour classer le projet après ceux qui sont ordonnés, du plus récent au plus ancien.
-   */
-  order?: number | null;
   year?: number | null;
   status?: ('live' | 'in-progress' | 'archived') | null;
   category?: (number | null) | Category;
@@ -358,31 +355,29 @@ export interface Technology {
   createdAt: string;
 }
 /**
- * Catégories partagées par les compétences, les technologies, les projets et le journal. Regroupées par domaine pour que chaque collection ne propose que les catégories qui la concernent.
+ * Catégories partagées par les compétences, les technologies, les projets et le journal. Regroupées par domaine pour que chaque collection ne propose que les catégories qui la concernent. Glissez-déposez les lignes pour choisir leur ordre sur le site, au sein de chaque groupe.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
 export interface Category {
   id: number;
+  _order?: string | null;
   name: string;
   slug: string;
   group: 'tech' | 'project' | 'journal';
-  /**
-   * Ordre d’affichage au sein du groupe : 1 s’affiche en premier, 2 en deuxième, etc. Les catégories sans valeur passent en dernier, triées par nom.
-   */
-  order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
- * Entrées de la frise des expériences professionnelles.
+ * Entrées de la frise des expériences professionnelles. Glissez-déposez les lignes pour choisir leur ordre sur le site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "experiences".
  */
 export interface Experience {
   id: number;
+  _order?: string | null;
   company: number | Company;
   position: string;
   employmentType?: string | null;
@@ -406,10 +401,6 @@ export interface Experience {
   startDate: string;
   endDate?: string | null;
   currentlyWorking?: boolean | null;
-  /**
-   * Ordre d’affichage : 1 s’affiche en premier, 2 en deuxième, etc. Laissez vide pour classer l’entrée après celles qui sont ordonnées, de la date de début la plus récente à la plus ancienne.
-   */
-  order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -468,13 +459,14 @@ export interface School {
   createdAt: string;
 }
 /**
- * Entrées de la frise des formations.
+ * Entrées de la frise des formations. Glissez-déposez les lignes pour choisir leur ordre sur le site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "education".
  */
 export interface Education {
   id: number;
+  _order?: string | null;
   school: number | School;
   degree: string;
   fieldOfStudy?: string | null;
@@ -497,21 +489,18 @@ export interface Education {
   startDate: string;
   endDate?: string | null;
   currentlyStudying?: boolean | null;
-  /**
-   * Ordre d’affichage : 1 s’affiche en premier, 2 en deuxième, etc. Laissez vide pour classer l’entrée après celles qui sont ordonnées, de la date de début la plus récente à la plus ancienne.
-   */
-  order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
- * Citations de clients et de collègues affichées dans la section témoignages.
+ * Citations de clients et de collègues affichées dans la section témoignages. Glissez-déposez les lignes pour choisir leur ordre sur le site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "testimonials".
  */
 export interface Testimonial {
   id: number;
+  _order?: string | null;
   /**
    * Nom complet de la personne qui témoigne.
    */
@@ -524,7 +513,6 @@ export interface Testimonial {
   avatar?: (number | null) | Media;
   quote: string;
   featured?: boolean | null;
-  order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -544,13 +532,14 @@ export interface Message {
   createdAt: string;
 }
 /**
- * Récits personnels, hors technique : voyages, sport, réussites, événements, découvertes.
+ * Récits personnels, hors technique : voyages, sport, réussites, événements, découvertes. Glissez-déposez les lignes pour choisir leur ordre sur le site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "journal".
  */
 export interface Journal {
   id: number;
+  _order?: string | null;
   title: string;
   slug: string;
   category: number | Category;
@@ -585,10 +574,6 @@ export interface Journal {
    * Les entrées privées restent dans le CMS mais ne sont jamais affichées sur le site.
    */
   visibility: 'public' | 'private';
-  /**
-   * Ordre d’affichage : 1 s’affiche en premier, 2 en deuxième, etc. Laissez vide pour classer l’entrée après celles qui sont ordonnées, de la date la plus récente à la plus ancienne.
-   */
-  order?: number | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -790,6 +775,7 @@ export interface VideosSelect<T extends boolean = true> {
  * via the `definition` "projects_select".
  */
 export interface ProjectsSelect<T extends boolean = true> {
+  _order?: T;
   title?: T;
   slug?: T;
   shortDescription?: T;
@@ -805,7 +791,6 @@ export interface ProjectsSelect<T extends boolean = true> {
   liveUrl?: T;
   featured?: T;
   visibility?: T;
-  order?: T;
   year?: T;
   status?: T;
   category?: T;
@@ -824,6 +809,7 @@ export interface ProjectsSelect<T extends boolean = true> {
  * via the `definition` "experiences_select".
  */
 export interface ExperiencesSelect<T extends boolean = true> {
+  _order?: T;
   company?: T;
   position?: T;
   employmentType?: T;
@@ -833,7 +819,6 @@ export interface ExperiencesSelect<T extends boolean = true> {
   startDate?: T;
   endDate?: T;
   currentlyWorking?: T;
-  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -870,10 +855,10 @@ export interface TechnologiesSelect<T extends boolean = true> {
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
+  _order?: T;
   name?: T;
   slug?: T;
   group?: T;
-  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -908,6 +893,7 @@ export interface SchoolsSelect<T extends boolean = true> {
  * via the `definition` "education_select".
  */
 export interface EducationSelect<T extends boolean = true> {
+  _order?: T;
   school?: T;
   degree?: T;
   fieldOfStudy?: T;
@@ -916,7 +902,6 @@ export interface EducationSelect<T extends boolean = true> {
   startDate?: T;
   endDate?: T;
   currentlyStudying?: T;
-  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -925,13 +910,13 @@ export interface EducationSelect<T extends boolean = true> {
  * via the `definition` "testimonials_select".
  */
 export interface TestimonialsSelect<T extends boolean = true> {
+  _order?: T;
   author?: T;
   role?: T;
   company?: T;
   avatar?: T;
   quote?: T;
   featured?: T;
-  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -952,6 +937,7 @@ export interface MessagesSelect<T extends boolean = true> {
  * via the `definition` "journal_select".
  */
 export interface JournalSelect<T extends boolean = true> {
+  _order?: T;
   title?: T;
   slug?: T;
   category?: T;
@@ -969,7 +955,6 @@ export interface JournalSelect<T extends boolean = true> {
       };
   featured?: T;
   visibility?: T;
-  order?: T;
   meta?:
     | T
     | {

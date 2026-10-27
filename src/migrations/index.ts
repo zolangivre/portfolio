@@ -25,6 +25,7 @@ import * as migration_20261009_120000_add_hero_availability from './20261009_120
 import * as migration_20261014_120000_add_background_style from './20261014_120000_add_background_style';
 import * as migration_20261014_180000_add_media_placeholder from './20261014_180000_add_media_placeholder';
 import * as migration_20261019_120000_payload_3_91_schema from './20261019_120000_payload_3_91_schema';
+import * as migration_20261027_173016_orderable_collections from './20261027_173016_orderable_collections';
 
 export const migrations = [
   {
@@ -161,5 +162,10 @@ export const migrations = [
     up: migration_20261019_120000_payload_3_91_schema.up,
     down: migration_20261019_120000_payload_3_91_schema.down,
     name: '20261019_120000_payload_3_91_schema'
+  },
+  {
+    up: migration_20261027_173016_orderable_collections.up,
+    down: migration_20261027_173016_orderable_collections.down,
+    name: '20261027_173016_orderable_collections'
   },
 ];

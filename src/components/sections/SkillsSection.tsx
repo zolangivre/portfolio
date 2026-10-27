@@ -1,5 +1,6 @@
 import { Container } from '@/components/ui/Container'
 import type { Dictionary } from '@/lib/i18n/dictionary'
+import { compareOrderKeys } from '@/lib/order'
 import type { SectionCopy } from '@/lib/sectionCopy'
 import type { Category, Skill } from '@/payload-types'
 
@@ -30,14 +31,11 @@ export function SkillsSection({ content, dictionary, skills }: SkillsSectionProp
     groupsById.set(key, group)
   }
 
-  const skillGroups = Array.from(groupsById.values()).sort((a, b) => {
-    const orderA = a.category?.order ?? Number.MAX_SAFE_INTEGER
-    const orderB = b.category?.order ?? Number.MAX_SAFE_INTEGER
-    if (orderA !== orderB) {
-      return orderA - orderB
-    }
-    return (a.category?.name ?? '').localeCompare(b.category?.name ?? '')
-  })
+  const skillGroups = Array.from(groupsById.values()).sort(
+    (a, b) =>
+      compareOrderKeys(a.category?._order, b.category?._order) ||
+      (a.category?.name ?? '').localeCompare(b.category?.name ?? ''),
+  )
 
   return (
     <section aria-labelledby="skills-title" className="content-section" id="skills">

@@ -16,7 +16,7 @@ const fetchEducation = unstable_cache(
       depth: 2,
       limit: 50,
       locale,
-      sort: ['order', '-startDate'],
+      sort: '_order',
     })
 
     return education.docs

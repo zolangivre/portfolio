@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 import { login } from '../helpers/login'
-import { editor } from './fixtures'
+import { editor, projects } from './fixtures'
 
 test.describe('Admin Panel', () => {
   let page: Page
@@ -37,5 +37,14 @@ test.describe('Admin Panel', () => {
   test('lists private projects to editors', async () => {
     await page.goto('/admin/collections/projects')
     await expect(page.getByText('Projet caché')).toBeVisible()
+  })
+
+  // Projects are orderable: Payload adds a drag-handle column to the list.
+  test('lets editors reorder projects by drag and drop', async () => {
+    await page.goto('/admin/collections/projects')
+    await expect(page.getByText('Projet Alpha')).toBeVisible()
+
+    // One handle per row: public projects plus the private one.
+    await expect(page.locator('td.cell-_dragHandle')).toHaveCount(projects.length + 1)
   })
 })

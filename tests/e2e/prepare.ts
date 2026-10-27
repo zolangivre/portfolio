@@ -112,11 +112,12 @@ const projectFields = (title: string) => ({
   title,
 })
 
-for (const [index, project] of projects.entries()) {
+// A new document is prepended to the list, so create them last-first: the
+// site then lists the projects in the order of the fixtures.
+for (const project of [...projects].reverse()) {
   await createLocalized(
     'projects',
     {
-      order: index + 1,
       slug: project.slug,
       technologies: project.technologies.map((name) => technologyIds.get(name)!),
       visibility: 'public',

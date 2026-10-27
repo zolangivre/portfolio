@@ -4,6 +4,7 @@ import {
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
+import { prependToOrder } from '@/hooks/prependToOrder'
 import { adminGroups } from '@/lib/adminLabels'
 
 export const Categories: CollectionConfig = {
@@ -15,15 +16,16 @@ export const Categories: CollectionConfig = {
   admin: {
     group: adminGroups.taxonomy,
     description:
-      'Catégories partagées par les compétences, les technologies, les projets et le journal. Regroupées par domaine pour que chaque collection ne propose que les catégories qui la concernent.',
-    defaultColumns: ['name', 'group', 'order'],
+      'Catégories partagées par les compétences, les technologies, les projets et le journal. Regroupées par domaine pour que chaque collection ne propose que les catégories qui la concernent. Glissez-déposez les lignes pour choisir leur ordre sur le site, au sein de chaque groupe.',
+    defaultColumns: ['name', 'group'],
     useAsTitle: 'name',
   },
-  defaultSort: 'order',
+  orderable: true,
   access: {
     read: () => true,
   },
   hooks: {
+    beforeChange: [prependToOrder],
     afterChange: [revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },
@@ -58,16 +60,6 @@ export const Categories: CollectionConfig = {
         { label: 'Projets', value: 'project' },
         { label: 'Journal', value: 'journal' },
       ],
-    },
-    {
-      name: 'order',
-      type: 'number',
-      label: 'Ordre',
-      admin: {
-        step: 1,
-        description:
-          'Ordre d’affichage au sein du groupe : 1 s’affiche en premier, 2 en deuxième, etc. Les catégories sans valeur passent en dernier, triées par nom.',
-      },
     },
   ],
   timestamps: true,

@@ -18,7 +18,7 @@ const fetchExperiences = unstable_cache(
       depth: 2,
       limit: DEFAULT_LIMIT,
       locale,
-      sort: ['order', '-startDate'],
+      sort: '_order',
     })
 
     return experiences.docs
