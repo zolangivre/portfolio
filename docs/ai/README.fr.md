@@ -42,8 +42,9 @@ flowchart TB
   chacun est un `SKILL.md` dans [`.claude/skills/`](../../.claude/skills/).
   Ils ne tournent que quand tu les tapes. Voir [Skills](skills.fr.md).
 - **Les skills que Claude charge tout seul** : `payload` (la référence de
-  Payload CMS) et `i18n-copy` (les règles du texte visible). Claude les lit
-  quand la tâche le demande.
+  Payload CMS), `i18n-copy` (les règles du texte visible) et
+  `brand-guidelines` (l'identité et le système visuel du site). Claude les
+  lit quand la tâche le demande.
 - **Les sous-agents** que les commandes appellent pour un second avis, dans
   [`.claude/agents/`](../../.claude/agents/). Ils démarrent avec un contexte
   neuf : ils jugent le diff par rapport au plan, pas le raisonnement qui l'a
