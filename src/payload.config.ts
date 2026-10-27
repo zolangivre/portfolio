@@ -22,6 +22,7 @@ import { Education } from './collections/Education'
 import { Testimonials } from './collections/Testimonials'
 import { Messages } from './collections/Messages'
 import { Journal } from './collections/Journal'
+import { canRunJobs } from './lib/access'
 import { translateSeoFields } from './lib/adminLabels'
 import { GlobalSettings } from './globals/GlobalSettings'
 import { Hero } from './globals/Hero'
@@ -131,6 +132,13 @@ export default buildConfig({
   i18n: {
     supportedLanguages: { fr },
     fallbackLanguage: 'fr',
+  },
+  // The queue only holds the scheduled publishes of the collections with
+  // drafts (collections/drafts.ts). Nothing runs it in-process — Vercel's
+  // functions don't stay alive between requests — so the daily cron in
+  // vercel.json calls /api/payload-jobs/run instead.
+  jobs: {
+    access: { run: canRunJobs },
   },
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

@@ -1,5 +1,7 @@
-import type { CollectionBeforeChangeHook } from 'payload'
+import type { CollectionAfterChangeHook, CollectionBeforeChangeHook } from 'payload'
 import { generateKeyBetween } from 'payload/shared'
+
+import { readMainRow, revalidate } from './revalidateSite'
 
 /**
  * Puts a new document at the top of an `orderable` collection.
@@ -39,4 +41,40 @@ export const prependToOrder: CollectionBeforeChangeHook = async ({
   data._order = generateKeyBetween(null, firstKey)
 
   return data
+}
+
+/**
+ * Keeps a drag-and-drop reorder visible on a document that has a draft.
+ *
+ * Payload's reorder endpoint saves each moved document the way its latest
+ * version is saved: as a draft when one is pending (an autosave, a draft never
+ * published). The new `_order` then only reaches a version, while the list
+ * and the site read the main row — the row snaps back to its old place.
+ * Copying `_order` onto the main row fixes that without touching anything
+ * else: `db.updateOne` with a single plain column is one `UPDATE … SET`, with
+ * no version and no hook. The site changes only if that row is published.
+ */
+export const syncDraftOrder: CollectionAfterChangeHook = async ({ collection, doc, req }) => {
+  if (doc._status !== 'draft' || !doc._order) {
+    return doc
+  }
+
+  const main = await readMainRow(req, collection.slug, doc.id)
+
+  if (!main || main._order === doc._order) {
+    return doc
+  }
+
+  await req.payload.db.updateOne({
+    collection: collection.slug,
+    data: { _order: doc._order },
+    id: doc.id,
+    req,
+  })
+
+  if (main._status === 'published') {
+    revalidate(collection.slug)
+  }
+
+  return doc
 }

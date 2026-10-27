@@ -19,6 +19,7 @@ const fetchExperiences = unstable_cache(
       limit: DEFAULT_LIMIT,
       locale,
       sort: '_order',
+      where: { _status: { equals: 'published' } },
     })
 
     return experiences.docs

@@ -7,5 +7,11 @@
       "main": true,
       "staging": true
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/payload-jobs/run?allQueues=true&limit=50",
+      "schedule": "0 7 * * *"
+    }
+  ]
 }

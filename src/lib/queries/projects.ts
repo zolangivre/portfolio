@@ -34,7 +34,7 @@ const fetchAllProjects = unstable_cache(
       locale,
       sort: '_order',
       where: {
-        visibility: { equals: 'public' },
+        _status: { equals: 'published' },
       },
     })
 
@@ -55,7 +55,7 @@ const fetchProject = unstable_cache(
       locale,
       where: {
         slug: { equals: slug },
-        visibility: { equals: 'public' },
+        _status: { equals: 'published' },
       },
     })
 

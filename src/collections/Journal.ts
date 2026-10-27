@@ -1,13 +1,15 @@
 import type { CollectionConfig } from 'payload'
 
-import { visibilityField } from '@/fields/shared'
-import { prependToOrder } from '@/hooks/prependToOrder'
+import { prependToOrder, syncDraftOrder } from '@/hooks/prependToOrder'
 import {
+  rememberLiveState,
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
-import { readPublicOrAuthenticated } from '@/lib/access'
+import { readPublishedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
+
+import { draftVersions, SCHEDULE_HINT } from './drafts'
 
 export const Journal: CollectionConfig = {
   slug: 'journal',
@@ -18,17 +20,19 @@ export const Journal: CollectionConfig = {
   admin: {
     group: adminGroups.journal,
     description:
-      'Récits personnels, hors technique : voyages, sport, réussites, événements, découvertes. Glissez-déposez les lignes pour choisir leur ordre sur le site.',
-    defaultColumns: ['coverImage', 'title', 'category', 'visibility', 'date', 'featured'],
+      'Récits personnels, hors technique : voyages, sport, réussites, événements, découvertes. Glissez-déposez les lignes pour choisir leur ordre sur le site.' +
+      SCHEDULE_HINT,
+    defaultColumns: ['coverImage', 'title', 'category', '_status', 'date', 'featured'],
     useAsTitle: 'title',
   },
   orderable: true,
+  versions: draftVersions(),
   access: {
-    read: readPublicOrAuthenticated,
+    read: readPublishedOrAuthenticated,
   },
   hooks: {
-    beforeChange: [prependToOrder],
-    afterChange: [revalidateCollectionAfterChange],
+    beforeChange: [prependToOrder, rememberLiveState],
+    afterChange: [syncDraftOrder, revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },
   fields: [
@@ -125,9 +129,6 @@ export const Journal: CollectionConfig = {
       defaultValue: false,
       index: true,
     },
-    visibilityField(
-      'Les entrées privées restent dans le CMS mais ne sont jamais affichées sur le site.',
-    ),
   ],
   timestamps: true,
 }

@@ -273,7 +273,7 @@ function project(fields: Partial<Project> & Pick<Project, 'title'>): Project {
     slug: `bu-project-${projectId}`,
     shortDescription: 'Application web pour gérer un festival de jeux de société.',
     description: paragraphs('Description longue.'),
-    visibility: 'public',
+    _status: 'published',
     ...fields,
     ...stamps,
   }

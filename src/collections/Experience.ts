@@ -1,11 +1,15 @@
 import type { CollectionConfig } from 'payload'
 
-import { prependToOrder } from '@/hooks/prependToOrder'
+import { prependToOrder, syncDraftOrder } from '@/hooks/prependToOrder'
 import {
+  rememberLiveState,
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
+import { readPublishedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
+
+import { draftVersions, SCHEDULE_HINT } from './drafts'
 
 export const Experiences: CollectionConfig = {
   slug: 'experiences',
@@ -15,17 +19,20 @@ export const Experiences: CollectionConfig = {
   },
   admin: {
     group: adminGroups.portfolio,
-    description: 'Entrées de la frise des expériences professionnelles. Glissez-déposez les lignes pour choisir leur ordre sur le site.',
-    defaultColumns: ['company', 'location', 'position', 'startDate', 'endDate'],
+    description:
+      'Entrées de la frise des expériences professionnelles. Glissez-déposez les lignes pour choisir leur ordre sur le site.' +
+      SCHEDULE_HINT,
+    defaultColumns: ['company', 'location', 'position', 'startDate', 'endDate', '_status'],
     useAsTitle: 'position',
   },
   orderable: true,
+  versions: draftVersions(),
   access: {
-    read: () => true,
+    read: readPublishedOrAuthenticated,
   },
   hooks: {
-    beforeChange: [prependToOrder],
-    afterChange: [revalidateCollectionAfterChange],
+    beforeChange: [prependToOrder, rememberLiveState],
+    afterChange: [syncDraftOrder, revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },
   fields: [

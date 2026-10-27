@@ -34,7 +34,7 @@ test.describe('Admin Panel', () => {
     await expect(page.locator('input[name="email"]')).toBeVisible()
   })
 
-  test('lists private projects to editors', async () => {
+  test('lists draft projects to editors', async () => {
     await page.goto('/admin/collections/projects')
     await expect(page.getByText('Projet caché')).toBeVisible()
   })
@@ -44,7 +44,7 @@ test.describe('Admin Panel', () => {
     await page.goto('/admin/collections/projects')
     await expect(page.getByText('Projet Alpha')).toBeVisible()
 
-    // One handle per row: public projects plus the private one.
+    // One handle per row: published projects plus the draft one.
     await expect(page.locator('td.cell-_dragHandle')).toHaveCount(projects.length + 1)
   })
 })
