@@ -1,6 +1,8 @@
 import type { GlobalConfig } from 'payload'
 
+import { draftVersions, GLOBAL_SCHEDULE_HINT, hideUnpublishButton } from '@/collections/drafts'
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { readPublishedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 
 import { palette } from '../lib/theme/palette'
@@ -13,10 +15,13 @@ export const GlobalSettings: GlobalConfig = {
   admin: {
     group: adminGroups.site,
     description:
-      'Identité, image de marque, contact, thème et SEO par défaut, utilisés sur tout le site.',
+      'Identité, image de marque, contact, thème et SEO par défaut, utilisés sur tout le site.' +
+      GLOBAL_SCHEDULE_HINT,
+    components: hideUnpublishButton(),
   },
+  versions: draftVersions(),
   access: {
-    read: () => true,
+    read: readPublishedOrAuthenticated,
   },
   hooks: {
     afterChange: [revalidateGlobalAfterChange],

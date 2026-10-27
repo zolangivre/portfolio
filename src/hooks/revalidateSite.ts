@@ -5,6 +5,7 @@ import type {
   CollectionBeforeChangeHook,
   CollectionSlug,
   GlobalAfterChangeHook,
+  GlobalSlug,
   PayloadRequest,
 } from 'payload'
 
@@ -73,6 +74,24 @@ async function isLive(req: PayloadRequest, collection: CollectionSlug, id: numbe
   const main = await readMainRow(req, collection, id)
 
   return main === undefined ? undefined : main?._status === 'published'
+}
+
+/** A global's main row, or `undefined` when it couldn't be read (logged). */
+async function readMainGlobal(req: PayloadRequest, slug: GlobalSlug) {
+  try {
+    return (await req.payload.findGlobal({
+      depth: 0,
+      draft: false,
+      overrideAccess: true,
+      req,
+      select: { updatedAt: true },
+      slug,
+    })) as { updatedAt?: string | null }
+  } catch (err) {
+    req.payload.logger.error({ err, msg: `Could not read the ${slug} global for revalidation.` })
+
+    return undefined
+  }
 }
 
 const wasLiveKey = (collection: string, id: unknown) =>
@@ -191,9 +210,29 @@ export const revalidateCollectionAfterDelete: CollectionAfterDeleteHook = ({
   return doc
 }
 
-export const revalidateGlobalAfterChange: GlobalAfterChangeHook = ({ context, doc, global }) => {
+export const revalidateGlobalAfterChange: GlobalAfterChangeHook = async ({
+  context,
+  doc,
+  global,
+  req,
+}) => {
   if (shouldSkip(context)) {
     return doc
+  }
+
+  // The site reads a global's main row. A draft save (autosave included)
+  // leaves it alone; other saves write it, some with a `draft` status: an
+  // API call without `_status` on a global never saved before, restoring a
+  // draft from the version history. So the test is whether this save wrote
+  // the row: if it did, the row carries this save's `updatedAt`. A restore
+  // always writes it, and "restore as draft" stamps the version a moment
+  // after the row, so it is recognised by the flag Payload sets instead.
+  if (isHidden(doc as MaybeHidden) && context.isRestoringVersion !== true) {
+    const main = await readMainGlobal(req, global.slug)
+
+    if (main !== undefined && main.updatedAt !== doc.updatedAt) {
+      return doc
+    }
   }
 
   revalidate(global.slug)

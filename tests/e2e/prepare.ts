@@ -78,10 +78,15 @@ async function createLocalized(
 await payload.create({ collection: 'users', context, data: editor })
 
 for (const locale of ['fr', 'en'] as const) {
-  await payload.updateGlobal({ context, data: { title: hero[locale] }, locale, slug: 'hero' })
   await payload.updateGlobal({
     context,
-    data: { successMessage: contactSuccess[locale] },
+    data: { _status: 'published', title: hero[locale] },
+    locale,
+    slug: 'hero',
+  })
+  await payload.updateGlobal({
+    context,
+    data: { _status: 'published', successMessage: contactSuccess[locale] },
     locale,
     slug: 'contact',
   })
@@ -91,13 +96,17 @@ for (const locale of ['fr', 'en'] as const) {
 // French, then give the English labels to the same row ids.
 const { items } = await payload.updateGlobal({
   context,
-  data: { items: navigation.map(({ fr, href }) => ({ href, label: fr })) },
+  data: {
+    _status: 'published',
+    items: navigation.map(({ fr, href }) => ({ href, label: fr })),
+  },
   locale: 'fr',
   slug: 'navigation',
 })
 await payload.updateGlobal({
   context,
   data: {
+    _status: 'published',
     items: (items ?? []).map((item, index) => ({ ...item, label: navigation[index]!.en })),
   },
   locale: 'en',

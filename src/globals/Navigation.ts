@@ -1,6 +1,8 @@
 import type { GlobalConfig } from 'payload'
 
+import { draftVersions, GLOBAL_SCHEDULE_HINT, hideUnpublishButton } from '@/collections/drafts'
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { readPublishedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 
 export const Navigation: GlobalConfig = {
@@ -8,10 +10,12 @@ export const Navigation: GlobalConfig = {
   label: 'Navigation',
   admin: {
     group: adminGroups.site,
-    description: 'Liens de navigation principaux, dans l’en-tête.',
+    description: 'Liens de navigation principaux, dans l’en-tête.' + GLOBAL_SCHEDULE_HINT,
+    components: hideUnpublishButton(),
   },
+  versions: draftVersions(),
   access: {
-    read: () => true,
+    read: readPublishedOrAuthenticated,
   },
   hooks: {
     afterChange: [revalidateGlobalAfterChange],

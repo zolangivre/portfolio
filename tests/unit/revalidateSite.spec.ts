@@ -337,22 +337,87 @@ describe('revalidateCollectionAfterDelete', () => {
 })
 
 describe('revalidateGlobalAfterChange', () => {
-  const globalChange = (context = {}) => {
-    const doc = { id: 1 }
+  const globalChange = async ({
+    context = {},
+    doc = { id: 1 },
+    main = { updatedAt: '2026-10-27T10:00:00.000Z' },
+  }: {
+    context?: Record<string, unknown>
+    doc?: Record<string, unknown>
+    /** The main row after the save; an Error makes the lookup throw. */
+    main?: Record<string, unknown> | Error
+  } = {}) => {
+    const findGlobal =
+      main instanceof Error ? vi.fn().mockRejectedValue(main) : vi.fn().mockResolvedValue(main)
+    const error = vi.fn()
+    const req = { payload: { findGlobal, logger: { error } } }
 
-    expect(revalidateGlobalAfterChange({ context, doc, global: { slug: 'hero' } } as never)).toBe(
-      doc,
-    )
+    expect(
+      await revalidateGlobalAfterChange({ context, doc, global: { slug: 'hero' }, req } as never),
+    ).toBe(doc)
+
+    return { error, findGlobal }
   }
 
-  it('revalidates the global by its slug', () => {
-    globalChange()
+  const SAVED_AT = '2026-10-27T10:00:00.000Z'
+
+  it('revalidates a published global by its slug, without a lookup', async () => {
+    const { findGlobal } = await globalChange({ doc: { id: 1, _status: 'published' } })
+
+    expect(revalidateTag).toHaveBeenCalledExactlyOnceWith('hero', { expire: 0 })
+    expect(findGlobal).not.toHaveBeenCalled()
+  })
+
+  it('skips a draft save, autosave included: the main row did not move', async () => {
+    const { findGlobal } = await globalChange({
+      doc: { id: 1, _status: 'draft', updatedAt: '2026-10-27T10:05:00.000Z' },
+      main: { updatedAt: SAVED_AT },
+    })
+
+    expect(revalidateTag).not.toHaveBeenCalled()
+    expect(findGlobal).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ draft: false, slug: 'hero' }),
+    )
+  })
+
+  it('revalidates a save that wrote the main row but left _status at draft', async () => {
+    await globalChange({
+      doc: { id: 1, _status: 'draft', updatedAt: SAVED_AT },
+      main: { updatedAt: SAVED_AT },
+    })
 
     expect(revalidateTag).toHaveBeenCalledExactlyOnceWith('hero', { expire: 0 })
   })
 
-  it('stays quiet for maintenance scripts', () => {
-    globalChange({ disableRevalidate: true })
+  it('revalidates a restore without reading the main row', async () => {
+    const { findGlobal } = await globalChange({
+      context: { isRestoringVersion: true },
+      doc: { id: 1, _status: 'draft', updatedAt: '2026-10-27T10:05:00.001Z' },
+      main: { updatedAt: SAVED_AT },
+    })
+
+    expect(revalidateTag).toHaveBeenCalledExactlyOnceWith('hero', { expire: 0 })
+    expect(findGlobal).not.toHaveBeenCalled()
+  })
+
+  it('revalidates when the main row cannot be read', async () => {
+    const { error } = await globalChange({
+      doc: { id: 1, _status: 'draft', updatedAt: SAVED_AT },
+      main: new Error('connection lost'),
+    })
+
+    expect(error).toHaveBeenCalledOnce()
+    expect(revalidateTag).toHaveBeenCalledExactlyOnceWith('hero', { expire: 0 })
+  })
+
+  it('still revalidates a global document without a status', async () => {
+    await globalChange()
+
+    expect(revalidateTag).toHaveBeenCalledExactlyOnceWith('hero', { expire: 0 })
+  })
+
+  it('stays quiet for maintenance scripts', async () => {
+    await globalChange({ context: { disableRevalidate: true } })
 
     expect(revalidateTag).not.toHaveBeenCalled()
   })
