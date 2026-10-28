@@ -44,6 +44,7 @@ const collectionPolicy: Record<CollectionSlug, { read: ReadPolicy; create: 'anyo
     journal: { read: 'published-only', create: 'editors' },
     media: { read: 'editors', create: 'editors' },
     messages: { read: 'editors', create: 'anyone' },
+    'payload-folders': { read: 'editors', create: 'editors' },
     'payload-jobs': { read: 'editors', create: 'editors' },
     'payload-kv': { read: 'editors', create: 'editors' },
     'payload-locked-documents': { read: 'editors', create: 'editors' },

@@ -20,6 +20,7 @@ export const Experiences: CollectionConfig = {
     plural: 'Expériences',
   },
   admin: {
+    groupBy: true,
     group: adminGroups.portfolio,
     description:
       'Entrées de la frise des expériences professionnelles. Glissez-déposez les lignes pour choisir leur ordre sur le site.' +

@@ -20,6 +20,7 @@ export const Journal: CollectionConfig = {
     plural: 'Journal',
   },
   admin: {
+    groupBy: true,
     group: adminGroups.journal,
     description:
       'Récits personnels, hors technique : voyages, sport, réussites, événements, découvertes. Glissez-déposez les lignes pour choisir leur ordre sur le site.' +

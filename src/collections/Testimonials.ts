@@ -17,6 +17,7 @@ export const Testimonials: CollectionConfig = {
     plural: 'Témoignages',
   },
   admin: {
+    groupBy: true,
     group: adminGroups.content,
     description:
       'Citations de clients et de collègues affichées dans la section témoignages. Glissez-déposez les lignes pour choisir leur ordre sur le site.',

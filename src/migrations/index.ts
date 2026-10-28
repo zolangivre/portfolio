@@ -30,6 +30,7 @@ import * as migration_20261027_175816_drafts_collections from './20261027_175816
 import * as migration_20261027_184534_drafts_globals from './20261027_184534_drafts_globals';
 import * as migration_20261028_010605_trash from './20261028_010605_trash';
 import * as migration_20261028_015440_mcp_api_keys from './20261028_015440_mcp_api_keys';
+import * as migration_20261028_141000_media_folders from './20261028_141000_media_folders';
 
 export const migrations = [
   {
@@ -191,5 +192,10 @@ export const migrations = [
     up: migration_20261028_015440_mcp_api_keys.up,
     down: migration_20261028_015440_mcp_api_keys.down,
     name: '20261028_015440_mcp_api_keys'
+  },
+  {
+    up: migration_20261028_141000_media_folders.up,
+    down: migration_20261028_141000_media_folders.down,
+    name: '20261028_141000_media_folders'
   },
 ];

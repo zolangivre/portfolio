@@ -28,6 +28,8 @@ import { adminGroups } from '@/lib/adminLabels'
 export const Videos: CollectionConfig = {
   slug: 'videos',
   trash: true,
+  // Same folders as media (see Media.ts).
+  folders: true,
   labels: {
     singular: 'Vidéo',
     plural: 'Vidéos',

@@ -192,6 +192,24 @@ export default buildConfig({
     Messages,
     Journal,
   ],
+  // The folders media and videos are sorted into (`folders: true` on each).
+  // Payload builds the folder collection itself, with English labels; this
+  // only translates them. Deleting a folder deletes its subfolders and moves
+  // the files it held back to the root, never deletes a file.
+  folders: {
+    collectionOverrides: [
+      ({ collection }) => ({
+        ...collection,
+        labels: { singular: 'Dossier', plural: 'Dossiers' },
+        fields: collection.fields.map((field) => {
+          if (!('name' in field)) return field
+          if (field.name === 'name') return { ...field, label: 'Nom' }
+          if (field.name === 'folderType') return { ...field, label: 'Peut contenir' }
+          return field
+        }),
+      }),
+    ],
+  },
   globals: [
     GlobalSettings,
     Hero,
