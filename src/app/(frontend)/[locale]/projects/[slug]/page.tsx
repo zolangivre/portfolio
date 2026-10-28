@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { ViewTransition } from 'react'
 
 import { AdjacentNav } from '@/components/ui/AdjacentNav'
@@ -19,7 +19,13 @@ import { getAdjacentBySlug } from '@/lib/adjacent'
 import { getDictionary } from '@/lib/i18n/dictionary'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
 import { asMediaDoc, getMediaUrl, getRelationUrl } from '@/lib/media'
-import { getAllProjects, getGlobalSettings, getProject, getSectionsVisibility } from '@/lib/queries'
+import {
+  getAllProjects,
+  getGlobalSettings,
+  getProject,
+  getRedirectDestination,
+  getSectionsVisibility,
+} from '@/lib/queries'
 import { pageMetadata, projectJsonLd } from '@/lib/seo'
 import { ReadingProgress } from '@/components/ui/ReadingProgress'
 
@@ -92,6 +98,9 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
   const project = await getProject(slug, locale)
 
   if (!project) {
+    // An old URL of a renamed or removed project may have a redirect.
+    const destination = await getRedirectDestination(`/${locale}/projects/${slug}`)
+    if (destination) permanentRedirect(destination)
     notFound()
   }
 
