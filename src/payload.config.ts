@@ -1,4 +1,5 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { fr } from '@payloadcms/translations/languages/fr'
 import { s3Storage } from '@payloadcms/storage-s3'
@@ -25,7 +26,7 @@ import { Journal } from './collections/Journal'
 import { refuseGlobalUnpublishSchedule } from './collections/drafts'
 import { canRunJobs } from './lib/access'
 import { previewPath, previewURL } from './lib/preview'
-import { translateSeoFields } from './lib/adminLabels'
+import { adminGroups, translateSeoFields } from './lib/adminLabels'
 import { GlobalSettings } from './globals/GlobalSettings'
 import { Hero } from './globals/Hero'
 import { About } from './globals/About'
@@ -261,6 +262,101 @@ export default buildConfig({
   }),
   sharp,
   plugins: [
+    // MCP: lets an MCP client (Claude) read and edit the site's content with
+    // an API key an editor creates in the admin (docs/ai/mcp.md). No
+    // deletion, no contact messages, accounts or files; and whatever it
+    // writes in a collection with drafts, or a global, is saved as a draft
+    // (hooks/mcpWritesAreDrafts.ts) for the editor to review and publish.
+    mcpPlugin({
+      collections: {
+        projects: {
+          description:
+            'Portfolio projects shown on the site, each with its own page (title, descriptions, technologies, links, images).',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+        journal: {
+          description:
+            'Personal journal entries (travel, sport, achievements), each with its own page.',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+        experiences: {
+          description: 'Work experience entries of the timeline.',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+        education: {
+          description: 'Education entries of the timeline.',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+        testimonials: {
+          description: 'Quotes from clients and colleagues.',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+        skills: {
+          description: 'Skills shown in the skills section, grouped by category.',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+        technologies: {
+          description: 'Technologies referenced by projects and experiences.',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+        categories: {
+          description: 'Categories shared by skills, technologies, projects and journal entries.',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+        companies: {
+          description: 'Companies referenced by experiences and testimonials.',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+        schools: {
+          description: 'Schools referenced by education entries.',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+      },
+      globals: {
+        hero: {
+          description: 'The homepage banner.',
+          enabled: { find: true, update: true },
+        },
+        about: {
+          description: 'The about section.',
+          enabled: { find: true, update: true },
+        },
+        contact: {
+          description: 'The contact section.',
+          enabled: { find: true, update: true },
+        },
+        navigation: {
+          description: 'The header navigation links.',
+          enabled: { find: true, update: true },
+        },
+        footer: {
+          description: 'The footer text and links.',
+          enabled: { find: true, update: true },
+        },
+        settings: {
+          description: 'Site-wide settings: identity, theme, social links, default SEO.',
+          enabled: { find: true, update: true },
+        },
+        'sections-content': {
+          description: 'Eyebrow, title and description above each homepage section.',
+          enabled: { find: true, update: true },
+        },
+        'sections-visibility': {
+          description: 'Which sections the site shows.',
+          enabled: { find: true, update: true },
+        },
+      },
+      overrideApiKeyCollection: (collection) => ({
+        ...collection,
+        labels: { singular: 'Clé d’API MCP', plural: 'Clés d’API MCP' },
+        admin: {
+          ...collection.admin,
+          group: adminGroups.site,
+          description:
+            'Clés qui permettent à un client MCP (Claude) de lire et modifier le contenu. Chaque clé agit au nom de son utilisateur, dans les limites cochées ; ce qu’elle écrit reste en brouillon.',
+        },
+      }),
+    }),
     seoPlugin({
       collections: ['projects', 'journal'],
       globals: ['hero'],

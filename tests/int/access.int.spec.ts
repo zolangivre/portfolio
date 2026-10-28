@@ -47,6 +47,8 @@ const collectionPolicy: Record<CollectionSlug, { read: ReadPolicy; create: 'anyo
     'payload-jobs': { read: 'editors', create: 'editors' },
     'payload-kv': { read: 'editors', create: 'editors' },
     'payload-locked-documents': { read: 'editors', create: 'editors' },
+    // MCP API keys: each editor sees and manages their own keys only.
+    'payload-mcp-api-keys': { read: 'editors', create: 'editors' },
     'payload-migrations': { read: 'editors', create: 'editors' },
     'payload-preferences': { read: 'editors', create: 'editors' },
     projects: { read: 'published-only', create: 'editors' },

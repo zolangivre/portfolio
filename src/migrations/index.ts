@@ -29,6 +29,7 @@ import * as migration_20261027_173016_orderable_collections from './20261027_173
 import * as migration_20261027_175816_drafts_collections from './20261027_175816_drafts_collections';
 import * as migration_20261027_184534_drafts_globals from './20261027_184534_drafts_globals';
 import * as migration_20261028_010605_trash from './20261028_010605_trash';
+import * as migration_20261028_015440_mcp_api_keys from './20261028_015440_mcp_api_keys';
 
 export const migrations = [
   {
@@ -185,5 +186,10 @@ export const migrations = [
     up: migration_20261028_010605_trash.up,
     down: migration_20261028_010605_trash.down,
     name: '20261028_010605_trash'
+  },
+  {
+    up: migration_20261028_015440_mcp_api_keys.up,
+    down: migration_20261028_015440_mcp_api_keys.down,
+    name: '20261028_015440_mcp_api_keys'
   },
 ];
