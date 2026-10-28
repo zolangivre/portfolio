@@ -1,5 +1,6 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { resendAdapter } from '@payloadcms/email-resend'
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
@@ -7,7 +8,7 @@ import { fr } from '@payloadcms/translations/languages/fr'
 import { s3Storage } from '@payloadcms/storage-s3'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
-import { buildConfig } from 'payload'
+import { buildConfig, type CollectionSlug } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
@@ -410,6 +411,32 @@ export default buildConfig({
         const shortDescription = (doc as { shortDescription?: string })?.shortDescription
         return shortDescription ?? ''
       },
+    }),
+    // "Exporter" (CSV or JSON) in the list of every collection an editor writes,
+    // for a backup that doesn't depend on Neon. Download only, run within the
+    // request: the files are never stored (Vercel's disk doesn't keep them) and
+    // the job queue only runs once a day. No import: a wrong file could
+    // overwrite the site. The plugin's own exports and imports collections stay
+    // out of the menu.
+    importExportPlugin({
+      collections: [
+        'projects',
+        'journal',
+        'experiences',
+        'education',
+        'testimonials',
+        'skills',
+        'technologies',
+        'categories',
+        'companies',
+        'schools',
+        'messages',
+        'redirects',
+      ].map((slug) => ({
+        slug: slug as CollectionSlug,
+        export: { disableJobsQueue: true, disableSave: true },
+        import: false,
+      })),
     }),
     // Falls back to local disk storage when R2 credentials are unset (local
     // dev), and uploads to Cloudflare R2 when they're set (production).

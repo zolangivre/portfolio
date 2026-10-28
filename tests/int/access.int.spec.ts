@@ -41,6 +41,8 @@ const collectionPolicy: Record<CollectionSlug, { read: ReadPolicy; create: 'anyo
     companies: { read: 'anyone', create: 'editors' },
     education: { read: 'published-only', create: 'editors' },
     experiences: { read: 'published-only', create: 'editors' },
+    exports: { read: 'editors', create: 'editors' },
+    imports: { read: 'editors', create: 'editors' },
     journal: { read: 'published-only', create: 'editors' },
     media: { read: 'editors', create: 'editors' },
     messages: { read: 'editors', create: 'anyone' },
