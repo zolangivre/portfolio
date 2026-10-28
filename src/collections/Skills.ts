@@ -5,6 +5,7 @@ import {
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
+import { mcpCannotTrash } from '@/hooks/mcpWritesAreDrafts'
 import { readUntrashedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 
@@ -25,6 +26,7 @@ export const Skills: CollectionConfig = {
     read: readUntrashedOrAuthenticated,
   },
   hooks: {
+    beforeOperation: [mcpCannotTrash],
     afterChange: [revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },

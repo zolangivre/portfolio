@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
+import { mcpWritesAreDrafts } from '@/hooks/mcpWritesAreDrafts'
 import { prependToOrder, syncDraftOrder } from '@/hooks/prependToOrder'
 import {
   rememberLiveState,
@@ -32,6 +33,7 @@ export const Journal: CollectionConfig = {
     read: readPublishedUntrashedOrAuthenticated,
   },
   hooks: {
+    beforeOperation: [mcpWritesAreDrafts],
     beforeChange: [prependToOrder, rememberLiveState],
     afterChange: [syncDraftOrder, revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],

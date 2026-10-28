@@ -1,6 +1,7 @@
 import type { Field, GlobalConfig } from 'payload'
 
 import { draftVersions, GLOBAL_SCHEDULE_HINT, hideUnpublishButton } from '@/collections/drafts'
+import { mcpGlobalWritesAreDrafts } from '@/hooks/mcpWritesAreDrafts'
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
 import { readPublishedOrAuthenticated } from '@/lib/access'
 import { adminGroups, sectionLabels } from '@/lib/adminLabels'
@@ -54,6 +55,7 @@ export const SectionsContent: GlobalConfig = {
     read: readPublishedOrAuthenticated,
   },
   hooks: {
+    beforeOperation: [mcpGlobalWritesAreDrafts],
     afterChange: [revalidateGlobalAfterChange],
   },
   fields: [
