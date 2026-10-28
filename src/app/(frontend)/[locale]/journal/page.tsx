@@ -7,9 +7,15 @@ import { Reveal } from '@/components/ui/Reveal'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { getDictionary } from '@/lib/i18n/dictionary'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
-import { getJournalEntries, getSectionsContent, getSectionsVisibility } from '@/lib/queries'
+import {
+  getGlobalSettings,
+  getJournalEntries,
+  getSectionsContent,
+  getSectionsVisibility,
+} from '@/lib/queries'
 import { lexicalToPlainText } from '@/lib/richText'
 import { resolveSectionCopy } from '@/lib/sectionCopy'
+import { pageMetadata } from '@/lib/seo'
 import { ReadingProgress } from '@/components/ui/ReadingProgress'
 
 // Safety net only — see the note in the locale layout. Freshness comes from
@@ -28,13 +34,20 @@ export async function generateMetadata({
     ? (rawLocale as Locale)
     : defaultLocale
   const dictionary = getDictionary(locale)
-  const sectionsContent = await getSectionsContent(locale)
+  const [sectionsContent, settings] = await Promise.all([
+    getSectionsContent(locale),
+    getGlobalSettings(locale),
+  ])
   const content = resolveSectionCopy(sectionsContent?.journal, dictionary.journal)
 
-  return {
-    title: content.title,
+  return pageMetadata({
     description: lexicalToPlainText(content.description),
-  }
+    locale,
+    path: '/journal',
+    siteName: settings?.seo?.defaultTitle,
+    title: content.title,
+    type: 'website',
+  })
 }
 
 export default async function JournalPage({ params }: { params: Promise<PageParams> }) {

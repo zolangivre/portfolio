@@ -53,6 +53,12 @@ const nextConfig: NextConfig = {
       source: '/((?!fr(?:/|$)|en(?:/|$)|api/preview$).*)',
       headers: [{ key: 'X-Frame-Options', value: 'DENY' }],
     },
+    // The generated share cards stay out of image search, like the uploads
+    // (media.zolangivre.com sends the same header). Social crawlers ignore it.
+    {
+      source: '/:path(.*opengraph-image.*)',
+      headers: [{ key: 'X-Robots-Tag', value: 'noindex' }],
+    },
     ...['/:locale(fr|en)', '/:locale(fr|en)/:path*', '/api/preview'].map((source) => ({
       source,
       headers: [

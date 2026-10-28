@@ -78,15 +78,65 @@ function loadFonts(): Promise<LoadedFont[]> {
   return fontsPromise
 }
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+
+/** The light page background (`--bg` in light mode), behind a project's logo. */
+const LOGO_TILE = '#f4f5f2'
+
+/**
+ * Fetches an upload and hands it to satori as a PNG data URI.
+ *
+ * Uploads are stored as WebP, which satori can't decode, so sharp converts
+ * them (and rasterises an SVG logo). Any failure — the media host down, an
+ * unreadable file — returns null and the card falls back to its text-only
+ * layout rather than failing the whole image.
+ */
+export async function loadImageForOg(
+  url: string | null | undefined,
+  maxWidth: number,
+): Promise<string | null> {
+  if (!url) {
+    return null
+  }
+
+  try {
+    // A hung media host would otherwise hold the crawler's request open.
+    const response = await fetch(new URL(url, siteUrl), { signal: AbortSignal.timeout(5000) })
+
+    if (!response.ok) {
+      return null
+    }
+
+    const { default: sharp } = await import('sharp')
+    const png = await sharp(Buffer.from(await response.arrayBuffer()))
+      .resize({ width: maxWidth, withoutEnlargement: true })
+      .png()
+      .toBuffer()
+
+    return `data:image/png;base64,${png.toString('base64')}`
+  } catch (error) {
+    console.error(`Failed to load "${url}" for an OG image.`, error)
+
+    return null
+  }
+}
+
 export type OgImageOptions = {
   /** Palette key from Global Settings → Theme. Falls back to the default. */
   accentKey?: string | null
   /** Small accent line above the title (section name, category…). */
   eyebrow?: string | null
+  /** A project's logo (data URI from `loadImageForOg`), on a light tile next to the title. */
+  logo?: string | null
   /** Dot-separated facts under the title (year, technologies, date…). */
   meta?: (string | null | undefined)[]
   /** Site owner's name, shown as the card's signature. */
   name?: string | null
+  /**
+   * A photo (data URI from `loadImageForOg`) filling the card, under a dark
+   * gradient that carries the text. Takes precedence over `logo`.
+   */
+  photo?: string | null
   /** Owner's job title, next to the name. */
   profession?: string | null
   /** The headline. Long titles shrink rather than overflow. */
@@ -96,8 +146,10 @@ export type OgImageOptions = {
 export async function renderOgImage({
   accentKey,
   eyebrow,
+  logo,
   meta,
   name,
+  photo,
   profession,
   title,
 }: OgImageOptions) {
@@ -113,6 +165,184 @@ export async function renderOgImage({
   // Rough fit: the display face is wide, so the longest titles step down two
   // sizes rather than wrapping into four cramped lines.
   const titleSize = title.length > 70 ? 60 : title.length > 40 ? 76 : 92
+  // Over a photo the text sits in the lower part only, and a logo takes the
+  // right of the card: both leave the title less room.
+  const tightTitleSize = title.length > 50 ? 56 : title.length > 28 ? 68 : 80
+  const showLogo = Boolean(logo) && !photo
+
+  const signatureRow = (
+    <div style={{ alignItems: 'center', display: 'flex', gap: 16, position: 'relative' }}>
+      <div
+        style={{
+          background: accent,
+          borderRadius: 999,
+          display: 'flex',
+          height: 18,
+          width: 18,
+        }}
+      />
+      {signature ? (
+        <div
+          style={{
+            color: FG,
+            fontFamily: 'Baloo 2',
+            fontSize: 30,
+            letterSpacing: '-0.02em',
+          }}
+        >
+          {signature}
+        </div>
+      ) : null}
+      {profession ? (
+        <div style={{ color: photo ? FG : FG_MUTED, fontFamily: 'Inter', fontSize: 24 }}>
+          {profession}
+        </div>
+      ) : null}
+    </div>
+  )
+
+  const headline = (
+    // Grows to push the logo tile right; over a photo it must not, or it
+    // drifts up into the bright part of the picture.
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+        // satori trims every style value, so an undefined one throws: spread
+        // the conditional properties in instead.
+        ...(photo ? {} : { flex: 1 }),
+      }}
+    >
+      {eyebrow ? (
+        <div
+          style={{
+            color: accent,
+            fontFamily: 'Inter',
+            fontSize: 20,
+            letterSpacing: '0.14em',
+            marginBottom: 18,
+            textTransform: 'uppercase',
+          }}
+        >
+          {eyebrow}
+        </div>
+      ) : null}
+      <div
+        style={{
+          color: FG,
+          display: 'flex',
+          fontFamily: 'Baloo 2',
+          fontSize: photo || showLogo ? tightTitleSize : titleSize,
+          letterSpacing: '-0.04em',
+          lineHeight: 1.08,
+          maxWidth: showLogo ? 700 : 960,
+          ...(photo ? { textShadow: '0 2px 24px rgba(10, 13, 17, 0.6)' } : {}),
+        }}
+      >
+        {title}
+      </div>
+    </div>
+  )
+
+  const footerRow = (
+    <div
+      style={{
+        alignItems: 'center',
+        display: 'flex',
+        justifyContent: 'space-between',
+        position: 'relative',
+      }}
+    >
+      <div style={{ color: photo ? FG : FG_MUTED, fontFamily: 'Inter', fontSize: 26 }}>
+        {metaLine}
+      </div>
+      <div
+        style={{
+          background: photo ? 'rgba(10, 13, 17, 0.55)' : `${accent}1f`,
+          border: `1px solid ${accent}3d`,
+          borderRadius: 999,
+          color: accent,
+          display: 'flex',
+          fontFamily: 'Inter',
+          fontSize: 22,
+          padding: '10px 24px',
+        }}
+      >
+        {new URL(siteUrl).host}
+      </div>
+    </div>
+  )
+
+  const options = {
+    ...OG_SIZE,
+    // An empty list makes @vercel/og fall back to its bundled font, which is
+    // the right outcome if Google Fonts is unreachable during a build.
+    fonts: fonts.length > 0 ? fonts : undefined,
+  }
+
+  if (photo) {
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            background: BG,
+            display: 'flex',
+            height: '100%',
+            position: 'relative',
+            width: '100%',
+          }}
+        >
+          {/* satori renders <img>, not next/image. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            alt=""
+            height={OG_SIZE.height}
+            src={photo}
+            style={{
+              height: '100%',
+              left: 0,
+              objectFit: 'cover',
+              position: 'absolute',
+              top: 0,
+              width: '100%',
+            }}
+            width={OG_SIZE.width}
+          />
+          {/* Dark from the middle down, so the text keeps its contrast whatever
+              the photo: the top of the picture stays untouched. */}
+          <div
+            style={{
+              backgroundImage:
+                'linear-gradient(180deg, rgba(10, 13, 17, 0) 25%, rgba(10, 13, 17, 0.65) 55%, rgba(10, 13, 17, 0.9) 100%)',
+              display: 'flex',
+              height: '100%',
+              left: 0,
+              position: 'absolute',
+              top: 0,
+              width: '100%',
+            }}
+          />
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 24,
+              justifyContent: 'flex-end',
+              padding: '56px 64px',
+              position: 'relative',
+              width: '100%',
+            }}
+          >
+            {signatureRow}
+            {headline}
+            {footerRow}
+          </div>
+        </div>
+      ),
+      options,
+    )
+  }
 
   return new ImageResponse(
     (
@@ -153,97 +383,41 @@ export async function renderOgImage({
             }}
           />
 
-          <div style={{ alignItems: 'center', display: 'flex', gap: 16, position: 'relative' }}>
-            <div
-              style={{
-                background: accent,
-                borderRadius: 999,
-                display: 'flex',
-                height: 18,
-                width: 18,
-              }}
-            />
-            {signature ? (
+          {signatureRow}
+
+          <div style={{ alignItems: 'center', display: 'flex', gap: 40, position: 'relative' }}>
+            {headline}
+            {showLogo && logo ? (
+              // Light tile whatever the logo: the uploads are made for the
+              // light page, and a dark wordmark would vanish on this card.
               <div
                 style={{
-                  color: FG,
-                  fontFamily: 'Baloo 2',
-                  fontSize: 30,
-                  letterSpacing: '-0.02em',
+                  alignItems: 'center',
+                  background: LOGO_TILE,
+                  borderRadius: 32,
+                  display: 'flex',
+                  flexShrink: 0,
+                  height: 260,
+                  justifyContent: 'center',
+                  width: 260,
                 }}
               >
-                {signature}
-              </div>
-            ) : null}
-            {profession ? (
-              <div style={{ color: FG_MUTED, fontFamily: 'Inter', fontSize: 24 }}>
-                {profession}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  alt=""
+                  height={196}
+                  src={logo}
+                  style={{ objectFit: 'contain' }}
+                  width={196}
+                />
               </div>
             ) : null}
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
-            {eyebrow ? (
-              <div
-                style={{
-                  color: accent,
-                  fontFamily: 'Inter',
-                  fontSize: 20,
-                  letterSpacing: '0.14em',
-                  marginBottom: 18,
-                  textTransform: 'uppercase',
-                }}
-              >
-                {eyebrow}
-              </div>
-            ) : null}
-            <div
-              style={{
-                color: FG,
-                display: 'flex',
-                fontFamily: 'Baloo 2',
-                fontSize: titleSize,
-                letterSpacing: '-0.04em',
-                lineHeight: 1.08,
-                maxWidth: 960,
-              }}
-            >
-              {title}
-            </div>
-          </div>
-
-          <div
-            style={{
-              alignItems: 'center',
-              display: 'flex',
-              justifyContent: 'space-between',
-              position: 'relative',
-            }}
-          >
-            <div style={{ color: FG_MUTED, fontFamily: 'Inter', fontSize: 26 }}>{metaLine}</div>
-            <div
-              style={{
-                background: `${accent}1f`,
-                border: `1px solid ${accent}3d`,
-                borderRadius: 999,
-                color: accent,
-                display: 'flex',
-                fontFamily: 'Inter',
-                fontSize: 22,
-                padding: '10px 24px',
-              }}
-            >
-              {new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000').host}
-            </div>
-          </div>
+          {footerRow}
         </div>
       </div>
     ),
-    {
-      ...OG_SIZE,
-      // An empty list makes @vercel/og fall back to its bundled font, which is
-      // the right outcome if Google Fonts is unreachable during a build.
-      fonts: fonts.length > 0 ? fonts : undefined,
-    },
+    options,
   )
 }
