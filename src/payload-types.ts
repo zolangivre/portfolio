@@ -1135,7 +1135,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
- * Identité, image de marque, contact, thème et SEO par défaut, utilisés sur tout le site.
+ * Identité, image de marque, contact, thème et SEO par défaut, utilisés sur tout le site. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie. Un global ne se dépublie pas : seule la publication se programme.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "settings".
@@ -1248,11 +1248,12 @@ export interface Setting {
     defaultDescription?: string | null;
     defaultImage?: (number | null) | Media;
   };
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
- * La bannière d’accueil, en haut de la page d’accueil.
+ * La bannière d’accueil, en haut de la page d’accueil. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie. Un global ne se dépublie pas : seule la publication se programme.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "hero".
@@ -1315,11 +1316,12 @@ export interface Hero {
      */
     image?: (number | null) | Media;
   };
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
- * La section « à propos » de la page d’accueil.
+ * La section « à propos » de la page d’accueil. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie. Un global ne se dépublie pas : seule la publication se programme.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "about".
@@ -1383,11 +1385,12 @@ export interface About {
       }[]
     | null;
   portrait?: (number | null) | Media;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
- * La section contact de la page d’accueil.
+ * La section contact de la page d’accueil. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie. Un global ne se dépublie pas : seule la publication se programme.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "contact".
@@ -1412,11 +1415,12 @@ export interface Contact {
     [k: string]: unknown;
   } | null;
   successMessage?: string | null;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
- * Liens de navigation principaux, dans l’en-tête.
+ * Liens de navigation principaux, dans l’en-tête. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie. Un global ne se dépublie pas : seule la publication se programme.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "navigation".
@@ -1430,11 +1434,12 @@ export interface Navigation {
         id?: string | null;
       }[]
     | null;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
- * Texte et liens du pied de page.
+ * Texte et liens du pied de page. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie. Un global ne se dépublie pas : seule la publication se programme.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "footer".
@@ -1449,11 +1454,12 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
- * Choisissez les sections affichées sur le site. Une section désactivée disparaît de la page d’accueil, de la navigation et, pour le journal, de ses pages dédiées.
+ * Choisissez les sections affichées sur le site. Une section désactivée disparaît de la page d’accueil, de la navigation et, pour le journal, de ses pages dédiées. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie. Un global ne se dépublie pas : seule la publication se programme.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sections-visibility".
@@ -1496,11 +1502,12 @@ export interface SectionsVisibility {
    * Affiche ou masque la section Journal sur tout le site.
    */
   journal?: boolean | null;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
- * Surtitre, titre et description affichés au-dessus des sections Projets, Expériences, Formations, Compétences, Témoignages et Journal.
+ * Surtitre, titre et description affichés au-dessus des sections Projets, Expériences, Formations, Compétences, Témoignages et Journal. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie. Un global ne se dépublie pas : seule la publication se programme.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sections-content".
@@ -1621,6 +1628,7 @@ export interface SectionsContent {
       [k: string]: unknown;
     } | null;
   };
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1664,6 +1672,7 @@ export interface SettingsSelect<T extends boolean = true> {
         defaultDescription?: T;
         defaultImage?: T;
       };
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1713,6 +1722,7 @@ export interface HeroSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1734,6 +1744,7 @@ export interface AboutSelect<T extends boolean = true> {
         id?: T;
       };
   portrait?: T;
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1747,6 +1758,7 @@ export interface ContactSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   successMessage?: T;
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1763,6 +1775,7 @@ export interface NavigationSelect<T extends boolean = true> {
         href?: T;
         id?: T;
       };
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1780,6 +1793,7 @@ export interface FooterSelect<T extends boolean = true> {
         href?: T;
         id?: T;
       };
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1798,6 +1812,7 @@ export interface SectionsVisibilitySelect<T extends boolean = true> {
   testimonials?: T;
   contact?: T;
   journal?: T;
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1849,6 +1864,7 @@ export interface SectionsContentSelect<T extends boolean = true> {
         title?: T;
         description?: T;
       };
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1888,7 +1904,18 @@ export interface TaskSchedulePublish {
           relationTo: 'journal';
           value: number | Journal;
         } | null);
-    global?: string | null;
+    global?:
+      | (
+          | 'settings'
+          | 'hero'
+          | 'about'
+          | 'contact'
+          | 'navigation'
+          | 'footer'
+          | 'sections-visibility'
+          | 'sections-content'
+        )
+      | null;
     user?: {
       relationTo: 'users';
       value: number | User;

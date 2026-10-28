@@ -1,6 +1,8 @@
 import type { GlobalConfig } from 'payload'
 
+import { draftVersions, GLOBAL_SCHEDULE_HINT, hideUnpublishButton } from '@/collections/drafts'
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { readPublishedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 
 export const Footer: GlobalConfig = {
@@ -8,10 +10,12 @@ export const Footer: GlobalConfig = {
   label: 'Pied de page',
   admin: {
     group: adminGroups.site,
-    description: 'Texte et liens du pied de page.',
+    description: 'Texte et liens du pied de page.' + GLOBAL_SCHEDULE_HINT,
+    components: hideUnpublishButton(),
   },
+  versions: draftVersions(),
   access: {
-    read: () => true,
+    read: readPublishedOrAuthenticated,
   },
   hooks: {
     afterChange: [revalidateGlobalAfterChange],

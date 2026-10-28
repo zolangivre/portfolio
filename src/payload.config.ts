@@ -22,6 +22,7 @@ import { Education } from './collections/Education'
 import { Testimonials } from './collections/Testimonials'
 import { Messages } from './collections/Messages'
 import { Journal } from './collections/Journal'
+import { refuseGlobalUnpublishSchedule } from './collections/drafts'
 import { canRunJobs } from './lib/access'
 import { translateSeoFields } from './lib/adminLabels'
 import { GlobalSettings } from './globals/GlobalSettings'
@@ -139,6 +140,20 @@ export default buildConfig({
   // vercel.json calls /api/payload-jobs/run instead.
   jobs: {
     access: { run: canRunJobs },
+    // Queued jobs go through the Local API (and its hooks) instead of a raw
+    // insert, so the jobs collection can refuse a scheduled unpublish of a
+    // global.
+    runHooks: true,
+    jobsCollectionOverrides: ({ defaultJobsCollection }) => ({
+      ...defaultJobsCollection,
+      hooks: {
+        ...defaultJobsCollection.hooks,
+        beforeChange: [
+          ...(defaultJobsCollection.hooks?.beforeChange ?? []),
+          refuseGlobalUnpublishSchedule,
+        ],
+      },
+    }),
   },
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

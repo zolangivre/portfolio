@@ -1,6 +1,8 @@
 import type { CheckboxField, GlobalConfig } from 'payload'
 
+import { draftVersions, GLOBAL_SCHEDULE_HINT, hideUnpublishButton } from '@/collections/drafts'
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { readPublishedOrAuthenticated } from '@/lib/access'
 import { adminGroups, sectionLabels } from '@/lib/adminLabels'
 
 const sectionField = (name: keyof typeof sectionLabels): CheckboxField => ({
@@ -19,10 +21,13 @@ export const SectionsVisibility: GlobalConfig = {
   admin: {
     group: adminGroups.site,
     description:
-      'Choisissez les sections affichées sur le site. Une section désactivée disparaît de la page d’accueil, de la navigation et, pour le journal, de ses pages dédiées.',
+      'Choisissez les sections affichées sur le site. Une section désactivée disparaît de la page d’accueil, de la navigation et, pour le journal, de ses pages dédiées.' +
+      GLOBAL_SCHEDULE_HINT,
+    components: hideUnpublishButton(),
   },
+  versions: draftVersions(),
   access: {
-    read: () => true,
+    read: readPublishedOrAuthenticated,
   },
   hooks: {
     afterChange: [revalidateGlobalAfterChange],

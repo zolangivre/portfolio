@@ -47,4 +47,23 @@ test.describe('Admin Panel', () => {
     // One handle per row: published projects plus the draft one.
     await expect(page.locator('td.cell-_dragHandle')).toHaveCount(projects.length + 1)
   })
+
+  // Globals have drafts, but unpublishing would write the last draft over the
+  // row the site reads: Publish stays, Unpublish is hidden.
+  test('offers Publish but no Unpublish on a global', async () => {
+    await page.goto('/admin/globals/hero')
+
+    const publish = page.locator('#action-save')
+    await expect(publish).toBeVisible()
+    await expect(publish).toHaveText('Publier les modifications')
+
+    // Unpublish sits in the "…" menu of the document controls. With the
+    // button hidden that menu may not exist at all: open it only when present.
+    const dots = page.locator('.doc-controls__dots')
+    if (await dots.isVisible()) {
+      await dots.click()
+    }
+    await expect(page.locator('#action-unpublish')).toHaveCount(0)
+    await expect(page.getByText('Annuler la publication')).toHaveCount(0)
+  })
 })

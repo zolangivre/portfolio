@@ -1,6 +1,8 @@
 import type { GlobalConfig } from 'payload'
 
+import { draftVersions, GLOBAL_SCHEDULE_HINT, hideUnpublishButton } from '@/collections/drafts'
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { readPublishedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 
 export const Hero: GlobalConfig = {
@@ -8,10 +10,12 @@ export const Hero: GlobalConfig = {
   label: 'Bannière (hero)',
   admin: {
     group: adminGroups.content,
-    description: 'La bannière d’accueil, en haut de la page d’accueil.',
+    description: 'La bannière d’accueil, en haut de la page d’accueil.' + GLOBAL_SCHEDULE_HINT,
+    components: hideUnpublishButton(),
   },
+  versions: draftVersions(),
   access: {
-    read: () => true,
+    read: readPublishedOrAuthenticated,
   },
   hooks: {
     afterChange: [revalidateGlobalAfterChange],

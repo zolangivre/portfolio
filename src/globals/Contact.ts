@@ -1,6 +1,8 @@
 import type { GlobalConfig } from 'payload'
 
+import { draftVersions, GLOBAL_SCHEDULE_HINT, hideUnpublishButton } from '@/collections/drafts'
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { readPublishedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 import { textToLexicalParagraphs } from '@/lib/richText'
 
@@ -9,10 +11,12 @@ export const Contact: GlobalConfig = {
   label: 'Contact',
   admin: {
     group: adminGroups.content,
-    description: 'La section contact de la page d’accueil.',
+    description: 'La section contact de la page d’accueil.' + GLOBAL_SCHEDULE_HINT,
+    components: hideUnpublishButton(),
   },
+  versions: draftVersions(),
   access: {
-    read: () => true,
+    read: readPublishedOrAuthenticated,
   },
   hooks: {
     afterChange: [revalidateGlobalAfterChange],
