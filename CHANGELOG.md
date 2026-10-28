@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.4.0](https://github.com/zolangivre/portfolio/compare/v1.3.1...v1.4.0) (2026-10-28)
+
+
+### Nouveautés
+
+* **admin:** dashboard widgets for what needs attention ([983738a](https://github.com/zolangivre/portfolio/commit/983738a42a35ecf1351c6d48c51be19ddb6ceb74))
+* **admin:** dashboard widgets for what needs attention ([a44247b](https://github.com/zolangivre/portfolio/commit/a44247b63cfd2193f2789ce657a69cc7cc123983))
+* **admin:** drafts, autosave and scheduled publishing on content collections ([36b66f6](https://github.com/zolangivre/portfolio/commit/36b66f6cadea686934b1f052aac7d296d07cc8a7))
+* **admin:** drafts, autosave and scheduled publishing on content collections ([43c07e1](https://github.com/zolangivre/portfolio/commit/43c07e167dbf2b63caa9fcf8e523306c635c47fc))
+* **admin:** drafts, autosave and scheduled publishing on globals ([c1c0811](https://github.com/zolangivre/portfolio/commit/c1c0811ad00080c08b360e2e47427161a847a244))
+* **admin:** drafts, autosave and scheduled publishing on globals ([43b0966](https://github.com/zolangivre/portfolio/commit/43b096656340bc2d6bb2d3ebc1aae38463740294))
+* **admin:** let Claude read and edit the content over MCP, as drafts ([f4440f7](https://github.com/zolangivre/portfolio/commit/f4440f7cfd68e950cf3fa77adcbf626976ded85e))
+* **admin:** let Claude read and edit the content over MCP, as drafts ([ef7827b](https://github.com/zolangivre/portfolio/commit/ef7827b55de5febdce17b88da916a1c6a342be86))
+* **admin:** live preview of drafts on the site ([ceb4ecb](https://github.com/zolangivre/portfolio/commit/ceb4ecb8edebbad3c21552bde79949d49d4642f0))
+* **admin:** live preview of drafts on the site ([57845ef](https://github.com/zolangivre/portfolio/commit/57845ef6e39945e149f0ca15d0975595002065ab))
+* **admin:** reorder collections by drag and drop ([0770329](https://github.com/zolangivre/portfolio/commit/0770329ccad8610b7a07d9ef44c929d5166fe06b))
+* **admin:** reorder collections by drag and drop ([845f021](https://github.com/zolangivre/portfolio/commit/845f021050d34eac06f171b7847cfce7b904c40b))
+* **admin:** trash on every content collection ([5db543a](https://github.com/zolangivre/portfolio/commit/5db543af077957f69d4411b405f8f808ce1ed5a9))
+* **admin:** trash on every content collection ([5cdbbac](https://github.com/zolangivre/portfolio/commit/5cdbbac95d76261a30747e1f62c602660516a959))
+
+
+### Corrections
+
+* **admin:** cap the length of text fields that render on the site ([fe55515](https://github.com/zolangivre/portfolio/commit/fe555154c10556945fdc4b53904d4b5cb257c33c))
+* **admin:** let the drafts migration clear an old trial's leftovers ([00ced6b](https://github.com/zolangivre/portfolio/commit/00ced6bbb2daffc75ae5a199e88bdea13ad35c2e))
+* **admin:** let the drafts migration clear an old trial's leftovers ([1ab1f99](https://github.com/zolangivre/portfolio/commit/1ab1f99a81de95f855cee53fd916894cf9f70ba8))
+* **ui:** keep the homepage readable with long, missing or broken content ([55fa29e](https://github.com/zolangivre/portfolio/commit/55fa29e27c00cf3066adc00fbf5e11b442d5783a))
+* **ui:** keep the homepage readable with long, missing or broken content ([2b7ac38](https://github.com/zolangivre/portfolio/commit/2b7ac38514377f76ed998e77c116708e37fc6e44))
+
+
+### Refactorisation
+
+* remove code nothing calls ([b1d6e25](https://github.com/zolangivre/portfolio/commit/b1d6e25e98868e0fc2398689277d4b1362d32d7d))
+* remove code nothing calls ([b56fcf3](https://github.com/zolangivre/portfolio/commit/b56fcf381ed378bc5895777af5e50a810e87300d))
+
 ## [1.3.1](https://github.com/zolangivre/portfolio/compare/v1.3.0...v1.3.1) (2026-10-20)
 
 
