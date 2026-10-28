@@ -19,8 +19,51 @@ import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 // admin lists of a collection with drafts read the version tables, so without
 // it every existing document would vanish from the admin while still showing
 // on the site.
+//
+// First of all, it clears the leftovers of an old drafts trial made through a
+// dev push and never committed: version tables, `_status` columns, their enums
+// and the project status enum already renamed. Staging's database had them,
+// and the migration failed on the rename. On a database built from the
+// migrations alone, that step does nothing. A leftover table that holds rows
+// stops the migration instead of being dropped: the error names it.
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+  await db.execute(sql`
+   DO $$
+  DECLARE t text; has_rows boolean;
+  BEGIN
+    FOR t IN SELECT tablename FROM pg_tables WHERE schemaname = 'public'
+      AND (tablename ~ '^_(projects|journal|experiences|education)_v' OR tablename IN ('payload_jobs', 'payload_jobs_log')) LOOP
+      EXECUTE format('SELECT EXISTS (SELECT 1 FROM %I)', t) INTO has_rows;
+      IF has_rows THEN
+        RAISE EXCEPTION 'Leftover table % from an old drafts trial holds rows: back it up and drop it, then migrate again.', t;
+      END IF;
+    END LOOP;
+    FOR t IN SELECT tablename FROM pg_tables WHERE schemaname = 'public'
+      AND (tablename ~ '^_(projects|journal|experiences|education)_v' OR tablename IN ('payload_jobs', 'payload_jobs_log')) LOOP
+      EXECUTE format('DROP TABLE IF EXISTS %I CASCADE', t);
+    END LOOP;
+    ALTER TABLE "projects" DROP COLUMN IF EXISTS "_status";
+    ALTER TABLE "journal" DROP COLUMN IF EXISTS "_status";
+    ALTER TABLE "experiences" DROP COLUMN IF EXISTS "_status";
+    ALTER TABLE "education" DROP COLUMN IF EXISTS "_status";
+    FOR t IN SELECT typname FROM pg_type
+      WHERE typname ~ '^enum__(projects|journal|experiences|education)_v_' OR typname ~ '^enum_(journal|experiences|education)_status$' OR typname ~ '^enum_payload_jobs_' LOOP
+      EXECUTE format('DROP TYPE %I', t);
+    END LOOP;
+    -- The trial had already moved the project's own status (live / in progress
+    -- / archived) to enum_projects_project_status: put it back where the
+    -- rename below expects it.
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'enum_projects_project_status') THEN
+      IF (SELECT udt_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'projects' AND column_name = 'status') = 'enum_projects_project_status' THEN
+        DROP TYPE IF EXISTS "enum_projects_status";
+        ALTER TYPE "enum_projects_project_status" RENAME TO "enum_projects_status";
+      ELSE
+        DROP TYPE "enum_projects_project_status";
+      END IF;
+    END IF;
+  END $$;`)
+
   await db.execute(sql`
    ALTER TYPE "public"."enum_projects_status" RENAME TO "enum_projects_project_status";
   CREATE TYPE "public"."enum_projects_status" AS ENUM('draft', 'published');
