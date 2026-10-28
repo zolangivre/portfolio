@@ -8,6 +8,8 @@ import { Analytics } from '@vercel/analytics/next'
 import { Footer } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'
 import { IndexRail } from '@/components/layout/IndexRail'
+import { LivePreviewRefresh } from '@/components/preview/LivePreviewRefresh'
+import { PreviewBanner } from '@/components/preview/PreviewBanner'
 import { MotionProvider } from '@/components/providers/MotionProvider'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { AmbientBackground } from '@/components/ui/AmbientBackground'
@@ -16,6 +18,7 @@ import { CursorEffects } from '@/components/ui/CursorEffects'
 import { getDictionary } from '@/lib/i18n/dictionary'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
 import { getMediaUrl } from '@/lib/media'
+import { isPreview } from '@/lib/preview'
 import { getFooter, getGlobalSettings, getNavigation, getSectionsVisibility } from '@/lib/queries'
 import { buildThemeStyle } from '@/lib/theme/palette'
 
@@ -127,11 +130,12 @@ export default async function LocaleLayout(props: {
   const locale = rawLocale as Locale
   const dictionary = getDictionary(locale)
 
-  const [navigation, footer, settings, sections] = await Promise.all([
+  const [navigation, footer, settings, sections, preview] = await Promise.all([
     getNavigation(locale),
     getFooter(locale),
     getGlobalSettings(locale),
     getSectionsVisibility(locale),
+    isPreview(),
   ])
 
   const themeStyle = buildThemeStyle(settings?.theme?.primaryColor, settings?.theme?.accentColor)
@@ -206,6 +210,12 @@ export default async function LocaleLayout(props: {
             </div>
           </MotionProvider>
         </ThemeProvider>
+        {preview ? (
+          <>
+            <LivePreviewRefresh />
+            <PreviewBanner exitLabel={dictionary.preview.exit} label={dictionary.preview.banner} />
+          </>
+        ) : null}
         <Analytics />
       </body>
     </html>

@@ -39,14 +39,27 @@ const nextConfig: NextConfig = {
     {
       source: '/:path*',
       headers: [
-        // Nothing here is meant to be embedded — least of all /admin, where
-        // framing the panel is a clickjacking route to authenticated actions.
-        { key: 'X-Frame-Options', value: 'DENY' },
         { key: 'X-Content-Type-Options', value: 'nosniff' },
         { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
       ],
     },
+    // Framing. The admin and the API are never embedded: framing the panel is
+    // a clickjacking route to authenticated actions. The site's pages and the
+    // preview route are framed by one thing only, the admin's Live Preview,
+    // on the same origin — so same-origin framing, for both the legacy header
+    // and CSP. Disjoint sources, so no header is sent twice.
+    {
+      source: '/((?!fr(?:/|$)|en(?:/|$)|api/preview$).*)',
+      headers: [{ key: 'X-Frame-Options', value: 'DENY' }],
+    },
+    ...['/:locale(fr|en)', '/:locale(fr|en)/:path*', '/api/preview'].map((source) => ({
+      source,
+      headers: [
+        { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+        { key: 'Content-Security-Policy', value: "frame-ancestors 'self'" },
+      ],
+    })),
   ],
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {

@@ -6,6 +6,7 @@ import type { Project } from '@/payload-types'
 import { cacheTags, FALLBACK_REVALIDATE } from '../cache'
 import { defaultLocale, type Locale } from '../locale'
 import { getPayloadClient } from '../payload'
+import { isPreview } from '../preview'
 
 // Both the homepage section and the /projects archive render the full list,
 // so this ceiling is the real cap on how many projects the site can show.
@@ -24,17 +25,18 @@ const PROJECT_TAGS = [
 ]
 
 const fetchAllProjects = unstable_cache(
-  async (locale: Locale): Promise<Project[]> => {
+  async (locale: Locale, draft: boolean): Promise<Project[]> => {
     const payload = await getPayloadClient()
 
     const projects = await payload.find({
       collection: 'projects',
+      draft,
       depth: 2,
       limit: DEFAULT_LIMIT,
       locale,
       sort: '_order',
       where: {
-        _status: { equals: 'published' },
+        ...(draft ? {} : { _status: { equals: 'published' as const } }),
       },
     })
 
@@ -45,17 +47,18 @@ const fetchAllProjects = unstable_cache(
 )
 
 const fetchProject = unstable_cache(
-  async (slug: string, locale: Locale): Promise<Project | null> => {
+  async (slug: string, locale: Locale, draft: boolean): Promise<Project | null> => {
     const payload = await getPayloadClient()
 
     const projects = await payload.find({
       collection: 'projects',
+      draft,
       depth: 2,
       limit: 1,
       locale,
       where: {
         slug: { equals: slug },
-        _status: { equals: 'published' },
+        ...(draft ? {} : { _status: { equals: 'published' as const } }),
       },
     })
 
@@ -71,7 +74,7 @@ const fetchProject = unstable_cache(
 // and served for a day.
 export const getAllProjects = cache(async (locale: Locale = defaultLocale): Promise<Project[]> => {
   try {
-    return await fetchAllProjects(locale)
+    return await fetchAllProjects(locale, await isPreview())
   } catch (error) {
     console.error('Failed to load projects from Payload.', error)
 
@@ -82,7 +85,7 @@ export const getAllProjects = cache(async (locale: Locale = defaultLocale): Prom
 export const getProject = cache(
   async (slug: string, locale: Locale = defaultLocale): Promise<Project | null> => {
     try {
-      return await fetchProject(slug, locale)
+      return await fetchProject(slug, locale, await isPreview())
     } catch (error) {
       console.error('Failed to load project from Payload.', error)
 

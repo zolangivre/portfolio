@@ -6,6 +6,7 @@ import type { Journal } from '@/payload-types'
 import { cacheTags, FALLBACK_REVALIDATE } from '../cache'
 import { defaultLocale, type Locale } from '../locale'
 import { getPayloadClient } from '../payload'
+import { isPreview } from '../preview'
 
 const DEFAULT_LIMIT = 100
 
@@ -13,17 +14,18 @@ const DEFAULT_LIMIT = 100
 const JOURNAL_TAGS = [cacheTags.journal, cacheTags.categories, cacheTags.media]
 
 const fetchJournalEntries = unstable_cache(
-  async (locale: Locale, category?: string): Promise<Journal[]> => {
+  async (locale: Locale, draft: boolean, category?: string): Promise<Journal[]> => {
     const payload = await getPayloadClient()
 
     const entries = await payload.find({
       collection: 'journal',
+      draft,
       depth: 2,
       limit: DEFAULT_LIMIT,
       locale,
       sort: '_order',
       where: {
-        _status: { equals: 'published' },
+        ...(draft ? {} : { _status: { equals: 'published' as const } }),
         ...(category ? { category: { equals: category } } : {}),
       },
     })
@@ -35,17 +37,18 @@ const fetchJournalEntries = unstable_cache(
 )
 
 const fetchJournalEntry = unstable_cache(
-  async (slug: string, locale: Locale): Promise<Journal | null> => {
+  async (slug: string, locale: Locale, draft: boolean): Promise<Journal | null> => {
     const payload = await getPayloadClient()
 
     const entries = await payload.find({
       collection: 'journal',
+      draft,
       depth: 2,
       limit: 1,
       locale,
       where: {
         slug: { equals: slug },
-        _status: { equals: 'published' },
+        ...(draft ? {} : { _status: { equals: 'published' as const } }),
       },
     })
 
@@ -58,7 +61,7 @@ const fetchJournalEntry = unstable_cache(
 export const getJournalEntries = cache(
   async (locale: Locale = defaultLocale, category?: string): Promise<Journal[]> => {
     try {
-      return await fetchJournalEntries(locale, category)
+      return await fetchJournalEntries(locale, await isPreview(), category)
     } catch (error) {
       console.error('Failed to load journal entries from Payload.', error)
 
@@ -70,7 +73,7 @@ export const getJournalEntries = cache(
 export const getJournalEntry = cache(
   async (slug: string, locale: Locale = defaultLocale): Promise<Journal | null> => {
     try {
-      return await fetchJournalEntry(slug, locale)
+      return await fetchJournalEntry(slug, locale, await isPreview())
     } catch (error) {
       console.error('Failed to load journal entry from Payload.', error)
 

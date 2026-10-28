@@ -24,6 +24,7 @@ import { Messages } from './collections/Messages'
 import { Journal } from './collections/Journal'
 import { refuseGlobalUnpublishSchedule } from './collections/drafts'
 import { canRunJobs } from './lib/access'
+import { previewPath, previewURL } from './lib/preview'
 import { translateSeoFields } from './lib/adminLabels'
 import { GlobalSettings } from './globals/GlobalSettings'
 import { Hero } from './globals/Hero'
@@ -94,6 +95,45 @@ export default buildConfig({
       graphics: {
         Logo: '/components/admin/graphics/AdminLogo#AdminLogo',
       },
+    },
+    // Every document the site renders can be previewed in place: a project or
+    // a journal entry on its own page, everything else on the homepage, in
+    // the locale being edited (lib/preview.ts). The panel opens on demand.
+    livePreview: {
+      collections: [
+        'projects',
+        'journal',
+        'experiences',
+        'education',
+        'testimonials',
+        'categories',
+        'skills',
+      ],
+      globals: [
+        'hero',
+        'about',
+        'contact',
+        'navigation',
+        'footer',
+        'settings',
+        'sections-content',
+        'sections-visibility',
+      ],
+      breakpoints: [
+        { label: 'Mobile', name: 'mobile', width: 390, height: 844 },
+        { label: 'Tablette', name: 'tablet', width: 820, height: 1180 },
+        { label: 'Ordinateur', name: 'desktop', width: 1440, height: 900 },
+      ],
+      url: ({ collectionConfig, data, globalConfig, locale, req }) =>
+        previewURL({
+          headers: req.headers,
+          path: previewPath({
+            collection: collectionConfig?.slug,
+            data,
+            global: globalConfig?.slug,
+            locale: locale.code,
+          }),
+        }),
     },
   },
   collections: [
