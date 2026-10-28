@@ -6,12 +6,14 @@ import type { Navigation } from '@/payload-types'
 import { cacheTags, FALLBACK_REVALIDATE } from '../cache'
 import { defaultLocale, type Locale } from '../locale'
 import { getPayloadClient } from '../payload'
+import { isPreview } from '../preview'
 
 const fetchNavigation = unstable_cache(
-  async (locale: Locale): Promise<Navigation> => {
+  async (locale: Locale, draft: boolean): Promise<Navigation> => {
     const payload = await getPayloadClient()
 
     return await payload.findGlobal({
+      draft,
       slug: 'navigation',
       locale,
     })
@@ -23,7 +25,7 @@ const fetchNavigation = unstable_cache(
 export const getNavigation = cache(
   async (locale: Locale = defaultLocale): Promise<Navigation | null> => {
     try {
-      return await fetchNavigation(locale)
+      return await fetchNavigation(locale, await isPreview())
     } catch (error) {
       console.error('Failed to load navigation from Payload.', error)
 

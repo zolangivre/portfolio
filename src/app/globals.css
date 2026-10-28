@@ -56,6 +56,9 @@
    */
   --z-rail: 5;
   --z-header: 10;
+  /* Below the header, whose mobile drawer and scrim live inside its own stacking
+     context: the open menu covers the preview banner. */
+  --z-preview: 9;
   --z-scrim: 12;
   --z-drawer: 15;
   --z-drawer-toggle: 20;

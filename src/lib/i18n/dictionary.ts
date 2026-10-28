@@ -135,6 +135,11 @@ export interface Dictionary {
     playLabel: string
     pauseLabel: string
   }
+  /** The banner shown to an editor browsing the site in Draft Mode. */
+  preview: {
+    banner: string
+    exit: string
+  }
 }
 
 const dictionaries: Record<Locale, Dictionary> = {
@@ -274,6 +279,10 @@ const dictionaries: Record<Locale, Dictionary> = {
       playLabel: 'Lire la vidéo',
       pauseLabel: 'Mettre la vidéo en pause',
     },
+    preview: {
+      banner: 'Aperçu des brouillons',
+      exit: 'Quitter l’aperçu',
+    },
   },
   en: {
     nav: {
@@ -410,6 +419,10 @@ const dictionaries: Record<Locale, Dictionary> = {
     video: {
       playLabel: 'Play video',
       pauseLabel: 'Pause video',
+    },
+    preview: {
+      banner: 'Previewing drafts',
+      exit: 'Exit preview',
     },
   },
 }

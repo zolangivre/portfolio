@@ -6,18 +6,20 @@ import type { Education } from '@/payload-types'
 import { cacheTags, FALLBACK_REVALIDATE } from '../cache'
 import { defaultLocale, type Locale } from '../locale'
 import { getPayloadClient } from '../payload'
+import { isPreview } from '../preview'
 
 const fetchEducation = unstable_cache(
-  async (locale: Locale): Promise<Education[]> => {
+  async (locale: Locale, draft: boolean): Promise<Education[]> => {
     const payload = await getPayloadClient()
 
     const education = await payload.find({
       collection: 'education',
+      draft,
       depth: 2,
       limit: 50,
       locale,
       sort: '_order',
-      where: { _status: { equals: 'published' } },
+      where: draft ? {} : { _status: { equals: 'published' } },
     })
 
     return education.docs
@@ -32,7 +34,7 @@ const fetchEducation = unstable_cache(
 
 export const getEducation = cache(async (locale: Locale = defaultLocale): Promise<Education[]> => {
   try {
-    return await fetchEducation(locale)
+    return await fetchEducation(locale, await isPreview())
   } catch (error) {
     console.error('Failed to load education from Payload.', error)
 
