@@ -6,12 +6,14 @@ import type { SectionsVisibility } from '@/payload-types'
 import { cacheTags, FALLBACK_REVALIDATE } from '../cache'
 import { defaultLocale, type Locale } from '../locale'
 import { getPayloadClient } from '../payload'
+import { isPreview } from '../preview'
 
 const fetchSectionsVisibility = unstable_cache(
-  async (locale: Locale): Promise<SectionsVisibility> => {
+  async (locale: Locale, draft: boolean): Promise<SectionsVisibility> => {
     const payload = await getPayloadClient()
 
     return await payload.findGlobal({
+      draft,
       slug: 'sections-visibility',
       locale,
     })
@@ -23,7 +25,7 @@ const fetchSectionsVisibility = unstable_cache(
 export const getSectionsVisibility = cache(
   async (locale: Locale = defaultLocale): Promise<SectionsVisibility | null> => {
     try {
-      return await fetchSectionsVisibility(locale)
+      return await fetchSectionsVisibility(locale, await isPreview())
     } catch (error) {
       console.error('Failed to load sections visibility from Payload.', error)
 

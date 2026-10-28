@@ -1,15 +1,20 @@
 import type { CollectionConfig } from 'payload'
 
-import { orderField, visibilityField } from '@/fields/shared'
+import { mcpWritesAreDrafts } from '@/hooks/mcpWritesAreDrafts'
+import { prependToOrder, syncDraftOrder } from '@/hooks/prependToOrder'
 import {
+  rememberLiveState,
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
-import { readPublicOrAuthenticated } from '@/lib/access'
+import { readPublishedUntrashedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
+
+import { draftVersions, SCHEDULE_HINT } from './drafts'
 
 export const Journal: CollectionConfig = {
   slug: 'journal',
+  trash: true,
   labels: {
     singular: 'Entrée de journal',
     plural: 'Journal',
@@ -17,16 +22,20 @@ export const Journal: CollectionConfig = {
   admin: {
     group: adminGroups.journal,
     description:
-      'Récits personnels, hors technique : voyages, sport, réussites, événements, découvertes.',
-    defaultColumns: ['coverImage', 'title', 'category', 'visibility', 'date', 'featured', 'order'],
+      'Récits personnels, hors technique : voyages, sport, réussites, événements, découvertes. Glissez-déposez les lignes pour choisir leur ordre sur le site.' +
+      SCHEDULE_HINT,
+    defaultColumns: ['coverImage', 'title', 'category', '_status', 'date', 'featured'],
     useAsTitle: 'title',
   },
-  defaultSort: 'order',
+  orderable: true,
+  versions: draftVersions(),
   access: {
-    read: readPublicOrAuthenticated,
+    read: readPublishedUntrashedOrAuthenticated,
   },
   hooks: {
-    afterChange: [revalidateCollectionAfterChange],
+    beforeOperation: [mcpWritesAreDrafts],
+    beforeChange: [prependToOrder, rememberLiveState],
+    afterChange: [syncDraftOrder, revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },
   fields: [
@@ -123,12 +132,6 @@ export const Journal: CollectionConfig = {
       defaultValue: false,
       index: true,
     },
-    visibilityField(
-      'Les entrées privées restent dans le CMS mais ne sont jamais affichées sur le site.',
-    ),
-    orderField(
-      'l’entrée après celles qui sont ordonnées, de la date la plus récente à la plus ancienne',
-    ),
   ],
   timestamps: true,
 }

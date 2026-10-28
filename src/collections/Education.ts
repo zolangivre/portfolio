@@ -1,30 +1,41 @@
 import type { CollectionConfig } from 'payload'
 
-import { orderField } from '@/fields/shared'
+import { mcpWritesAreDrafts } from '@/hooks/mcpWritesAreDrafts'
+import { prependToOrder, syncDraftOrder } from '@/hooks/prependToOrder'
 import {
+  rememberLiveState,
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
+import { readPublishedUntrashedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
+
+import { draftVersions, SCHEDULE_HINT } from './drafts'
 
 export const Education: CollectionConfig = {
   slug: 'education',
+  trash: true,
   labels: {
     singular: 'Formation',
     plural: 'Formations',
   },
   admin: {
     group: adminGroups.portfolio,
-    description: 'Entrées de la frise des formations.',
-    defaultColumns: ['school', 'location', 'degree', 'startDate', 'endDate', 'order'],
+    description:
+      'Entrées de la frise des formations. Glissez-déposez les lignes pour choisir leur ordre sur le site.' +
+      SCHEDULE_HINT,
+    defaultColumns: ['school', 'location', 'degree', 'startDate', 'endDate', '_status'],
     useAsTitle: 'degree',
   },
-  defaultSort: 'order',
+  orderable: true,
+  versions: draftVersions(),
   access: {
-    read: () => true,
+    read: readPublishedUntrashedOrAuthenticated,
   },
   hooks: {
-    afterChange: [revalidateCollectionAfterChange],
+    beforeOperation: [mcpWritesAreDrafts],
+    beforeChange: [prependToOrder, rememberLiveState],
+    afterChange: [syncDraftOrder, revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },
   fields: [
@@ -43,6 +54,7 @@ export const Education: CollectionConfig = {
     {
       name: 'degree',
       type: 'text',
+      maxLength: 120,
       label: 'Diplôme',
       required: true,
       localized: true,
@@ -50,6 +62,7 @@ export const Education: CollectionConfig = {
     {
       name: 'fieldOfStudy',
       type: 'text',
+      maxLength: 120,
       label: 'Domaine d’études',
       localized: true,
     },
@@ -92,9 +105,6 @@ export const Education: CollectionConfig = {
       label: 'Formation en cours',
       defaultValue: false,
     },
-    orderField(
-      'l’entrée après celles qui sont ordonnées, de la date de début la plus récente à la plus ancienne',
-    ),
   ],
   timestamps: true,
 }

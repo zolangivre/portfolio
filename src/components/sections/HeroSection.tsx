@@ -13,6 +13,8 @@ import { DURATION_SLOW, EASE_OUT_PREMIUM } from '@/lib/motion/tokens'
 import type { Hero, Setting } from '@/payload-types'
 
 type HeroSectionProps = {
+  /** Shown only while neither the hero title nor the site name is set. */
+  fallbackTitle: string
   hero: Hero | null
   settings: Setting | null
 }
@@ -41,8 +43,8 @@ function keepTogether(text: string) {
   return text.replace(/(\p{L})-(?=\p{L})/gu, '$1\u2011').replace(/ ([—–])/g, '\u00a0$1')
 }
 
-export function HeroSection({ hero, settings }: HeroSectionProps) {
-  const title = hero?.title ?? 'Building polished digital products with calm, modern engineering.'
+export function HeroSection({ fallbackTitle, hero, settings }: HeroSectionProps) {
+  const title = hero?.title || settings?.name || fallbackTitle
   const typedLength = useTypewriter(title)
   const availability = resolveAvailability(hero)
   const highlights = (hero?.highlights ?? []).filter((item) => item.value.trim().length > 0)
@@ -127,18 +129,11 @@ export function HeroSection({ hero, settings }: HeroSectionProps) {
           </motion.div>
           {highlights.length > 0 ? (
             <motion.div
-              className="order-2 mt-8 flex flex-wrap justify-center gap-4 text-sm text-fg-muted lg:order-none lg:justify-start"
+              className="hero-highlights dot-list order-2 mt-8 justify-center gap-y-2 text-sm text-fg-muted lg:order-none lg:justify-start"
               variants={heroItemVariants}
             >
               {highlights.map((item, index) => (
-                <span key={`${item.value}-${index}`}>
-                  {item.value}
-                  {index < highlights.length - 1 ? (
-                    <span aria-hidden="true" className="mx-2">
-                      •
-                    </span>
-                  ) : null}
-                </span>
+                <span key={`${item.value}-${index}`}>{item.value}</span>
               ))}
             </motion.div>
           ) : null}

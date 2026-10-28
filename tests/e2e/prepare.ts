@@ -40,29 +40,34 @@ const payload = await getPayload({ config })
 const context = { disableRevalidate: true }
 
 type Localized = { en: string; fr: string }
+type Status = 'draft' | 'published'
 
 /**
  * Creates a doc in French, then fills in its English variant. `localized`
  * returns every localized field for one locale's text: an update in a new
  * locale has to satisfy that locale's required fields on its own.
+ *
+ * `status` is always passed: with drafts enabled a Local API create that
+ * doesn't say otherwise stores a draft, which the site would not show.
  */
 async function createLocalized(
   collection: CollectionSlug,
   data: Record<string, unknown>,
   localized: (text: string) => Record<string, unknown>,
   text: Localized,
+  status: Status,
 ) {
   const doc = await payload.create({
     collection,
     context,
-    data: { ...data, ...localized(text.fr) } as never,
+    data: { ...data, ...localized(text.fr), _status: status } as never,
     locale: 'fr',
   })
 
   await payload.update({
     collection,
     context,
-    data: localized(text.en) as never,
+    data: { ...localized(text.en), _status: status } as never,
     id: doc.id,
     locale: 'en',
   })
@@ -73,10 +78,15 @@ async function createLocalized(
 await payload.create({ collection: 'users', context, data: editor })
 
 for (const locale of ['fr', 'en'] as const) {
-  await payload.updateGlobal({ context, data: { title: hero[locale] }, locale, slug: 'hero' })
   await payload.updateGlobal({
     context,
-    data: { successMessage: contactSuccess[locale] },
+    data: { _status: 'published', title: hero[locale] },
+    locale,
+    slug: 'hero',
+  })
+  await payload.updateGlobal({
+    context,
+    data: { _status: 'published', successMessage: contactSuccess[locale] },
     locale,
     slug: 'contact',
   })
@@ -86,13 +96,17 @@ for (const locale of ['fr', 'en'] as const) {
 // French, then give the English labels to the same row ids.
 const { items } = await payload.updateGlobal({
   context,
-  data: { items: navigation.map(({ fr, href }) => ({ href, label: fr })) },
+  data: {
+    _status: 'published',
+    items: navigation.map(({ fr, href }) => ({ href, label: fr })),
+  },
   locale: 'fr',
   slug: 'navigation',
 })
 await payload.updateGlobal({
   context,
   data: {
+    _status: 'published',
     items: (items ?? []).map((item, index) => ({ ...item, label: navigation[index]!.en })),
   },
   locale: 'en',
@@ -112,17 +126,18 @@ const projectFields = (title: string) => ({
   title,
 })
 
-for (const [index, project] of projects.entries()) {
+// A new document is prepended to the list, so create them last-first: the
+// site then lists the projects in the order of the fixtures.
+for (const project of [...projects].reverse()) {
   await createLocalized(
     'projects',
     {
-      order: index + 1,
       slug: project.slug,
       technologies: project.technologies.map((name) => technologyIds.get(name)!),
-      visibility: 'public',
     },
     projectFields,
     project,
+    'published',
   )
 }
 
@@ -130,10 +145,10 @@ await createLocalized(
   'projects',
   {
     slug: privateProject.slug,
-    visibility: 'private',
   },
   projectFields,
   privateProject,
+  'draft',
 )
 
 // The journal categories come from the migrations.
@@ -150,9 +165,9 @@ const journalFields = (title: string) => ({
   title,
 })
 
-for (const [entry, visibility] of [
-  ...journalEntries.map((entry) => [entry, 'public'] as const),
-  [privateJournalEntry, 'private'] as const,
+for (const [entry, status] of [
+  ...journalEntries.map((entry) => [entry, 'published'] as const),
+  [privateJournalEntry, 'draft'] as const,
 ]) {
   await createLocalized(
     'journal',
@@ -160,10 +175,10 @@ for (const [entry, visibility] of [
       category: categoryId(entry.category),
       date: '2026-01-15T00:00:00.000Z',
       slug: entry.slug,
-      visibility,
     },
     journalFields,
     entry,
+    status,
   )
 }
 

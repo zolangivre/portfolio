@@ -4,10 +4,13 @@ import {
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
+import { mcpCannotTrash } from '@/hooks/mcpWritesAreDrafts'
+import { readUntrashedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 
 export const Schools: CollectionConfig = {
   slug: 'schools',
+  trash: true,
   labels: {
     singular: 'École',
     plural: 'Écoles',
@@ -19,9 +22,10 @@ export const Schools: CollectionConfig = {
     useAsTitle: 'name',
   },
   access: {
-    read: () => true,
+    read: readUntrashedOrAuthenticated,
   },
   hooks: {
+    beforeOperation: [mcpCannotTrash],
     afterChange: [revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },
@@ -29,6 +33,7 @@ export const Schools: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
+      maxLength: 100,
       label: 'Nom',
       required: true,
     },

@@ -7,6 +7,7 @@ import { JournalCard } from '@/components/cards/JournalCard'
 import { RevealGroup } from '@/components/ui/RevealGroup'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
+import { compareOrderKeys } from '@/lib/order'
 import { springPlayful } from '@/lib/motion/tokens'
 import type { Category, Journal } from '@/payload-types'
 
@@ -47,14 +48,9 @@ export function JournalGrid({ dictionary, entries, locale }: JournalGridProps) {
       }
     }
 
-    return Array.from(seen.values()).sort((a, b) => {
-      const orderA = a.order ?? Number.MAX_SAFE_INTEGER
-      const orderB = b.order ?? Number.MAX_SAFE_INTEGER
-      if (orderA !== orderB) {
-        return orderA - orderB
-      }
-      return a.name.localeCompare(b.name)
-    })
+    return Array.from(seen.values()).sort(
+      (a, b) => compareOrderKeys(a._order, b._order) || a.name.localeCompare(b.name),
+    )
   }, [entries])
 
   const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null)

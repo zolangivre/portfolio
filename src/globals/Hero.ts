@@ -1,6 +1,9 @@
 import type { GlobalConfig } from 'payload'
 
+import { draftVersions, GLOBAL_SCHEDULE_HINT, hideUnpublishButton } from '@/collections/drafts'
+import { mcpGlobalWritesAreDrafts } from '@/hooks/mcpWritesAreDrafts'
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { readPublishedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 
 export const Hero: GlobalConfig = {
@@ -8,12 +11,15 @@ export const Hero: GlobalConfig = {
   label: 'Bannière (hero)',
   admin: {
     group: adminGroups.content,
-    description: 'La bannière d’accueil, en haut de la page d’accueil.',
+    description: 'La bannière d’accueil, en haut de la page d’accueil.' + GLOBAL_SCHEDULE_HINT,
+    components: hideUnpublishButton(),
   },
+  versions: draftVersions(),
   access: {
-    read: () => true,
+    read: readPublishedOrAuthenticated,
   },
   hooks: {
+    beforeOperation: [mcpGlobalWritesAreDrafts],
     afterChange: [revalidateGlobalAfterChange],
   },
   fields: [
@@ -35,6 +41,7 @@ export const Hero: GlobalConfig = {
         {
           name: 'label',
           type: 'text',
+          maxLength: 90,
           label: 'Texte',
           localized: true,
           admin: {
@@ -47,6 +54,7 @@ export const Hero: GlobalConfig = {
     {
       name: 'eyebrow',
       type: 'text',
+      maxLength: 90,
       label: 'Surtitre / rôle',
       localized: true,
       defaultValue: 'Full-stack developer',
@@ -54,6 +62,7 @@ export const Hero: GlobalConfig = {
     {
       name: 'title',
       type: 'text',
+      maxLength: 60,
       label: 'Titre',
       required: true,
       localized: true,
@@ -78,6 +87,7 @@ export const Hero: GlobalConfig = {
         {
           name: 'value',
           type: 'text',
+          maxLength: 60,
           label: 'Texte',
           required: true,
         },
@@ -91,6 +101,7 @@ export const Hero: GlobalConfig = {
         {
           name: 'label',
           type: 'text',
+          maxLength: 40,
           label: 'Libellé',
           localized: true,
           defaultValue: 'View projects',
@@ -111,6 +122,7 @@ export const Hero: GlobalConfig = {
         {
           name: 'label',
           type: 'text',
+          maxLength: 40,
           label: 'Libellé',
           localized: true,
           defaultValue: 'Let’s talk',
@@ -135,6 +147,7 @@ export const Hero: GlobalConfig = {
         {
           name: 'label',
           type: 'text',
+          maxLength: 40,
           label: 'Libellé',
           localized: true,
           defaultValue: 'Download CV',

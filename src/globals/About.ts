@@ -1,6 +1,9 @@
 import type { GlobalConfig } from 'payload'
 
+import { draftVersions, GLOBAL_SCHEDULE_HINT, hideUnpublishButton } from '@/collections/drafts'
+import { mcpGlobalWritesAreDrafts } from '@/hooks/mcpWritesAreDrafts'
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { readPublishedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 import { textToLexicalParagraphs } from '@/lib/richText'
 
@@ -9,12 +12,15 @@ export const About: GlobalConfig = {
   label: 'À propos',
   admin: {
     group: adminGroups.content,
-    description: 'La section « à propos » de la page d’accueil.',
+    description: 'La section « à propos » de la page d’accueil.' + GLOBAL_SCHEDULE_HINT,
+    components: hideUnpublishButton(),
   },
+  versions: draftVersions(),
   access: {
-    read: () => true,
+    read: readPublishedOrAuthenticated,
   },
   hooks: {
+    beforeOperation: [mcpGlobalWritesAreDrafts],
     afterChange: [revalidateGlobalAfterChange],
   },
   fields: [
@@ -65,6 +71,7 @@ export const About: GlobalConfig = {
         {
           name: 'title',
           type: 'text',
+          maxLength: 80,
           label: 'Titre',
           required: true,
         },

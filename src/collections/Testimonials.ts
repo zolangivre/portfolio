@@ -4,24 +4,32 @@ import {
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
+import { mcpCannotTrash } from '@/hooks/mcpWritesAreDrafts'
+import { prependToOrder } from '@/hooks/prependToOrder'
+import { readUntrashedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 
 export const Testimonials: CollectionConfig = {
   slug: 'testimonials',
+  trash: true,
   labels: {
     singular: 'Témoignage',
     plural: 'Témoignages',
   },
   admin: {
     group: adminGroups.content,
-    description: 'Citations de clients et de collègues affichées dans la section témoignages.',
+    description:
+      'Citations de clients et de collègues affichées dans la section témoignages. Glissez-déposez les lignes pour choisir leur ordre sur le site.',
     defaultColumns: ['avatar', 'author', 'company', 'featured', 'updatedAt'],
     useAsTitle: 'author',
   },
+  orderable: true,
   access: {
-    read: () => true,
+    read: readUntrashedOrAuthenticated,
   },
   hooks: {
+    beforeOperation: [mcpCannotTrash],
+    beforeChange: [prependToOrder],
     afterChange: [revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },
@@ -29,6 +37,7 @@ export const Testimonials: CollectionConfig = {
     {
       name: 'author',
       type: 'text',
+      maxLength: 60,
       label: 'Auteur',
       required: true,
       admin: {
@@ -38,6 +47,7 @@ export const Testimonials: CollectionConfig = {
     {
       name: 'role',
       type: 'text',
+      maxLength: 80,
       label: 'Poste',
       admin: {
         description: 'Intitulé du poste, par exemple « Product Manager ».',
@@ -58,6 +68,7 @@ export const Testimonials: CollectionConfig = {
     {
       name: 'quote',
       type: 'textarea',
+      maxLength: 800,
       label: 'Témoignage',
       required: true,
       localized: true,
@@ -68,15 +79,6 @@ export const Testimonials: CollectionConfig = {
       label: 'Mis en avant',
       defaultValue: false,
       index: true,
-    },
-    {
-      name: 'order',
-      type: 'number',
-      label: 'Ordre',
-      defaultValue: 0,
-      admin: {
-        step: 1,
-      },
     },
   ],
   timestamps: true,

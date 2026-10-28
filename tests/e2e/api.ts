@@ -16,6 +16,22 @@ export async function loginAsEditor(request: APIRequestContext) {
   const headers = { Authorization: `JWT ${token}` }
 
   return {
+    async create(collection: string, data: object, locale = 'fr') {
+      const response = await request.post(`/api/${collection}?locale=${locale}`, {
+        data,
+        headers,
+      })
+      expect(response.ok(), await response.text()).toBe(true)
+
+      return ((await response.json()) as { doc: { id: number } }).doc
+    },
+
+    /** Permanent delete, trash included: leaves nothing behind a test. */
+    async remove(collection: string, id: number) {
+      const response = await request.delete(`/api/${collection}/${id}?trash=true`, { headers })
+      expect(response.ok() || response.status() === 404, await response.text()).toBe(true)
+    },
+
     async find(collection: string, where: Record<string, unknown>) {
       const params = new URLSearchParams({ depth: '0' })
       for (const [field, condition] of Object.entries(where)) {

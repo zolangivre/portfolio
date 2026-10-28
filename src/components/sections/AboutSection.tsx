@@ -16,7 +16,7 @@ type AboutSectionProps = {
 }
 
 export function AboutSection({ about, dictionary }: AboutSectionProps) {
-  const title = about?.title ?? 'Designing thoughtful products with engineering depth.'
+  const title = about?.title || dictionary.about.fallbackTitle
   const pointGroups = about?.pointGroups ?? []
   const portrait = about?.portrait
   const portraitUrl = getMediaUrl(portrait)
@@ -58,6 +58,9 @@ export function AboutSection({ about, dictionary }: AboutSectionProps) {
             // lives in styles.css (.about-points): a Tailwind `grid` here
             // would outrank the shelf's `display: flex`.
             <Shelf
+              // Beside the portrait from lg: takes the rest of the row, and
+              // may shrink below its cards' width so they reflow instead.
+              className="min-w-0 flex-1"
               navLabel={dictionary.about.shelfNavLabel}
               titles={pointGroups.map((group) => group.title)}
             >

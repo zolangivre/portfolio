@@ -1,4 +1,5 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { fr } from '@payloadcms/translations/languages/fr'
 import { s3Storage } from '@payloadcms/storage-s3'
@@ -22,7 +23,10 @@ import { Education } from './collections/Education'
 import { Testimonials } from './collections/Testimonials'
 import { Messages } from './collections/Messages'
 import { Journal } from './collections/Journal'
-import { translateSeoFields } from './lib/adminLabels'
+import { refuseGlobalUnpublishSchedule } from './collections/drafts'
+import { canRunJobs } from './lib/access'
+import { previewPath, previewURL } from './lib/preview'
+import { adminGroups, translateSeoFields } from './lib/adminLabels'
 import { GlobalSettings } from './globals/GlobalSettings'
 import { Hero } from './globals/Hero'
 import { About } from './globals/About'
@@ -93,6 +97,84 @@ export default buildConfig({
         Logo: '/components/admin/graphics/AdminLogo#AdminLogo',
       },
     },
+    // The dashboard: what needs attention first, then Payload's own grid of
+    // collections (the built-in `collections` widget). The widget API is
+    // experimental in Payload 3 and slated for a redesign in v4.
+    dashboard: {
+      widgets: [
+        {
+          slug: 'unread-messages',
+          Component: '/components/admin/dashboard/UnreadMessagesWidget#UnreadMessagesWidget',
+          label: 'Messages non lus',
+          minWidth: 'small',
+        },
+        {
+          slug: 'pending-drafts',
+          Component: '/components/admin/dashboard/PendingDraftsWidget#PendingDraftsWidget',
+          label: 'Brouillons en cours',
+          minWidth: 'small',
+        },
+        {
+          slug: 'scheduled-publishes',
+          Component:
+            '/components/admin/dashboard/ScheduledPublishesWidget#ScheduledPublishesWidget',
+          label: 'Publications programmées',
+          minWidth: 'small',
+        },
+        {
+          slug: 'recent-changes',
+          Component: '/components/admin/dashboard/RecentChangesWidget#RecentChangesWidget',
+          label: 'Dernières modifications',
+          minWidth: 'small',
+        },
+      ],
+      defaultLayout: [
+        { widgetSlug: 'unread-messages', width: 'medium' },
+        { widgetSlug: 'pending-drafts', width: 'medium' },
+        { widgetSlug: 'scheduled-publishes', width: 'medium' },
+        { widgetSlug: 'recent-changes', width: 'medium' },
+        { widgetSlug: 'collections', width: 'full' },
+      ],
+    },
+    // Every document the site renders can be previewed in place: a project or
+    // a journal entry on its own page, everything else on the homepage, in
+    // the locale being edited (lib/preview.ts). The panel opens on demand.
+    livePreview: {
+      collections: [
+        'projects',
+        'journal',
+        'experiences',
+        'education',
+        'testimonials',
+        'categories',
+        'skills',
+      ],
+      globals: [
+        'hero',
+        'about',
+        'contact',
+        'navigation',
+        'footer',
+        'settings',
+        'sections-content',
+        'sections-visibility',
+      ],
+      breakpoints: [
+        { label: 'Mobile', name: 'mobile', width: 390, height: 844 },
+        { label: 'Tablette', name: 'tablet', width: 820, height: 1180 },
+        { label: 'Ordinateur', name: 'desktop', width: 1440, height: 900 },
+      ],
+      url: ({ collectionConfig, data, globalConfig, locale, req }) =>
+        previewURL({
+          headers: req.headers,
+          path: previewPath({
+            collection: collectionConfig?.slug,
+            data,
+            global: globalConfig?.slug,
+            locale: locale.code,
+          }),
+        }),
+    },
   },
   collections: [
     Users,
@@ -132,6 +214,27 @@ export default buildConfig({
     supportedLanguages: { fr },
     fallbackLanguage: 'fr',
   },
+  // The queue only holds the scheduled publishes of the collections with
+  // drafts (collections/drafts.ts). Nothing runs it in-process — Vercel's
+  // functions don't stay alive between requests — so the daily cron in
+  // vercel.json calls /api/payload-jobs/run instead.
+  jobs: {
+    access: { run: canRunJobs },
+    // Queued jobs go through the Local API (and its hooks) instead of a raw
+    // insert, so the jobs collection can refuse a scheduled unpublish of a
+    // global.
+    runHooks: true,
+    jobsCollectionOverrides: ({ defaultJobsCollection }) => ({
+      ...defaultJobsCollection,
+      hooks: {
+        ...defaultJobsCollection.hooks,
+        beforeChange: [
+          ...(defaultJobsCollection.hooks?.beforeChange ?? []),
+          refuseGlobalUnpublishSchedule,
+        ],
+      },
+    }),
+  },
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     // Off in the test suites (.env.test, .env.e2e): they load this config
@@ -159,6 +262,101 @@ export default buildConfig({
   }),
   sharp,
   plugins: [
+    // MCP: lets an MCP client (Claude) read and edit the site's content with
+    // an API key an editor creates in the admin (docs/ai/mcp.md). No
+    // deletion, no contact messages, accounts or files; and whatever it
+    // writes in a collection with drafts, or a global, is saved as a draft
+    // (hooks/mcpWritesAreDrafts.ts) for the editor to review and publish.
+    mcpPlugin({
+      collections: {
+        projects: {
+          description:
+            'Portfolio projects shown on the site, each with its own page (title, descriptions, technologies, links, images).',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+        journal: {
+          description:
+            'Personal journal entries (travel, sport, achievements), each with its own page.',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+        experiences: {
+          description: 'Work experience entries of the timeline.',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+        education: {
+          description: 'Education entries of the timeline.',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+        testimonials: {
+          description: 'Quotes from clients and colleagues.',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+        skills: {
+          description: 'Skills shown in the skills section, grouped by category.',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+        technologies: {
+          description: 'Technologies referenced by projects and experiences.',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+        categories: {
+          description: 'Categories shared by skills, technologies, projects and journal entries.',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+        companies: {
+          description: 'Companies referenced by experiences and testimonials.',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+        schools: {
+          description: 'Schools referenced by education entries.',
+          enabled: { create: true, delete: false, find: true, update: true },
+        },
+      },
+      globals: {
+        hero: {
+          description: 'The homepage banner.',
+          enabled: { find: true, update: true },
+        },
+        about: {
+          description: 'The about section.',
+          enabled: { find: true, update: true },
+        },
+        contact: {
+          description: 'The contact section.',
+          enabled: { find: true, update: true },
+        },
+        navigation: {
+          description: 'The header navigation links.',
+          enabled: { find: true, update: true },
+        },
+        footer: {
+          description: 'The footer text and links.',
+          enabled: { find: true, update: true },
+        },
+        settings: {
+          description: 'Site-wide settings: identity, theme, social links, default SEO.',
+          enabled: { find: true, update: true },
+        },
+        'sections-content': {
+          description: 'Eyebrow, title and description above each homepage section.',
+          enabled: { find: true, update: true },
+        },
+        'sections-visibility': {
+          description: 'Which sections the site shows.',
+          enabled: { find: true, update: true },
+        },
+      },
+      overrideApiKeyCollection: (collection) => ({
+        ...collection,
+        labels: { singular: 'Clé d’API MCP', plural: 'Clés d’API MCP' },
+        admin: {
+          ...collection.admin,
+          group: adminGroups.site,
+          description:
+            'Clés qui permettent à un client MCP (Claude) de lire et modifier le contenu. Chaque clé agit au nom de son utilisateur, dans les limites cochées ; ce qu’elle écrit reste en brouillon.',
+        },
+      }),
+    }),
     seoPlugin({
       collections: ['projects', 'journal'],
       globals: ['hero'],

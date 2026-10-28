@@ -64,6 +64,7 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
@@ -81,7 +82,9 @@ export interface Config {
     testimonials: Testimonial;
     messages: Message;
     journal: Journal;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
+    'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -102,7 +105,9 @@ export interface Config {
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     messages: MessagesSelect<false> | MessagesSelect<true>;
     journal: JournalSelect<false> | JournalSelect<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -133,15 +138,43 @@ export interface Config {
   };
   locale: 'fr' | 'en';
   widgets: {
+    'unread-messages': UnreadMessagesWidget;
+    'pending-drafts': PendingDraftsWidget;
+    'scheduled-publishes': ScheduledPublishesWidget;
+    'recent-changes': RecentChangesWidget;
     collections: CollectionsWidget;
   };
-  user: User;
+  user: User | PayloadMcpApiKey;
   jobs: {
-    tasks: unknown;
+    tasks: {
+      schedulePublish: TaskSchedulePublish;
+      inline: {
+        input: unknown;
+        output: unknown;
+      };
+    };
     workflows: unknown;
   };
 }
 export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface PayloadMcpApiKeyAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -200,6 +233,7 @@ export interface Media {
   _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -226,6 +260,7 @@ export interface Video {
   _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -237,13 +272,14 @@ export interface Video {
   focalY?: number | null;
 }
 /**
- * Projets du portfolio affichés dans la section projets.
+ * Projets du portfolio affichés dans la section projets. Glissez-déposez les lignes pour choisir leur ordre sur le site. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "projects".
  */
 export interface Project {
   id: number;
+  _order?: string | null;
   title: string;
   slug: string;
   shortDescription: string;
@@ -311,14 +347,6 @@ export interface Project {
   githubUrl?: string | null;
   liveUrl?: string | null;
   featured?: boolean | null;
-  /**
-   * Les projets privés restent dans le CMS mais ne sont jamais affichés sur le site.
-   */
-  visibility: 'public' | 'private';
-  /**
-   * Ordre d’affichage : 1 s’affiche en premier, 2 en deuxième, etc. Laissez vide pour classer le projet après ceux qui sont ordonnés, du plus récent au plus ancien.
-   */
-  order?: number | null;
   year?: number | null;
   status?: ('live' | 'in-progress' | 'archived') | null;
   category?: (number | null) | Category;
@@ -332,6 +360,8 @@ export interface Project {
   };
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * Étiquettes de technologies utilisées par les projets et les expériences.
@@ -356,33 +386,33 @@ export interface Technology {
   category?: (number | null) | Category;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
- * Catégories partagées par les compétences, les technologies, les projets et le journal. Regroupées par domaine pour que chaque collection ne propose que les catégories qui la concernent.
+ * Catégories partagées par les compétences, les technologies, les projets et le journal. Regroupées par domaine pour que chaque collection ne propose que les catégories qui la concernent. Glissez-déposez les lignes pour choisir leur ordre sur le site, au sein de chaque groupe.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
 export interface Category {
   id: number;
+  _order?: string | null;
   name: string;
   slug: string;
   group: 'tech' | 'project' | 'journal';
-  /**
-   * Ordre d’affichage au sein du groupe : 1 s’affiche en premier, 2 en deuxième, etc. Les catégories sans valeur passent en dernier, triées par nom.
-   */
-  order?: number | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
- * Entrées de la frise des expériences professionnelles.
+ * Entrées de la frise des expériences professionnelles. Glissez-déposez les lignes pour choisir leur ordre sur le site. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "experiences".
  */
 export interface Experience {
   id: number;
+  _order?: string | null;
   company: number | Company;
   position: string;
   employmentType?: string | null;
@@ -406,12 +436,10 @@ export interface Experience {
   startDate: string;
   endDate?: string | null;
   currentlyWorking?: boolean | null;
-  /**
-   * Ordre d’affichage : 1 s’affiche en premier, 2 en deuxième, etc. Laissez vide pour classer l’entrée après celles qui sont ordonnées, de la date de début la plus récente à la plus ancienne.
-   */
-  order?: number | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * Entreprises référencées par les expériences professionnelles.
@@ -428,6 +456,7 @@ export interface Company {
   description?: string | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * Compétences regroupées par catégorie, affichées dans la section compétences.
@@ -450,6 +479,7 @@ export interface Skill {
   invertLogoInDarkMode?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * Écoles référencées par les entrées de formation.
@@ -466,15 +496,17 @@ export interface School {
   description?: string | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
- * Entrées de la frise des formations.
+ * Entrées de la frise des formations. Glissez-déposez les lignes pour choisir leur ordre sur le site. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "education".
  */
 export interface Education {
   id: number;
+  _order?: string | null;
   school: number | School;
   degree: string;
   fieldOfStudy?: string | null;
@@ -497,21 +529,20 @@ export interface Education {
   startDate: string;
   endDate?: string | null;
   currentlyStudying?: boolean | null;
-  /**
-   * Ordre d’affichage : 1 s’affiche en premier, 2 en deuxième, etc. Laissez vide pour classer l’entrée après celles qui sont ordonnées, de la date de début la plus récente à la plus ancienne.
-   */
-  order?: number | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
 }
 /**
- * Citations de clients et de collègues affichées dans la section témoignages.
+ * Citations de clients et de collègues affichées dans la section témoignages. Glissez-déposez les lignes pour choisir leur ordre sur le site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "testimonials".
  */
 export interface Testimonial {
   id: number;
+  _order?: string | null;
   /**
    * Nom complet de la personne qui témoigne.
    */
@@ -524,9 +555,9 @@ export interface Testimonial {
   avatar?: (number | null) | Media;
   quote: string;
   featured?: boolean | null;
-  order?: number | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * Messages envoyés depuis le formulaire de contact du site.
@@ -542,15 +573,17 @@ export interface Message {
   read?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
- * Récits personnels, hors technique : voyages, sport, réussites, événements, découvertes.
+ * Récits personnels, hors technique : voyages, sport, réussites, événements, découvertes. Glissez-déposez les lignes pour choisir leur ordre sur le site. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "journal".
  */
 export interface Journal {
   id: number;
+  _order?: string | null;
   title: string;
   slug: string;
   category: number | Category;
@@ -581,14 +614,6 @@ export interface Journal {
       }[]
     | null;
   featured?: boolean | null;
-  /**
-   * Les entrées privées restent dans le CMS mais ne sont jamais affichées sur le site.
-   */
-  visibility: 'public' | 'private';
-  /**
-   * Ordre d’affichage : 1 s’affiche en premier, 2 en deuxième, etc. Laissez vide pour classer l’entrée après celles qui sont ordonnées, de la date la plus récente à la plus ancienne.
-   */
-  order?: number | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -599,6 +624,256 @@ export interface Journal {
   };
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Clés qui permettent à un client MCP (Claude) de lire et modifier le contenu. Chaque clé agit au nom de son utilisateur, dans les limites cochées ; ce qu’elle écrit reste en brouillon.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys".
+ */
+export interface PayloadMcpApiKey {
+  id: number;
+  /**
+   * The user that the API key is associated with.
+   */
+  user: number | User;
+  /**
+   * A useful label for the API key.
+   */
+  label?: string | null;
+  /**
+   * The purpose of the API key.
+   */
+  description?: string | null;
+  projects?: {
+    /**
+     * Allow clients to find projects.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create projects.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update projects.
+     */
+    update?: boolean | null;
+  };
+  journal?: {
+    /**
+     * Allow clients to find journal.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create journal.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update journal.
+     */
+    update?: boolean | null;
+  };
+  experiences?: {
+    /**
+     * Allow clients to find experiences.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create experiences.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update experiences.
+     */
+    update?: boolean | null;
+  };
+  education?: {
+    /**
+     * Allow clients to find education.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create education.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update education.
+     */
+    update?: boolean | null;
+  };
+  testimonials?: {
+    /**
+     * Allow clients to find testimonials.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create testimonials.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update testimonials.
+     */
+    update?: boolean | null;
+  };
+  skills?: {
+    /**
+     * Allow clients to find skills.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create skills.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update skills.
+     */
+    update?: boolean | null;
+  };
+  technologies?: {
+    /**
+     * Allow clients to find technologies.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create technologies.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update technologies.
+     */
+    update?: boolean | null;
+  };
+  categories?: {
+    /**
+     * Allow clients to find categories.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create categories.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update categories.
+     */
+    update?: boolean | null;
+  };
+  companies?: {
+    /**
+     * Allow clients to find companies.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create companies.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update companies.
+     */
+    update?: boolean | null;
+  };
+  schools?: {
+    /**
+     * Allow clients to find schools.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create schools.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update schools.
+     */
+    update?: boolean | null;
+  };
+  hero?: {
+    /**
+     * Allow clients to find hero global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update hero global.
+     */
+    update?: boolean | null;
+  };
+  about?: {
+    /**
+     * Allow clients to find about global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update about global.
+     */
+    update?: boolean | null;
+  };
+  contact?: {
+    /**
+     * Allow clients to find contact global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update contact global.
+     */
+    update?: boolean | null;
+  };
+  navigation?: {
+    /**
+     * Allow clients to find navigation global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update navigation global.
+     */
+    update?: boolean | null;
+  };
+  footer?: {
+    /**
+     * Allow clients to find footer global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update footer global.
+     */
+    update?: boolean | null;
+  };
+  settings?: {
+    /**
+     * Allow clients to find settings global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update settings global.
+     */
+    update?: boolean | null;
+  };
+  sectionsContent?: {
+    /**
+     * Allow clients to find sections-content global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update sections-content global.
+     */
+    update?: boolean | null;
+  };
+  sectionsVisibility?: {
+    /**
+     * Allow clients to find sections-visibility global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update sections-visibility global.
+     */
+    update?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  hasAPIKey?: boolean | null;
+  collection: 'payload-mcp-api-keys';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -616,6 +891,98 @@ export interface PayloadKv {
     | number
     | boolean
     | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs".
+ */
+export interface PayloadJob {
+  id: number;
+  /**
+   * Input data provided to the job
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  taskStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  completedAt?: string | null;
+  totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
+  hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
+  error?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Task execution log
+   */
+  log?:
+    | {
+        executedAt: string;
+        completedAt: string;
+        taskSlug: 'inline' | 'schedulePublish';
+        taskID: string;
+        input?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        state: 'failed' | 'succeeded';
+        error?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  taskSlug?: ('inline' | 'schedulePublish') | null;
+  queue?: string | null;
+  waitUntil?: string | null;
+  processing?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -679,12 +1046,21 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'journal';
         value: number | Journal;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: number | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: number | PayloadMcpApiKey;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -694,10 +1070,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: number;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: number | PayloadMcpApiKey;
+      };
   key?: string | null;
   value?:
     | {
@@ -755,6 +1136,7 @@ export interface MediaSelect<T extends boolean = true> {
   _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   url?: T;
   thumbnailURL?: T;
   filename?: T;
@@ -775,6 +1157,7 @@ export interface VideosSelect<T extends boolean = true> {
   _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   url?: T;
   thumbnailURL?: T;
   filename?: T;
@@ -790,6 +1173,7 @@ export interface VideosSelect<T extends boolean = true> {
  * via the `definition` "projects_select".
  */
 export interface ProjectsSelect<T extends boolean = true> {
+  _order?: T;
   title?: T;
   slug?: T;
   shortDescription?: T;
@@ -804,8 +1188,6 @@ export interface ProjectsSelect<T extends boolean = true> {
   githubUrl?: T;
   liveUrl?: T;
   featured?: T;
-  visibility?: T;
-  order?: T;
   year?: T;
   status?: T;
   category?: T;
@@ -818,12 +1200,15 @@ export interface ProjectsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "experiences_select".
  */
 export interface ExperiencesSelect<T extends boolean = true> {
+  _order?: T;
   company?: T;
   position?: T;
   employmentType?: T;
@@ -833,9 +1218,10 @@ export interface ExperiencesSelect<T extends boolean = true> {
   startDate?: T;
   endDate?: T;
   currentlyWorking?: T;
-  order?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -849,6 +1235,7 @@ export interface SkillsSelect<T extends boolean = true> {
   invertLogoInDarkMode?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -864,18 +1251,20 @@ export interface TechnologiesSelect<T extends boolean = true> {
   category?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
+  _order?: T;
   name?: T;
   slug?: T;
   group?: T;
-  order?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -889,6 +1278,7 @@ export interface CompaniesSelect<T extends boolean = true> {
   description?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -902,12 +1292,14 @@ export interface SchoolsSelect<T extends boolean = true> {
   description?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "education_select".
  */
 export interface EducationSelect<T extends boolean = true> {
+  _order?: T;
   school?: T;
   degree?: T;
   fieldOfStudy?: T;
@@ -916,24 +1308,26 @@ export interface EducationSelect<T extends boolean = true> {
   startDate?: T;
   endDate?: T;
   currentlyStudying?: T;
-  order?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "testimonials_select".
  */
 export interface TestimonialsSelect<T extends boolean = true> {
+  _order?: T;
   author?: T;
   role?: T;
   company?: T;
   avatar?: T;
   quote?: T;
   featured?: T;
-  order?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -946,12 +1340,14 @@ export interface MessagesSelect<T extends boolean = true> {
   read?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "journal_select".
  */
 export interface JournalSelect<T extends boolean = true> {
+  _order?: T;
   title?: T;
   slug?: T;
   category?: T;
@@ -968,8 +1364,6 @@ export interface JournalSelect<T extends boolean = true> {
         id?: T;
       };
   featured?: T;
-  visibility?: T;
-  order?: T;
   meta?:
     | T
     | {
@@ -979,6 +1373,141 @@ export interface JournalSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_select".
+ */
+export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  user?: T;
+  label?: T;
+  description?: T;
+  projects?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+      };
+  journal?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+      };
+  experiences?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+      };
+  education?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+      };
+  testimonials?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+      };
+  skills?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+      };
+  technologies?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+      };
+  categories?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+      };
+  companies?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+      };
+  schools?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+      };
+  hero?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  about?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  contact?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  navigation?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  footer?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  settings?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  sectionsContent?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  sectionsVisibility?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+  hasAPIKey?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -987,6 +1516,37 @@ export interface JournalSelect<T extends boolean = true> {
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs_select".
+ */
+export interface PayloadJobsSelect<T extends boolean = true> {
+  input?: T;
+  taskStatus?: T;
+  completedAt?: T;
+  totalTried?: T;
+  hasError?: T;
+  error?: T;
+  log?:
+    | T
+    | {
+        executedAt?: T;
+        completedAt?: T;
+        taskSlug?: T;
+        taskID?: T;
+        input?: T;
+        output?: T;
+        state?: T;
+        error?: T;
+        id?: T;
+      };
+  taskSlug?: T;
+  queue?: T;
+  waitUntil?: T;
+  processing?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1021,7 +1581,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
- * Identité, image de marque, contact, thème et SEO par défaut, utilisés sur tout le site.
+ * Identité, image de marque, contact, thème et SEO par défaut, utilisés sur tout le site. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie. Un global ne se dépublie pas : seule la publication se programme.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "settings".
@@ -1134,11 +1694,12 @@ export interface Setting {
     defaultDescription?: string | null;
     defaultImage?: (number | null) | Media;
   };
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
- * La bannière d’accueil, en haut de la page d’accueil.
+ * La bannière d’accueil, en haut de la page d’accueil. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie. Un global ne se dépublie pas : seule la publication se programme.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "hero".
@@ -1201,11 +1762,12 @@ export interface Hero {
      */
     image?: (number | null) | Media;
   };
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
- * La section « à propos » de la page d’accueil.
+ * La section « à propos » de la page d’accueil. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie. Un global ne se dépublie pas : seule la publication se programme.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "about".
@@ -1269,11 +1831,12 @@ export interface About {
       }[]
     | null;
   portrait?: (number | null) | Media;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
- * La section contact de la page d’accueil.
+ * La section contact de la page d’accueil. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie. Un global ne se dépublie pas : seule la publication se programme.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "contact".
@@ -1298,11 +1861,12 @@ export interface Contact {
     [k: string]: unknown;
   } | null;
   successMessage?: string | null;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
- * Liens de navigation principaux, dans l’en-tête.
+ * Liens de navigation principaux, dans l’en-tête. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie. Un global ne se dépublie pas : seule la publication se programme.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "navigation".
@@ -1316,11 +1880,12 @@ export interface Navigation {
         id?: string | null;
       }[]
     | null;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
- * Texte et liens du pied de page.
+ * Texte et liens du pied de page. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie. Un global ne se dépublie pas : seule la publication se programme.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "footer".
@@ -1335,11 +1900,12 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
- * Choisissez les sections affichées sur le site. Une section désactivée disparaît de la page d’accueil, de la navigation et, pour le journal, de ses pages dédiées.
+ * Choisissez les sections affichées sur le site. Une section désactivée disparaît de la page d’accueil, de la navigation et, pour le journal, de ses pages dédiées. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie. Un global ne se dépublie pas : seule la publication se programme.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sections-visibility".
@@ -1382,11 +1948,12 @@ export interface SectionsVisibility {
    * Affiche ou masque la section Journal sur tout le site.
    */
   journal?: boolean | null;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
- * Surtitre, titre et description affichés au-dessus des sections Projets, Expériences, Formations, Compétences, Témoignages et Journal.
+ * Surtitre, titre et description affichés au-dessus des sections Projets, Expériences, Formations, Compétences, Témoignages et Journal. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie. Un global ne se dépublie pas : seule la publication se programme.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sections-content".
@@ -1507,6 +2074,7 @@ export interface SectionsContent {
       [k: string]: unknown;
     } | null;
   };
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1550,6 +2118,7 @@ export interface SettingsSelect<T extends boolean = true> {
         defaultDescription?: T;
         defaultImage?: T;
       };
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1599,6 +2168,7 @@ export interface HeroSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1620,6 +2190,7 @@ export interface AboutSelect<T extends boolean = true> {
         id?: T;
       };
   portrait?: T;
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1633,6 +2204,7 @@ export interface ContactSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   successMessage?: T;
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1649,6 +2221,7 @@ export interface NavigationSelect<T extends boolean = true> {
         href?: T;
         id?: T;
       };
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1666,6 +2239,7 @@ export interface FooterSelect<T extends boolean = true> {
         href?: T;
         id?: T;
       };
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1684,6 +2258,7 @@ export interface SectionsVisibilitySelect<T extends boolean = true> {
   testimonials?: T;
   contact?: T;
   journal?: T;
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1735,9 +2310,50 @@ export interface SectionsContentSelect<T extends boolean = true> {
         title?: T;
         description?: T;
       };
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unread-messages_widget".
+ */
+export interface UnreadMessagesWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pending-drafts_widget".
+ */
+export interface PendingDraftsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "scheduled-publishes_widget".
+ */
+export interface ScheduledPublishesWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recent-changes_widget".
+ */
+export interface RecentChangesWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1748,6 +2364,55 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSchedulePublish".
+ */
+export interface TaskSchedulePublish {
+  input: {
+    type?: ('publish' | 'unpublish') | null;
+    locale?: string | null;
+    doc?:
+      | ({
+          relationTo: 'projects';
+          value: number | Project;
+        } | null)
+      | ({
+          relationTo: 'experiences';
+          value: number | Experience;
+        } | null)
+      | ({
+          relationTo: 'education';
+          value: number | Education;
+        } | null)
+      | ({
+          relationTo: 'journal';
+          value: number | Journal;
+        } | null);
+    global?:
+      | (
+          | 'settings'
+          | 'hero'
+          | 'about'
+          | 'contact'
+          | 'navigation'
+          | 'footer'
+          | 'sections-visibility'
+          | 'sections-content'
+        )
+      | null;
+    user?:
+      | ({
+          relationTo: 'users';
+          value: number | User;
+        } | null)
+      | ({
+          relationTo: 'payload-mcp-api-keys';
+          value: number | PayloadMcpApiKey;
+        } | null);
+  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

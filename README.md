@@ -64,19 +64,19 @@ The database is exposed on `127.0.0.1:5432`, the site on port 3000. The containe
 
 ## Scripts
 
-| Command                                              | Action                                                                                           |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `pnpm dev`                                           | Development server                                                                               |
-| `pnpm devsafe`                                       | Same, after clearing the `.next` cache                                                           |
-| `pnpm build` / `pnpm start`                          | Production build and server                                                                      |
-| `pnpm generate:types`                                | Regenerates `src/payload-types.ts` after a schema change                                         |
-| `pnpm payload migrate`                               | Applies pending migrations                                                                       |
-| `pnpm payload migrate:status`                        | Migration status                                                                                 |
-| `pnpm lint`                                          | ESLint                                                                                           |
-| `pnpm test`                                          | Unit, then integration (Vitest), then e2e (Playwright)                                           |
-| `pnpm test:unit` / `pnpm test:int` / `pnpm test:e2e` | Each suite separately                                                                            |
-| `pnpm test:e2e:ui` / `pnpm test:e2e:report`          | Playwright UI mode / HTML report of the last e2e run                                             |
-| `pnpm test:coverage`                                 | Unit suite with coverage, failing under 90% on `src/lib`, `src/hooks`, the proxy and the sitemap |
+| Command                                                                | Action                                                                                           |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `pnpm dev`                                                             | Development server                                                                               |
+| `pnpm devsafe`                                                         | Same, after clearing the `.next` cache                                                           |
+| `pnpm build` / `pnpm start`                                            | Production build and server                                                                      |
+| `pnpm generate:types`                                                  | Regenerates `src/payload-types.ts` after a schema change                                         |
+| `pnpm payload migrate`                                                 | Applies pending migrations                                                                       |
+| `pnpm payload migrate:status`                                          | Migration status                                                                                 |
+| `pnpm lint`                                                            | ESLint                                                                                           |
+| `pnpm test`                                                            | Unit, components, then integration (Vitest), then e2e (Playwright)                               |
+| `pnpm test:unit` / `pnpm test:dom` / `pnpm test:int` / `pnpm test:e2e` | Each suite separately                                                                            |
+| `pnpm test:e2e:ui` / `pnpm test:e2e:report`                            | Playwright UI mode / HTML report of the last e2e run                                             |
+| `pnpm test:coverage`                                                   | Unit suite with coverage, failing under 90% on `src/lib`, `src/hooks`, the proxy and the sitemap |
 
 ## Content model
 
@@ -121,11 +121,12 @@ After any schema change, write the matching migration by hand: `payload migrate:
 
 - **Unit** (`tests/unit`) — pure logic, no database. Anything with I/O is mocked.
 - **Integration** (`tests/int`) — the real Payload Local API against a throwaway `payload-portfolio-test` database, configured in [`.env.test`](.env.test). Postgres creates it on first run; every run drops it and rebuilds it with `payload migrate:fresh`, so the suite also proves the migrations still build a working schema from scratch. It refuses to start unless `DATABASE_URL` is a local database named `*-test`, and never reads `.env`.
-- **Component** (`tests/dom`) — React components with Testing Library in jsdom.
+- **Component** (`tests/dom`) — React components and client hooks with Testing Library in jsdom: state, ARIA, timers. Runs with the unit tests in CI.
 - **E2E** (`tests/e2e`) — frontend and admin via Playwright, against a production build (`next build && next start` on port 3100) and its own `payload-portfolio-e2e-test` database, configured in [`.env.e2e`](.env.e2e). [`tests/e2e/serve.ts`](tests/e2e/serve.ts) rebuilds the database from the migrations, seeds the content in [`tests/e2e/fixtures.ts`](tests/e2e/fixtures.ts), then builds into `.next-e2e` — a separate directory, so an e2e build and a regular build never share a data cache. Specs that edit content do it through the REST API and put it back. Two Playwright projects: desktop Chromium runs everything; `mobile-safari` (iPhone 15 on WebKit) runs the navigation and mobile-menu specs. Run `pnpm exec playwright install chromium webkit` once before the first local run.
 
 ```bash
 pnpm test:unit        # no setup needed
+pnpm test:dom         # components in jsdom, no setup needed
 pnpm test:int         # needs local Postgres (docker compose up postgres)
 pnpm test:e2e         # needs local Postgres; builds the site first (~2 min)
 pnpm test:e2e:serve   # keep a seeded server up on :3100 — test:e2e reuses it
@@ -137,13 +138,13 @@ A failing e2e test keeps a video, a screenshot and a full trace (DOM, network an
 
 ## CI/CD
 
-- **GitHub Actions** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs on every push to `main`/`staging` and on pull requests, as four parallel jobs: lint + typecheck; unit tests with the coverage thresholds; integration tests against a PostgreSQL service that starts empty and is built from the migrations alone (`PAYLOAD_DB_PUSH=false`), so a migration that no longer applies to a fresh database fails the build; e2e tests against a seeded production build (the Playwright report is attached to the run). Every job is skipped when the code was already tested: the `pull_request` run of the `staging` → `main` PR (the `push` run on `staging` tests the same commit), and the release-please version PR and its merge into `staging` (see [Versioning](#versioning)).
+- **GitHub Actions** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs on every push to `main`/`staging` and on pull requests, as four parallel jobs: lint + typecheck; unit tests with the coverage thresholds; integration tests against a PostgreSQL service that starts empty and is built from the migrations alone (`PAYLOAD_DB_PUSH=false`), so a migration that no longer applies to a fresh database fails the build; e2e tests against a seeded production build (the Playwright report is attached to the run). Every job is skipped when the code was already tested: the `pull_request` run of the `staging` → `main` PR (the `push` run on `staging` tests the same commit), and the release-please version PR and its merge into `staging` (see [Versioning](#versioning)). On a pull request that only changes docs, Markdown, `.claude/` or GitHub config other than `ci.yml`, the integration and e2e jobs are skipped too ([`.github/ci-site-changed.sh`](.github/ci-site-changed.sh) lists what is safe to skip, so anything else runs them); the push to `staging` after the merge runs everything.
 - **Release** ([`.github/workflows/release.yml`](.github/workflows/release.yml)) — see [Versioning](#versioning).
 - **Vercel** builds with `pnpm run ci` ([`vercel.json`](vercel.json)), which applies pending migrations to the production database before `next build` — the schema can never lag behind the deployed code. Only `main` (production) and `staging` (preview) are deployed: `git.deploymentEnabled` in the same file blocks every other branch (`feature/…`, Dependabot, the release-please version PR), so they trigger no build and no migration.
 
 ## Agent workflows
 
-Claude Code commands, review subagents and two GitHub workflows (a daily security sweep, a review on pull requests) help ship changes, upgrades and fixes. They propose, and never merge or deploy. How each one works, when to use it and how to set it up: [docs/agent-workflows.md](docs/agent-workflows.md).
+Claude Code commands, review subagents and two GitHub workflows (a daily security sweep, a review on pull requests) help ship changes, upgrades and fixes. They propose, and never merge or deploy. How each one works, when to use it and how to set it up: [docs/ai/](docs/ai/README.md). Everything else that runs on its own (CI, Dependabot, releases, the git hook) is in [docs/](docs/README.md).
 
 ## Versioning
 
@@ -151,10 +152,10 @@ Claude Code commands, review subagents and two GitHub workflows (a daily securit
 
 | Commit                                       | Effect on the version           |
 | -------------------------------------------- | ------------------------------- |
-| `fix: …`, `perf: …`                          | patch: 1.0.0 → 1.0.1            |
+| `fix`, `perf`, `refactor`, `revert`          | patch: 1.0.0 → 1.0.1            |
 | `feat: …`                                    | minor: 1.0.0 → 1.1.0            |
 | `feat!: …` or `BREAKING CHANGE:` in the body | major: 1.0.0 → 2.0.0            |
-| `chore`, `refactor`, `docs`, `test`, `ci`…   | none, left out of the CHANGELOG |
+| `chore`, `docs`, `test`, `ci`, `build`…      | none, left out of the CHANGELOG |
 
 Same flow as patateprod-front and patateprod-back:
 
@@ -162,7 +163,7 @@ Same flow as patateprod-front and patateprod-back:
 2. To release, merge that PR into `staging`: the `vX.Y.Z` tag and the GitHub Release are created.
 3. Merge `staging` → `main`: Vercel deploys once, with the right version number.
 
-Merge `staging` → `main` right after the version PR: a commit pushed in between would go to production under that number without appearing in its CHANGELOG. First version: 1.0.0 (`initial-version` in `release-please-config.json`).
+Merge `staging` → `main` right after the version PR: a commit pushed in between would go to production under that number without appearing in its CHANGELOG. First version: 1.0.0 (`initial-version` in `release-please-config.json`). More in [docs/github/releases.md](docs/github/releases.md) and [docs/git-hooks.md](docs/git-hooks.md).
 
 ## Deployment
 

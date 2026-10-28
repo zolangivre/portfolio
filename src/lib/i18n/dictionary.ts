@@ -14,8 +14,14 @@ export interface Dictionary {
     closeMenuLabel: string
     sectionIndexLabel: string
   }
+  hero: {
+    /** Shown only while neither the hero title nor the site name is set. */
+    fallbackTitle: string
+  }
   about: {
     eyebrow: string
+    /** Shown only while the About title is empty in Payload. */
+    fallbackTitle: string
     /** The dots under the swipeable About cards on phones. */
     shelfNavLabel: string
   }
@@ -71,9 +77,15 @@ export interface Dictionary {
     title: string
     description: string
     emptyState: string
+    /** The toggle under a quote too long to show in full. */
+    readMoreLabel: string
+    readLessLabel: string
   }
   contact: {
     eyebrow: string
+    /** Shown only while the Contact title / success message are empty in Payload. */
+    fallbackTitle: string
+    fallbackSuccessMessage: string
     reachOut: string
     formNameLabel: string
     formEmailLabel: string
@@ -123,6 +135,11 @@ export interface Dictionary {
     playLabel: string
     pauseLabel: string
   }
+  /** The banner shown to an editor browsing the site in Draft Mode. */
+  preview: {
+    banner: string
+    exit: string
+  }
 }
 
 const dictionaries: Record<Locale, Dictionary> = {
@@ -140,8 +157,12 @@ const dictionaries: Record<Locale, Dictionary> = {
       closeMenuLabel: 'Fermer le menu',
       sectionIndexLabel: 'Index des sections',
     },
+    hero: {
+      fallbackTitle: 'Des produits numériques soignés, construits avec calme et rigueur.',
+    },
     about: {
       eyebrow: 'À propos',
+      fallbackTitle: 'Concevoir des produits réfléchis, avec une vraie profondeur technique.',
       shelfNavLabel: 'Aller à un encadré',
     },
     projects: {
@@ -200,9 +221,13 @@ const dictionaries: Record<Locale, Dictionary> = {
       title: 'Ce qu’on en dit',
       description: 'Retours de personnes avec qui j’ai collaboré sur des produits livrés.',
       emptyState: 'Aucun témoignage n’a encore été publié.',
+      readMoreLabel: 'Lire la suite',
+      readLessLabel: 'Réduire',
     },
     contact: {
       eyebrow: 'Contact',
+      fallbackTitle: 'Construisons quelque chose qui compte.',
+      fallbackSuccessMessage: 'Merci pour votre message — je vous réponds très vite.',
       reachOut: 'Me contacter',
       formNameLabel: 'Nom',
       formEmailLabel: 'Email',
@@ -254,6 +279,10 @@ const dictionaries: Record<Locale, Dictionary> = {
       playLabel: 'Lire la vidéo',
       pauseLabel: 'Mettre la vidéo en pause',
     },
+    preview: {
+      banner: 'Aperçu des brouillons',
+      exit: 'Quitter l’aperçu',
+    },
   },
   en: {
     nav: {
@@ -269,8 +298,12 @@ const dictionaries: Record<Locale, Dictionary> = {
       closeMenuLabel: 'Close menu',
       sectionIndexLabel: 'Section index',
     },
+    hero: {
+      fallbackTitle: 'Building polished digital products with calm, modern engineering.',
+    },
     about: {
       eyebrow: 'About',
+      fallbackTitle: 'Designing thoughtful products with engineering depth.',
       shelfNavLabel: 'Jump to a card',
     },
     projects: {
@@ -330,9 +363,13 @@ const dictionaries: Record<Locale, Dictionary> = {
       title: 'What people say',
       description: 'Feedback from people I’ve worked with on shipped products.',
       emptyState: 'No testimonials have been published yet.',
+      readMoreLabel: 'Read more',
+      readLessLabel: 'Show less',
     },
     contact: {
       eyebrow: 'Contact',
+      fallbackTitle: 'Let’s build something meaningful.',
+      fallbackSuccessMessage: 'Thanks for reaching out — I’ll get back to you shortly.',
       reachOut: 'Reach out',
       formNameLabel: 'Name',
       formEmailLabel: 'Email',
@@ -382,6 +419,10 @@ const dictionaries: Record<Locale, Dictionary> = {
     video: {
       playLabel: 'Play video',
       pauseLabel: 'Pause video',
+    },
+    preview: {
+      banner: 'Previewing drafts',
+      exit: 'Exit preview',
     },
   },
 }

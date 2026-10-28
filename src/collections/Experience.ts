@@ -1,30 +1,41 @@
 import type { CollectionConfig } from 'payload'
 
-import { orderField } from '@/fields/shared'
+import { mcpWritesAreDrafts } from '@/hooks/mcpWritesAreDrafts'
+import { prependToOrder, syncDraftOrder } from '@/hooks/prependToOrder'
 import {
+  rememberLiveState,
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
+import { readPublishedUntrashedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
+
+import { draftVersions, SCHEDULE_HINT } from './drafts'
 
 export const Experiences: CollectionConfig = {
   slug: 'experiences',
+  trash: true,
   labels: {
     singular: 'Expérience',
     plural: 'Expériences',
   },
   admin: {
     group: adminGroups.portfolio,
-    description: 'Entrées de la frise des expériences professionnelles.',
-    defaultColumns: ['company', 'location', 'position', 'startDate', 'endDate', 'order'],
+    description:
+      'Entrées de la frise des expériences professionnelles. Glissez-déposez les lignes pour choisir leur ordre sur le site.' +
+      SCHEDULE_HINT,
+    defaultColumns: ['company', 'location', 'position', 'startDate', 'endDate', '_status'],
     useAsTitle: 'position',
   },
-  defaultSort: 'order',
+  orderable: true,
+  versions: draftVersions(),
   access: {
-    read: () => true,
+    read: readPublishedUntrashedOrAuthenticated,
   },
   hooks: {
-    afterChange: [revalidateCollectionAfterChange],
+    beforeOperation: [mcpWritesAreDrafts],
+    beforeChange: [prependToOrder, rememberLiveState],
+    afterChange: [syncDraftOrder, revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },
   fields: [
@@ -43,6 +54,7 @@ export const Experiences: CollectionConfig = {
     {
       name: 'position',
       type: 'text',
+      maxLength: 100,
       label: 'Poste',
       required: true,
       localized: true,
@@ -50,6 +62,7 @@ export const Experiences: CollectionConfig = {
     {
       name: 'employmentType',
       type: 'text',
+      maxLength: 40,
       label: 'Type de contrat',
       localized: true,
     },
@@ -100,9 +113,6 @@ export const Experiences: CollectionConfig = {
       label: 'Poste en cours',
       defaultValue: false,
     },
-    orderField(
-      'l’entrée après celles qui sont ordonnées, de la date de début la plus récente à la plus ancienne',
-    ),
   ],
   timestamps: true,
 }

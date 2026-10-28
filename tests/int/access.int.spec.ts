@@ -27,7 +27,7 @@ const config = await configPromise
 
 type ReadPolicy =
   | 'anyone' // open to visitors
-  | 'public-only' // visitors see `visibility: 'public'` documents only
+  | 'published-only' // visitors see `_status: 'published'` documents only
   | 'editors' // closed to visitors
 
 /**
@@ -39,16 +39,19 @@ const collectionPolicy: Record<CollectionSlug, { read: ReadPolicy; create: 'anyo
   {
     categories: { read: 'anyone', create: 'editors' },
     companies: { read: 'anyone', create: 'editors' },
-    education: { read: 'anyone', create: 'editors' },
-    experiences: { read: 'anyone', create: 'editors' },
-    journal: { read: 'public-only', create: 'editors' },
+    education: { read: 'published-only', create: 'editors' },
+    experiences: { read: 'published-only', create: 'editors' },
+    journal: { read: 'published-only', create: 'editors' },
     media: { read: 'editors', create: 'editors' },
     messages: { read: 'editors', create: 'anyone' },
+    'payload-jobs': { read: 'editors', create: 'editors' },
     'payload-kv': { read: 'editors', create: 'editors' },
     'payload-locked-documents': { read: 'editors', create: 'editors' },
+    // MCP API keys: each editor sees and manages their own keys only.
+    'payload-mcp-api-keys': { read: 'editors', create: 'editors' },
     'payload-migrations': { read: 'editors', create: 'editors' },
     'payload-preferences': { read: 'editors', create: 'editors' },
-    projects: { read: 'public-only', create: 'editors' },
+    projects: { read: 'published-only', create: 'editors' },
     schools: { read: 'anyone', create: 'editors' },
     skills: { read: 'anyone', create: 'editors' },
     technologies: { read: 'anyone', create: 'editors' },
@@ -90,17 +93,26 @@ beforeAll(async () => {
     }),
   )
 
-  for (const visibility of ['public', 'private'] as const) {
+  const company = track(
+    'companies',
+    await payload.create({ collection: 'companies', data: { name: 'Access company' } }),
+  )
+  const school = track(
+    'schools',
+    await payload.create({ collection: 'schools', data: { name: 'Access school' } }),
+  )
+
+  for (const status of ['published', 'draft'] as const) {
     track(
       'projects',
       await payload.create({
         collection: 'projects',
         data: {
+          _status: status,
           description: textToLexicalParagraphs('Description.'),
           shortDescription: 'Short description.',
-          slug: `access-${visibility}-project`,
-          title: `Access ${visibility} project`,
-          visibility,
+          slug: `access-${status}-project`,
+          title: `Access ${status} project`,
         },
       }),
     )
@@ -110,13 +122,41 @@ beforeAll(async () => {
       await payload.create({
         collection: 'journal',
         data: {
+          _status: status,
           category: category.id,
           content: textToLexicalParagraphs('Content.'),
           date: '2026-01-01T00:00:00.000Z',
           shortDescription: 'Short description.',
-          slug: `access-${visibility}-entry`,
-          title: `Access ${visibility} entry`,
-          visibility,
+          slug: `access-${status}-entry`,
+          title: `Access ${status} entry`,
+        },
+      }),
+    )
+
+    track(
+      'experiences',
+      await payload.create({
+        collection: 'experiences',
+        data: {
+          _status: status,
+          company: company.id,
+          description: textToLexicalParagraphs('Description.'),
+          position: `access-${status}-experience`,
+          startDate: '2025-01-01T00:00:00.000Z',
+        },
+      }),
+    )
+
+    track(
+      'education',
+      await payload.create({
+        collection: 'education',
+        data: {
+          _status: status,
+          degree: `access-${status}-education`,
+          description: textToLexicalParagraphs('Description.'),
+          school: school.id,
+          startDate: '2025-01-01T00:00:00.000Z',
         },
       }),
     )
@@ -186,60 +226,78 @@ describe.each(globals)('anonymous visitor on the %s global', (slug) => {
   })
 })
 
-describe.each(['projects', 'journal'] as const)('private documents in %s', (collection) => {
-  const slugsOf = (docs: { slug: string }[]) =>
-    docs
-      .map((doc) => doc.slug)
-      .filter((slug) => slug.startsWith('access-'))
-      .sort()
+// What each collection calls its slug-like field, to tell the seeded
+// documents apart from whatever else the database holds.
+const draftable = {
+  education: { field: 'degree', noun: 'education' },
+  experiences: { field: 'position', noun: 'experience' },
+  journal: { field: 'slug', noun: 'entry' },
+  projects: { field: 'slug', noun: 'project' },
+} as const
 
-  const privateSlug = collection === 'projects' ? 'access-private-project' : 'access-private-entry'
-  const publicSlug = collection === 'projects' ? 'access-public-project' : 'access-public-entry'
+describe.each(Object.keys(draftable) as (keyof typeof draftable)[])(
+  'draft documents in %s',
+  (collection) => {
+    const { field, noun } = draftable[collection]
+    const draftName = `access-draft-${noun}`
+    const publishedName = `access-published-${noun}`
 
-  it('are left out of an anonymous list', async () => {
-    const { docs } = await payload.find({ collection, overrideAccess: false })
+    const namesOf = (docs: object[]) =>
+      docs
+        .map((doc) => (doc as Record<string, string>)[field]!)
+        .filter((name) => name.startsWith('access-'))
+        .sort()
 
-    expect(slugsOf(docs)).toEqual([publicSlug])
-  })
+    it('are left out of an anonymous list', async () => {
+      const { docs } = await payload.find({ collection, limit: 0, overrideAccess: false })
 
-  it('stay hidden when the query asks for them explicitly', async () => {
-    const { docs, totalDocs } = await payload.find({
-      collection,
-      overrideAccess: false,
-      where: { visibility: { equals: 'private' } },
+      expect(namesOf(docs)).toEqual([publishedName])
     })
 
-    expect(docs).toEqual([])
-    expect(totalDocs).toBe(0)
-  })
+    it('stay hidden when the query asks for them explicitly', async () => {
+      const { docs, totalDocs } = await payload.find({
+        collection,
+        overrideAccess: false,
+        where: { _status: { equals: 'draft' } },
+      })
 
-  it('are left out of an anonymous count', async () => {
-    const { totalDocs } = await payload.count({
-      collection,
-      overrideAccess: false,
-      where: { slug: { like: 'access-' } },
+      expect(docs).toEqual([])
+      expect(totalDocs).toBe(0)
     })
 
-    expect(totalDocs).toBe(1)
-  })
+    it('are left out of an anonymous count', async () => {
+      const { totalDocs } = await payload.count({
+        collection,
+        overrideAccess: false,
+        where: { [field]: { like: 'access-' } },
+      })
 
-  it('cannot be fetched by id', async () => {
-    const {
-      docs: [hidden],
-    } = await payload.find({ collection, where: { slug: { equals: privateSlug } } })
+      expect(totalDocs).toBe(1)
+    })
 
-    expect(hidden).toBeDefined()
-    await expect(
-      payload.findByID({ collection, id: hidden!.id, overrideAccess: false }),
-    ).rejects.toBeInstanceOf(NotFound)
-  })
+    it('cannot be fetched by id', async () => {
+      const {
+        docs: [hidden],
+      } = await payload.find({ collection, where: { [field]: { equals: draftName } } })
 
-  it('are listed for a logged-in editor', async () => {
-    const { docs } = await payload.find({ collection, overrideAccess: false, user: editor })
+      expect(hidden).toBeDefined()
+      await expect(
+        payload.findByID({ collection, id: hidden!.id, overrideAccess: false }),
+      ).rejects.toBeInstanceOf(NotFound)
+    })
 
-    expect(slugsOf(docs)).toEqual([privateSlug, publicSlug])
-  })
-})
+    it('are listed for a logged-in editor', async () => {
+      const { docs } = await payload.find({
+        collection,
+        limit: 0,
+        overrideAccess: false,
+        user: editor,
+      })
+
+      expect(namesOf(docs)).toEqual([draftName, publishedName])
+    })
+  },
+)
 
 /**
  * `messages` is the one collection a visitor can write to, and the REST

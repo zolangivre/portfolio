@@ -27,6 +27,7 @@ import { adminGroups } from '@/lib/adminLabels'
  */
 export const Videos: CollectionConfig = {
   slug: 'videos',
+  trash: true,
   labels: {
     singular: 'Vidéo',
     plural: 'Vidéos',

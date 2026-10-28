@@ -3,8 +3,11 @@
 import Image, { type ImageProps } from 'next/image'
 import { useCallback, useState } from 'react'
 
-export function FadeImage({ className, onLoad, ...props }: ImageProps) {
+export function FadeImage({ className, onError, onLoad, ...props }: ImageProps) {
   const [loaded, setLoaded] = useState(false)
+  // A file that never loads would stay faded out forever, an invisible box
+  // holding its place (the gap before a testimonial's name): drop it.
+  const [failed, setFailed] = useState(false)
   // With a blurred preview the image is never empty: the preview shows at
   // once and the photo sharpens over it, so there's nothing to fade in.
   const visible = loaded || props.placeholder === 'blur'
@@ -20,11 +23,19 @@ export function FadeImage({ className, onLoad, ...props }: ImageProps) {
     }
   }, [])
 
+  if (failed) {
+    return null
+  }
+
   return (
     // eslint-disable-next-line jsx-a11y/alt-text -- alt is required by ImageProps and forwarded via props
     <Image
       {...props}
       className={`transition-opacity duration-(--duration-base) ease-out ${visible ? 'opacity-100' : 'opacity-0'}${className ? ` ${className}` : ''}`}
+      onError={(event) => {
+        setFailed(true)
+        onError?.(event)
+      }}
       onLoad={(event) => {
         setLoaded(true)
         onLoad?.(event)

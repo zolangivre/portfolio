@@ -47,7 +47,9 @@ that misses its Target is.
 
 ## 4. Design direction
 
-The site is rounded and artistic, not technical. Flag:
+The site is rounded and artistic, not technical. The full rules are in
+`.claude/skills/brand-guidelines/SKILL.md`; read it when a change adds a
+component, a surface or an animation. Flag:
 
 - monospace fonts, `//` comment-style prefixes, grid/blueprint/ruler motifs;
 - small radii (under ~16px) on cards, photos, buttons or chips;

@@ -5,11 +5,14 @@ import {
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
+import { mcpCannotTrash } from '@/hooks/mcpWritesAreDrafts'
+import { readUntrashedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 import { isValidHexColor } from '@/lib/color'
 
 export const Technologies: CollectionConfig = {
   slug: 'technologies',
+  trash: true,
   labels: {
     singular: 'Technologie',
     plural: 'Technologies',
@@ -21,9 +24,10 @@ export const Technologies: CollectionConfig = {
     useAsTitle: 'name',
   },
   access: {
-    read: () => true,
+    read: readUntrashedOrAuthenticated,
   },
   hooks: {
+    beforeOperation: [mcpCannotTrash],
     afterChange: [revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },
@@ -31,6 +35,7 @@ export const Technologies: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
+      maxLength: 32,
       label: 'Nom',
       required: true,
     },

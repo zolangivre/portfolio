@@ -5,10 +5,13 @@ import {
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
+import { mcpCannotTrash } from '@/hooks/mcpWritesAreDrafts'
+import { readUntrashedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 
 export const Skills: CollectionConfig = {
   slug: 'skills',
+  trash: true,
   labels: {
     singular: 'Compétence',
     plural: 'Compétences',
@@ -20,9 +23,10 @@ export const Skills: CollectionConfig = {
     useAsTitle: 'name',
   },
   access: {
-    read: () => true,
+    read: readUntrashedOrAuthenticated,
   },
   hooks: {
+    beforeOperation: [mcpCannotTrash],
     afterChange: [revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },
@@ -30,6 +34,7 @@ export const Skills: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
+      maxLength: 32,
       label: 'Nom',
       required: true,
     },

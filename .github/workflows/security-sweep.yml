@@ -33,7 +33,11 @@ name: Security sweep
 
 on:
   schedule:
-    - cron: '0 6 * * *'
+    # 00:17 UTC, 02:17 in Paris in summer, 01:17 in winter: at night, so a
+    # sweep that runs Claude uses a 5-hour usage window that has reset by
+    # morning. Off the hour, where GitHub delays scheduled runs the most
+    # (they can still start hours late).
+    - cron: '17 0 * * *'
   workflow_dispatch:
 
 permissions:
@@ -136,10 +140,23 @@ jobs:
       # Bash can't write files that Edit/Write may not: edits are limited to
       # package.json and src/, and workflow or .claude/ fixes are left to a
       # local sweep. No `gh run rerun`: rerunning CI is a person's call.
+      # Where the sweep branch stands before Claude runs, so a later step can
+      # tell whether this run pushed anything. Exact ref match (ls-remote
+      # alone also matches refs/heads/<anything>/chore/security-sweep) and
+      # hex only; empty when the branch doesn't exist.
+      - if: steps.decide.outputs.run == 'true'
+        name: Sweep branch before
+        id: before
+        run: |
+          ref=refs/heads/chore/security-sweep
+          sha="$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" "$ref" | awk -v ref="$ref" '$2 == ref { print $1; exit }')"
+          [[ "$sha" =~ ^[0-9a-f]{40,64}$ ]] || sha=""
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
       - if: steps.decide.outputs.run == 'true'
         name: Sweep
         id: sweep
-        uses: anthropics/claude-code-action@58985842b834ed26087302ba27d07bc24ca8697a # v1.0.244
+        uses: anthropics/claude-code-action@db77d4d3c98f3f6380e7cd45ffba2342a3dbde3c # v1.0.254
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           base_branch: staging
@@ -153,7 +170,45 @@ jobs:
       # sweep used (a PR opened with GITHUB_TOKEN wouldn't trigger CI). This
       # runs outside the Claude session and reads one fixed file, so the
       # agent never gets a command that publishes a file of its choosing.
-      - if: steps.decide.outputs.run == 'true' && hashFiles('.security/pr-body.md') != ''
+      # Whether this run moved the sweep branch: a PR is opened or updated
+      # only then, so a run with nothing new never rewrites an open PR's
+      # description.
+      - if: steps.decide.outputs.run == 'true' && !cancelled()
+        name: Did the sweep push?
+        id: pushed
+        env:
+          BEFORE: ${{ steps.before.outputs.sha }}
+        run: |
+          ref=refs/heads/chore/security-sweep
+          after="$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" "$ref" | awk -v ref="$ref" '$2 == ref { print $1; exit }')"
+          [[ "$after" =~ ^[0-9a-f]{40,64}$ ]] || after=""
+          if [ -n "$after" ] && [ "$after" != "$BEFORE" ]; then
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # A fixed line on the run's page (Summary), never the agent's report:
+      # run summaries are public on this repository, while Dependabot alerts
+      # are not, and a report with nothing fixed is only analysis of open,
+      # unpatched alerts. That analysis stays private: the Security tab, or a
+      # local `/security-sweep` for the dismissal proposals.
+      - if: steps.decide.outputs.run == 'true' && !cancelled()
+        name: Summary
+        env:
+          TOTAL: ${{ steps.alerts.outputs.total }}
+          PUSHED: ${{ steps.pushed.outputs.pushed }}
+          OUTCOME: ${{ steps.sweep.outcome }}
+        run: |
+          if [ "$OUTCOME" != "success" ]; then
+            echo "The sweep step ended with: $OUTCOME. See its log." >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$PUSHED" = "true" ]; then
+            echo "The sweep pushed fixes to \`chore/security-sweep\`: its PR into \`staging\` carries the report." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "$TOTAL open item(s), nothing the sweep could fix here. They need a person: see the Security tab, or run \`/security-sweep\` locally for the reasoned dismissal proposals." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - if: steps.decide.outputs.run == 'true' && steps.pushed.outputs.pushed == 'true' && hashFiles('.security/pr-body.md') != ''
         name: Open or update the sweep PR
         env:
           GH_TOKEN: ${{ steps.sweep.outputs.github_token }}
@@ -163,9 +218,7 @@ jobs:
           # hashFiles() is only a pre-filter: it also matches an empty file,
           # which would wipe the PR description.
           [ -s "$body" ] || { echo "$body is missing or empty" >&2; exit 1; }
-          if ! git ls-remote --exit-code --heads "https://github.com/${GITHUB_REPOSITORY}.git" "$branch" >/dev/null; then
-            echo "The sweep pushed nothing: no PR to open."
-          elif [ "$(gh pr view "$branch" --json state -q .state 2>/dev/null || true)" = "OPEN" ]; then
+          if [ "$(gh pr view "$branch" --json state -q .state 2>/dev/null || true)" = "OPEN" ]; then
             gh pr edit "$branch" --body-file "$body"
           else
             gh pr create --base staging --head "$branch" --title "fix(deps): security sweep" --body-file "$body"

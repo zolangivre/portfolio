@@ -1,7 +1,9 @@
 import { expect, test, type Page } from '@playwright/test'
 
+import { textToLexicalParagraphs } from '../../src/lib/richText'
 import { login } from '../helpers/login'
-import { editor } from './fixtures'
+import { loginAsEditor } from './api'
+import { editor, projects } from './fixtures'
 
 test.describe('Admin Panel', () => {
   let page: Page
@@ -22,6 +24,25 @@ test.describe('Admin Panel', () => {
     await expect(page.locator('span[title="Tableau de bord"]').first()).toBeVisible()
   })
 
+  // Four widgets above the grid of collections Payload draws by default.
+  test('shows the four widgets and the collection cards on the dashboard', async () => {
+    await page.goto('/admin')
+
+    for (const name of [
+      'Messages non lus',
+      'Brouillons en cours',
+      'Publications programmées',
+      'Dernières modifications',
+    ]) {
+      await expect(page.getByRole('heading', { name })).toBeVisible()
+    }
+
+    // The default grid: a card per collection, here the projects one.
+    const cards = page.locator('.collections__card-list')
+    await expect(cards.first()).toBeVisible()
+    await expect(cards.getByRole('link', { name: 'Projets' }).first()).toBeVisible()
+  })
+
   test('can navigate to list view', async () => {
     await page.goto('/admin/collections/projects')
     await expect(page).toHaveURL(/\/admin\/collections\/projects(\?|$)/)
@@ -34,8 +55,83 @@ test.describe('Admin Panel', () => {
     await expect(page.locator('input[name="email"]')).toBeVisible()
   })
 
-  test('lists private projects to editors', async () => {
+  test('lists draft projects to editors', async () => {
     await page.goto('/admin/collections/projects')
     await expect(page.getByText('Projet caché')).toBeVisible()
+  })
+
+  // Projects are orderable: Payload adds a drag-handle column to the list.
+  test('lets editors reorder projects by drag and drop', async () => {
+    await page.goto('/admin/collections/projects')
+    await expect(page.getByText('Projet Alpha')).toBeVisible()
+
+    // One handle per row: published projects plus the draft one.
+    await expect(page.locator('td.cell-_dragHandle')).toHaveCount(projects.length + 1)
+  })
+
+  // Globals have drafts, but unpublishing would write the last draft over the
+  // row the site reads: Publish stays, Unpublish is hidden.
+  test('offers Publish but no Unpublish on a global', async () => {
+    await page.goto('/admin/globals/hero')
+
+    const publish = page.locator('#action-save')
+    await expect(publish).toBeVisible()
+    await expect(publish).toHaveText('Publier les modifications')
+
+    // Unpublish sits in the "…" menu of the document controls. With the
+    // button hidden that menu may not exist at all: open it only when present.
+    const dots = page.locator('.doc-controls__dots')
+    if (await dots.isVisible()) {
+      await dots.click()
+    }
+    await expect(page.locator('#action-unpublish')).toHaveCount(0)
+    await expect(page.getByText('Annuler la publication')).toHaveCount(0)
+  })
+
+  // "Supprimer" on a collection with a trash moves the document there instead
+  // of erasing it, and the trash view can bring it back. The project is
+  // created for the test so the seeded ones stay as they are.
+  test('moves a deleted project to the trash and restores it', async ({ request }) => {
+    const title = 'Projet corbeille E2E'
+    // A cell of the list, not any text: the toast also names the project.
+    const row = page.locator('td', { hasText: title })
+    const api = await loginAsEditor(request)
+    const { id } = await api.create('projects', {
+      _status: 'published',
+      description: textToLexicalParagraphs('Description.'),
+      shortDescription: 'Courte description.',
+      slug: 'e2e-trash',
+      title,
+    })
+
+    try {
+      await page.goto(`/admin/collections/projects/${id}`)
+      await expect(page.locator('input[name="title"]')).toHaveValue(title)
+
+      await page.locator('.doc-controls__dots').click()
+      await page.locator('#action-delete').click()
+      await page.locator('#confirm-action').click()
+
+      // Gone from the regular list...
+      await expect(page).toHaveURL(/\/admin\/collections\/projects(\?|$)/)
+      await expect(row).toHaveCount(0)
+
+      // ...and listed in the trash view.
+      await page.goto('/admin/collections/projects/trash')
+      await expect(row).toBeVisible()
+
+      await page.goto(`/admin/collections/projects/trash/${id}`)
+      await page.locator('#action-restore').click()
+      await page.locator('#confirm-action').click()
+      await expect(page).toHaveURL(/\/admin\/collections\/projects\/\d+/)
+
+      await page.goto('/admin/collections/projects')
+      await expect(row).toBeVisible()
+
+      await page.goto('/admin/collections/projects/trash')
+      await expect(row).toHaveCount(0)
+    } finally {
+      await api.remove('projects', id)
+    }
   })
 })

@@ -1,12 +1,16 @@
 import type { CollectionConfig } from 'payload'
 
-import { orderField, visibilityField } from '@/fields/shared'
+import { mcpWritesAreDrafts } from '@/hooks/mcpWritesAreDrafts'
+import { prependToOrder, syncDraftOrder } from '@/hooks/prependToOrder'
 import {
+  rememberLiveState,
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
-import { readPublicOrAuthenticated } from '@/lib/access'
+import { readPublishedUntrashedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
+
+import { draftVersions, SCHEDULE_HINT } from './drafts'
 
 // Both mockup uploads only mean anything once a frame is chosen. The first
 // half of the check is not redundant: on a brand-new doc `mockupFrame` is
@@ -16,38 +20,44 @@ const hasMockupFrame = (data: { mockupFrame?: string | null } | undefined) =>
 
 export const Projects: CollectionConfig = {
   slug: 'projects',
+  trash: true,
   labels: {
     singular: 'Projet',
     plural: 'Projets',
   },
   admin: {
     group: adminGroups.portfolio,
-    description: 'Projets du portfolio affichés dans la section projets.',
+    description:
+      'Projets du portfolio affichés dans la section projets. Glissez-déposez les lignes pour choisir leur ordre sur le site.' +
+      SCHEDULE_HINT,
     defaultColumns: [
       'coverImage',
       'title',
       'status',
       'technologies',
       'category',
-      'visibility',
+      '_status',
       'featured',
-      'order',
       'year',
     ],
     useAsTitle: 'title',
   },
-  defaultSort: 'order',
+  orderable: true,
+  versions: draftVersions(),
   access: {
-    read: readPublicOrAuthenticated,
+    read: readPublishedUntrashedOrAuthenticated,
   },
   hooks: {
-    afterChange: [revalidateCollectionAfterChange],
+    beforeOperation: [mcpWritesAreDrafts],
+    beforeChange: [prependToOrder, rememberLiveState],
+    afterChange: [syncDraftOrder, revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },
   fields: [
     {
       name: 'title',
       type: 'text',
+      maxLength: 60,
       label: 'Titre',
       required: true,
       localized: true,
@@ -63,6 +73,7 @@ export const Projects: CollectionConfig = {
     {
       name: 'shortDescription',
       type: 'textarea',
+      maxLength: 280,
       label: 'Description courte',
       required: true,
       localized: true,
@@ -169,10 +180,6 @@ export const Projects: CollectionConfig = {
       defaultValue: false,
       index: true,
     },
-    visibilityField(
-      'Les projets privés restent dans le CMS mais ne sont jamais affichés sur le site.',
-    ),
-    orderField('le projet après ceux qui sont ordonnés, du plus récent au plus ancien'),
     {
       name: 'year',
       type: 'number',
@@ -184,7 +191,11 @@ export const Projects: CollectionConfig = {
     {
       name: 'status',
       type: 'select',
-      label: 'Statut',
+      label: 'État du projet',
+      // Drafts add Payload's own `_status`, and the adapter snake-cases both
+      // names to `status`: without its own name, this enum and the
+      // draft/published one would both be `enum_projects_status`.
+      enumName: 'enum_projects_project_status',
       options: [
         { label: 'En ligne', value: 'live' },
         { label: 'En cours', value: 'in-progress' },

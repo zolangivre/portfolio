@@ -1,6 +1,9 @@
 import type { Field, GlobalConfig } from 'payload'
 
+import { draftVersions, GLOBAL_SCHEDULE_HINT, hideUnpublishButton } from '@/collections/drafts'
+import { mcpGlobalWritesAreDrafts } from '@/hooks/mcpWritesAreDrafts'
 import { revalidateGlobalAfterChange } from '@/hooks/revalidateSite'
+import { readPublishedOrAuthenticated } from '@/lib/access'
 import { adminGroups, sectionLabels } from '@/lib/adminLabels'
 import { textToLexicalParagraphs } from '@/lib/richText'
 
@@ -43,12 +46,16 @@ export const SectionsContent: GlobalConfig = {
   admin: {
     group: adminGroups.content,
     description:
-      'Surtitre, titre et description affichés au-dessus des sections Projets, Expériences, Formations, Compétences, Témoignages et Journal.',
+      'Surtitre, titre et description affichés au-dessus des sections Projets, Expériences, Formations, Compétences, Témoignages et Journal.' +
+      GLOBAL_SCHEDULE_HINT,
+    components: hideUnpublishButton(),
   },
+  versions: draftVersions(),
   access: {
-    read: () => true,
+    read: readPublishedOrAuthenticated,
   },
   hooks: {
+    beforeOperation: [mcpGlobalWritesAreDrafts],
     afterChange: [revalidateGlobalAfterChange],
   },
   fields: [

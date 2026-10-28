@@ -44,6 +44,32 @@ const isDefaultOnly = (statement: string) =>
     statement.trim(),
   )
 
+/**
+ * Postgres cuts identifiers to 63 bytes (NAMEDATALEN), and Drizzle doesn't
+ * know it: a generated name past that length is stored cut, and the next
+ * comparison asks to drop the cut constraint and add the full one — forever,
+ * since adding it cuts it again. Such a pair is the same constraint. (The
+ * first one: the settings versions' background photo FK, 64 characters.)
+ */
+const POSTGRES_MAX_IDENTIFIER = 63
+
+const isTruncatedRename = (statement: string, statements: string[]) => {
+  const drop = /^ALTER TABLE "([^"]+)" DROP CONSTRAINT "([^"]+)";?$/.exec(statement.trim())
+  const add = /^ALTER TABLE "([^"]+)" ADD CONSTRAINT "([^"]+)"/.exec(statement.trim())
+  const [, table, name] = drop ?? add ?? []
+  if (!table || !name) return false
+
+  return statements.some((other) => {
+    const pair = drop
+      ? /^ALTER TABLE "([^"]+)" ADD CONSTRAINT "([^"]+)"/.exec(other.trim())
+      : /^ALTER TABLE "([^"]+)" DROP CONSTRAINT "([^"]+)";?$/.exec(other.trim())
+    if (!pair || pair[1] !== table) return false
+    const [full, cut] = drop ? [pair[2]!, name] : [name, pair[2]!]
+
+    return full.length > POSTGRES_MAX_IDENTIFIER && full.slice(0, POSTGRES_MAX_IDENTIFIER) === cut
+  })
+}
+
 let payload: Payload
 
 beforeAll(async () => {
@@ -69,7 +95,10 @@ describe('schema drift', () => {
 
     const { pushSchema } = adapter.requireDrizzleKit()
     const { statementsToExecute } = await pushSchema(adapter.schema, adapter.drizzle)
-    const missing = statementsToExecute.filter((statement) => !isDefaultOnly(statement))
+    const missing = statementsToExecute.filter(
+      (statement) =>
+        !isDefaultOnly(statement) && !isTruncatedRename(statement, statementsToExecute),
+    )
 
     expect(
       missing,

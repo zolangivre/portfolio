@@ -26,7 +26,7 @@ export const technologies = [
 
 type TechnologyName = (typeof technologies)[number]['name']
 
-/** Public projects, in the order the site lists them (by `order`). */
+/** Public projects, in the order the site lists them (drag-and-drop order; the seed creates them last-first because new documents go on top). */
 export const projects: readonly {
   en: string
   fr: string

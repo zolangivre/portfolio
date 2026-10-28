@@ -74,14 +74,3 @@ export function projectMomentum(velocity: number, decelerationRate = 0.998) {
 export function rubberband(overshoot: number, dimension: number, constant = 0.55) {
   return (overshoot * dimension * constant) / (dimension + constant * Math.abs(overshoot))
 }
-
-export const revealTransition = {
-  duration: DURATION_SLOW,
-  ease: EASE_OUT_PREMIUM,
-} as const
-
-export const staggerContainer = (staggerChildren = 0.08, delayChildren = 0) => ({
-  visible: {
-    transition: { staggerChildren, delayChildren },
-  },
-})

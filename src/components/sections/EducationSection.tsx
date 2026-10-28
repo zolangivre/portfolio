@@ -1,7 +1,7 @@
-import Image from 'next/image'
-
 import { Container } from '@/components/ui/Container'
 import { Pill } from '@/components/ui/Pill'
+import { SafeImage } from '@/components/ui/SafeImage'
+import { formatMonthRange } from '@/lib/dates'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
 import { getMediaUrl } from '@/lib/media'
@@ -19,16 +19,6 @@ type EducationSectionProps = {
   dictionary: Dictionary
   education: Education[]
   locale: Locale
-}
-
-function formatDate(value: string | null | undefined, locale: Locale, present: string) {
-  if (!value) {
-    return present
-  }
-
-  return new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric' }).format(
-    new Date(value),
-  )
 }
 
 export function EducationSection({
@@ -59,16 +49,22 @@ export function EducationSection({
                   <article className="timeline-item">
                     <div className="timeline-meta">
                       <Pill tone="accent">
-                        {formatDate(entry.startDate, locale, dictionary.experience.present)} –{' '}
-                        {formatDate(entry.endDate, locale, dictionary.experience.present)}
+                        {formatMonthRange(
+                          entry.startDate,
+                          entry.endDate,
+                          locale,
+                          dictionary.experience.present,
+                        )}
                       </Pill>
                     </div>
                     <h3>{entry.degree}</h3>
-                    <div className="timeline-company flex flex-wrap items-center gap-2">
+                    {/* No wrap: a long name breaks beside the logo rather than
+                        dropping below it and leaving the logo alone on a line. */}
+                    <div className="timeline-company flex items-start gap-2">
                       {schoolLogoUrl ? (
-                        <Image
+                        <SafeImage
                           alt=""
-                          className="h-5 w-5 shrink-0 object-contain"
+                          className="mt-0.5 h-5 w-5 shrink-0 object-contain"
                           height={20}
                           src={schoolLogoUrl}
                           width={20}
@@ -76,7 +72,7 @@ export function EducationSection({
                       ) : null}
                       {school?.website ? (
                         <a
-                          className="transition hover:text-accent"
+                          className="min-w-0 transition hover:text-accent"
                           href={school.website}
                           rel="noreferrer"
                           target="_blank"
@@ -84,7 +80,9 @@ export function EducationSection({
                           {school.name}
                         </a>
                       ) : (
-                        <span>{school?.name ?? dictionary.education.fallbackSchool}</span>
+                        <span className="min-w-0">
+                          {school?.name ?? dictionary.education.fallbackSchool}
+                        </span>
                       )}
                     </div>
                     {/* Shown on the page rather than in a `title` tooltip, which
