@@ -24,6 +24,25 @@ test.describe('Admin Panel', () => {
     await expect(page.locator('span[title="Tableau de bord"]').first()).toBeVisible()
   })
 
+  // Four widgets above the grid of collections Payload draws by default.
+  test('shows the four widgets and the collection cards on the dashboard', async () => {
+    await page.goto('/admin')
+
+    for (const name of [
+      'Messages non lus',
+      'Brouillons en cours',
+      'Publications programmées',
+      'Dernières modifications',
+    ]) {
+      await expect(page.getByRole('heading', { name })).toBeVisible()
+    }
+
+    // The default grid: a card per collection, here the projects one.
+    const cards = page.locator('.collections__card-list')
+    await expect(cards.first()).toBeVisible()
+    await expect(cards.getByRole('link', { name: 'Projets' }).first()).toBeVisible()
+  })
+
   test('can navigate to list view', async () => {
     await page.goto('/admin/collections/projects')
     await expect(page).toHaveURL(/\/admin\/collections\/projects(\?|$)/)

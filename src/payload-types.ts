@@ -135,6 +135,10 @@ export interface Config {
   };
   locale: 'fr' | 'en';
   widgets: {
+    'unread-messages': UnreadMessagesWidget;
+    'pending-drafts': PendingDraftsWidget;
+    'scheduled-publishes': ScheduledPublishesWidget;
+    'recent-changes': RecentChangesWidget;
     collections: CollectionsWidget;
   };
   user: User;
@@ -1894,6 +1898,46 @@ export interface SectionsContentSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unread-messages_widget".
+ */
+export interface UnreadMessagesWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pending-drafts_widget".
+ */
+export interface PendingDraftsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "scheduled-publishes_widget".
+ */
+export interface ScheduledPublishesWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recent-changes_widget".
+ */
+export interface RecentChangesWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
