@@ -1,5 +1,6 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
+import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { fr } from '@payloadcms/translations/languages/fr'
 import { s3Storage } from '@payloadcms/storage-s3'
@@ -23,6 +24,7 @@ import { Education } from './collections/Education'
 import { Testimonials } from './collections/Testimonials'
 import { Messages } from './collections/Messages'
 import { Journal } from './collections/Journal'
+import { redirectsConfig } from './collections/Redirects'
 import { refuseGlobalUnpublishSchedule } from './collections/drafts'
 import { canRunJobs } from './lib/access'
 import { previewPath, previewURL } from './lib/preview'
@@ -375,6 +377,8 @@ export default buildConfig({
         },
       }),
     }),
+    // Redirects: an old URL of the site sends visitors on (collections/Redirects.ts).
+    redirectsPlugin(redirectsConfig),
     seoPlugin({
       collections: ['projects', 'journal'],
       globals: ['hero'],

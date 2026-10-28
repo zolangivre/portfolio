@@ -53,6 +53,7 @@ const collectionPolicy: Record<CollectionSlug, { read: ReadPolicy; create: 'anyo
     'payload-migrations': { read: 'editors', create: 'editors' },
     'payload-preferences': { read: 'editors', create: 'editors' },
     projects: { read: 'published-only', create: 'editors' },
+    redirects: { read: 'editors', create: 'editors' },
     schools: { read: 'anyone', create: 'editors' },
     skills: { read: 'anyone', create: 'editors' },
     technologies: { read: 'anyone', create: 'editors' },

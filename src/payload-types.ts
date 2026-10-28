@@ -82,6 +82,7 @@ export interface Config {
     testimonials: Testimonial;
     messages: Message;
     journal: Journal;
+    redirects: Redirect;
     'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
@@ -110,6 +111,7 @@ export interface Config {
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     messages: MessagesSelect<false> | MessagesSelect<true>;
     journal: JournalSelect<false> | JournalSelect<true>;
+    redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
@@ -666,6 +668,34 @@ export interface Journal {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Envoie une ancienne URL du site vers un projet, un article du journal ou une autre URL. Une redirection ne s’applique qu’à une URL qui n’existe plus : elle ne masque jamais une page en ligne. Changer le slug d’un projet ou d’un article publié crée la sienne tout seul.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects".
+ */
+export interface Redirect {
+  id: number;
+  /**
+   * Le chemin de l’ancienne URL, par exemple /fr/projects/ancien-slug. Sans /fr ni /en, il vaut pour les deux langues.
+   */
+  from: string;
+  to?: {
+    type?: ('reference' | 'custom') | null;
+    reference?:
+      | ({
+          relationTo: 'journal';
+          value: number | Journal;
+        } | null)
+      | ({
+          relationTo: 'projects';
+          value: number | Project;
+        } | null);
+    url?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Clés qui permettent à un client MCP (Claude) de lire et modifier le contenu. Chaque clé agit au nom de son utilisateur, dans les limites cochées ; ce qu’elle écrit reste en brouillon.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1086,6 +1116,10 @@ export interface PayloadLockedDocument {
         value: number | Journal;
       } | null)
     | ({
+        relationTo: 'redirects';
+        value: number | Redirect;
+      } | null)
+    | ({
         relationTo: 'payload-mcp-api-keys';
         value: number | PayloadMcpApiKey;
       } | null)
@@ -1419,6 +1453,22 @@ export interface JournalSelect<T extends boolean = true> {
   createdAt?: T;
   deletedAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects_select".
+ */
+export interface RedirectsSelect<T extends boolean = true> {
+  from?: T;
+  to?:
+    | T
+    | {
+        type?: T;
+        reference?: T;
+        url?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

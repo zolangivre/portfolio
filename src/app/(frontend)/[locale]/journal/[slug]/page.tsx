@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { ViewTransition } from 'react'
 
 import { AdjacentNav } from '@/components/ui/AdjacentNav'
@@ -23,6 +23,7 @@ import {
   getGlobalSettings,
   getJournalEntries,
   getJournalEntry,
+  getRedirectDestination,
   getSectionsVisibility,
 } from '@/lib/queries'
 import { journalJsonLd, pageMetadata } from '@/lib/seo'
@@ -116,6 +117,9 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
   const entry = await getJournalEntry(slug, locale)
 
   if (!entry) {
+    // An old URL of a renamed or removed entry may have a redirect.
+    const destination = await getRedirectDestination(`/${locale}/journal/${slug}`)
+    if (destination) permanentRedirect(destination)
     notFound()
   }
 

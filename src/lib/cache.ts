@@ -25,6 +25,7 @@ export const cacheTags = {
   media: 'media',
   navigation: 'navigation',
   projects: 'projects',
+  redirects: 'redirects',
   schools: 'schools',
   sectionsContent: 'sections-content',
   sectionsVisibility: 'sections-visibility',
