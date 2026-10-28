@@ -229,18 +229,18 @@ describe.each(globals)('anonymous visitor on the %s global', (slug) => {
 // What each collection calls its slug-like field, to tell the seeded
 // documents apart from whatever else the database holds.
 const draftable = {
-  education: { field: 'degree', stem: 'access-%-education' },
-  experiences: { field: 'position', stem: 'access-%-experience' },
-  journal: { field: 'slug', stem: 'access-%-entry' },
-  projects: { field: 'slug', stem: 'access-%-project' },
+  education: { field: 'degree', noun: 'education' },
+  experiences: { field: 'position', noun: 'experience' },
+  journal: { field: 'slug', noun: 'entry' },
+  projects: { field: 'slug', noun: 'project' },
 } as const
 
 describe.each(Object.keys(draftable) as (keyof typeof draftable)[])(
   'draft documents in %s',
   (collection) => {
-    const { field, stem } = draftable[collection]
-    const draftName = stem.replace('%', 'draft')
-    const publishedName = stem.replace('%', 'published')
+    const { field, noun } = draftable[collection]
+    const draftName = `access-draft-${noun}`
+    const publishedName = `access-published-${noun}`
 
     const namesOf = (docs: object[]) =>
       docs
