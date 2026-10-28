@@ -18,6 +18,7 @@ export const Technologies: CollectionConfig = {
     plural: 'Technologies',
   },
   admin: {
+    groupBy: true,
     group: adminGroups.taxonomy,
     description: 'Étiquettes de technologies utilisées par les projets et les expériences.',
     defaultColumns: ['logo', 'name', 'category', 'color'],

@@ -17,6 +17,7 @@ export const Skills: CollectionConfig = {
     plural: 'Compétences',
   },
   admin: {
+    groupBy: true,
     group: adminGroups.taxonomy,
     description: 'Compétences regroupées par catégorie, affichées dans la section compétences.',
     defaultColumns: ['logo', 'name', 'category', 'url'],

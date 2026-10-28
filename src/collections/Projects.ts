@@ -26,6 +26,7 @@ export const Projects: CollectionConfig = {
     plural: 'Projets',
   },
   admin: {
+    groupBy: true,
     group: adminGroups.portfolio,
     description:
       'Projets du portfolio affichés dans la section projets. Glissez-déposez les lignes pour choisir leur ordre sur le site.' +
