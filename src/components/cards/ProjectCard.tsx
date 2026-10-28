@@ -6,7 +6,7 @@ import { DeviceMockup } from '@/components/ui/DeviceMockup'
 import { Pill } from '@/components/ui/Pill'
 import { ProjectLogo } from '@/components/ui/ProjectLogo'
 import { SafeImage } from '@/components/ui/SafeImage'
-import { TechChip } from '@/components/ui/TechChip'
+import { presentTechnologies, TechChip } from '@/components/ui/TechChip'
 import { getMediaUrl, getRelationUrl } from '@/lib/media'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
@@ -20,6 +20,7 @@ type ProjectCardProps = {
 
 export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
   const imageUrl = getMediaUrl(project.coverImage)
+  const technologies = presentTechnologies(project.technologies)
   const darkImageUrl = getMediaUrl(project.coverImageDark)
   const imageAlt =
     typeof project.coverImage === 'object' && project.coverImage
@@ -144,14 +145,14 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
         </Link>
 
         <div className="flex flex-col gap-4 px-6 pb-6 sm:px-7 sm:pb-7">
-          {project.technologies && project.technologies.length > 0 ? (
+          {technologies.length > 0 ? (
             <ul
               className="flex flex-wrap gap-2"
               aria-label={`${project.title} ${dictionary.projects.technologiesAriaLabelSuffix}`}
             >
-              {project.technologies.map((technology, index) => (
+              {technologies.map((technology) => (
                 <TechChip
-                  key={typeof technology === 'object' && technology ? technology.id : index}
+                  key={typeof technology === 'object' ? technology.id : technology}
                   technology={technology}
                 />
               ))}

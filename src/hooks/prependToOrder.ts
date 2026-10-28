@@ -34,6 +34,9 @@ export const prependToOrder: CollectionBeforeChangeHook = async ({
     req,
     select: { _order: true },
     sort: '_order',
+    // Documents in the trash keep their key: a new one must still go before
+    // them, or a restored document could tie with it.
+    trash: true,
     where: { _order: { exists: true } },
   })
   const firstKey = (docs[0] as { _order?: string | null } | undefined)?._order ?? null

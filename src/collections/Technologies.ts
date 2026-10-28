@@ -5,11 +5,13 @@ import {
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
+import { readUntrashedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 import { isValidHexColor } from '@/lib/color'
 
 export const Technologies: CollectionConfig = {
   slug: 'technologies',
+  trash: true,
   labels: {
     singular: 'Technologie',
     plural: 'Technologies',
@@ -21,7 +23,7 @@ export const Technologies: CollectionConfig = {
     useAsTitle: 'name',
   },
   access: {
-    read: () => true,
+    read: readUntrashedOrAuthenticated,
   },
   hooks: {
     afterChange: [revalidateCollectionAfterChange],

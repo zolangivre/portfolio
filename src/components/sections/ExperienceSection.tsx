@@ -1,7 +1,7 @@
 import { Container } from '@/components/ui/Container'
 import { Pill } from '@/components/ui/Pill'
 import { SafeImage } from '@/components/ui/SafeImage'
-import { TechChip } from '@/components/ui/TechChip'
+import { presentTechnologies, TechChip } from '@/components/ui/TechChip'
 import { formatMonthRange } from '@/lib/dates'
 import type { Dictionary } from '@/lib/i18n/dictionary'
 import type { Locale } from '@/lib/locale'
@@ -47,7 +47,7 @@ export function ExperienceSection({
                   ? experience.company
                   : null
               const companyLogoUrl = getMediaUrl(company?.logo)
-              const technologies = experience.technologies ?? []
+              const technologies = presentTechnologies(experience.technologies)
 
               return (
                 <Reveal
@@ -121,13 +121,9 @@ export function ExperienceSection({
                           aria-label={`${experience.position} ${dictionary.projects.technologiesAriaLabelSuffix}`}
                           className="mt-4 flex flex-wrap gap-2"
                         >
-                          {technologies.map((technology, techIndex) => (
+                          {technologies.map((technology) => (
                             <TechChip
-                              key={
-                                typeof technology === 'object' && technology
-                                  ? technology.id
-                                  : techIndex
-                              }
+                              key={typeof technology === 'object' ? technology.id : technology}
                               technology={technology}
                             />
                           ))}

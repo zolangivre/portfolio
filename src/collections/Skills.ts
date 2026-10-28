@@ -5,10 +5,12 @@ import {
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
+import { readUntrashedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 
 export const Skills: CollectionConfig = {
   slug: 'skills',
+  trash: true,
   labels: {
     singular: 'Compétence',
     plural: 'Compétences',
@@ -20,7 +22,7 @@ export const Skills: CollectionConfig = {
     useAsTitle: 'name',
   },
   access: {
-    read: () => true,
+    read: readUntrashedOrAuthenticated,
   },
   hooks: {
     afterChange: [revalidateCollectionAfterChange],

@@ -6,7 +6,7 @@ import {
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
-import { readPublishedOrAuthenticated } from '@/lib/access'
+import { readPublishedUntrashedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 
 import { draftVersions, SCHEDULE_HINT } from './drafts'
@@ -19,6 +19,7 @@ const hasMockupFrame = (data: { mockupFrame?: string | null } | undefined) =>
 
 export const Projects: CollectionConfig = {
   slug: 'projects',
+  trash: true,
   labels: {
     singular: 'Projet',
     plural: 'Projets',
@@ -43,7 +44,7 @@ export const Projects: CollectionConfig = {
   orderable: true,
   versions: draftVersions(),
   access: {
-    read: readPublishedOrAuthenticated,
+    read: readPublishedUntrashedOrAuthenticated,
   },
   hooks: {
     beforeChange: [prependToOrder, rememberLiveState],

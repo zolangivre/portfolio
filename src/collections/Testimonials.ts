@@ -5,23 +5,26 @@ import {
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
 import { prependToOrder } from '@/hooks/prependToOrder'
+import { readUntrashedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 
 export const Testimonials: CollectionConfig = {
   slug: 'testimonials',
+  trash: true,
   labels: {
     singular: 'Témoignage',
     plural: 'Témoignages',
   },
   admin: {
     group: adminGroups.content,
-    description: 'Citations de clients et de collègues affichées dans la section témoignages. Glissez-déposez les lignes pour choisir leur ordre sur le site.',
+    description:
+      'Citations de clients et de collègues affichées dans la section témoignages. Glissez-déposez les lignes pour choisir leur ordre sur le site.',
     defaultColumns: ['avatar', 'author', 'company', 'featured', 'updatedAt'],
     useAsTitle: 'author',
   },
   orderable: true,
   access: {
-    read: () => true,
+    read: readUntrashedOrAuthenticated,
   },
   hooks: {
     beforeChange: [prependToOrder],

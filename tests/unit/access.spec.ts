@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { canRunJobs, readPublishedOrAuthenticated } from '@/lib/access'
+import {
+  canRunJobs,
+  readPublishedOrAuthenticated,
+  readPublishedUntrashedOrAuthenticated,
+  readUntrashedOrAuthenticated,
+} from '@/lib/access'
 
 // The behaviour through Payload is covered in tests/int/access.int.spec.ts;
 // this pins the rule itself.
@@ -61,5 +66,30 @@ describe('canRunJobs', () => {
     expect(call(null, 'Bearer ')).toBe(false)
     expect(call(null, 'Bearer undefined')).toBe(false)
     expect(call({ id: 1 })).toBe(true)
+  })
+})
+
+describe('readUntrashedOrAuthenticated', () => {
+  it('lets an editor read everything, the trash included', () => {
+    expect(readUntrashedOrAuthenticated({ req: { user: { id: 1 } } } as never)).toBe(true)
+  })
+
+  it('keeps the trash from a visitor', () => {
+    expect(readUntrashedOrAuthenticated({ req: { user: null } } as never)).toEqual({
+      deletedAt: { exists: false },
+    })
+  })
+})
+
+describe('readPublishedUntrashedOrAuthenticated', () => {
+  it('lets an editor read everything', () => {
+    expect(readPublishedUntrashedOrAuthenticated({ req: { user: { id: 1 } } } as never)).toBe(true)
+  })
+
+  it('gives a visitor what is published and not in the trash', () => {
+    expect(readPublishedUntrashedOrAuthenticated({ req: { user: null } } as never)).toEqual({
+      _status: { equals: 'published' },
+      deletedAt: { exists: false },
+    })
   })
 })

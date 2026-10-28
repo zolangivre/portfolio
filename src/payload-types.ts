@@ -208,6 +208,7 @@ export interface Media {
   _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -234,6 +235,7 @@ export interface Video {
   _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -333,6 +335,7 @@ export interface Project {
   };
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -358,6 +361,7 @@ export interface Technology {
   category?: (number | null) | Category;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * Catégories partagées par les compétences, les technologies, les projets et le journal. Regroupées par domaine pour que chaque collection ne propose que les catégories qui la concernent. Glissez-déposez les lignes pour choisir leur ordre sur le site, au sein de chaque groupe.
@@ -373,6 +377,7 @@ export interface Category {
   group: 'tech' | 'project' | 'journal';
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * Entrées de la frise des expériences professionnelles. Glissez-déposez les lignes pour choisir leur ordre sur le site. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie.
@@ -408,6 +413,7 @@ export interface Experience {
   currentlyWorking?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -425,6 +431,7 @@ export interface Company {
   description?: string | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * Compétences regroupées par catégorie, affichées dans la section compétences.
@@ -447,6 +454,7 @@ export interface Skill {
   invertLogoInDarkMode?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * Écoles référencées par les entrées de formation.
@@ -463,6 +471,7 @@ export interface School {
   description?: string | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * Entrées de la frise des formations. Glissez-déposez les lignes pour choisir leur ordre sur le site. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie.
@@ -497,6 +506,7 @@ export interface Education {
   currentlyStudying?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -522,6 +532,7 @@ export interface Testimonial {
   featured?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * Messages envoyés depuis le formulaire de contact du site.
@@ -537,6 +548,7 @@ export interface Message {
   read?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * Récits personnels, hors technique : voyages, sport, réussites, événements, découvertes. Glissez-déposez les lignes pour choisir leur ordre sur le site. Une publication programmée part au passage quotidien de 7 h UTC qui suit l’heure choisie.
@@ -587,6 +599,7 @@ export interface Journal {
   };
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -836,6 +849,7 @@ export interface MediaSelect<T extends boolean = true> {
   _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   url?: T;
   thumbnailURL?: T;
   filename?: T;
@@ -856,6 +870,7 @@ export interface VideosSelect<T extends boolean = true> {
   _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   url?: T;
   thumbnailURL?: T;
   filename?: T;
@@ -898,6 +913,7 @@ export interface ProjectsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -917,6 +933,7 @@ export interface ExperiencesSelect<T extends boolean = true> {
   currentlyWorking?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -931,6 +948,7 @@ export interface SkillsSelect<T extends boolean = true> {
   invertLogoInDarkMode?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -946,6 +964,7 @@ export interface TechnologiesSelect<T extends boolean = true> {
   category?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -958,6 +977,7 @@ export interface CategoriesSelect<T extends boolean = true> {
   group?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -971,6 +991,7 @@ export interface CompaniesSelect<T extends boolean = true> {
   description?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -984,6 +1005,7 @@ export interface SchoolsSelect<T extends boolean = true> {
   description?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1001,6 +1023,7 @@ export interface EducationSelect<T extends boolean = true> {
   currentlyStudying?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -1017,6 +1040,7 @@ export interface TestimonialsSelect<T extends boolean = true> {
   featured?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1029,6 +1053,7 @@ export interface MessagesSelect<T extends boolean = true> {
   read?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1061,6 +1086,7 @@ export interface JournalSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**

@@ -1,6 +1,8 @@
 import { expect, test, type Page } from '@playwright/test'
 
+import { textToLexicalParagraphs } from '../../src/lib/richText'
 import { login } from '../helpers/login'
+import { loginAsEditor } from './api'
 import { editor, projects } from './fixtures'
 
 test.describe('Admin Panel', () => {
@@ -65,5 +67,52 @@ test.describe('Admin Panel', () => {
     }
     await expect(page.locator('#action-unpublish')).toHaveCount(0)
     await expect(page.getByText('Annuler la publication')).toHaveCount(0)
+  })
+
+  // "Supprimer" on a collection with a trash moves the document there instead
+  // of erasing it, and the trash view can bring it back. The project is
+  // created for the test so the seeded ones stay as they are.
+  test('moves a deleted project to the trash and restores it', async ({ request }) => {
+    const title = 'Projet corbeille E2E'
+    // A cell of the list, not any text: the toast also names the project.
+    const row = page.locator('td', { hasText: title })
+    const api = await loginAsEditor(request)
+    const { id } = await api.create('projects', {
+      _status: 'published',
+      description: textToLexicalParagraphs('Description.'),
+      shortDescription: 'Courte description.',
+      slug: 'e2e-trash',
+      title,
+    })
+
+    try {
+      await page.goto(`/admin/collections/projects/${id}`)
+      await expect(page.locator('input[name="title"]')).toHaveValue(title)
+
+      await page.locator('.doc-controls__dots').click()
+      await page.locator('#action-delete').click()
+      await page.locator('#confirm-action').click()
+
+      // Gone from the regular list...
+      await expect(page).toHaveURL(/\/admin\/collections\/projects(\?|$)/)
+      await expect(row).toHaveCount(0)
+
+      // ...and listed in the trash view.
+      await page.goto('/admin/collections/projects/trash')
+      await expect(row).toBeVisible()
+
+      await page.goto(`/admin/collections/projects/trash/${id}`)
+      await page.locator('#action-restore').click()
+      await page.locator('#confirm-action').click()
+      await expect(page).toHaveURL(/\/admin\/collections\/projects\/\d+/)
+
+      await page.goto('/admin/collections/projects')
+      await expect(row).toBeVisible()
+
+      await page.goto('/admin/collections/projects/trash')
+      await expect(row).toHaveCount(0)
+    } finally {
+      await api.remove('projects', id)
+    }
   })
 })

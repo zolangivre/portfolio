@@ -5,7 +5,7 @@ import { ViewTransition } from 'react'
 
 import { AdjacentNav } from '@/components/ui/AdjacentNav'
 import { AnimatedTitle } from '@/components/ui/AnimatedTitle'
-import { TechChip } from '@/components/ui/TechChip'
+import { presentTechnologies, TechChip } from '@/components/ui/TechChip'
 import { Container } from '@/components/ui/Container'
 import { DeviceMockup } from '@/components/ui/DeviceMockup'
 import { Divider } from '@/components/ui/Divider'
@@ -106,7 +106,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
   const statusLabel = project.status
     ? (dictionary.projects.statusLabels[project.status] ?? project.status)
     : null
-  const technologies = project.technologies ?? []
+  const technologies = presentTechnologies(project.technologies)
   // Both collections can be dropped in the same gallery, and their ids are
   // independent sequences — so the key has to carry the collection too, or a
   // media and a video that happen to share an id collide in the React list.
@@ -270,9 +270,9 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                 aria-label={`${project.title} ${dictionary.projects.technologiesAriaLabelSuffix}`}
                 className="mt-8 flex flex-wrap gap-2"
               >
-                {technologies.map((technology, index) => (
+                {technologies.map((technology) => (
                   <TechChip
-                    key={typeof technology === 'object' && technology ? technology.id : index}
+                    key={typeof technology === 'object' ? technology.id : technology}
                     technology={technology}
                     wrap
                   />

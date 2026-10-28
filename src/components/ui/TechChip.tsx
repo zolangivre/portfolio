@@ -5,7 +5,8 @@ import { getMediaUrl } from '@/lib/media'
 import type { Technology } from '@/payload-types'
 
 type TechChipProps = {
-  technology: Technology | number
+  /** `null` is a technology in the trash: Payload populates it as `null`. */
+  technology: Technology | number | null
   /**
    * A name too long for the row ("AWS Elastic Container Service (Fargate)")
    * is cut with an ellipsis by default — cards stay tidy, the full name is
@@ -21,8 +22,23 @@ type TechChipProps = {
 const CHIP_CLASSNAME = pillClassName({ className: 'max-w-full' })
 const LINK_CHIP_CLASSNAME = pillClassName({ className: 'max-w-full', interactive: true })
 
+/**
+ * A relationship's technologies without the ones in the trash, which Payload
+ * populates as `null`: a list renders no empty chip for them, and no list at
+ * all once they're all gone.
+ */
+export function presentTechnologies(
+  technologies: (Technology | number | null)[] | null | undefined,
+): (Technology | number)[] {
+  return (technologies ?? []).filter((technology) => technology !== null)
+}
+
 export function TechChip({ technology, wrap = false }: TechChipProps) {
-  const isResolved = typeof technology === 'object' && technology !== null
+  if (technology === null) {
+    return null
+  }
+
+  const isResolved = typeof technology === 'object'
 
   if (!isResolved) {
     return (

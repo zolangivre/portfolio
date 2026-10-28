@@ -10,6 +10,7 @@ import { withUniqueSuffix } from '@/lib/uploadFilename'
 
 export const Media: CollectionConfig = {
   slug: 'media',
+  trash: true,
   labels: {
     singular: 'Média',
     plural: 'Médias',
