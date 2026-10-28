@@ -13,6 +13,7 @@ Nothing merges, deploys or writes to the production CMS by itself.
 | [Subagents](subagents.md)                   | The reviewers and the test writer the commands call                       |
 | [Hooks and settings](hooks-and-settings.md) | What runs around each of Claude's actions, permissions, instruction files |
 | [Claude on GitHub](github-agents.md)        | The two workflows that run Claude without you                             |
+| [Claude in the CMS (MCP)](mcp.md)           | Reading and editing the site's content from Claude, drafts only           |
 
 ## Four layers
 

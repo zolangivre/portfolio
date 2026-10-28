@@ -14,6 +14,7 @@ ne déploie ni n'écrit dans le CMS de production tout seul.
 | [Sous-agents](subagents.fr.md)                | Les reviewers et le rédacteur de tests que les commandes appellent                            |
 | [Hooks et réglages](hooks-and-settings.fr.md) | Ce qui tourne autour de chaque action de Claude, les permissions, les fichiers d'instructions |
 | [Claude sur GitHub](github-agents.fr.md)      | Les deux workflows qui lancent Claude sans toi                                                |
+| [Claude dans le CMS (MCP)](mcp.fr.md)         | Lire et modifier le contenu du site depuis Claude, en brouillon seulement                     |
 
 ## Quatre niveaux
 
