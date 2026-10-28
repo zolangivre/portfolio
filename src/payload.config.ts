@@ -1,4 +1,5 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { resendAdapter } from '@payloadcms/email-resend'
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
@@ -27,6 +28,7 @@ import { Journal } from './collections/Journal'
 import { redirectsConfig } from './collections/Redirects'
 import { refuseGlobalUnpublishSchedule } from './collections/drafts'
 import { canRunJobs } from './lib/access'
+import { parseSender } from './lib/emailSender'
 import { previewPath, previewURL } from './lib/preview'
 import { adminGroups, translateSeoFields } from './lib/adminLabels'
 import { GlobalSettings } from './globals/GlobalSettings'
@@ -40,6 +42,21 @@ import { SectionsContent } from './globals/SectionsContent'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+// Payload's own emails (the admin's "Mot de passe oublié") go through Resend,
+// with the contact notification's key and sender (hooks/notifyNewMessage.ts).
+// Without them Payload writes each email to the console, as local
+// development and the tests want; in production that meant a reset link
+// nobody received.
+const emailSender = parseSender(process.env.CONTACT_NOTIFICATION_FROM)
+const email =
+  process.env.RESEND_API_KEY && emailSender
+    ? resendAdapter({
+        apiKey: process.env.RESEND_API_KEY,
+        defaultFromAddress: emailSender.address,
+        defaultFromName: emailSender.name,
+      })
+    : undefined
 
 /**
  * The R2 wiring shared by both s3Storage instances below. Held in one place so
@@ -255,6 +272,7 @@ export default buildConfig({
       },
     }),
   },
+  email,
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     // Off in the test suites (.env.test, .env.e2e): they load this config
