@@ -4,12 +4,26 @@ import { OG_CONTENT_TYPE, OG_SIZE, renderOgImage } from '@/lib/og'
 import { getGlobalSettings, getJournalEntries, getSectionsContent } from '@/lib/queries'
 import { resolveSectionCopy } from '@/lib/sectionCopy'
 
-export const alt = 'Journal'
-export const contentType = OG_CONTENT_TYPE
-export const size = OG_SIZE
+// Rendered on first request, then cached: a card built while the media host
+// was down (text-only fallback) is rebuilt within a day, like the pages.
+export const revalidate = 86400
 
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }))
+/** The alt text is the section's title, in the page's language. */
+export async function generateImageMetadata({ params }: { params: { locale: string } }) {
+  const locale: Locale = locales.includes(params.locale as Locale)
+    ? (params.locale as Locale)
+    : defaultLocale
+  const dictionary = getDictionary(locale)
+  const sectionsContent = await getSectionsContent(locale)
+
+  return [
+    {
+      alt: resolveSectionCopy(sectionsContent?.journal, dictionary.journal).title,
+      contentType: OG_CONTENT_TYPE,
+      id: 'card',
+      size: OG_SIZE,
+    },
+  ]
 }
 
 export default async function OpengraphImage({
