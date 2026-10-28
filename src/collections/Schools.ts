@@ -4,10 +4,12 @@ import {
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
+import { readUntrashedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 
 export const Schools: CollectionConfig = {
   slug: 'schools',
+  trash: true,
   labels: {
     singular: 'École',
     plural: 'Écoles',
@@ -19,7 +21,7 @@ export const Schools: CollectionConfig = {
     useAsTitle: 'name',
   },
   access: {
-    read: () => true,
+    read: readUntrashedOrAuthenticated,
   },
   hooks: {
     afterChange: [revalidateCollectionAfterChange],

@@ -6,13 +6,14 @@ import {
   revalidateCollectionAfterChange,
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
-import { readPublishedOrAuthenticated } from '@/lib/access'
+import { readPublishedUntrashedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 
 import { draftVersions, SCHEDULE_HINT } from './drafts'
 
 export const Education: CollectionConfig = {
   slug: 'education',
+  trash: true,
   labels: {
     singular: 'Formation',
     plural: 'Formations',
@@ -28,7 +29,7 @@ export const Education: CollectionConfig = {
   orderable: true,
   versions: draftVersions(),
   access: {
-    read: readPublishedOrAuthenticated,
+    read: readPublishedUntrashedOrAuthenticated,
   },
   hooks: {
     beforeChange: [prependToOrder, rememberLiveState],

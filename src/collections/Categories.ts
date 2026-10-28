@@ -5,10 +5,12 @@ import {
   revalidateCollectionAfterDelete,
 } from '@/hooks/revalidateSite'
 import { prependToOrder } from '@/hooks/prependToOrder'
+import { readUntrashedOrAuthenticated } from '@/lib/access'
 import { adminGroups } from '@/lib/adminLabels'
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
+  trash: true,
   labels: {
     singular: 'Catégorie',
     plural: 'Catégories',
@@ -22,7 +24,7 @@ export const Categories: CollectionConfig = {
   },
   orderable: true,
   access: {
-    read: () => true,
+    read: readUntrashedOrAuthenticated,
   },
   hooks: {
     beforeChange: [prependToOrder],

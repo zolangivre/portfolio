@@ -1,10 +1,25 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 
 import { notifyNewMessage } from '@/hooks/notifyNewMessage'
 import { adminGroups } from '@/lib/adminLabels'
 
+/**
+ * `create` is public (the contact form), and trash adds a `deletedAt` field
+ * any caller could set: a message created straight into the trash would
+ * still send its notification, yet never show in the inbox. Only an editor
+ * decides what goes to the trash.
+ */
+const ignoreDeletedAtFromVisitors: CollectionBeforeChangeHook = ({ data, operation, req }) => {
+  if (operation === 'create' && !req.user) {
+    delete data.deletedAt
+  }
+
+  return data
+}
+
 export const Messages: CollectionConfig = {
   slug: 'messages',
+  trash: true,
   labels: {
     singular: 'Message',
     plural: 'Messages',
@@ -16,6 +31,7 @@ export const Messages: CollectionConfig = {
     useAsTitle: 'name',
   },
   hooks: {
+    beforeChange: [ignoreDeletedAtFromVisitors],
     afterChange: [notifyNewMessage],
   },
   access: {
