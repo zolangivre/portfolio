@@ -33,6 +33,10 @@ import { ColorSwatchSelect as ColorSwatchSelect_eeb1140fc360ea32b694b4c22891a946
 import { NoUnpublishButton as NoUnpublishButton_c0e70d66fcd0ba378767bc718a4c0178 } from '../../../components/admin/NoUnpublishButton'
 import { AdminLogo as AdminLogo_3c20596c7457c7d08948beafb1767dff } from '../../../components/admin/graphics/AdminLogo'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
+import { UnreadMessagesWidget as UnreadMessagesWidget_a24033850c65548a3205d7beb88aebbb } from '../../../components/admin/dashboard/UnreadMessagesWidget'
+import { PendingDraftsWidget as PendingDraftsWidget_907453173de47706fcf64278b8bef626 } from '../../../components/admin/dashboard/PendingDraftsWidget'
+import { ScheduledPublishesWidget as ScheduledPublishesWidget_4b1f6991aa646bdd88825d30c725c652 } from '../../../components/admin/dashboard/ScheduledPublishesWidget'
+import { RecentChangesWidget as RecentChangesWidget_c557bc1a103be128cacaac5808272a43 } from '../../../components/admin/dashboard/RecentChangesWidget'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -72,5 +76,9 @@ export const importMap = {
   "/components/admin/NoUnpublishButton#NoUnpublishButton": NoUnpublishButton_c0e70d66fcd0ba378767bc718a4c0178,
   "/components/admin/graphics/AdminLogo#AdminLogo": AdminLogo_3c20596c7457c7d08948beafb1767dff,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
+  "/components/admin/dashboard/UnreadMessagesWidget#UnreadMessagesWidget": UnreadMessagesWidget_a24033850c65548a3205d7beb88aebbb,
+  "/components/admin/dashboard/PendingDraftsWidget#PendingDraftsWidget": PendingDraftsWidget_907453173de47706fcf64278b8bef626,
+  "/components/admin/dashboard/ScheduledPublishesWidget#ScheduledPublishesWidget": ScheduledPublishesWidget_4b1f6991aa646bdd88825d30c725c652,
+  "/components/admin/dashboard/RecentChangesWidget#RecentChangesWidget": RecentChangesWidget_c557bc1a103be128cacaac5808272a43,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

@@ -96,6 +96,45 @@ export default buildConfig({
         Logo: '/components/admin/graphics/AdminLogo#AdminLogo',
       },
     },
+    // The dashboard: what needs attention first, then Payload's own grid of
+    // collections (the built-in `collections` widget). The widget API is
+    // experimental in Payload 3 and slated for a redesign in v4.
+    dashboard: {
+      widgets: [
+        {
+          slug: 'unread-messages',
+          Component: '/components/admin/dashboard/UnreadMessagesWidget#UnreadMessagesWidget',
+          label: 'Messages non lus',
+          minWidth: 'small',
+        },
+        {
+          slug: 'pending-drafts',
+          Component: '/components/admin/dashboard/PendingDraftsWidget#PendingDraftsWidget',
+          label: 'Brouillons en cours',
+          minWidth: 'small',
+        },
+        {
+          slug: 'scheduled-publishes',
+          Component:
+            '/components/admin/dashboard/ScheduledPublishesWidget#ScheduledPublishesWidget',
+          label: 'Publications programmées',
+          minWidth: 'small',
+        },
+        {
+          slug: 'recent-changes',
+          Component: '/components/admin/dashboard/RecentChangesWidget#RecentChangesWidget',
+          label: 'Dernières modifications',
+          minWidth: 'small',
+        },
+      ],
+      defaultLayout: [
+        { widgetSlug: 'unread-messages', width: 'medium' },
+        { widgetSlug: 'pending-drafts', width: 'medium' },
+        { widgetSlug: 'scheduled-publishes', width: 'medium' },
+        { widgetSlug: 'recent-changes', width: 'medium' },
+        { widgetSlug: 'collections', width: 'full' },
+      ],
+    },
     // Every document the site renders can be previewed in place: a project or
     // a journal entry on its own page, everything else on the homepage, in
     // the locale being edited (lib/preview.ts). The panel opens on demand.
