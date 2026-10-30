@@ -125,7 +125,7 @@ dans le **Backlog**.
 | [`claude-review.yml`](github-agents.fr.md#la-revue-de-pr)           | Seulement quand tu ajoutes le label `review` à une PR vers `staging`                                                     |
 | [`security-sweep.yml`](github-agents.fr.md#le-balayage-de-sécurité) | Démarre chaque nuit, mais Claude ne tourne que si l'ensemble des alertes ouvertes a changé, ou si tu le lances à la main |
 
-`ci.yml`, `release.yml`, Dependabot et le hook git n'appellent pas Claude.
+`ci.yml`, `release.yml`, `production-check.yml`, Dependabot et le hook git n'appellent pas Claude.
 Les deux workflows utilisent `CLAUDE_CODE_OAUTH_TOKEN` : ils comptent dans
 les mêmes limites d'abonnement que tes propres sessions. Pour en mettre un en
 pause, désactive-le dans l'onglet Actions (⋯ → Disable workflow).
