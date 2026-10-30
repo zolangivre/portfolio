@@ -22,6 +22,7 @@ set up on GitHub for it all to work. Back to the [docs index](../README.md).
 | [`workflows/security-sweep.yml`](../../.github/workflows/security-sweep.yml) | The nightly security sweep                                                                         | [Claude on GitHub](../ai/github-agents.md#the-security-sweep) |
 | [`dependabot.yml`](../../.github/dependabot.yml)                             | npm every Monday, GitHub Actions every month, PRs against `staging`                                | [Dependabot](dependabot.md)                                   |
 | [`ci-site-changed.sh`](../../.github/ci-site-changed.sh)                     | Decides whether a PR needs the integration and e2e tests                                           | [CI](ci.md#changes-skipping-the-slow-tests)                   |
+| [`lighthouse-summary.sh`](../../.github/lighthouse-summary.sh)               | Turns a Lighthouse run into a Summary and annotations                                              | [CI](ci.md#lighthouse)                                        |
 | [`check-doc-pairs.sh`](../../.github/check-doc-pairs.sh)                     | Fails a PR that changes one language of a translated doc only                                      | [CI](ci.md#docs-fren-in-sync)                                 |
 | [`pull_request_template.md`](../../.github/pull_request_template.md)         | The four sections of every PR body                                                                 | [below](#the-pr-template)                                     |
 

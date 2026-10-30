@@ -37,6 +37,8 @@ const eslintConfig = [
       '.next-e2e/',
       'coverage/',
       'playwright-report/',
+      'lighthouse-report/',
+      '.lighthouseci/',
       'test-results/',
       'src/payload-types.ts',
       'src/payload-generated-schema.ts',
