@@ -17,20 +17,23 @@ flowchart LR
   D["Docs fr/en in sync<br/>(PR seulement)"]
   C[Changes] --> I[Integration tests]
   C --> E[E2E tests]
+  C --> H[Lighthouse]
 ```
 
 | Job                | Fait                                                                                                              | Postgres    | Durée    |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------- | ----------- | -------- |
-| Lint & typecheck   | `pnpm lint`, `pnpm exec tsc --noEmit`                                                                             | non         | ~40 s    |
+| Lint & typecheck   | `pnpm lint`, `pnpm exec tsc --noEmit`, [`pnpm knip`](#knip)                                                       | non         | ~1 min   |
 | Unit tests         | `pnpm test:coverage` (échoue sous 90 %), puis `pnpm test:dom` (les composants dans jsdom, une seconde environ)    | non         | ~30 s    |
 | Docs fr/en in sync | [`check-doc-pairs.sh`](#docs-fren-synchronisées), sur les PR seulement                                            | non         | secondes |
 | Changes            | [`ci-site-changed.sh`](#changes--sauter-les-tests-lents) : les jobs lents doivent-ils tourner ?                   | non         | secondes |
 | Integration tests  | `pnpm test:int` : la vraie Local API de Payload, [test de dérive du schéma](#le-test-de-dérive-du-schéma) compris | oui, vide   | ~50 s    |
 | E2E tests          | `pnpm test:e2e` : Chromium et `mobile-safari` (iPhone 15, WebKit) sur le build de production avec contenu de test | oui, rempli | ~4 min   |
+| Lighthouse         | [`pnpm lighthouse`](#lighthouse) : budgets de performance sur le même build, en simple avertissement              | oui, rempli | ~4 min   |
 
 Chaque job tourne sur Ubuntu avec Node 24 et `pnpm install --frozen-lockfile`.
-Les six sont des vérifications obligatoires du [ruleset](README.fr.md#ruleset)
-(leurs noms doivent y correspondre).
+Les six premiers sont des vérifications obligatoires du
+[ruleset](README.fr.md#ruleset) (leurs noms doivent y correspondre). Pas
+Lighthouse : les temps d'un runner partagé varient trop pour bloquer un merge.
 
 ## Quand un job est sauté
 
@@ -53,7 +56,7 @@ indéfiniment.
 ## Changes : sauter les tests lents
 
 Sur une pull request, [`ci-site-changed.sh`](../../.github/ci-site-changed.sh)
-décide si l'intégration et l'e2e (5 minutes environ) doivent tourner. Il
+décide si l'intégration, l'e2e et Lighthouse doivent tourner. Il
 liste ce qui peut être sauté **sans risque**, pas ce qui est risqué :
 
 | Fichiers modifiés                                                                                                              | Intégration et e2e |
@@ -64,8 +67,8 @@ liste ce qui peut être sauté **sans risque**, pas ce qui est risqué :
 | Aucun fichier modifié trouvé                                                                                                   | lancés             |
 
 Il écrit `site=true|false` dans la sortie du job et la raison dans le Summary
-du passage. **Échec fermé** : l'intégration et l'e2e ne sont sautés que si
-Changes a tourné, a réussi et a dit `false`. Si Changes a échoué, ils
+du passage. **Échec fermé** : ces jobs ne sont sautés que si Changes a
+tourné, a réussi et a dit `false`. Si Changes a échoué, ils
 tournent quand même. Les push sur `staging` et `main` lancent toujours tout :
 c'est ce que Vercel déploie.
 
@@ -136,6 +139,39 @@ build de production que celui que déploie Vercel.
 - **Rapport** : toujours envoyé comme artefact `playwright-report`, gardé 7
   jours, avec une vidéo, une capture et une trace complète pour chaque échec.
   Télécharge-le, puis `pnpm exec playwright show-report <dossier>`.
+
+## Lighthouse
+
+[`lighthouserc.cjs`](../../lighthouserc.cjs) mesure trois pages, trois fois
+chacune, sur le build de production de
+[`tests/e2e/serve.ts`](../../tests/e2e/serve.ts), et garde le passage médian.
+
+- **Budgets** : score de performance, score d'accessibilité, décalage de mise
+  en page, temps de blocage, poids des scripts et poids total. Ils ne font
+  qu'avertir. Un budget dépassé est une annotation sur le passage, et le
+  Summary donne les scores de chaque page
+  ([`lighthouse-summary.sh`](../../.github/lighthouse-summary.sh)). Rien
+  n'échoue à cause d'eux.
+- **Ce que ça ne dit pas** : le contenu de test n'a ni images ni vidéo, donc
+  pas de budget sur le LCP, et les poids ne concernent que le code. Les vrais
+  visiteurs sont dans Speed Insights, sur Vercel.
+- **Rapport** : envoyé comme artefact `lighthouse-report`, gardé 7 jours.
+  Ouvre les fichiers `.html`.
+- **`pnpm dlx`, pas une dépendance** : `@lhci/cli` ajouterait environ 200
+  paquets et 8 alertes d'audit, pour un outil qui ne part jamais en production.
+  La version est figée dans le script `lighthouse` de `package.json`, Dependabot
+  ne la suit donc pas : à monter à la main.
+
+Pour trouver ce qui a grossi, `pnpm analyze` ouvre l'analyseur de bundle de
+Next. `pnpm lighthouse` se lance en local avec Postgres démarré : il utilise le
+port 3100 et la base e2e.
+
+## Knip
+
+`pnpm knip` échoue sur un fichier, une dépendance ou un export inutilisé. Comme
+c'est le job Lint, obligatoire, un faux positif bloque un merge : déclare-le
+dans [`knip.jsonc`](../../knip.jsonc), qui dit déjà pourquoi `prettier`,
+`tests/e2e/prepare.ts` et les tokens de mouvement restent.
 
 ## Lire un passage rouge
 

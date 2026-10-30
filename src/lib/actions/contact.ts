@@ -3,8 +3,6 @@
 import { EMAIL_PATTERN, type ContactField } from '@/lib/contactValidation'
 import { createMessage } from '@/lib/queries/messages'
 
-export type { ContactField }
-
 export type ContactFormState = {
   error?: string
   /** The field the error is about, so the form can mark and focus it. */

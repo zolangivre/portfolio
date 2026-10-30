@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { Baloo_2, Bagel_Fat_One, Inter } from 'next/font/google'
 import React from 'react'
 import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 import { Footer } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'
@@ -219,6 +220,7 @@ export default async function LocaleLayout(props: {
           </>
         ) : null}
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )

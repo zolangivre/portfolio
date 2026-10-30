@@ -1,0 +1,13 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  // Started by name, not imported: serve.ts runs prepare.ts through execFile,
+  // and Lighthouse CI finds its config by itself.
+  "entry": ["tests/e2e/prepare.ts", "lighthouserc.cjs"],
+  // Run by the Claude Code format hook and by the editor, never from a script.
+  "ignoreDependencies": ["prettier"],
+  "ignoreExportsUsedInFile": true,
+  "ignoreIssues": {
+    // Mirrors the custom properties of globals.css one to one, used or not.
+    "src/lib/motion/tokens.ts": ["exports"],
+  },
+}

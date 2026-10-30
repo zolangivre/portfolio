@@ -54,6 +54,11 @@ jobs:
       - name: Typecheck
         run: pnpm exec tsc --noEmit
 
+      # Unused files, dependencies and exports. knip.jsonc says what looks
+      # unused but isn't.
+      - name: Knip
+        run: pnpm knip
+
   # README.md and the docs exist in English and French (<name>.fr.md): a PR
   # that changes one language and not the other fails here. See the script
   # for the `Docs-Sync: skip` escape hatch. Pull requests only, minus the same
@@ -230,4 +235,61 @@ jobs:
         with:
           name: playwright-report
           path: playwright-report/
+          retention-days: 7
+
+  # Performance budgets (lighthouserc.cjs) on the same seeded production build
+  # as e2e, in its own job: e2e's server stops with the suite. Budgets only warn
+  # and this isn't a required check. A budget that isn't met shows as an
+  # annotation on the run and in its Summary (lighthouse-summary.sh). `pnpm
+  # lighthouse` runs @lhci/cli through dlx, not as a dependency: it would add
+  # 200 packages and 8 audit findings for a tool that never ships.
+  lighthouse:
+    name: Lighthouse
+    needs: changes
+    # Fail closed: same condition as e2e.
+    if: >-
+      ${{ !cancelled() && needs.changes.result != 'skipped' &&
+          !(needs.changes.result == 'success' && needs.changes.outputs.site == 'false') }}
+    runs-on: ubuntu-latest
+    # Matches .env.e2e, as in the e2e job.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: payload-portfolio-e2e-test
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lighthouse
+        run: pnpm lighthouse
+
+      - name: Report budgets
+        if: ${{ !cancelled() }}
+        run: bash .github/lighthouse-summary.sh
+
+      - name: Upload Lighthouse report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: lighthouse-report
+          path: lighthouse-report/
           retention-days: 7
