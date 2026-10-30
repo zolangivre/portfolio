@@ -46,6 +46,9 @@ importers:
       '@vercel/analytics':
         specifier: ^2.0.1
         version: 2.0.1(next@16.4.3(@babel/core@7.29.7)(@playwright/test@1.64.1)(@types/node@24.19.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(sass@1.77.4))(react@19.3.1)
+      '@vercel/speed-insights':
+        specifier: ^2.0.0
+        version: 2.0.0(next@16.4.3(@babel/core@7.29.7)(@playwright/test@1.64.1)(@types/node@24.19.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(sass@1.77.4))(react@19.3.1)
       cross-env:
         specifier: ^10.1.0
         version: 10.1.0
@@ -2359,6 +2362,32 @@ packages:
     peerDependenciesMeta:
       '@remix-run/react':
         optional: true
+      '@sveltejs/kit':
+        optional: true
+      next:
+        optional: true
+      nuxt:
+        optional: true
+      react:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+      vue-router:
+        optional: true
+
+  '@vercel/speed-insights@2.0.0':
+    resolution: {integrity: sha512-jwkNcrTeafWxjmWq4AHBaptSqZiJkYU5adLC9QBSqeim0GcqDMgN5Ievh8OG1rJ6W3A4l1oiP7qr9CWxGuzu3w==}
+    peerDependencies:
+      '@sveltejs/kit': ^1 || ^2
+      next: '>= 13'
+      nuxt: '>= 3'
+      react: ^18 || ^19 || ^19.0.0-rc
+      svelte: '>= 4'
+      vue: ^3
+      vue-router: ^4
+    peerDependenciesMeta:
       '@sveltejs/kit':
         optional: true
       next:
@@ -6785,7 +6814,7 @@ snapshots:
       '@modelcontextprotocol/sdk': 1.30.0(zod@3.25.76)
       '@types/json-schema': 7.0.15
       json-schema-to-zod: 2.6.1
-      mcp-handler: 1.1.0(@modelcontextprotocol/sdk@1.30.0(zod@4.6.7))(next@16.4.3(@babel/core@7.29.7)(@playwright/test@1.64.1)(@types/node@24.19.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(sass@1.77.4))
+      mcp-handler: 1.1.0(@modelcontextprotocol/sdk@1.30.0(zod@3.25.76))(next@16.4.3(@babel/core@7.29.7)(@playwright/test@1.64.1)(@types/node@24.19.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(sass@1.77.4))
       payload: 3.92.0(graphql@16.14.2)(typescript@5.9.3)
       zod: 3.25.76
     transitivePeerDependencies:
@@ -7424,6 +7453,11 @@ snapshots:
     optional: true
 
   '@vercel/analytics@2.0.1(next@16.4.3(@babel/core@7.29.7)(@playwright/test@1.64.1)(@types/node@24.19.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(sass@1.77.4))(react@19.3.1)':
+    optionalDependencies:
+      next: 16.4.3(@babel/core@7.29.7)(@playwright/test@1.64.1)(@types/node@24.19.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(sass@1.77.4)
+      react: 19.3.1
+
+  '@vercel/speed-insights@2.0.0(next@16.4.3(@babel/core@7.29.7)(@playwright/test@1.64.1)(@types/node@24.19.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(sass@1.77.4))(react@19.3.1)':
     optionalDependencies:
       next: 16.4.3(@babel/core@7.29.7)(@playwright/test@1.64.1)(@types/node@24.19.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(sass@1.77.4)
       react: 19.3.1
@@ -9147,7 +9181,7 @@ snapshots:
 
   math-intrinsics@1.1.0: {}
 
-  mcp-handler@1.1.0(@modelcontextprotocol/sdk@1.30.0(zod@4.6.7))(next@16.4.3(@babel/core@7.29.7)(@playwright/test@1.64.1)(@types/node@24.19.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(sass@1.77.4)):
+  mcp-handler@1.1.0(@modelcontextprotocol/sdk@1.30.0(zod@3.25.76))(next@16.4.3(@babel/core@7.29.7)(@playwright/test@1.64.1)(@types/node@24.19.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(sass@1.77.4)):
     dependencies:
       '@modelcontextprotocol/sdk': 1.30.0(zod@3.25.76)
       chalk: 5.6.2
