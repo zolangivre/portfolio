@@ -53,11 +53,6 @@ node_modules/
 
 scripts
 
-.codex
-.agents
-
-AGENTS.md
-
 /plans
 
 # /security-sweep working files (alerts fetched from GitHub)

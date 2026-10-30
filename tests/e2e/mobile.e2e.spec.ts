@@ -47,6 +47,30 @@ test('tapping outside the drawer closes it', async ({ page }) => {
   await expect(openButton(page)).toHaveAttribute('aria-expanded', 'false')
 })
 
+// The only theme switch WebKit runs: on a scrolled page the header goes through
+// the reveal as part of the page, and takes its own transition layer back after.
+test('the theme switches from the menu of a scrolled page', async ({ page }) => {
+  const html = page.locator('html')
+  const header = page.locator('.site-header')
+
+  await page.goto('/fr')
+  await page.evaluate(() => window.scrollTo({ behavior: 'instant', top: 800 }))
+  await expect(header).toHaveAttribute('data-scrolled', 'true')
+
+  await openButton(page).click()
+  await page
+    .getByRole('group', { name: 'Changer de thème' })
+    .getByRole('button', { name: 'Thème sombre' })
+    .click()
+
+  await expect(html).toHaveClass(/\bdark\b/)
+  await expect(html).not.toHaveAttribute('data-theme-transition')
+  await expect(header).toHaveAttribute('data-scrolled', 'true')
+  expect(await header.evaluate((element) => getComputedStyle(element).viewTransitionName)).toBe(
+    'site-header',
+  )
+})
+
 test('choosing a link closes the menu and goes there', async ({ page }) => {
   await openButton(page).click()
   await primaryNav(page).getByRole('link', { name: 'Projets' }).click()
