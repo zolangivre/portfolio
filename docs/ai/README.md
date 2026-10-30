@@ -119,7 +119,7 @@ file is deleted, and whatever it left out moves to the **Backlog**.
 | [`claude-review.yml`](github-agents.md#the-pr-review)       | Only when you add the `review` label to a PR into `staging`                                                |
 | [`security-sweep.yml`](github-agents.md#the-security-sweep) | Starts every night, but Claude only runs when the set of open alerts changed, or when you start it by hand |
 
-`ci.yml`, `release.yml`, Dependabot and the git hook don't call Claude. The
+`ci.yml`, `release.yml`, `production-check.yml`, Dependabot and the git hook don't call Claude. The
 two workflows use `CLAUDE_CODE_OAUTH_TOKEN`, so they count against the same
 subscription limits as your own sessions. To pause one, disable it in the
 Actions tab (⋯ → Disable workflow).
