@@ -28,13 +28,28 @@ import { MetaTitleComponent as MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c08
 import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
+import { ExportListMenuItem as ExportListMenuItem_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
 import { CompanyLogoCell as CompanyLogoCell_d5ddffeb069462c232de28511023a1ff } from '../../../components/admin/RelatedLogoCell'
 import { TechColorSwatchCell as TechColorSwatchCell_d774248b171fa0efecab71e487730153 } from '../../../components/admin/TechColorSwatchCell'
 import { SchoolLogoCell as SchoolLogoCell_d5ddffeb069462c232de28511023a1ff } from '../../../components/admin/RelatedLogoCell'
+import { FormatField as FormatField_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
+import { LimitField as LimitField_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
+import { Page as Page_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
+import { SortBy as SortBy_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
+import { SortOrder as SortOrder_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
+import { LocaleField as LocaleField_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
+import { SelectionToUseField as SelectionToUseField_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
+import { FieldsToExport as FieldsToExport_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
+import { CollectionField as CollectionField_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
+import { ExportPreview as ExportPreview_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
+import { ExportSaveButton as ExportSaveButton_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
+import { ImportPreview as ImportPreview_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
+import { ImportSaveButton as ImportSaveButton_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
 import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { ColorSwatchSelect as ColorSwatchSelect_eeb1140fc360ea32b694b4c22891a946 } from '../../../components/admin/ColorSwatchSelect'
 import { NoUnpublishButton as NoUnpublishButton_c0e70d66fcd0ba378767bc718a4c0178 } from '../../../components/admin/NoUnpublishButton'
 import { AdminLogo as AdminLogo_3c20596c7457c7d08948beafb1767dff } from '../../../components/admin/graphics/AdminLogo'
+import { ImportExportProvider as ImportExportProvider_cdf7e044479f899a31f804427d568b36 } from '@payloadcms/plugin-import-export/rsc'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { UnreadMessagesWidget as UnreadMessagesWidget_a24033850c65548a3205d7beb88aebbb } from '../../../components/admin/dashboard/UnreadMessagesWidget'
 import { PendingDraftsWidget as PendingDraftsWidget_907453173de47706fcf64278b8bef626 } from '../../../components/admin/dashboard/PendingDraftsWidget'
@@ -74,13 +89,28 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaDescriptionComponent": MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
+  "@payloadcms/plugin-import-export/rsc#ExportListMenuItem": ExportListMenuItem_cdf7e044479f899a31f804427d568b36,
   "/components/admin/RelatedLogoCell#CompanyLogoCell": CompanyLogoCell_d5ddffeb069462c232de28511023a1ff,
   "/components/admin/TechColorSwatchCell#TechColorSwatchCell": TechColorSwatchCell_d774248b171fa0efecab71e487730153,
   "/components/admin/RelatedLogoCell#SchoolLogoCell": SchoolLogoCell_d5ddffeb069462c232de28511023a1ff,
+  "@payloadcms/plugin-import-export/rsc#FormatField": FormatField_cdf7e044479f899a31f804427d568b36,
+  "@payloadcms/plugin-import-export/rsc#LimitField": LimitField_cdf7e044479f899a31f804427d568b36,
+  "@payloadcms/plugin-import-export/rsc#Page": Page_cdf7e044479f899a31f804427d568b36,
+  "@payloadcms/plugin-import-export/rsc#SortBy": SortBy_cdf7e044479f899a31f804427d568b36,
+  "@payloadcms/plugin-import-export/rsc#SortOrder": SortOrder_cdf7e044479f899a31f804427d568b36,
+  "@payloadcms/plugin-import-export/rsc#LocaleField": LocaleField_cdf7e044479f899a31f804427d568b36,
+  "@payloadcms/plugin-import-export/rsc#SelectionToUseField": SelectionToUseField_cdf7e044479f899a31f804427d568b36,
+  "@payloadcms/plugin-import-export/rsc#FieldsToExport": FieldsToExport_cdf7e044479f899a31f804427d568b36,
+  "@payloadcms/plugin-import-export/rsc#CollectionField": CollectionField_cdf7e044479f899a31f804427d568b36,
+  "@payloadcms/plugin-import-export/rsc#ExportPreview": ExportPreview_cdf7e044479f899a31f804427d568b36,
+  "@payloadcms/plugin-import-export/rsc#ExportSaveButton": ExportSaveButton_cdf7e044479f899a31f804427d568b36,
+  "@payloadcms/plugin-import-export/rsc#ImportPreview": ImportPreview_cdf7e044479f899a31f804427d568b36,
+  "@payloadcms/plugin-import-export/rsc#ImportSaveButton": ImportSaveButton_cdf7e044479f899a31f804427d568b36,
   "@payloadcms/next/client#FolderTypeField": FolderTypeField_2b8867833a34864a02ddf429b0728a40,
   "/components/admin/ColorSwatchSelect#ColorSwatchSelect": ColorSwatchSelect_eeb1140fc360ea32b694b4c22891a946,
   "/components/admin/NoUnpublishButton#NoUnpublishButton": NoUnpublishButton_c0e70d66fcd0ba378767bc718a4c0178,
   "/components/admin/graphics/AdminLogo#AdminLogo": AdminLogo_3c20596c7457c7d08948beafb1767dff,
+  "@payloadcms/plugin-import-export/rsc#ImportExportProvider": ImportExportProvider_cdf7e044479f899a31f804427d568b36,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "/components/admin/dashboard/UnreadMessagesWidget#UnreadMessagesWidget": UnreadMessagesWidget_a24033850c65548a3205d7beb88aebbb,
   "/components/admin/dashboard/PendingDraftsWidget#PendingDraftsWidget": PendingDraftsWidget_907453173de47706fcf64278b8bef626,
