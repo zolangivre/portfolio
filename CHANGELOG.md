@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.5.0](https://github.com/zolangivre/portfolio/compare/v1.4.0...v1.5.0) (2026-10-30)
+
+
+### Nouveautés
+
+* **admin:** export the content as CSV or JSON from the admin lists ([94431e3](https://github.com/zolangivre/portfolio/commit/94431e3dc253719c921ead2416caaf5877aa8018))
+* **admin:** export the content as CSV or JSON from the admin lists ([fdb76d6](https://github.com/zolangivre/portfolio/commit/fdb76d692af02adf1bf2ca9f96eb50126acb6019))
+* **admin:** folders for media and videos, grouped lists ([af8b289](https://github.com/zolangivre/portfolio/commit/af8b289efd17f478c60d2bb97209e613376b1d6b))
+* **admin:** folders for media and videos, grouped lists ([73cea0d](https://github.com/zolangivre/portfolio/commit/73cea0df66ad3c42310adc2bc613bd04fa5ac4aa))
+* **admin:** send Payload's emails through Resend ([6e48139](https://github.com/zolangivre/portfolio/commit/6e4813973d25df4adf0ee03384207696cb42e8ad))
+* **admin:** send Payload's emails through Resend ([8800676](https://github.com/zolangivre/portfolio/commit/8800676ca737d5fe86f6b7ca18902c9df3215f63))
+* **site:** measure real visitors, and watch performance and dead code in CI ([6434d0d](https://github.com/zolangivre/portfolio/commit/6434d0d411ff026f99b949512d6c8e0d057ac8f6))
+* **site:** measure real visitors, and watch performance and dead code in CI ([509630f](https://github.com/zolangivre/portfolio/commit/509630f03a3bc63f76efeb80ce2ad2ae17e7ecc7))
+* **site:** redirects for old URLs, created on their own when a slug changes ([04446bb](https://github.com/zolangivre/portfolio/commit/04446bb5aa333f11f09c68d65f1a0892c2089463))
+* **site:** redirects for old URLs, created on their own when a slug changes ([0275fb3](https://github.com/zolangivre/portfolio/commit/0275fb3217480eecefd7102790e8f253e26392b1))
+* **site:** report errors to Sentry, with no visitor data ([49a9607](https://github.com/zolangivre/portfolio/commit/49a96071cc32719b4bcce93027f6552d5ae1fa36))
+* **site:** report errors to Sentry, with no visitor data ([d3c18ea](https://github.com/zolangivre/portfolio/commit/d3c18ea21bf167344d4fde7da09cd6a5b9e49380))
+
+
+### Corrections
+
+* **admin:** neutralize formulas anywhere a spreadsheet can start a cell ([f9fcb1d](https://github.com/zolangivre/portfolio/commit/f9fcb1d7496fa1d3fcbc9e618518f449e564e968))
+* **admin:** neutralize formulas behind any padding, quotes included ([d106337](https://github.com/zolangivre/portfolio/commit/d10633795e7a73a8b6cf1401b4f7a9cfbf2da71d))
+* **admin:** neutralize formulas in exported messages and close the imports API ([f8e1075](https://github.com/zolangivre/portfolio/commit/f8e10758eab297405c8dbeff1e55f6fe0ab34283))
+* **admin:** neutralize formulas in exported messages and close the imports API ([aa8caf5](https://github.com/zolangivre/portfolio/commit/aa8caf5eaad7cea99a54e642ad94e4954829f443))
+* **deps:** patch dompurify, vite and the MCP SDK ([e14f4e1](https://github.com/zolangivre/portfolio/commit/e14f4e17c494c766f416e47474b2e3517135f3dd))
+* **deps:** patch dompurify, vite and the MCP SDK ([be51bab](https://github.com/zolangivre/portfolio/commit/be51bab2a6aa92bdb0023bb49eee01b26dcc9b8b))
+* **seo:** give project and journal pages their own canonical, share cards and structured data ([7efebf2](https://github.com/zolangivre/portfolio/commit/7efebf2f4b8c21f90e0e1a2147b7cbbfcfe85625))
+* **seo:** give project and journal pages their own canonical, share cards and structured data ([dd1cdda](https://github.com/zolangivre/portfolio/commit/dd1cdda72e0e5849f7953ecdccda31f72cd12a6c))
+* **ui:** keep the old theme under the navbar until the reveal reaches it ([323ec25](https://github.com/zolangivre/portfolio/commit/323ec2553caf336dcebfefba98859ab947f22463))
+* **ui:** keep the old theme under the navbar until the reveal reaches it ([bebb92c](https://github.com/zolangivre/portfolio/commit/bebb92c7d3552e7e8c801ef53b650352e0d70a35))
+
 ## [1.4.0](https://github.com/zolangivre/portfolio/compare/v1.3.1...v1.4.0) (2026-10-28)
 
 
