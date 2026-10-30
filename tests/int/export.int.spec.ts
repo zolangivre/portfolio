@@ -63,7 +63,7 @@ beforeAll(async () => {
   messageId = (
     await payload.create({
       collection: 'messages',
-      data: { email: 'visitor@test.local', message: '@SUM(1+1)', name: FORMULA },
+      data: { email: 'visitor@test.local', message: '@SUM(1+1);=2+2;fin', name: FORMULA },
     })
   ).id
 })
@@ -128,7 +128,7 @@ describe("a visitor's message in an export", () => {
     expect(response.status).toBe(200)
     const csv = await response.text()
     expect(csv).toContain(`"'=HYPERLINK(""http://evil.test"",""clic"")"`)
-    expect(csv).toContain(`'@SUM(1+1)`)
+    expect(csv).toContain(`'@SUM(1+1);'=2+2;fin`)
     expect(csv).toContain('visitor@test.local')
   })
 
@@ -136,7 +136,7 @@ describe("a visitor's message in an export", () => {
     const response = await download({ collectionSlug: 'messages', format: 'json' })
 
     const docs = (await response.json()) as { message: string; name: string }[]
-    expect(docs.find((doc) => doc.name === FORMULA)?.message).toBe('@SUM(1+1)')
+    expect(docs.find((doc) => doc.name === FORMULA)?.message).toBe('@SUM(1+1);=2+2;fin')
   })
 })
 
