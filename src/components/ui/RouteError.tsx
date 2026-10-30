@@ -1,5 +1,6 @@
 'use client'
 
+import { captureException } from '@sentry/nextjs'
 import { useParams } from 'next/navigation'
 import { useEffect } from 'react'
 
@@ -32,6 +33,9 @@ export function RouteError({ error, reset }: RouteErrorProps) {
 
   useEffect(() => {
     console.error(error)
+    // An error with a digest came from the server, which already reported it
+    // (onRequestError in instrumentation.ts); here it has lost its message.
+    if (!error.digest) captureException(error)
   }, [error])
 
   return (
