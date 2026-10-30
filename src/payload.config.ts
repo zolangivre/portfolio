@@ -416,8 +416,9 @@ export default buildConfig({
     // for a backup that doesn't depend on Neon. Download only, run within the
     // request: the files are never stored (Vercel's disk doesn't keep them) and
     // the job queue only runs once a day. No import: a wrong file could
-    // overwrite the site. The plugin's own exports and imports collections stay
-    // out of the menu.
+    // overwrite the site, and `import: false` only removes the button, so the
+    // imports collection is closed as well. The plugin's own exports and imports
+    // collections stay out of the menu.
     importExportPlugin({
       collections: [
         'projects',
@@ -437,6 +438,10 @@ export default buildConfig({
         export: { disableJobsQueue: true, disableSave: true },
         import: false,
       })),
+      overrideImportCollection: ({ collection }) => ({
+        ...collection,
+        access: { ...collection.access, create: () => false },
+      }),
     }),
     // Falls back to local disk storage when R2 credentials are unset (local
     // dev), and uploads to Cloudflare R2 when they're set (production).
