@@ -98,7 +98,7 @@ flowchart TB
 5. **Ouvrir ou mettre à jour la PR**, hors de la session de Claude,
    seulement si ce passage a fait bouger la branche, avec le jeton de l'app
    GitHub Claude (une PR ouverte avec `GITHUB_TOKEN` ne lancerait pas la CI).
-   Titre : `fix(deps): security sweep`.
+   Titre : `Security sweep`.
 6. **Summary** : une ligne fixe, jamais le rapport de l'agent. Les Summary
    des passages sont publics sur ce dépôt et les alertes Dependabot ne le
    sont pas : un rapport sans rien de corrigé ne serait qu'une analyse

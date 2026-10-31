@@ -88,7 +88,7 @@ flowchart TB
    `--force-with-lease`. It writes its report to `.security/pr-body.md`.
 5. **Open or update the PR**, outside Claude's session, only if this run
    moved the branch, with the Claude GitHub App's token (a PR opened with
-   `GITHUB_TOKEN` wouldn't trigger CI). Title: `fix(deps): security sweep`.
+   `GITHUB_TOKEN` wouldn't trigger CI). Title: `Security sweep`.
 6. **Summary**: a fixed line, never the agent's report. Run summaries are
    public on this repository and Dependabot alerts aren't: a report with
    nothing fixed would only be analysis of open, unpatched alerts. For the
