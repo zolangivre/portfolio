@@ -221,7 +221,7 @@ jobs:
           if [ "$(gh pr view "$branch" --json state -q .state 2>/dev/null || true)" = "OPEN" ]; then
             gh pr edit "$branch" --body-file "$body"
           else
-            gh pr create --base staging --head "$branch" --title "fix(deps): security sweep" --body-file "$body"
+            gh pr create --base staging --head "$branch" --title "Security sweep" --body-file "$body"
           fi
 
       - if: steps.decide.outputs.run == 'true'

@@ -101,7 +101,9 @@ gh pr create --base staging --head <branch> --title "<title>" --body-file <file>
 ```
 
 - `--draft` if `$ARGUMENTS` has it.
-- **Title**: Conventional, like the main commit.
+- **Title**: a plain English sentence, with no Conventional prefix. GitHub
+  copies it into the merge commit's body, and release-please would list a
+  Conventional one in the CHANGELOG next to the commit.
 - **Body**, written to a file in the scratchpad (not `/tmp`), in English,
   short, following `.github/pull_request_template.md` (its comments removed):
   - **What and why**: a few sentences for someone who didn't follow the
