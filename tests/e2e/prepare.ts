@@ -20,6 +20,7 @@ import {
   navigation,
   privateJournalEntry,
   privateProject,
+  profession,
   projects,
   technologies,
 } from './fixtures'
@@ -83,6 +84,12 @@ for (const locale of ['fr', 'en'] as const) {
     data: { _status: 'published', title: hero[locale] },
     locale,
     slug: 'hero',
+  })
+  await payload.updateGlobal({
+    context,
+    data: { _status: 'published', profession: profession[locale] },
+    locale,
+    slug: 'settings',
   })
   await payload.updateGlobal({
     context,

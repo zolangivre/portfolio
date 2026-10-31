@@ -7,6 +7,9 @@ export const editor = { email: 'e2e-editor@test.local', password: 'e2e-editor-pa
 
 export const hero = { en: 'E2E hero title', fr: 'Titre hero E2E' }
 
+/** Seeded in settings so the home title differs per locale (the field default is the same in both). */
+export const profession = { en: 'E2E software engineer', fr: 'Ingénieur logiciel E2E' }
+
 export const contactSuccess = {
   en: 'E2E: message received.',
   fr: 'E2E : message bien reçu.',

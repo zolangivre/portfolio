@@ -44,7 +44,7 @@ export async function generateMetadata({
     description: lexicalToPlainText(content.description),
     locale,
     path: '/journal',
-    siteName: settings?.seo?.defaultTitle,
+    siteName: settings?.name,
     title: content.title,
     type: 'website',
   })
@@ -75,6 +75,7 @@ export default async function JournalPage({ params }: { params: Promise<PagePara
       <Container>
         <Reveal>
           <SectionHeader
+            as="h1"
             description={content.description}
             eyebrow={content.eyebrow}
             id="journal-title"
