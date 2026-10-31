@@ -1,0 +1,77 @@
+name: Production check
+
+# Every 3 hours, and by hand: checks that the live site still has its content
+# (production-check.sh). When it doesn't, the run fails and an issue assigned
+# to the owner says what's wrong, which is what sends the email: GitHub only
+# mails a failed scheduled run to whoever last edited its cron line. The issue
+# stays open during the outage, so one outage is one email, and the first run
+# that passes closes it.
+#
+# Every 3 hours rather than more often: each run wakes the Neon compute, and
+# the free plan counts the time it stays awake. Off the hour, where GitHub
+# delays scheduled runs the most (they can still start late). GitHub turns off
+# schedules after 60 days without activity in the repository.
+
+on:
+  schedule:
+    - cron: '23 */3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-check
+  cancel-in-progress: false
+
+env:
+  ISSUE_LABEL: production-down
+
+jobs:
+  check:
+    name: Production check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check the live site
+        id: check
+        run: |
+          set -o pipefail
+          bash .github/production-check.sh | tee report.txt
+
+      - name: Open an issue
+        if: failure() && steps.check.conclusion == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          open="$(gh issue list --label "$ISSUE_LABEL" --state open --json number --jq 'length')"
+          if [ "$open" -gt 0 ]; then
+            echo "An issue is already open for this outage."
+            exit 0
+          fi
+
+          gh label create "$ISSUE_LABEL" --color B60205 --force \
+            --description 'The production check failed'
+          {
+            cat report.txt
+            printf '\nRun: %s\n\n' "$RUN_URL"
+            echo 'Closed by the first check that passes.'
+          } >issue.md
+          gh issue create --title 'Production check failed' --label "$ISSUE_LABEL" \
+            --assignee "$GITHUB_REPOSITORY_OWNER" --body-file issue.md
+
+      - name: Close the issue
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue list --label "$ISSUE_LABEL" --state open --json number --jq '.[].number' |
+            while read -r number; do
+              gh issue close "$number" --comment 'The production check passes again.'
+            done

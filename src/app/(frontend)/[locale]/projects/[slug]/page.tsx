@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { ViewTransition } from 'react'
 
 import { AdjacentNav } from '@/components/ui/AdjacentNav'
@@ -12,18 +12,28 @@ import { Divider } from '@/components/ui/Divider'
 import Image from 'next/image'
 import { MediaGallery } from '@/components/ui/MediaGallery'
 import { ProjectLogo } from '@/components/ui/ProjectLogo'
+import { JsonLd } from '@/components/seo/JsonLd'
 import { Reveal } from '@/components/ui/Reveal'
 import { RichText } from '@/components/ui/RichText'
 import { getAdjacentBySlug } from '@/lib/adjacent'
 import { getDictionary } from '@/lib/i18n/dictionary'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
 import { asMediaDoc, getMediaUrl, getRelationUrl } from '@/lib/media'
-import { getAllProjects, getProject, getSectionsVisibility } from '@/lib/queries'
+import {
+  getAllProjects,
+  getGlobalSettings,
+  getProject,
+  getRedirectDestination,
+  getSectionsVisibility,
+} from '@/lib/queries'
+import { pageMetadata, projectJsonLd } from '@/lib/seo'
 import { ReadingProgress } from '@/components/ui/ReadingProgress'
 
 // Safety net only — see the note in the locale layout. Freshness comes from
 // the tag-based revalidation in Payload's afterChange hooks.
 export const revalidate = 86400
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
 type PageParams = { locale: string; slug: string }
 
@@ -51,30 +61,35 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: rawLocale, slug } = await params
   const locale = resolveLocale(rawLocale)
-  const project = await getProject(slug, locale)
+  const [project, settings] = await Promise.all([
+    getProject(slug, locale),
+    getGlobalSettings(locale),
+  ])
 
   if (!project) {
     return {}
   }
 
-  // Only an image picked in the SEO tab overrides the generated card from
-  // `opengraph-image.tsx`. The cover image used to be the fallback here, but
-  // covers are framed for the page (often a logo on empty space) and made a
-  // poor 1200x630 preview — the generated card is the better default.
-  const imageUrl = getMediaUrl(project.meta?.image)
-
-  return {
-    title: project.meta?.title || project.title,
+  // The share image comes from `opengraph-image.tsx`, which also renders the
+  // SEO tab's image when one is picked.
+  return pageMetadata({
     description: project.meta?.description || project.shortDescription,
-    openGraph: imageUrl ? { images: [{ url: imageUrl }] } : undefined,
-  }
+    locale,
+    path: `/projects/${project.slug}`,
+    siteName: settings?.seo?.defaultTitle,
+    title: project.meta?.title || project.title,
+    type: 'website',
+  })
 }
 
 export default async function ProjectDetailPage({ params }: { params: Promise<PageParams> }) {
   const { locale: rawLocale, slug } = await params
   const locale = resolveLocale(rawLocale)
   const dictionary = getDictionary(locale)
-  const sections = await getSectionsVisibility(locale)
+  const [sections, settings] = await Promise.all([
+    getSectionsVisibility(locale),
+    getGlobalSettings(locale),
+  ])
 
   if (sections?.projects === false) {
     notFound()
@@ -83,6 +98,9 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
   const project = await getProject(slug, locale)
 
   if (!project) {
+    // An old URL of a renamed or removed project may have a redirect.
+    const destination = await getRedirectDestination(`/${locale}/projects/${slug}`)
+    if (destination) permanentRedirect(destination)
     notFound()
   }
 
@@ -150,6 +168,21 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
       exit={{ 'nav-back': 'nav-back', 'nav-forward': 'nav-forward', default: 'none' }}
     >
       <article className="content-section">
+        <JsonLd
+          data={projectJsonLd({
+            authorName: settings?.name,
+            description: project.meta?.description || project.shortDescription,
+            imageUrl: getMediaUrl(project.meta?.image) ?? imageUrl,
+            locale,
+            siteUrl,
+            slug: project.slug,
+            technologies: technologies.flatMap((technology) =>
+              typeof technology === 'object' && technology?.name ? [technology.name] : [],
+            ),
+            title: project.title,
+            year: project.year,
+          })}
+        />
         <ReadingProgress />
         <Container>
           <Reveal>

@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { mcpWritesAreDrafts } from '@/hooks/mcpWritesAreDrafts'
 import { prependToOrder, syncDraftOrder } from '@/hooks/prependToOrder'
+import { redirectOldSlug, rememberLiveSlug } from '@/hooks/redirectOldSlug'
 import {
   rememberLiveState,
   revalidateCollectionAfterChange,
@@ -26,6 +27,7 @@ export const Projects: CollectionConfig = {
     plural: 'Projets',
   },
   admin: {
+    groupBy: true,
     group: adminGroups.portfolio,
     description:
       'Projets du portfolio affichés dans la section projets. Glissez-déposez les lignes pour choisir leur ordre sur le site.' +
@@ -49,8 +51,8 @@ export const Projects: CollectionConfig = {
   },
   hooks: {
     beforeOperation: [mcpWritesAreDrafts],
-    beforeChange: [prependToOrder, rememberLiveState],
-    afterChange: [syncDraftOrder, revalidateCollectionAfterChange],
+    beforeChange: [prependToOrder, rememberLiveState, rememberLiveSlug],
+    afterChange: [syncDraftOrder, redirectOldSlug, revalidateCollectionAfterChange],
     afterDelete: [revalidateCollectionAfterDelete],
   },
   fields: [

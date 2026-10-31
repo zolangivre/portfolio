@@ -11,6 +11,9 @@ import { withUniqueSuffix } from '@/lib/uploadFilename'
 export const Media: CollectionConfig = {
   slug: 'media',
   trash: true,
+  // Sorted into folders in the admin ("Parcourir par dossier"); the site never
+  // reads the folder, so moving a file changes nothing a visitor sees.
+  folders: true,
   labels: {
     singular: 'Média',
     plural: 'Médias',

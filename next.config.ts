@@ -1,4 +1,5 @@
 import { withPayload } from '@payloadcms/next/withPayload'
+import { withSentryConfig } from '@sentry/nextjs/config'
 import type { NextConfig } from 'next'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -53,6 +54,12 @@ const nextConfig: NextConfig = {
       source: '/((?!fr(?:/|$)|en(?:/|$)|api/preview$).*)',
       headers: [{ key: 'X-Frame-Options', value: 'DENY' }],
     },
+    // The generated share cards stay out of image search, like the uploads
+    // (media.zolangivre.com sends the same header). Social crawlers ignore it.
+    {
+      source: '/:path(.*opengraph-image.*)',
+      headers: [{ key: 'X-Robots-Tag', value: 'noindex' }],
+    },
     ...['/:locale(fr|en)', '/:locale(fr|en)/:path*', '/api/preview'].map((source) => ({
       source,
       headers: [
@@ -75,4 +82,13 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default withPayload(nextConfig, { devBundleServerPackages: false })
+export default withSentryConfig(withPayload(nextConfig, { devBundleServerPackages: false }), {
+  org: 'zolan-givre-organisation',
+  project: 'portfolio',
+  // Uploads the source maps so errors show the real code. Without the token
+  // the build still passes, and stack traces stay minified.
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  widenClientFileUpload: true,
+  silent: !process.env.CI,
+  telemetry: false,
+})

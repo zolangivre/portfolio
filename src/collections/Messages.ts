@@ -2,6 +2,7 @@ import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 
 import { notifyNewMessage } from '@/hooks/notifyNewMessage'
 import { adminGroups } from '@/lib/adminLabels'
+import { neutralizeFormula } from '@/lib/csv'
 
 /**
  * `create` is public (the contact form), and trash adds a `deletedAt` field
@@ -15,6 +16,13 @@ const ignoreDeletedAtFromVisitors: CollectionBeforeChangeHook = ({ data, operati
   }
 
   return data
+}
+
+/** On each field a visitor fills in. JSON exports keep the exact text. */
+const safeInCSV = {
+  'plugin-import-export': {
+    toCSV: ({ value }: { value: unknown }) => neutralizeFormula(value),
+  },
 }
 
 export const Messages: CollectionConfig = {
@@ -50,6 +58,7 @@ export const Messages: CollectionConfig = {
       label: 'Nom',
       required: true,
       maxLength: 120,
+      custom: safeInCSV,
     },
     {
       name: 'email',
@@ -60,6 +69,7 @@ export const Messages: CollectionConfig = {
       // 254 is the maximum length of an address per RFC 5321.
       validate: (value: string | null | undefined) =>
         !value || value.length <= 254 || 'L’adresse e-mail est trop longue.',
+      custom: safeInCSV,
     },
     {
       name: 'message',
@@ -67,6 +77,7 @@ export const Messages: CollectionConfig = {
       label: 'Message',
       required: true,
       maxLength: 5000,
+      custom: safeInCSV,
     },
     {
       name: 'read',

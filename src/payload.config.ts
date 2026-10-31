@@ -1,11 +1,14 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { resendAdapter } from '@payloadcms/email-resend'
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
+import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { fr } from '@payloadcms/translations/languages/fr'
 import { s3Storage } from '@payloadcms/storage-s3'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
-import { buildConfig } from 'payload'
+import { buildConfig, type CollectionSlug } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
@@ -23,8 +26,10 @@ import { Education } from './collections/Education'
 import { Testimonials } from './collections/Testimonials'
 import { Messages } from './collections/Messages'
 import { Journal } from './collections/Journal'
+import { redirectsConfig } from './collections/Redirects'
 import { refuseGlobalUnpublishSchedule } from './collections/drafts'
 import { canRunJobs } from './lib/access'
+import { parseSender } from './lib/emailSender'
 import { previewPath, previewURL } from './lib/preview'
 import { adminGroups, translateSeoFields } from './lib/adminLabels'
 import { GlobalSettings } from './globals/GlobalSettings'
@@ -38,6 +43,21 @@ import { SectionsContent } from './globals/SectionsContent'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+// Payload's own emails (the admin's "Mot de passe oublié") go through Resend,
+// with the contact notification's key and sender (hooks/notifyNewMessage.ts).
+// Without them Payload writes each email to the console, as local
+// development and the tests want; in production that meant a reset link
+// nobody received.
+const emailSender = parseSender(process.env.CONTACT_NOTIFICATION_FROM)
+const email =
+  process.env.RESEND_API_KEY && emailSender
+    ? resendAdapter({
+        apiKey: process.env.RESEND_API_KEY,
+        defaultFromAddress: emailSender.address,
+        defaultFromName: emailSender.name,
+      })
+    : undefined
 
 /**
  * The R2 wiring shared by both s3Storage instances below. Held in one place so
@@ -192,6 +212,24 @@ export default buildConfig({
     Messages,
     Journal,
   ],
+  // The folders media and videos are sorted into (`folders: true` on each).
+  // Payload builds the folder collection itself, with English labels; this
+  // only translates them. Deleting a folder deletes its subfolders and moves
+  // the files it held back to the root, never deletes a file.
+  folders: {
+    collectionOverrides: [
+      ({ collection }) => ({
+        ...collection,
+        labels: { singular: 'Dossier', plural: 'Dossiers' },
+        fields: collection.fields.map((field) => {
+          if (!('name' in field)) return field
+          if (field.name === 'name') return { ...field, label: 'Nom' }
+          if (field.name === 'folderType') return { ...field, label: 'Peut contenir' }
+          return field
+        }),
+      }),
+    ],
+  },
   globals: [
     GlobalSettings,
     Hero,
@@ -235,6 +273,7 @@ export default buildConfig({
       },
     }),
   },
+  email,
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     // Off in the test suites (.env.test, .env.e2e): they load this config
@@ -357,6 +396,8 @@ export default buildConfig({
         },
       }),
     }),
+    // Redirects: an old URL of the site sends visitors on (collections/Redirects.ts).
+    redirectsPlugin(redirectsConfig),
     seoPlugin({
       collections: ['projects', 'journal'],
       globals: ['hero'],
@@ -370,6 +411,37 @@ export default buildConfig({
         const shortDescription = (doc as { shortDescription?: string })?.shortDescription
         return shortDescription ?? ''
       },
+    }),
+    // "Exporter" (CSV or JSON) in the list of every collection an editor writes,
+    // for a backup that doesn't depend on Neon. Download only, run within the
+    // request: the files are never stored (Vercel's disk doesn't keep them) and
+    // the job queue only runs once a day. No import: a wrong file could
+    // overwrite the site, and `import: false` only removes the button, so the
+    // imports collection is closed as well. The plugin's own exports and imports
+    // collections stay out of the menu.
+    importExportPlugin({
+      collections: [
+        'projects',
+        'journal',
+        'experiences',
+        'education',
+        'testimonials',
+        'skills',
+        'technologies',
+        'categories',
+        'companies',
+        'schools',
+        'messages',
+        'redirects',
+      ].map((slug) => ({
+        slug: slug as CollectionSlug,
+        export: { disableJobsQueue: true, disableSave: true },
+        import: false,
+      })),
+      overrideImportCollection: ({ collection }) => ({
+        ...collection,
+        access: { ...collection.access, create: () => false },
+      }),
     }),
     // Falls back to local disk storage when R2 credentials are unset (local
     // dev), and uploads to Cloudflare R2 when they're set (production).

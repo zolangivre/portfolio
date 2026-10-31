@@ -263,6 +263,14 @@ html {
     z-index: 2;
   }
 
+  /* The header's own transition layer (see below) sits above the reveal: it
+     would take the new theme at once, its fade and its shadow landing on the
+     old page until the circle got there. Here it stays part of the page, and
+     the circle sweeps across it like the rest. */
+  html[data-theme-transition] .site-header {
+    view-transition-name: none;
+  }
+
   /* Route changes: the page itself just cross-fades, quickly, under
      whatever shared element is morphing on top of it. */
   html:not([data-theme-transition], [data-gallery-transition])::view-transition-old(root) {
@@ -413,8 +421,9 @@ html {
    * flattened into a view-transition root capture flicker or ghost during
    * the animation; giving the header its own group and disabling that
    * group's default cross-fade means it simply carries over instantly while
-   * the circular reveal plays around it — which is the intended look on
-   * every browser, not just a Safari workaround.
+   * the page changes under it on a route change — which is the intended look
+   * on every browser, not just a Safari workaround. Theme switches and the
+   * gallery lightbox opt out, above.
    */
   ::view-transition-group(site-header) {
     animation: none;

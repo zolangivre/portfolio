@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { ViewTransition } from 'react'
 
 import { AdjacentNav } from '@/components/ui/AdjacentNav'
 import { AnimatedTitle } from '@/components/ui/AnimatedTitle'
 import { Container } from '@/components/ui/Container'
+import { JsonLd } from '@/components/seo/JsonLd'
 import { Divider } from '@/components/ui/Divider'
 import { FadeImage } from '@/components/ui/FadeImage'
 import { MediaGallery } from '@/components/ui/MediaGallery'
@@ -18,12 +19,21 @@ import { getDictionary } from '@/lib/i18n/dictionary'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
 import { getMediaUrl, placeholderProps } from '@/lib/media'
 import { readingTimeLabel } from '@/lib/richText'
-import { getJournalEntries, getJournalEntry, getSectionsVisibility } from '@/lib/queries'
+import {
+  getGlobalSettings,
+  getJournalEntries,
+  getJournalEntry,
+  getRedirectDestination,
+  getSectionsVisibility,
+} from '@/lib/queries'
+import { journalJsonLd, pageMetadata } from '@/lib/seo'
 import type { Media } from '@/payload-types'
 
 // Safety net only — see the note in the locale layout. Freshness comes from
 // the tag-based revalidation in Payload's afterChange hooks.
 export const revalidate = 86400
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 
 type PageParams = { locale: string; slug: string }
 
@@ -69,28 +79,36 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale: rawLocale, slug } = await params
   const locale = resolveLocale(rawLocale)
-  const entry = await getJournalEntry(slug, locale)
+  const [entry, settings] = await Promise.all([
+    getJournalEntry(slug, locale),
+    getGlobalSettings(locale),
+  ])
 
   if (!entry) {
     return {}
   }
 
-  // See the note in the project page: the generated card wins unless an image
-  // was explicitly chosen in the SEO tab.
-  const imageUrl = getMediaUrl(entry.meta?.image)
-
-  return {
-    title: entry.meta?.title || entry.title,
+  // The share image comes from `opengraph-image.tsx`: the SEO tab's image or
+  // the cover photo, under the entry's title.
+  return pageMetadata({
     description: entry.meta?.description || entry.shortDescription,
-    openGraph: imageUrl ? { images: [{ url: imageUrl }] } : undefined,
-  }
+    locale,
+    path: `/journal/${entry.slug}`,
+    publishedTime: entry.date,
+    siteName: settings?.seo?.defaultTitle,
+    title: entry.meta?.title || entry.title,
+    type: 'article',
+  })
 }
 
 export default async function JournalEntryPage({ params }: { params: Promise<PageParams> }) {
   const { locale: rawLocale, slug } = await params
   const locale = resolveLocale(rawLocale)
   const dictionary = getDictionary(locale)
-  const sections = await getSectionsVisibility(locale)
+  const [sections, settings] = await Promise.all([
+    getSectionsVisibility(locale),
+    getGlobalSettings(locale),
+  ])
 
   if (sections?.journal === false) {
     notFound()
@@ -99,6 +117,9 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
   const entry = await getJournalEntry(slug, locale)
 
   if (!entry) {
+    // An old URL of a renamed or removed entry may have a redirect.
+    const destination = await getRedirectDestination(`/${locale}/journal/${slug}`)
+    if (destination) permanentRedirect(destination)
     notFound()
   }
 
@@ -141,6 +162,19 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
       exit={{ 'nav-back': 'nav-back', 'nav-forward': 'nav-forward', default: 'none' }}
     >
       <article className="content-section">
+        <JsonLd
+          data={journalJsonLd({
+            authorName: settings?.name,
+            date: entry.date,
+            description: entry.meta?.description || entry.shortDescription,
+            imageUrl: getMediaUrl(entry.meta?.image) ?? imageUrl,
+            locale,
+            siteUrl,
+            slug: entry.slug,
+            title: entry.title,
+            updatedAt: entry.updatedAt,
+          })}
+        />
         <ReadingProgress />
         <Container>
           <Reveal>

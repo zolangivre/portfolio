@@ -1,15 +1,16 @@
 import type { Metadata, Viewport } from 'next'
 import { notFound } from 'next/navigation'
 import { Baloo_2, Bagel_Fat_One, Inter } from 'next/font/google'
-import Script from 'next/script'
 import React from 'react'
 import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 import { Footer } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'
 import { IndexRail } from '@/components/layout/IndexRail'
 import { LivePreviewRefresh } from '@/components/preview/LivePreviewRefresh'
 import { PreviewBanner } from '@/components/preview/PreviewBanner'
+import { JsonLd } from '@/components/seo/JsonLd'
 import { MotionProvider } from '@/components/providers/MotionProvider'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { AmbientBackground } from '@/components/ui/AmbientBackground'
@@ -20,6 +21,7 @@ import { defaultLocale, locales, type Locale } from '@/lib/locale'
 import { getMediaUrl } from '@/lib/media'
 import { isPreview } from '@/lib/preview'
 import { getFooter, getGlobalSettings, getNavigation, getSectionsVisibility } from '@/lib/queries'
+import { OG_LOCALES, personJsonLd, websiteJsonLd } from '@/lib/seo'
 import { buildThemeStyle } from '@/lib/theme/palette'
 
 import '../../globals.css'
@@ -93,21 +95,27 @@ export async function generateMetadata({
     openGraph: {
       description,
       images,
-      locale,
+      locale: OG_LOCALES[locale],
       siteName: title,
       title,
       type: 'website',
       url: `/${locale}`,
     },
+    // No `images`: X falls back to og:image, the generated card, so the
+    // homepage shares the same picture on X as everywhere else.
     twitter: {
       card: 'summary_large_image',
       description,
-      images,
       title,
     },
+    // Only the homepage keeps these: every other page sets its own through
+    // `pageMetadata` (@/lib/seo), or it would inherit this canonical.
     alternates: {
       canonical: `/${locale}`,
-      languages: Object.fromEntries(locales.map((entry) => [entry, `/${entry}`])),
+      languages: {
+        ...Object.fromEntries(locales.map((entry) => [entry, `/${entry}`])),
+        'x-default': '/fr',
+      },
     },
     title: {
       default: title,
@@ -145,16 +153,18 @@ export default async function LocaleLayout(props: {
 
     return url ? [url] : []
   })
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Person',
-    name: settings?.name,
-    jobTitle: settings?.profession,
-    email: settings?.contactEmail,
-    image: photoUrl ? `${siteUrl}${photoUrl}` : undefined,
-    url: `${siteUrl}/${locale}`,
-    sameAs: (settings?.socialLinks ?? []).map((link) => link.url),
-  }
+  const jsonLd = [
+    personJsonLd({
+      email: settings?.contactEmail,
+      jobTitle: settings?.profession,
+      locale,
+      name: settings?.name,
+      photoUrl,
+      sameAs: (settings?.socialLinks ?? []).map((link) => link.url),
+      siteUrl,
+    }),
+    websiteJsonLd({ locale, name: settings?.name, siteUrl }),
+  ]
 
   return (
     <html
@@ -165,16 +175,9 @@ export default async function LocaleLayout(props: {
     >
       <body>
         <style dangerouslySetInnerHTML={{ __html: themeStyle }} />
-        <Script
-          // JSON.stringify leaves `<` intact, so a settings value containing
-          // `</script>` would close this tag early and let whatever follows
-          // run as markup. Escaping it keeps the payload valid JSON.
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
-          }}
-          id="person-jsonld"
-          type="application/ld+json"
-        />
+        {jsonLd.map((data) => (
+          <JsonLd data={data} key={String(data['@type'])} />
+        ))}
         <a className="skip-link" href="#main-content">
           {dictionary.nav.skipToContent}
         </a>
@@ -217,6 +220,7 @@ export default async function LocaleLayout(props: {
           </>
         ) : null}
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )

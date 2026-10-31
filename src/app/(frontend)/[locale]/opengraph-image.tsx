@@ -2,12 +2,28 @@ import { defaultLocale, locales, type Locale } from '@/lib/locale'
 import { OG_CONTENT_TYPE, OG_SIZE, renderOgImage } from '@/lib/og'
 import { getGlobalSettings, getHero } from '@/lib/queries'
 
-export const alt = 'Portfolio'
-export const contentType = OG_CONTENT_TYPE
-export const size = OG_SIZE
+// Rendered on first request, then cached: a card built while the media host
+// was down (text-only fallback) is rebuilt within a day, like the pages.
+export const revalidate = 86400
 
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }))
+/** The alt text names the owner and their job, in the page's language. */
+export async function generateImageMetadata({ params }: { params: { locale: string } }) {
+  const locale: Locale = locales.includes(params.locale as Locale)
+    ? (params.locale as Locale)
+    : defaultLocale
+  const settings = await getGlobalSettings(locale)
+
+  return [
+    {
+      alt:
+        [settings?.name, settings?.profession].filter(Boolean).join(' — ') ||
+        settings?.seo?.defaultTitle ||
+        'Portfolio',
+      contentType: OG_CONTENT_TYPE,
+      id: 'card',
+      size: OG_SIZE,
+    },
+  ]
 }
 
 export default async function OpengraphImage({
