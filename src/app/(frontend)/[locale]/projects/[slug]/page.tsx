@@ -76,7 +76,7 @@ export async function generateMetadata({
     description: project.meta?.description || project.shortDescription,
     locale,
     path: `/projects/${project.slug}`,
-    siteName: settings?.seo?.defaultTitle,
+    siteName: settings?.name,
     title: project.meta?.title || project.title,
     type: 'website',
   })
