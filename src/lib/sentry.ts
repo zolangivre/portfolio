@@ -19,6 +19,13 @@ export const sentryOptions = {
   environment: process.env.NEXT_PUBLIC_VERCEL_ENV,
 }
 
+/**
+ * `ignoreErrors` on the server: Node writes its process warnings with
+ * `console.error`, which captureConsoleIntegration turns into an error on
+ * every cold start.
+ */
+export const ignoredServerErrors = [/ExperimentalWarning/]
+
 const withoutQueryParams = (text: string) => text.replace(/\s*params:[\s\S]*$/, '')
 
 /**
