@@ -41,6 +41,12 @@ arrive tel quel dans le CHANGELOG. Un commit qui répare le propre travail de
 la branche prend `test`, `refactor` ou `chore`, pas `fix` : il ne corrige rien
 de ce qui est parti.
 
+Les titres de PR restent des phrases simples, sans préfixe Conventional.
+GitHub recopie le titre dans le corps du commit de merge, et release-please y
+lit une ligne Conventional comme un commit de plus : le même changement
+apparaîtrait deux fois. GitHub n'a aucun réglage qui garde le titre de merge
+classique avec un corps vide.
+
 ## `release.yml`
 
 À chaque push sur `staging`, release-please garde une **PR de version**

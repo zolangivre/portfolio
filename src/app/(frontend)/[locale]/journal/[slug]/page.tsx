@@ -95,7 +95,7 @@ export async function generateMetadata({
     locale,
     path: `/journal/${entry.slug}`,
     publishedTime: entry.date,
-    siteName: settings?.seo?.defaultTitle,
+    siteName: settings?.name,
     title: entry.meta?.title || entry.title,
     type: 'article',
   })

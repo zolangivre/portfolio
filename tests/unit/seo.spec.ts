@@ -1,9 +1,10 @@
 /**
- * Contract for src/lib/seo.ts (plan 008). Argument shapes the builders take:
+ * Contract for src/lib/seo.ts (plans 008 and 009). Argument shapes the builders take:
  *
+ *   homeTitle({ fallback, name, profession })
  *   pageMetadata({ locale, path, title, description, siteName, type, publishedTime? })
  *   personJsonLd({ siteUrl, locale, name, jobTitle, email, photoUrl, sameAs })
- *   websiteJsonLd({ siteUrl, locale, name })
+ *   websiteJsonLd({ siteUrl, name, alternateName? })   (one entity for both locales)
  *   projectJsonLd({ siteUrl, locale, slug, title, description, imageUrl, year, technologies, authorName })
  *   journalJsonLd({ siteUrl, locale, slug, title, description, imageUrl, date, updatedAt, authorName })
  *
@@ -11,10 +12,20 @@
  * is always an absolute URL. `path` starts with "/" (or is "" for a locale
  * root). Optional fields left undefined are omitted, never "undefined".
  * `technologies` is a string[]; `year` a number; dates are ISO strings.
+ * `siteUrl` has no trailing slash. The Person is identified by
+ * `${siteUrl}/#person` and the WebSite by `${siteUrl}/#website`; the `author`
+ * of a project or journal entry carries the Person's @id.
  */
 import { describe, expect, it } from 'vitest'
 
-import { journalJsonLd, pageMetadata, personJsonLd, projectJsonLd, websiteJsonLd } from '@/lib/seo'
+import {
+  homeTitle,
+  journalJsonLd,
+  pageMetadata,
+  personJsonLd,
+  projectJsonLd,
+  websiteJsonLd,
+} from '@/lib/seo'
 
 const siteUrl = 'https://site.test'
 
@@ -28,6 +39,26 @@ const page = (overrides: Record<string, unknown> = {}) =>
     type: 'website',
     ...overrides,
   } as never)
+
+describe('homeTitle', () => {
+  it('joins the name and the profession with an em dash', () => {
+    expect(homeTitle({ fallback: 'Portfolio', name: 'Zolan', profession: 'Engineer' })).toBe(
+      'Zolan \u2014 Engineer',
+    )
+  })
+
+  it('keeps the name alone when the profession is empty', () => {
+    expect(homeTitle({ fallback: 'Portfolio', name: 'Zolan', profession: '' })).toBe('Zolan')
+    expect(homeTitle({ fallback: 'Portfolio', name: 'Zolan', profession: null })).toBe('Zolan')
+  })
+
+  it('falls back when the name is empty', () => {
+    expect(homeTitle({ fallback: 'Portfolio', name: '', profession: 'Engineer' })).toBe('Portfolio')
+    expect(homeTitle({ fallback: 'Portfolio', name: undefined, profession: undefined })).toBe(
+      'Portfolio',
+    )
+  })
+})
 
 describe('pageMetadata', () => {
   it('makes the page its own canonical, resolved later by metadataBase', () => {
@@ -132,6 +163,18 @@ describe('personJsonLd', () => {
     expect(person('/api/media/file/x.webp').image).toBe('https://site.test/api/media/file/x.webp')
   })
 
+  it('has a stable @id shared by both locales', () => {
+    const en = personJsonLd({ locale: 'en', name: 'Zolan', siteUrl } as never) as Record<
+      string,
+      unknown
+    >
+
+    expect(person()['@id']).toBe('https://site.test/#person')
+    expect(en['@id']).toBe('https://site.test/#person')
+    expect(person().url).toBe('https://site.test/fr')
+    expect(en.url).toBe('https://site.test/en')
+  })
+
   it('omits the image when there is no photo', () => {
     expect(person().image).toBeUndefined()
     expect(JSON.stringify(person())).not.toContain('undefined')
@@ -139,14 +182,32 @@ describe('personJsonLd', () => {
 })
 
 describe('websiteJsonLd', () => {
-  it('describes the WebSite of the locale', () => {
-    expect(websiteJsonLd({ locale: 'en', name: 'Site', siteUrl } as never)).toMatchObject({
+  const website = (overrides: Record<string, unknown> = {}) =>
+    websiteJsonLd({ name: 'Site', siteUrl, ...overrides } as never) as Record<string, unknown>
+
+  it('describes one WebSite at the root of the domain, for both locales', () => {
+    expect(website()).toMatchObject({
       '@context': 'https://schema.org',
+      '@id': 'https://site.test/#website',
       '@type': 'WebSite',
-      inLanguage: 'en',
+      inLanguage: ['fr', 'en'],
       name: 'Site',
-      url: 'https://site.test/en',
+      url: 'https://site.test/',
     })
+  })
+
+  it('gives the same entity whatever locale the caller had in mind', () => {
+    expect(website({ locale: 'en' })).toEqual(website({ locale: 'fr' }))
+  })
+
+  it('adds the alternate name when there is one', () => {
+    expect(website({ alternateName: 'Site Portfolio' }).alternateName).toBe('Site Portfolio')
+  })
+
+  it('omits the alternate name when empty or missing', () => {
+    expect(website({ alternateName: '' }).alternateName).toBeUndefined()
+    expect(website().alternateName).toBeUndefined()
+    expect(JSON.stringify(website({ alternateName: '' }))).not.toContain('undefined')
   })
 })
 
@@ -179,6 +240,7 @@ describe('projectJsonLd', () => {
 
   it('credits the author as a Person pointing at the locale home', () => {
     expect(project().author).toEqual({
+      '@id': 'https://site.test/#person',
       '@type': 'Person',
       name: 'Zolan',
       url: 'https://site.test/fr',
@@ -237,6 +299,7 @@ describe('journalJsonLd', () => {
 
   it('credits the author as a Person pointing at the locale home', () => {
     expect(entry().author).toEqual({
+      '@id': 'https://site.test/#person',
       '@type': 'Person',
       name: 'Zolan',
       url: 'https://site.test/en',

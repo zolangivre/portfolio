@@ -156,7 +156,7 @@ jobs:
       - if: steps.decide.outputs.run == 'true'
         name: Sweep
         id: sweep
-        uses: anthropics/claude-code-action@925afb53776cf1a2b738c6bdbed37b4d4000ef13 # v1.0.262
+        uses: anthropics/claude-code-action@d70510b174a1244958df0b03166a54912811f3e6 # v1.0.264
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           base_branch: staging
@@ -221,7 +221,7 @@ jobs:
           if [ "$(gh pr view "$branch" --json state -q .state 2>/dev/null || true)" = "OPEN" ]; then
             gh pr edit "$branch" --body-file "$body"
           else
-            gh pr create --base staging --head "$branch" --title "fix(deps): security sweep" --body-file "$body"
+            gh pr create --base staging --head "$branch" --title "Security sweep" --body-file "$body"
           fi
 
       - if: steps.decide.outputs.run == 'true'
