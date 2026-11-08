@@ -38,6 +38,11 @@ Since PRs are merged with a merge commit, every commit of a PR lands in the
 CHANGELOG as is. A commit that repairs the branch's own work takes `test`,
 `refactor` or `chore`, not `fix`: it fixes nothing that shipped.
 
+PR titles stay plain sentences, with no Conventional prefix. GitHub copies the
+title into the merge commit's body, and release-please reads a Conventional
+line there as one more commit: the same change would show up twice. GitHub
+offers no setting that keeps the classic merge title with an empty body.
+
 ## `release.yml`
 
 On every push to `staging`, release-please keeps one **version PR** open

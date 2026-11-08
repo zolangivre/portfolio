@@ -1,6 +1,6 @@
 import { expect, test, type APIRequestContext } from '@playwright/test'
 
-import { journalEntries, projects } from './fixtures'
+import { journalEntries, profession, projects } from './fixtures'
 
 /** The e2e build's NEXT_PUBLIC_SITE_URL (.env.e2e), which metadataBase resolves against. */
 const origin = 'http://localhost:3100'
@@ -150,4 +150,105 @@ test('the home page sends x-default and shares without a separate X image', asyn
 
   expect(alternates['x-default']).toBe(`${origin}/fr`)
   expect(meta(html, 'twitter:image')).toBe(meta(html, 'og:image'))
+})
+
+const title = (html: string) => html.match(/<title>([^<]*)<\/title>/)?.[1]
+
+const website = (html: string) => jsonLd(html).find((item) => item['@type'] === 'WebSite')
+const person = (html: string) => jsonLd(html).find((item) => item['@type'] === 'Person')
+
+test.describe('home identity', () => {
+  test('each locale has its own title, made of the site name and the profession', async ({
+    request,
+  }) => {
+    const fr = await getHtml(request, '/fr')
+    const en = await getHtml(request, '/en')
+    const name = String(website(fr)?.name)
+
+    expect(name).toBeTruthy()
+    expect(title(fr)).toBe(`${name} \u2014 ${profession.fr}`)
+    expect(title(en)).toBe(`${name} \u2014 ${profession.en}`)
+    expect(title(fr)).not.toBe(title(en))
+  })
+
+  test('shares the same title on Open Graph and X', async ({ request }) => {
+    for (const locale of ['fr', 'en'] as const) {
+      const html = await getHtml(request, `/${locale}`)
+
+      expect(meta(html, 'og:title')).toBe(title(html))
+      expect(meta(html, 'twitter:title')).toBe(title(html))
+    }
+  })
+
+  test('keeps the site title suffix on the other pages', async ({ request }) => {
+    const html = await getHtml(request, `/fr/projects/${project.slug}`)
+
+    expect(title(html)).toMatch(new RegExp(`^${project.fr} \\| .+`))
+    expect(title(html)).not.toContain(profession.fr)
+  })
+
+  test('describes a single WebSite at the root of the domain from every locale', async ({
+    request,
+  }) => {
+    for (const path of ['/fr', '/en', '/fr/journal', `/en/projects/${project.slug}`]) {
+      const site = website(await getHtml(request, path))
+
+      expect(site?.url, path).toBe(`${origin}/`)
+      expect(site?.['@id'], path).toBe(`${origin}/#website`)
+    }
+  })
+
+  test('describes the same Person on /fr and /en', async ({ request }) => {
+    const fr = person(await getHtml(request, '/fr'))
+    const en = person(await getHtml(request, '/en'))
+
+    expect(fr?.['@id']).toBe(`${origin}/#person`)
+    expect(en?.['@id']).toBe(fr?.['@id'])
+  })
+
+  test('credits the author of a project and a journal entry by the Person @id', async ({
+    request,
+  }) => {
+    const personId = person(await getHtml(request, '/fr'))?.['@id']
+    const paths = [
+      ['CreativeWork', `/fr/projects/${project.slug}`],
+      ['BlogPosting', `/en/journal/${entry.slug}`],
+    ] as const
+
+    for (const [type, path] of paths) {
+      const main = jsonLd(await getHtml(request, path)).find((item) => item['@type'] === type)
+
+      expect((main?.author as Record<string, unknown>)?.['@id'], path).toBe(personId)
+    }
+  })
+
+  test('og:site_name is the WebSite name on every kind of page', async ({ request }) => {
+    const paths = [
+      '/fr',
+      '/en',
+      '/fr/journal',
+      `/fr/projects/${project.slug}`,
+      `/en/journal/${entry.slug}`,
+    ]
+
+    for (const path of paths) {
+      const html = await getHtml(request, path)
+
+      expect(meta(html, 'og:site_name'), path).toBe(String(website(html)?.name))
+    }
+  })
+})
+
+test.describe('journal list heading', () => {
+  for (const locale of ['fr', 'en'] as const) {
+    test(`/${locale}/journal has exactly one h1, the section title`, async ({ page }) => {
+      await page.goto(`/${locale}/journal`)
+
+      await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1)
+
+      // The section stays labelled by that heading.
+      const heading = (await page.getByRole('heading', { level: 1 }).textContent())!.trim()
+      await expect(page.getByRole('region', { name: heading })).toBeVisible()
+    })
+  }
 })

@@ -68,6 +68,27 @@ export function pageMetadata({
   }
 }
 
+/**
+ * The homepage's title. `settings.seo.defaultTitle` isn't localized and doubles
+ * as every other page's `%s | …` suffix, so the name and the translated
+ * profession say what the page is about, in the page's language.
+ */
+export function homeTitle({
+  fallback,
+  name,
+  profession,
+}: {
+  fallback: string
+  name?: string | null
+  profession?: string | null
+}): string {
+  if (!name) {
+    return fallback
+  }
+
+  return profession ? `${name} — ${profession}` : name
+}
+
 /** Drops undefined, null and empty values so the JSON never says "undefined". */
 function compact<T extends Record<string, unknown>>(data: T): T {
   return Object.fromEntries(
@@ -94,8 +115,16 @@ function absoluteUrl(url: string | null | undefined, siteUrl: string): string | 
   }
 }
 
+/** One person across both locales, so search engines don't read two of them. */
+const personId = (siteUrl: string) => `${siteUrl}/#person`
+
 const author = (name: string | null | undefined, siteUrl: string, locale: Locale) =>
-  compact({ '@type': 'Person', name: name ?? undefined, url: `${siteUrl}/${locale}` })
+  compact({
+    '@id': personId(siteUrl),
+    '@type': 'Person',
+    name: name ?? undefined,
+    url: `${siteUrl}/${locale}`,
+  })
 
 export function personJsonLd({
   email,
@@ -116,6 +145,7 @@ export function personJsonLd({
 }) {
   return compact({
     '@context': 'https://schema.org',
+    '@id': personId(siteUrl),
     '@type': 'Person',
     email: email ?? undefined,
     image: absoluteUrl(photoUrl, siteUrl),
@@ -126,21 +156,27 @@ export function personJsonLd({
   })
 }
 
+/**
+ * Google only reads a site name at the domain root, not per subdirectory, so
+ * both locales describe the same WebSite, at the root.
+ */
 export function websiteJsonLd({
-  locale,
+  alternateName,
   name,
   siteUrl,
 }: {
-  locale: Locale
+  alternateName?: string | null
   name?: string | null
   siteUrl: string
 }) {
   return compact({
     '@context': 'https://schema.org',
+    '@id': `${siteUrl}/#website`,
     '@type': 'WebSite',
-    inLanguage: locale,
+    alternateName: alternateName ?? undefined,
+    inLanguage: [...locales],
     name: name ?? undefined,
-    url: `${siteUrl}/${locale}`,
+    url: `${siteUrl}/`,
   })
 }
 

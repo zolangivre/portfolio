@@ -1,7 +1,7 @@
 import type { ErrorEvent } from '@sentry/nextjs'
 import { describe, expect, it } from 'vitest'
 
-import { dropConsoleBreadcrumb, scrubEvent } from '@/lib/sentry'
+import { dropConsoleBreadcrumb, ignoredServerErrors, scrubEvent } from '@/lib/sentry'
 
 // How Drizzle words a failed query, with a contact message's values.
 const failedInsert =
@@ -67,6 +67,24 @@ describe('scrubEvent', () => {
     const untouched = event({ level: 'error' })
 
     expect(scrubEvent(untouched)).toEqual({ level: 'error' })
+  })
+})
+
+describe('ignoredServerErrors', () => {
+  const isIgnored = (message: string) =>
+    ignoredServerErrors.some((pattern) => pattern.test(message))
+
+  it('ignores the warning Node logs on a cold start', () => {
+    expect(
+      isIgnored(
+        '(node:8) ExperimentalWarning: vm.USE_MAIN_CONTEXT_DEFAULT_LOADER is an experimental feature and might change at any time',
+      ),
+    ).toBe(true)
+  })
+
+  it('keeps real failures', () => {
+    expect(isIgnored(failedInsert)).toBe(false)
+    expect(isIgnored('Failed to load hero content from Payload.')).toBe(false)
   })
 })
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.5.1](https://github.com/zolangivre/portfolio/compare/v1.5.0...v1.5.1) (2026-11-04)
+
+
+### Corrections
+
+* **deps:** declare vite 8 so plugin-react 6 resolves ([05ab057](https://github.com/zolangivre/portfolio/commit/05ab0572ff55432c97bc5889439c3eb8d368e98b))
+* **seo:** give the home a real title and the site one identity ([3e6155e](https://github.com/zolangivre/portfolio/commit/3e6155e2f2a6d8b6f9f1222ab25664e31f84e013))
+* **site:** release idle database connections before a function freezes ([ab61f32](https://github.com/zolangivre/portfolio/commit/ab61f321f3f426d7f7f6cd8bb46f3d7dd8bb8457))
+* **site:** stop reporting Node warnings as errors ([63351ed](https://github.com/zolangivre/portfolio/commit/63351edb2ddb3b8691d393236b0fedabc56ac83d))
+
 ## [1.5.0](https://github.com/zolangivre/portfolio/compare/v1.4.0...v1.5.0) (2026-10-30)
 
 

@@ -21,7 +21,7 @@ import { defaultLocale, locales, type Locale } from '@/lib/locale'
 import { getMediaUrl } from '@/lib/media'
 import { isPreview } from '@/lib/preview'
 import { getFooter, getGlobalSettings, getNavigation, getSectionsVisibility } from '@/lib/queries'
-import { OG_LOCALES, personJsonLd, websiteJsonLd } from '@/lib/seo'
+import { homeTitle, OG_LOCALES, personJsonLd, websiteJsonLd } from '@/lib/seo'
 import { buildThemeStyle } from '@/lib/theme/palette'
 
 import '../../globals.css'
@@ -83,6 +83,11 @@ export async function generateMetadata({
   const locale = resolveLocale(rawLocale)
   const settings = await getGlobalSettings(locale)
   const title = settings?.seo?.defaultTitle ?? 'Developer Portfolio'
+  const home = homeTitle({
+    fallback: title,
+    name: settings?.name,
+    profession: settings?.profession,
+  })
   const description =
     settings?.seo?.defaultDescription ??
     'Professional developer portfolio powered by Payload CMS and Next.js.'
@@ -96,8 +101,8 @@ export async function generateMetadata({
       description,
       images,
       locale: OG_LOCALES[locale],
-      siteName: title,
-      title,
+      siteName: settings?.name ?? title,
+      title: home,
       type: 'website',
       url: `/${locale}`,
     },
@@ -106,7 +111,7 @@ export async function generateMetadata({
     twitter: {
       card: 'summary_large_image',
       description,
-      title,
+      title: home,
     },
     // Only the homepage keeps these: every other page sets its own through
     // `pageMetadata` (@/lib/seo), or it would inherit this canonical.
@@ -118,7 +123,7 @@ export async function generateMetadata({
       },
     },
     title: {
-      default: title,
+      default: home,
       template: `%s | ${title}`,
     },
   }
@@ -163,7 +168,11 @@ export default async function LocaleLayout(props: {
       sameAs: (settings?.socialLinks ?? []).map((link) => link.url),
       siteUrl,
     }),
-    websiteJsonLd({ locale, name: settings?.name, siteUrl }),
+    websiteJsonLd({
+      alternateName: settings?.seo?.defaultTitle,
+      name: settings?.name,
+      siteUrl,
+    }),
   ]
 
   return (

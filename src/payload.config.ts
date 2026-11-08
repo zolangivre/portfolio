@@ -1,4 +1,4 @@
-import { postgresAdapter } from '@payloadcms/db-postgres'
+import { postgresAdapter, type PostgresAdapter } from '@payloadcms/db-postgres'
 import { resendAdapter } from '@payloadcms/email-resend'
 import { importExportPlugin } from '@payloadcms/plugin-import-export'
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
@@ -7,6 +7,7 @@ import { seoPlugin } from '@payloadcms/plugin-seo'
 import { fr } from '@payloadcms/translations/languages/fr'
 import { s3Storage } from '@payloadcms/storage-s3'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { attachDatabasePool } from '@vercel/functions'
 import path from 'path'
 import { buildConfig, type CollectionSlug } from 'payload'
 import { fileURLToPath } from 'url'
@@ -299,6 +300,14 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || '',
     },
   }),
+  // Vercel freezes a function between requests, which also stops the pool's
+  // idle timer. Neon then closes the connection when it suspends, and the next
+  // query lands on a dead socket ("Connection terminated unexpectedly"). This
+  // keeps the function alive until the pool has released its idle connections.
+  // It does nothing off Vercel.
+  onInit: (payload) => {
+    attachDatabasePool((payload.db as unknown as PostgresAdapter).pool)
+  },
   sharp,
   plugins: [
     // MCP: lets an MCP client (Claude) read and edit the site's content with
