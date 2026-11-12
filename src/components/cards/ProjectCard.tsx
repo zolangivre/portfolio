@@ -135,12 +135,16 @@ export function ProjectCard({ dictionary, locale, project }: ProjectCardProps) {
               </p>
             ) : null}
 
-            <p className="line-clamp-3 flex-1 text-sm leading-7 text-fg-muted">
-              {typeof project.shortDescription === 'string' &&
-              project.shortDescription.trim().length > 0
-                ? project.shortDescription
-                : dictionary.projects.fallbackDescription}
-            </p>
+            {/* The wrapper takes the card's spare height, not the text: a
+                stretched line-clamp box shows a fourth line under the "…". */}
+            <div className="flex-1">
+              <p className="line-clamp-3 text-sm leading-7 text-fg-muted">
+                {typeof project.shortDescription === 'string' &&
+                project.shortDescription.trim().length > 0
+                  ? project.shortDescription
+                  : dictionary.projects.fallbackDescription}
+              </p>
+            </div>
           </div>
         </Link>
 
