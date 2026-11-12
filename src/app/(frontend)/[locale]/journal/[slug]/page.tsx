@@ -5,6 +5,7 @@ import { ViewTransition } from 'react'
 
 import { AdjacentNav } from '@/components/ui/AdjacentNav'
 import { AnimatedTitle } from '@/components/ui/AnimatedTitle'
+import { ContactCta } from '@/components/ui/ContactCta'
 import { Container } from '@/components/ui/Container'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { Divider } from '@/components/ui/Divider'
@@ -260,6 +261,21 @@ export default async function JournalEntryPage({ params }: { params: Promise<Pag
                 />
               </Reveal>
             </>
+          ) : null}
+
+          {/* Before previous / next: someone who read to here has the way to
+            reach out first, then the way to keep browsing. Not when the
+            contact section is hidden — the button would lead nowhere. */}
+          {sections?.contact !== false ? (
+            <Reveal className="mt-12">
+              <ContactCta
+                buttonLabel={dictionary.contact.endCta.buttonLabel}
+                eyebrow={dictionary.contact.eyebrow}
+                href={`/${locale}#contact`}
+                text={dictionary.contact.endCta.journalText}
+                title={dictionary.contact.endCta.journalTitle}
+              />
+            </Reveal>
           ) : null}
 
           {previous || next ? (
