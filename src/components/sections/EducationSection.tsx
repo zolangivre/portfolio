@@ -98,7 +98,7 @@ export function EducationSection({
                         <h4 className="text-base">{entry.fieldOfStudy}</h4>
                       ) : null}
                       {entry.description ? (
-                        // Folded to its opening paragraph on phones.
+                        // Folded to its opening paragraph when it runs long.
                         <TimelineDetails
                           hideLabel={dictionary.experience.hideDetailsLabel}
                           showLabel={dictionary.experience.showDetailsLabel}
