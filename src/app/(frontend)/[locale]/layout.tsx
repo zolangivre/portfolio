@@ -218,7 +218,7 @@ export default async function LocaleLayout(props: {
                 settings={settings}
               />
               <main id="main-content">{children}</main>
-              <Footer dictionary={dictionary} footer={footer} locale={locale} />
+              <Footer dictionary={dictionary} footer={footer} locale={locale} settings={settings} />
             </div>
           </MotionProvider>
         </ThemeProvider>
