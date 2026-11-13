@@ -42,6 +42,9 @@ const eslintConfig = [
       'test-results/',
       'src/payload-types.ts',
       'src/payload-generated-schema.ts',
+      // Third-party skill installed with `npx skills add` (see skills-lock.json):
+      // its CommonJS scripts are replaced on update, never edited here.
+      '.claude/skills/security-audit/',
     ],
   },
 ]
