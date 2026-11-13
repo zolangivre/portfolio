@@ -133,3 +133,7 @@ approve: the choice is the approval. Write the plan file anyway, since
 
 Scores per page and axis, the problems found, those fixed (PR links, before
 → after), and those left aside with the reason.
+
+## Modèle des sous-agents
+
+Pour les étapes de lecture, de collecte et de vérification de ce skill, lance les sous-agents avec `model: "sonnet"` (paramètre `model` de l'outil Agent). Garde le modèle principal pour les décisions, les choix à faire avec l'utilisateur et la rédaction finale.

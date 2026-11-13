@@ -44,3 +44,7 @@ problem at once. Don't fix anything unless asked; report first.
 
 A short table: step / ✅ or ❌ / one-line detail. Then remind that feature PRs
 target `staging`, not `main`; the `staging → main` PR is the release.
+
+## Modèle des sous-agents
+
+Pour les étapes de lecture, de collecte et de vérification de ce skill, lance les sous-agents avec `model: "haiku"` (paramètre `model` de l'outil Agent). Garde le modèle principal pour les décisions, les choix à faire avec l'utilisateur et la rédaction finale.

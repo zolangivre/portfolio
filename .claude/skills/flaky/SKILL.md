@@ -120,3 +120,7 @@ the app, `ci: …` if it was the CI. Update **Known cases** in the same commit.
 | ---- | ----- | --- | ----------------- |
 
 Add the flaky tests found but not fixed, with what's known of their cause.
+
+## Modèle des sous-agents
+
+Pour les étapes de lecture, de collecte et de vérification de ce skill, lance les sous-agents avec `model: "sonnet"` (paramètre `model` de l'outil Agent). Garde le modèle principal pour les décisions, les choix à faire avec l'utilisateur et la rédaction finale.
