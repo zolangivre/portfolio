@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { describe, expect, it } from 'vitest'
 
+import { locales } from '@/lib/locale'
 import { config, proxy } from '@/proxy'
 
 const request = (path: string, acceptLanguage?: string) =>
@@ -36,6 +37,34 @@ describe('proxy', () => {
     expect(redirectTarget('/', 'fr;q=0.1, en;q=0.9')).toBe('/fr')
   })
 
+  it.each([
+    '/wp-login.php',
+    '/wp-admin/setup-config.php',
+    '/wp-admin/',
+    '/wp-content/plugins/x/readme.txt',
+    '/xmlrpc.php',
+    '/.env',
+    '/.git/config',
+    '/backup/.aws/credentials',
+    '/cgi-bin/luci.cgi',
+    '/config.yml',
+    '/db.sql',
+  ])('answers 404 to the scanner probe %s without a redirect', (path) => {
+    const response = proxy(request(path))
+
+    expect(response.status).toBe(404)
+    expect(response.headers.get('location')).toBeNull()
+  })
+
+  // Close to a probe, but real paths: they still go to their localized page.
+  it.each([
+    ['/projects/wordpress-site', '/fr/projects/wordpress-site'],
+    ['/journal/php-in-2026', '/fr/journal/php-in-2026'],
+    ['/env', '/fr/env'],
+  ])('still redirects %s', (path, expected) => {
+    expect(redirectTarget(path)).toBe(expected)
+  })
+
   it.each(['/fr', '/en', '/fr/projects', '/en/journal/some-entry'])(
     'lets %s through untouched',
     (path) => {
@@ -50,11 +79,20 @@ describe('proxy', () => {
 describe('proxy matcher', () => {
   const matcher = new RegExp(`^${config.matcher[0]}$`)
 
-  it.each(['/', '/projects', '/fr/journal/some-entry', '/en'])('runs on %s', (path) => {
-    expect(matcher.test(path)).toBe(true)
-  })
+  it.each(['/', '/projects', '/english', '/french/page', '/wp-login.php', '/.env'])(
+    'runs on %s',
+    (path) => {
+      expect(matcher.test(path)).toBe(true)
+    },
+  )
 
   it.each([
+    // Localized pages: the cache serves them without the proxy.
+    '/fr',
+    '/en',
+    '/fr/journal/some-entry',
+    '/en/projects/some-slug',
+    '/fr/opengraph-image-card',
     '/admin',
     '/admin/collections/projects',
     '/api/projects',
@@ -66,5 +104,12 @@ describe('proxy matcher', () => {
     '/fonts/display.css',
   ])('skips %s', (path) => {
     expect(matcher.test(path)).toBe(false)
+  })
+
+  // The matcher spells the locales out (Next reads it at build time): a
+  // locale added to the list must be added there too.
+  it.each(locales)('skips every page of the %s locale', (locale) => {
+    expect(matcher.test(`/${locale}`)).toBe(false)
+    expect(matcher.test(`/${locale}/journal`)).toBe(false)
   })
 })
