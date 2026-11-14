@@ -44,6 +44,8 @@ export interface Dictionary {
     nextProjectLabel: string
     /** The dots under the swipeable row of projects on phones. */
     shelfNavLabel: string
+    /** Heads the grid of projects under the featured ones (from 720px). */
+    othersTitle: string
   }
   experience: {
     eyebrow: string
@@ -189,6 +191,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       previousProjectLabel: 'Projet précédent',
       nextProjectLabel: 'Projet suivant',
       shelfNavLabel: 'Aller à un projet',
+      othersTitle: 'Autres projets',
     },
     experience: {
       eyebrow: 'Parcours',
@@ -330,6 +333,7 @@ const dictionaries: Record<Locale, Dictionary> = {
       previousProjectLabel: 'Previous project',
       nextProjectLabel: 'Next project',
       shelfNavLabel: 'Jump to a project',
+      othersTitle: 'Other projects',
     },
     experience: {
       eyebrow: 'Background',

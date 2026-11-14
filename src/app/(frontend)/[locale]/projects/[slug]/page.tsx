@@ -26,6 +26,7 @@ import {
   getRedirectDestination,
   getSectionsVisibility,
 } from '@/lib/queries'
+import { featuredFirst } from '@/lib/projectOrder'
 import { pageMetadata, projectJsonLd } from '@/lib/seo'
 import { ReadingProgress } from '@/components/ui/ReadingProgress'
 
@@ -134,9 +135,12 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
     return doc ? [{ doc, key: `${item.relationTo}-${doc.id}` }] : []
   })
 
-  // Same query — and so the same order — as the projects section, so
-  // "previous" and "next" match the list the visitor came from.
-  const { previous, next } = getAdjacentBySlug(await getAllProjects(locale), project.slug)
+  // Same query and the same order as the projects section (featured first),
+  // so "previous" and "next" match the list the visitor came from.
+  const { previous, next } = getAdjacentBySlug(
+    featuredFirst(await getAllProjects(locale)),
+    project.slug,
+  )
   const toAdjacentItem = (adjacent: typeof previous) => {
     if (!adjacent) {
       return null
