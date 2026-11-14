@@ -114,3 +114,7 @@ already there.
 ## Report
 
 The path to the report, the "En bref" line, and the Backlog lines added.
+
+## Modèle des sous-agents
+
+Pour les étapes de lecture, de collecte et de vérification de ce skill, lance les sous-agents avec `model: "sonnet"` (paramètre `model` de l'outil Agent). Garde le modèle principal pour les décisions, les choix à faire avec l'utilisateur et la rédaction finale.

@@ -165,3 +165,7 @@ In French, short:
 - **Quand merger**: relative to the open PRs (a pending release goes first),
   and whether to comment `@dependabot rebase` first so its CI runs on the
   current base.
+
+## Modèle des sous-agents
+
+Pour les étapes de lecture, de collecte et de vérification de ce skill, lance les sous-agents avec `model: "sonnet"` (paramètre `model` de l'outil Agent). Garde le modèle principal pour les décisions, les choix à faire avec l'utilisateur et la rédaction finale.

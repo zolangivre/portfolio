@@ -109,3 +109,7 @@ In French: **En bref** in one sentence (ready to ship, or what's wrong), then:
 - **Mouvement réduit et console**: findings, or "rien".
 - **À regarder sur un vrai téléphone**: what emulation can't tell (touch
   feel, Safari), if anything changed there.
+
+## Modèle des sous-agents
+
+Pour les étapes de lecture, de collecte et de vérification de ce skill, lance les sous-agents avec `model: "sonnet"` (paramètre `model` de l'outil Agent). Garde le modèle principal pour les décisions, les choix à faire avec l'utilisateur et la rédaction finale.

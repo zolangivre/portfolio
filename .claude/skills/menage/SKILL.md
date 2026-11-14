@@ -92,3 +92,7 @@ checking the pushed-commits rule.
 
 What was deleted, by category. What was kept and why (unpushed work, local
 changes, a closed PR's branch). The quiet PRs to look at.
+
+## Modèle des sous-agents
+
+Pour les étapes de lecture, de collecte et de vérification de ce skill, lance les sous-agents avec `model: "haiku"` (paramètre `model` de l'outil Agent). Garde le modèle principal pour les décisions, les choix à faire avec l'utilisateur et la rédaction finale.

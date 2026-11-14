@@ -194,3 +194,7 @@ One commit per kind of fix, Conventional format:
 - Edit `.env*`, or change the versions of the `payload-next-react` group.
 - Add an override that crosses a major, run `pnpm update --depth`, or commit
   with `--no-verify`.
+
+## Modèle des sous-agents
+
+Pour les étapes de lecture, de collecte et de vérification de ce skill, lance les sous-agents avec `model: "sonnet"` (paramètre `model` de l'outil Agent). Garde le modèle principal pour les décisions, les choix à faire avec l'utilisateur et la rédaction finale.

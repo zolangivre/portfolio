@@ -15,6 +15,20 @@ import { getRedirectDestination } from '@/lib/queries'
  *
  * Before that, an old URL that has a redirect sends the visitor on.
  */
+
+/**
+ * No path is built ahead, but the empty list still matters: without
+ * `generateStaticParams` Next renders this route on every request, with no
+ * cache. Bots and scanners live on unknown URLs, so each of their hits cost a
+ * full render of the 404 page. With it, each URL is rendered once and then
+ * served from the cache like the other pages. Its 404 or redirect stays
+ * right: the redirect lookup is tagged `redirects`, `projects` and `journal`,
+ * so a save in one of them refreshes it.
+ */
+export function generateStaticParams() {
+  return []
+}
+
 export default async function CatchAllNotFound({
   params,
 }: {

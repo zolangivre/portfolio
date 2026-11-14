@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.2](https://github.com/zolangivre/portfolio/compare/v1.5.1...v1.5.2) (2026-11-14)
+
+
+### Corrections
+
+* **site:** stop bots and cached pages from running functions ([0617ee2](https://github.com/zolangivre/portfolio/commit/0617ee2dd3e77729b2d9f1a97dab72a8b5b47358))
+
 ## [1.5.1](https://github.com/zolangivre/portfolio/compare/v1.5.0...v1.5.1) (2026-11-04)
 
 
