@@ -41,6 +41,7 @@ import { Navigation } from './globals/Navigation'
 import { Footer } from './globals/Footer'
 import { SectionsVisibility } from './globals/SectionsVisibility'
 import { SectionsContent } from './globals/SectionsContent'
+import { withVerifiedTls } from './lib/databaseUrl'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -297,7 +298,7 @@ export default buildConfig({
     // from detecting a schema drift and hanging on an interactive prompt.
     push: process.env.PAYLOAD_DB_PUSH !== 'false',
     pool: {
-      connectionString: process.env.DATABASE_URL || '',
+      connectionString: withVerifiedTls(process.env.DATABASE_URL || ''),
     },
   }),
   // Vercel freezes a function between requests, which also stops the pool's
