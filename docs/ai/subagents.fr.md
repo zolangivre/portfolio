@@ -71,8 +71,8 @@ finit dans la PR.
 Le back, à partir de `git diff origin/staging...HEAD`, avec les références
 du [skill `payload`](skills.fr.md#payload) sous la main :
 
-1. **Contrôle d'accès.** Les API REST et GraphQL sont publiques et répondent
-   d'après les seules règles d'accès. Chaque collection et global a un accès
+1. **Contrôle d'accès.** L'API REST est publique et répond d'après les
+   seules règles d'accès (GraphQL est désactivé). Chaque collection et global a un accès
    explicite ; les collections avec `visibility` utilisent
    `readPublicOrAuthenticated` ; `messages` est le seul `create` public, et
    son action serveur valide et plafonne les entrées. Les appels à la Local

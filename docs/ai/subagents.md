@@ -67,8 +67,8 @@ up in the PR.
 The back end, starting from `git diff origin/staging...HEAD`, with the
 [`payload` skill](skills.md#payload) references at hand:
 
-1. **Access control.** The REST and GraphQL APIs are public and answer from
-   the access rules alone. Every collection and global has explicit access;
+1. **Access control.** The REST API is public and answers from the access
+   rules alone (GraphQL is disabled). Every collection and global has explicit access;
    collections with `visibility` use `readPublicOrAuthenticated`; `messages`
    is the only public `create`, and its server action validates and caps
    input. Local API calls with request-derived input need

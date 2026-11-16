@@ -16,8 +16,9 @@ QUERIES.md); read the relevant one before judging something.
 
 ## 1. Access control
 
-The REST and GraphQL APIs (`/api/<collection>`, `/api/graphql`) are public and
-answer from the access rules alone. The site's own queries don't protect anything.
+The REST API (`/api/<collection>`) is public and answers from the access rules
+alone; GraphQL is disabled (`graphQL.disable` in `payload.config.ts`) and must
+stay so unless something needs it. The site's own queries don't protect anything.
 
 - Every collection/global needs explicit `access`. A missing `read` means
   readable by anyone. Collections with a `visibility` field must use
