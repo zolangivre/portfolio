@@ -579,6 +579,13 @@ describe('anonymous REST queries', () => {
     expect((await get(conditions(MAX_ANONYMOUS_CONDITIONS + 1))).status).toBe(400)
   })
 
+  // Payload reads `OR` as `or`: the cap has to as well.
+  it('refuses more under an upper-case OR', async () => {
+    const upper = conditions(MAX_ANONYMOUS_CONDITIONS + 1).replaceAll('where[or]', 'where[OR]')
+
+    expect((await get(upper)).status).toBe(400)
+  })
+
   it.each([
     ['a huge limit', 'limit=1000000'],
     ['limit=0 (every row)', 'limit=0'],

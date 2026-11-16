@@ -21,18 +21,35 @@ export const MAX_ANONYMOUS_CONDITIONS = 20
 
 type QueryArgs = { limit?: number; pagination?: boolean; where?: Where }
 
-/** The field conditions in a `where`, through every `and` / `or`. */
-export function countConditions(where: Where | undefined): number {
-  if (!where || typeof where !== 'object') return 0
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+
+/**
+ * The conditions in a `where`, through every `and` / `or`, counted the way
+ * Payload reads them: it matches `and` / `or` in any case (`OR`, `And`), and
+ * each operator under a field (`{ equals, in, like }`) is a condition of its
+ * own. A shape Payload wouldn't read as a plain list of conditions counts as
+ * over the limit rather than as one.
+ */
+export function countConditions(where: unknown): number {
+  if (where === undefined) return 0
+  if (!isPlainObject(where)) return Infinity
 
   let count = 0
 
   for (const [key, value] of Object.entries(where)) {
-    if ((key === 'and' || key === 'or') && Array.isArray(value)) {
-      for (const nested of value) count += countConditions(nested as Where)
+    const lower = key.toLowerCase()
+
+    if (lower === 'and' || lower === 'or') {
+      if (!Array.isArray(value)) return Infinity
+      for (const nested of value) count += countConditions(nested)
+    } else if (isPlainObject(value)) {
+      count += Math.max(1, Object.keys(value).length)
     } else {
       count += 1
     }
+
+    if (count > MAX_ANONYMOUS_CONDITIONS) return count
   }
 
   return count
