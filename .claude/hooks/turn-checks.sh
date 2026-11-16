@@ -17,6 +17,10 @@
 #
 # Off for a session: CLAUDE_TURN_CHECKS=off in the `env` of
 # .claude/settings.local.json.
+# Off in GitHub Actions: the agents there (security-sweep, claude-review) hold
+# write tokens, and this hook would run node_modules and repo code next to
+# them. CI runs its own checks.
+[ "${GITHUB_ACTIONS:-}" = "true" ] && exit 0
 mode=$1
 input=$(cat)
 [ "${CLAUDE_TURN_CHECKS:-}" = "off" ] && exit 0

@@ -59,7 +59,8 @@ jobs:
       # not from the PR: .claude/ (agents, skills, settings, hooks), .mcp.json,
       # and every CLAUDE.md or AGENTS.md. A PR must not rewrite the rules of
       # its own review, so the PR's copies are deleted first, files and links
-      # it added included. (A change to them is reviewed with the current
+      # it added included, and any .claude/ it nests deeper (Claude Code also
+      # reads those). (A change to them is reviewed with the current
       # rules, and takes effect once merged.) The repo has no symlinks, so a
       # PR that adds one stops here instead of pointing a name somewhere else.
       - name: Use the reviewers from staging
@@ -68,7 +69,8 @@ jobs:
             echo "This PR adds symlinks: not reviewed automatically." >&2
             exit 1
           fi
-          rm -rf .claude .mcp.json
+          rm -rf .mcp.json
+          find . -path ./.git -prune -o -type d -name .claude -prune -print -exec rm -rf {} +
           git checkout origin/staging -- .claude
           find . -path ./.git -prune -o \( -name CLAUDE.md -o -name CLAUDE.local.md -o -name AGENTS.md \) \( -type f -o -type l \) -print -exec rm -f {} +
           git ls-tree -r --name-only -z origin/staging | grep -zE '(^|/)(CLAUDE|AGENTS)\.md$|^\.mcp\.json$' | xargs -0 -r git checkout origin/staging --
@@ -115,4 +117,4 @@ jobs:
           claude_args: >-
             --max-turns 40
             --allowedTools "Read(./**),Glob,Grep,Agent,Bash(git diff *),Bash(git log *),Bash(git show *),Bash(gh pr view *),Bash(gh pr diff *),Bash(gh pr comment *),mcp__github_inline_comment__create_inline_comment"
-            --disallowedTools "Bash(*difftool*),Bash(*--extcmd*),Bash(*--ext-diff*),Bash(*--upload-pack*),Bash(*--receive-pack*),Bash(*--exec*),Bash(git -c*),Bash(*core.*),Bash(*diff.external*),Read(//proc/**),Read(//sys/**),Read(//etc/**),Read(//run/**),Read(//tmp/**),Read(//home/runner/work/_temp/**),Read(~/.*/**),Bash(*--no-index*),Bash(*/proc/*),Bash(*environ*),Bash(*_temp*),Bash(*$(*),Bash(*`*),Bash(*../*),Bash(*--body-file*),Bash(* -F*),Bash(*--output*),Bash(*>*)"
+            --disallowedTools "Bash(*difftool*),Bash(*--extcmd*),Bash(*--ext-diff*),Bash(*--upload-pack*),Bash(*--receive-pack*),Bash(*--exec*),Bash(git -c*),Bash(*core.*),Bash(*diff.external*),Read(//proc/**),Read(//sys/**),Read(//etc/**),Read(//run/**),Read(//tmp/**),Read(//home/runner/work/_temp/**),Read(~/.*/**),Bash(*--no-index*),Bash(*/proc/*),Bash(*environ*),Bash(*_temp*),Bash(*$(*),Bash(*`*),Bash(*../*),Bash(*--body-file*),Bash(* -F*),Bash(*--output*),Bash(*>*),Read(./.git/**)"

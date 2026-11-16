@@ -27,6 +27,12 @@ included.
 | After an edit             | [`turn-checks.sh record`](../../.claude/hooks/turn-checks.sh) | Notes the edited file for the end of the turn                                             |
 | When Claude tries to stop | [`turn-checks.sh stop`](../../.claude/hooks/turn-checks.sh)   | Runs the tests related to the edited files, and checks these docs followed a setup change |
 
+In GitHub Actions (`GITHUB_ACTIONS=true`), `format`, `generate-types` and
+`turn-checks` exit without doing anything: the agents there hold write
+tokens, and these hooks would run `node_modules` code next to them
+([github-agents.md](github-agents.md#what-protects-these-workflows)). The
+two guards still run.
+
 "Edit" means the `Edit`, `Write` and `MultiEdit` tools. A file changed
 through a shell command (`sed`, a heredoc) goes through `guard-git` only.
 
