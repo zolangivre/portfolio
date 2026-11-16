@@ -69,9 +69,9 @@ The back end, starting from `git diff origin/staging...HEAD`, with the
 
 1. **Access control.** The REST API is public and answers from the access
    rules alone (GraphQL is disabled). Every collection and global has explicit access;
-   collections with `visibility` use `readPublicOrAuthenticated`; `messages`
-   is the only public `create`, and its server action validates and caps
-   input. Local API calls with request-derived input need
+   collections with `visibility` use `readPublicOrAuthenticated`; no
+   collection has a public `create`: visitors write `messages` through the
+   contact form's server action, which validates and caps input. Local API calls with request-derived input need
    `overrideAccess: false`. Hooks that write pass `req` and don't loop.
 2. **Schema and migration drift.** Every config change that alters the DB
    shape has a matching, registered migration, with a `down` that reverses it

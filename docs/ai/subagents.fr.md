@@ -74,8 +74,10 @@ du [skill `payload`](skills.fr.md#payload) sous la main :
 1. **Contrôle d'accès.** L'API REST est publique et répond d'après les
    seules règles d'accès (GraphQL est désactivé). Chaque collection et global a un accès
    explicite ; les collections avec `visibility` utilisent
-   `readPublicOrAuthenticated` ; `messages` est le seul `create` public, et
-   son action serveur valide et plafonne les entrées. Les appels à la Local
+   `readPublicOrAuthenticated` ; aucune
+   collection n'a de `create` public : les visiteurs écrivent dans
+   `messages` via l'action serveur du formulaire, qui valide et plafonne les
+   entrées. Les appels à la Local
    API avec des entrées venant de la requête demandent
    `overrideAccess: false`. Les hooks qui écrivent passent `req` et ne
    bouclent pas.

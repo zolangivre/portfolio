@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { notifyNewMessage } from '@/hooks/notifyNewMessage'
+import { MAX_NOTIFICATIONS_PER_HOUR, notifyNewMessage } from '@/hooks/notifyNewMessage'
 
 const fetchMock = vi.fn()
 
 const logger = { error: vi.fn(), warn: vi.fn() }
 const findGlobal = vi.fn()
+// Messages created within the hour, this one included.
+const count = vi.fn()
 
 const doc = { email: 'visitor@example.com', id: 1, message: 'Hello!', name: 'Visitor' }
 
@@ -15,7 +17,7 @@ const notify = async (overrides: { operation?: 'create' | 'update'; doc?: object
   const returned = await notifyNewMessage({
     doc: input,
     operation: overrides.operation ?? 'create',
-    req: { payload: { findGlobal, logger } },
+    req: { payload: { count, findGlobal, logger } },
   } as never)
 
   expect(returned).toBe(input)
@@ -29,6 +31,7 @@ beforeEach(() => {
   vi.stubEnv('CONTACT_NOTIFICATION_FROM', 'portfolio@example.com')
   vi.stubEnv('CONTACT_NOTIFICATION_TO', 'owner@example.com')
   fetchMock.mockResolvedValue(new Response('{}', { status: 200 }))
+  count.mockResolvedValue({ totalDocs: 1 })
 })
 
 describe('notifyNewMessage', () => {
@@ -140,5 +143,42 @@ describe('notifyNewMessage', () => {
 
     expect(fetchMock).not.toHaveBeenCalled()
     expect(logger.error).toHaveBeenCalledOnce()
+  })
+
+  it('still sends the last message under the hourly cap', async () => {
+    count.mockResolvedValue({ totalDocs: MAX_NOTIFICATIONS_PER_HOUR })
+
+    await notify()
+
+    expect(fetchMock).toHaveBeenCalledOnce()
+  })
+
+  // A script filling the form would otherwise use up the Resend quota, which
+  // also carries the admin's password-reset emails.
+  it('stops emailing past the hourly cap, warning once', async () => {
+    count.mockResolvedValue({ totalDocs: MAX_NOTIFICATIONS_PER_HOUR + 1 })
+    await notify()
+    count.mockResolvedValue({ totalDocs: MAX_NOTIFICATIONS_PER_HOUR + 2 })
+    await notify()
+
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(logger.warn).toHaveBeenCalledOnce()
+  })
+
+  it('counts only the last hour of messages', async () => {
+    await notify()
+
+    const { where } = count.mock.calls[0]![0]
+    const since = new Date(where.createdAt.greater_than).getTime()
+
+    expect(count.mock.calls[0]![0].collection).toBe('messages')
+    expect(Date.now() - since).toBeGreaterThanOrEqual(60 * 60 * 1000 - 1000)
+    expect(Date.now() - since).toBeLessThanOrEqual(60 * 60 * 1000 + 1000)
+  })
+
+  it('keeps line breaks out of the subject', async () => {
+    await notify({ doc: { ...doc, name: 'Visitor\r\nBcc: x@example.com' } })
+
+    expect(sentBody().subject).toBe('Nouveau message de Visitor Bcc: x@example.com')
   })
 })

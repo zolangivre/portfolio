@@ -29,6 +29,7 @@ import { Messages } from './collections/Messages'
 import { Journal } from './collections/Journal'
 import { redirectsConfig } from './collections/Redirects'
 import { refuseGlobalUnpublishSchedule } from './collections/drafts'
+import { limitAnonymousQueries } from './hooks/limitAnonymousQueries'
 import { canRunJobs } from './lib/access'
 import { parseSender } from './lib/emailSender'
 import { previewPath, previewURL } from './lib/preview'
@@ -224,6 +225,9 @@ export default buildConfig({
         }),
     },
   },
+  // Every collection bounds what an anonymous REST read may ask of the
+  // database (hooks/limitAnonymousQueries.ts), here once rather than in
+  // each file, so a new collection can't forget it.
   collections: [
     Users,
     Media,
@@ -239,7 +243,13 @@ export default buildConfig({
     Testimonials,
     Messages,
     Journal,
-  ],
+  ].map((collection) => ({
+    ...collection,
+    hooks: {
+      ...collection.hooks,
+      beforeOperation: [...(collection.hooks?.beforeOperation ?? []), limitAnonymousQueries],
+    },
+  })),
   // The folders media and videos are sorted into (`folders: true` on each).
   // Payload builds the folder collection itself, with English labels; this
   // only translates them. Deleting a folder deletes its subfolders and moves

@@ -11,6 +11,7 @@ import {
 } from 'payload'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
+import { MAX_ANONYMOUS_CONDITIONS, MAX_ANONYMOUS_LIMIT } from '@/hooks/limitAnonymousQueries'
 import { textToLexicalParagraphs } from '@/lib/richText'
 import configPromise from '@/payload.config'
 
@@ -46,7 +47,8 @@ const collectionPolicy: Record<CollectionSlug, { read: ReadPolicy; create: 'anyo
     imports: { read: 'editors', create: 'editors' },
     journal: { read: 'published-only', create: 'editors' },
     media: { read: 'editors', create: 'editors' },
-    messages: { read: 'editors', create: 'anyone' },
+    // Visitors write through the contact form's server action, not the API.
+    messages: { read: 'editors', create: 'editors' },
     'payload-folders': { read: 'editors', create: 'editors' },
     'payload-jobs': { read: 'editors', create: 'editors' },
     'payload-kv': { read: 'editors', create: 'editors' },
@@ -305,12 +307,11 @@ describe.each(Object.keys(draftable) as (keyof typeof draftable)[])(
 )
 
 /**
- * `messages` is the one collection a visitor can write to, and the REST
- * endpoint skips everything the contact form's server action checks (the
- * honeypot, the length limits). The collection's own validation is all that
- * stands in the way there.
+ * A visitor's message, as the contact form's server action creates it: the
+ * Local API with access overridden and no user. The collection's validation
+ * and hooks are what hold there, whatever the action lets through.
  */
-describe('anonymous message submissions', () => {
+describe('messages from visitors', () => {
   // 254 characters is the RFC 5321 ceiling the collection enforces. Built from
   // short labels so no other email rule (64-char local part, 63-char labels)
   // is what rejects it.
@@ -327,11 +328,24 @@ describe('anonymous message submissions', () => {
     const doc = await payload.create({
       collection: 'messages',
       data: { ...valid, ...data },
-      overrideAccess: false,
     })
 
     return track('messages', doc)
   }
+
+  // The API skipped the server action's honeypot; scripts posted there.
+  it('can no longer be posted to /api/messages', async () => {
+    const response = await handleEndpoints({
+      config,
+      request: new Request('http://localhost:3000/api/messages', {
+        body: JSON.stringify(valid),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      }),
+    })
+
+    expect(response.status).toBe(403)
+  })
 
   it('accepts a valid message', async () => {
     await expect(submit({})).resolves.toMatchObject(valid)
@@ -532,6 +546,61 @@ describe('references in rich text', () => {
 
     expect(block!.value).toBe(projectId)
     expect(link!.fields!.doc.value).toBe(projectId)
+  })
+})
+
+/**
+ * What one anonymous REST read may ask of the database
+ * (hooks/limitAnonymousQueries.ts). Each condition on a relationship adds
+ * joins to a single SQL statement, and Payload caps neither the conditions
+ * nor the page size.
+ */
+describe('anonymous REST queries', () => {
+  const get = async (query: string) => {
+    const response = await handleEndpoints({
+      config,
+      request: new Request(`http://localhost:3000/api/projects?${query}`, { method: 'GET' }),
+    })
+
+    return { body: (await response.json()) as { limit?: number }, status: response.status }
+  }
+
+  const conditions = (count: number) =>
+    Array.from(
+      { length: count },
+      (_, i) => `where[or][${i}][category.slug][equals]=access-${i}`,
+    ).join('&')
+
+  it(`accepts up to ${MAX_ANONYMOUS_CONDITIONS} conditions`, async () => {
+    expect((await get(conditions(MAX_ANONYMOUS_CONDITIONS))).status).toBe(200)
+  })
+
+  it('refuses more, before any query runs', async () => {
+    expect((await get(conditions(MAX_ANONYMOUS_CONDITIONS + 1))).status).toBe(400)
+  })
+
+  it.each([
+    ['a huge limit', 'limit=1000000'],
+    ['limit=0 (every row)', 'limit=0'],
+  ])(`caps %s at ${MAX_ANONYMOUS_LIMIT}`, async (_, query) => {
+    const { body, status } = await get(query)
+
+    expect(status).toBe(200)
+    expect(body.limit).toBe(MAX_ANONYMOUS_LIMIT)
+  })
+
+  it('keeps pagination on', async () => {
+    const { body } = await get('pagination=false')
+
+    expect(body.limit).toBeGreaterThan(0)
+  })
+
+  it('leaves the site’s own queries alone', async () => {
+    const where = { or: Array.from({ length: 30 }, (_, i) => ({ slug: { equals: `x-${i}` } })) }
+
+    await expect(
+      payload.find({ collection: 'projects', limit: 0, pagination: false, where }),
+    ).resolves.toBeDefined()
   })
 })
 

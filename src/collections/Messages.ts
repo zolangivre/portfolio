@@ -6,15 +6,19 @@ import { EMAIL_PATTERN } from '@/lib/contactValidation'
 import { neutralizeFormula } from '@/lib/csv'
 
 /**
- * `create` is public (the contact form), so a visitor's request body may
- * carry fields the form never sends. Two kinds are dropped:
- * - `deletedAt`, from trash: a message created straight into the trash would
- *   still send its notification, yet never show in the inbox. Only an editor
+ * A message from a visitor (no signed-in user) comes in with its inbox state
+ * set by the server, whatever the data says:
+ * - unread: otherwise spam could be filed as already seen, out of sight of
+ *   the unread list.
+ * - not in the trash: a message created straight into the trash would still
+ *   send its notification, yet never show in the inbox. Only an editor
  *   decides what goes to the trash.
- * - the timestamps: the inbox and the dashboard's unread widget sort by
+ * - dated now: the inbox and the dashboard's unread widget sort by
  *   `createdAt`, so a message dated 9999 would sit on top for good, and five
- *   of them would push every real message out of the widget. Only the server
- *   dates a message.
+ *   of them would push every real message out of the widget.
+ *
+ * The contact form's server action writes with access overridden, so field
+ * access doesn't apply to it: this hook does.
  */
 export const ignoreInboxStateFromVisitors: CollectionBeforeChangeHook = ({
   data,
@@ -22,6 +26,7 @@ export const ignoreInboxStateFromVisitors: CollectionBeforeChangeHook = ({
   req,
 }) => {
   if (operation === 'create' && !req.user) {
+    data.read = false
     delete data.deletedAt
     delete data.createdAt
     delete data.updatedAt
@@ -33,9 +38,8 @@ export const ignoreInboxStateFromVisitors: CollectionBeforeChangeHook = ({
 /**
  * A custom `validate` replaces Payload's own email validation instead of
  * adding to it, so the address check and the required check live here too.
- * Without them the REST endpoint, which skips the contact form's server
- * action, stored an empty or malformed address and used it as the
- * notification's reply-to.
+ * Without them the REST endpoint (public until `create` was closed) stored an
+ * empty or malformed address and used it as the notification's reply-to.
  *
  * The format is only checked on create: an editor marking an older message as
  * read re-validates the whole document, and shouldn't be stopped by an address
@@ -85,8 +89,12 @@ export const Messages: CollectionConfig = {
     beforeChange: [ignoreInboxStateFromVisitors],
     afterChange: [notifyNewMessage],
   },
+  // Visitors write through the contact form's server action only
+  // (lib/actions/contact.ts), which checks the honeypot and the fields, then
+  // creates the message with access overridden. A public `create` only opened
+  // /api/messages, which skips the honeypot, to scripts.
   access: {
-    create: () => true,
+    create: ({ req }) => Boolean(req.user),
     read: ({ req }) => Boolean(req.user),
     update: ({ req }) => Boolean(req.user),
     delete: ({ req }) => Boolean(req.user),
@@ -127,12 +135,7 @@ export const Messages: CollectionConfig = {
       label: 'Lu',
       defaultValue: false,
       index: true,
-      access: {
-        // Anyone may create a message, but only an editor decides it has been
-        // read — otherwise a script posting to /api/messages could file its
-        // spam as already seen, out of sight of the unread list.
-        create: ({ req }) => Boolean(req.user),
-      },
+      // A visitor's message always starts unread: ignoreInboxStateFromVisitors.
     },
   ],
   timestamps: true,

@@ -36,6 +36,30 @@ const fetchJournalEntries = unstable_cache(
   { revalidate: FALLBACK_REVALIDATE, tags: JOURNAL_TAGS },
 )
 
+/**
+ * The slugs a visitor can open, in one cache entry. A page asked for an
+ * unknown slug checks this list before looking the slug up on its own: that
+ * lookup is cached per slug, and the slugs come from whoever asks, so each
+ * one a bot tried left one more entry.
+ */
+const fetchPublishedJournalSlugs = unstable_cache(
+  async (): Promise<string[]> => {
+    const payload = await getPayloadClient()
+
+    const { docs } = await payload.find({
+      collection: 'journal',
+      depth: 0,
+      pagination: false,
+      select: { slug: true },
+      where: { _status: { equals: 'published' as const } },
+    })
+
+    return docs.map((doc) => doc.slug)
+  },
+  ['journal:slugs'],
+  { revalidate: FALLBACK_REVALIDATE, tags: [cacheTags.journal] },
+)
+
 const fetchJournalEntry = unstable_cache(
   async (slug: string, locale: Locale, draft: boolean): Promise<Journal | null> => {
     const payload = await getPayloadClient()
@@ -73,7 +97,12 @@ export const getJournalEntries = cache(
 export const getJournalEntry = cache(
   async (slug: string, locale: Locale = defaultLocale): Promise<Journal | null> => {
     try {
-      return await fetchJournalEntry(slug, locale, await isPreview())
+      const draft = await isPreview()
+
+      // Drafts aren't in the list: the preview looks every slug up.
+      if (!draft && !(await fetchPublishedJournalSlugs()).includes(slug)) return null
+
+      return await fetchJournalEntry(slug, locale, draft)
     } catch (error) {
       console.error('Failed to load journal entry from Payload.', error)
 

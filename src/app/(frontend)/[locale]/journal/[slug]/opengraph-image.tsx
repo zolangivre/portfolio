@@ -1,3 +1,5 @@
+import { notFound } from 'next/navigation'
+
 import { getDictionary } from '@/lib/i18n/dictionary'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
 import { getMediaUrl } from '@/lib/media'
@@ -39,10 +41,16 @@ export default async function OpengraphImage({ params }: { params: Promise<Param
     getJournalEntry(slug, locale),
   ])
 
+  // No card for a slug that isn't an entry: drawing one cost a full image
+  // render, cached under every slug a bot tried.
+  if (!entry) notFound()
+
   const category =
     entry && typeof entry.category === 'object' && entry.category ? entry.category.name : null
   const date = entry?.date
-    ? new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(new Date(entry.date))
+    ? new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(
+        new Date(entry.date),
+      )
     : null
   // The journal is about the pictures: the SEO tab's image, or the cover.
   const photo = await loadImageForOg(
