@@ -2259,7 +2259,19 @@
       display: none;
     }
 
-    .shelf > * {
+    /* A group of cards inside the row (the featured projects, then the
+     others) dissolves into it: its cards are the row's own items, and a
+     heading between groups has no place in a row you swipe. */
+    .shelf .shelf-group {
+      display: contents;
+    }
+
+    .shelf .project-others-title {
+      display: none;
+    }
+
+    .shelf > *,
+    .shelf > .shelf-group > * {
       /* Sized off the screen rather than a percentage of the scroller: the
        gutter on the left, then ~2rem of the next card showing on the right. */
       flex: 0 0 calc(100vw - 4.25rem);
@@ -2493,6 +2505,28 @@
     .project-grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
+  }
+
+  /* The projects section (ProjectsSection.tsx): the featured projects one
+   under the other, each across the section, then a heading and the grid
+   of the others. On phones the list is the shelf instead (below). */
+  @media (min-width: 720px) {
+    .project-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+  }
+
+  .project-featured {
+    display: grid;
+    gap: 1.1rem;
+  }
+
+  .project-others-title {
+    color: var(--fg);
+    font-size: 1.25rem;
+    margin: 1.9rem 0 0.3rem;
   }
 
   @media (max-width: 639px) {
