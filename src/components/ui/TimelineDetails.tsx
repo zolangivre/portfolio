@@ -17,13 +17,20 @@ const MIN_FOLD_PX = 80
 const MAX_FOLD_PX = 140
 /** Content barely taller than the fold isn't worth a button. */
 const SLACK_PX = 24
+/**
+ * From 720px a line holds twice the words and a card costs far less of the
+ * screen: only a description that runs well past the fold (an internship's
+ * project-by-project account, not a school's one paragraph) is folded.
+ */
+const WIDE_SLACK_PX = 240
+const WIDE_QUERY = '(min-width: 720px)'
 
 /**
- * The description of an experience or a school, folded on phones: its first
- * paragraph (or its first five lines or so) shows — the summary — fading out, with "Show details" to open
- * the rest. Long narratives cost several screens each on a phone; this keeps
- * the timeline scannable and the detail one tap away. From 720px it's all
- * shown and the button is gone (styles.css).
+ * The description of an experience or a school, folded: its first paragraph
+ * (or its first five lines or so) shows — the summary — fading out, with
+ * "Show details" to open the rest. Long narratives cost several screens
+ * each on a phone, and more than one on a laptop; this keeps the timeline
+ * scannable and the detail one tap away.
  *
  * Opening and closing animate the height on the default spring, from
  * wherever it is right now — tap again mid-way and it turns around without
@@ -53,7 +60,9 @@ export function TimelineDetails({ children, hideLabel, showLabel }: TimelineDeta
       )
 
       body.style.setProperty('--fold-height', `${fold}px`)
-      setFoldable(body.scrollHeight > fold + SLACK_PX)
+      const slack = window.matchMedia(WIDE_QUERY).matches ? WIDE_SLACK_PX : SLACK_PX
+
+      setFoldable(body.scrollHeight > fold + slack)
     }
 
     measure()

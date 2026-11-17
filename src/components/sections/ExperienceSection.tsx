@@ -108,7 +108,7 @@ export function ExperienceSection({
                       <p className="timeline-company mt-1 text-xs">{experience.location}</p>
                     ) : null}
                     <div className="timeline-body">
-                      {/* Folded to its opening paragraph on phones; the
+                      {/* Folded to its opening paragraph; the
                           technologies below stay in view. */}
                       <TimelineDetails
                         hideLabel={dictionary.experience.hideDetailsLabel}
