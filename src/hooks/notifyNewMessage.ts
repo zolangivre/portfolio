@@ -17,6 +17,17 @@ import type { CollectionAfterChangeHook } from 'payload'
 
 const RESEND_ENDPOINT = 'https://api.resend.com/emails'
 
+/**
+ * Past this many messages within the hour, they're still stored but no longer
+ * emailed. Real visitors never come close; a script filling the form would
+ * otherwise use up the Resend quota — which also carries the admin's
+ * password-reset emails — and the operator's inbox. The admin's unread list
+ * still shows every message.
+ */
+export const MAX_NOTIFICATIONS_PER_HOUR = 20
+
+const HOUR = 60 * 60 * 1000
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -65,7 +76,26 @@ export const notifyNewMessage: CollectionAfterChangeHook = async ({ doc, operati
       return doc
     }
 
-    const name = String(doc.name ?? '')
+    // Counts this message too: the one past the limit is the first not sent.
+    const { totalDocs: lastHour } = await req.payload.count({
+      collection: 'messages',
+      req,
+      where: { createdAt: { greater_than: new Date(Date.now() - HOUR).toISOString() } },
+    })
+
+    if (lastHour > MAX_NOTIFICATIONS_PER_HOUR) {
+      // Once per burst, not once per message.
+      if (lastHour === MAX_NOTIFICATIONS_PER_HOUR + 1) {
+        req.payload.logger.warn(
+          `More than ${MAX_NOTIFICATIONS_PER_HOUR} contact messages within the hour — notifications paused until the rate drops.`,
+        )
+      }
+
+      return doc
+    }
+
+    // A line break in the subject means nothing to a mail client but noise.
+    const name = String(doc.name ?? '').replace(/[\r\n]+/g, ' ')
     const email = String(doc.email ?? '')
     const message = String(doc.message ?? '')
 

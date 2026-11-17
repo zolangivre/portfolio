@@ -11,6 +11,10 @@
 # One hook, in this order: Claude Code runs a tool's hooks in parallel, and two
 # of them rewriting the same file would race. Prettier runs last, so whatever
 # --fix rewrote ends up formatted.
+# Off in GitHub Actions: the agents there (security-sweep, claude-review) hold
+# write tokens, and this hook would run node_modules and repo code next to
+# them. CI runs its own checks.
+[ "${GITHUB_ACTIONS:-}" = "true" ] && exit 0
 file=$(jq -r '.tool_input.file_path // empty')
 [ -n "$file" ] && [ -f "$file" ] || exit 0
 

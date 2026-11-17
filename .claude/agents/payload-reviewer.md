@@ -16,16 +16,21 @@ QUERIES.md); read the relevant one before judging something.
 
 ## 1. Access control
 
-The REST and GraphQL APIs (`/api/<collection>`, `/api/graphql`) are public and
-answer from the access rules alone. The site's own queries don't protect anything.
+The REST API (`/api/<collection>`) is public and answers from the access rules
+alone; GraphQL is disabled (`graphQL.disable` in `payload.config.ts`) and must
+stay so unless something needs it. The site's own queries don't protect anything.
 
 - Every collection/global needs explicit `access`. A missing `read` means
   readable by anyone. Collections with a `visibility` field must use
   `readPublicOrAuthenticated` from `src/lib/access.ts`.
-- `messages` is the only collection with public `create` (contact form). Check
-  that the server action in `src/lib/actions/` validates and caps input, that
+- No collection has a public `create`: visitors reach `messages` only through
+  the contact form's server action (`src/lib/actions/`), which writes with
+  access overridden. Check that it validates and caps input, that
+  `ignoreInboxStateFromVisitors` still resets the inbox state, that
   `read/update/delete` stay authenticated, and that `notifyNewMessage` doesn't
   leak data or trust user-supplied fields.
+- Anonymous REST reads go through `limitAnonymousQueries` (added to every
+  collection in `payload.config.ts`): a new collection gets it from there.
 - Local API calls (`payload.find`, `payload.update`, …) default to
   `overrideAccess: true`. Flag any one that runs with request-derived input
   (search params, form data) without `overrideAccess: false` + `user`, or

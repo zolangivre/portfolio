@@ -28,6 +28,12 @@ chaque session, mode bypass compris.
 | Après une modification      | [`turn-checks.sh record`](../../.claude/hooks/turn-checks.sh) | Note le fichier modifié pour la fin du tour                                                                  |
 | Quand Claude veut s'arrêter | [`turn-checks.sh stop`](../../.claude/hooks/turn-checks.sh)   | Lance les tests liés aux fichiers modifiés, et vérifie que ces docs ont suivi un changement de configuration |
 
+Dans GitHub Actions (`GITHUB_ACTIONS=true`), `format`, `generate-types` et
+`turn-checks` s'arrêtent sans rien faire : les agents qui y tournent ont des
+jetons d'écriture, et ces hooks lanceraient du code de `node_modules` à côté
+([github-agents.fr.md](github-agents.fr.md#ce-qui-protège-ces-workflows)).
+Les deux garde-fous tournent toujours.
+
 « Modification » désigne les outils `Edit`, `Write` et `MultiEdit`. Un
 fichier changé par une commande shell (`sed`, un heredoc) ne passe que par
 `guard-git`.

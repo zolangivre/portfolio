@@ -1,3 +1,5 @@
+import { notFound } from 'next/navigation'
+
 import { getDictionary } from '@/lib/i18n/dictionary'
 import { defaultLocale, locales, type Locale } from '@/lib/locale'
 import { getMediaUrl } from '@/lib/media'
@@ -39,7 +41,14 @@ export default async function OpengraphImage({ params }: { params: Promise<Param
   const locale = resolveLocale(rawLocale)
   const dictionary = getDictionary(locale)
 
-  const [settings, project] = await Promise.all([getGlobalSettings(locale), getProject(slug, locale)])
+  const [settings, project] = await Promise.all([
+    getGlobalSettings(locale),
+    getProject(slug, locale),
+  ])
+
+  // No card for a slug that isn't a project: drawing one cost a full image
+  // render, cached under every slug a bot tried.
+  if (!project) notFound()
 
   const category =
     project && typeof project.category === 'object' && project.category

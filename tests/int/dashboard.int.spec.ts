@@ -54,9 +54,13 @@ const createProject = async (
 const createMessage = async (name: string, extra: { read?: boolean } = {}) => {
   const doc = await payload.create({
     collection: 'messages',
-    data: { email: 'dash@test.local', message: 'Hello.', name, ...extra },
+    data: { email: 'dash@test.local', message: 'Hello.', name },
   })
   messageIds.push(doc.id)
+  // A visitor's message always comes in unread; an editor marks it read.
+  if (extra.read) {
+    return payload.update({ collection: 'messages', data: { read: true }, id: doc.id })
+  }
   return doc
 }
 
