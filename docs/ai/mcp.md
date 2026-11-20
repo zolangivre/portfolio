@@ -51,4 +51,11 @@ Good to know:
    Use the staging or production URL to work on that environment. A key only
    exists in the database it was created in: create one per environment.
 
+   For staging or production, keep the server in this project's local scope
+   (the default, never `-s user`) and turn it off in `/mcp` when you're done.
+   Claude Code connects to every enabled server when a session starts, and
+   each connection is a cold start of a Vercel function: a server enabled for
+   every session spends the free plan's Fluid Active CPU even in sessions
+   that never touch the content.
+
 Revoke a key by deleting it, or untick "API key" on it.
