@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.5.3](https://github.com/zolangivre/portfolio/compare/v1.5.2...v1.5.3) (2026-11-21)
+
+
+### Corrections
+
+* **api:** count anonymous query conditions the way Payload reads them ([af7d409](https://github.com/zolangivre/portfolio/commit/af7d409dd1234e9510d915550cae13e5f6c7ae5f))
+* **db:** spell out sslmode=verify-full to stop pg's warning ([084f0cb](https://github.com/zolangivre/portfolio/commit/084f0cb41744b514e82bcd758b5e0d3c39c4132a))
+* **security:** close the messages API, bound anonymous reads and per-URL cache entries ([fb54f58](https://github.com/zolangivre/portfolio/commit/fb54f58228014524e455dfd74a5aaa237d27c131))
+* **security:** keep messages and accounts out of rich text, harden message create ([bc59d09](https://github.com/zolangivre/portfolio/commit/bc59d0937aeee3c025e86434ad7d5d47eef69f13))
+* **security:** security review fixes for the CMS, public API and agent workflows ([88bfad9](https://github.com/zolangivre/portfolio/commit/88bfad9add96260a24f46c3150df915234ab00a1))
+
 ## [1.5.2](https://github.com/zolangivre/portfolio/compare/v1.5.1...v1.5.2) (2026-11-14)
 
 
