@@ -53,4 +53,12 @@ Bon à savoir :
    environnement. Une clé n'existe que dans la base où elle a été créée : il
    en faut une par environnement.
 
+   Pour staging ou la production, garde le serveur dans le scope local du
+   projet (par défaut, jamais `-s user`) et désactive-le dans `/mcp` quand tu
+   as fini. Claude Code se connecte à chaque serveur activé au démarrage d'une
+   session, et chaque connexion est un démarrage à froid d'une fonction
+   Vercel : un serveur activé pour toutes les sessions consomme le Fluid
+   Active CPU du plan gratuit même dans les sessions qui ne touchent pas au
+   contenu.
+
 Pour révoquer une clé, supprime-la ou décoche « API key ».
