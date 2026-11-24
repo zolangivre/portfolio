@@ -2630,6 +2630,16 @@
     color: var(--accent-strong);
   }
 
+  /* "Inline code" in the editor (a package name, a command): set apart by
+   weight, in the text's own face. The browser's default is monospace, which
+   the site doesn't use anywhere. */
+  .rich-text code {
+    color: var(--fg);
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: 600;
+  }
+
   .rich-text ul,
   .rich-text ol {
     padding-left: 1.4em;
