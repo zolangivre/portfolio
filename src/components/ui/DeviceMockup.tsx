@@ -14,6 +14,8 @@ type FrameProps = {
   alt: string
   /** The small version shown inside a project card. */
   compact?: boolean
+  /** Compact, in a featured project's wider card: loads a larger file. */
+  large?: boolean
   darkSrc: string | null
   height: number
   /** Of the media actually shown; a screen recording is played, not shown. */
@@ -165,7 +167,11 @@ function PhoneFrame(props: FrameProps) {
           <Screen
             {...props}
             sizes={
-              props.compact ? '110px' : '(min-width: 1024px) 240px, (min-width: 640px) 205px, 170px'
+              props.compact
+                ? props.large
+                  ? '170px'
+                  : '110px'
+                : '(min-width: 1024px) 240px, (min-width: 640px) 205px, 170px'
             }
           />
         </div>
@@ -207,7 +213,11 @@ function DesktopFrame(props: FrameProps) {
           <Screen
             {...props}
             sizes={
-              props.compact ? '(min-width: 720px) 300px, 75vw' : '(min-width: 1200px) 880px, 75vw'
+              props.compact
+                ? props.large
+                  ? '(min-width: 1024px) 520px, (min-width: 720px) 42vw, 75vw'
+                  : '(min-width: 720px) 300px, 75vw'
+                : '(min-width: 1200px) 880px, 75vw'
             }
           />
         </div>
@@ -259,7 +269,11 @@ function CustomFrame(props: FrameProps) {
             : 'h-auto max-h-[26rem] w-auto max-w-full object-contain sm:max-h-[32rem] lg:max-h-[38rem]'
         }
         sizes={
-          props.compact ? '(min-width: 720px) 375px, 100vw' : '(min-width: 1200px) 1160px, 100vw'
+          props.compact
+            ? props.large
+              ? '(min-width: 1024px) 660px, 100vw'
+              : '(min-width: 720px) 375px, 100vw'
+            : '(min-width: 1200px) 1160px, 100vw'
         }
       />
     </div>
@@ -283,9 +297,10 @@ const FRAMES: Record<
 type DeviceMockupProps = {
   /**
    * `card` fills a project card's 16/10 media box instead of opening the
-   * project page; the recording then plays on hover only.
+   * project page; the recording then plays on hover only. `featured` is the
+   * same in a featured project's wider card, with larger files.
    */
-  variant?: 'card' | 'page'
+  variant?: 'card' | 'featured' | 'page'
   /** Shown when the chosen upload carries no alt of its own. */
   fallbackAlt: string
   frame: MockupFrame
@@ -334,12 +349,13 @@ export function DeviceMockup({
   }
 
   const { Component, height, width } = FRAMES[frame]
-  const compact = variant === 'card'
+  const compact = variant !== 'page'
 
   const device = (
     <Component
       alt={primary.alt || fallbackAlt}
       compact={compact}
+      large={variant === 'featured'}
       darkPlaceholder={secondary && 'placeholder' in secondary ? secondary.placeholder : null}
       darkSrc={getMediaUrl(secondary)}
       height={primary.height ?? height}
