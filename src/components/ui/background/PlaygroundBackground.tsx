@@ -9,20 +9,87 @@ type ShapeSpec = {
   size: number
   /** Where it settles on load, as fractions of the screen. */
   at: [number, number]
+  /**
+   * Where it settles from 1024px, once the hero's text and photo sit side
+   * by side: px from the photo's left edge, then a fraction of the screen's
+   * height.
+   */
+  wide: [number, number]
+  /**
+   * Side by side, glides in from the left edge although it settles right of
+   * centre: for the one whose way in from the right runs through another's
+   * spot.
+   */
+  wideFromLeft?: boolean
   radius: string
   tone: 'accent' | 'accent-2'
 }
 
-// Settled in the free band between the hero's text (left) and its photo
-// (right), and along the bottom of the first screen.
+// Side by side (`wide`), the shapes keep off the words: they settle in the
+// band between the hero's paragraphs and its photo, around the photo and
+// under it. Measured from the photo's edge because that is what the band
+// follows as the screen widens, where a fraction of the width drifted into
+// the text. Stacked (`at`), there is no free band: they sit behind the
+// text, small and faded (styles.css). No two glide in along the same line
+// from the same side: one would bat the other off its spot.
 const SHAPES: ShapeSpec[] = [
-  { size: 150, at: [0.5, 0.3], radius: '58% 42% 63% 37% / 46% 55% 45% 54%', tone: 'accent' },
-  { size: 96, at: [0.62, 0.56], radius: '45% 55% 40% 60% / 55% 45% 60% 40%', tone: 'accent-2' },
-  { size: 120, at: [0.44, 0.82], radius: '62% 38% 54% 46% / 40% 60% 42% 58%', tone: 'accent-2' },
-  { size: 74, at: [0.38, 0.5], radius: '50% 50% 38% 62% / 58% 42% 58% 42%', tone: 'accent' },
-  { size: 180, at: [0.84, 0.88], radius: '42% 58% 48% 52% / 60% 40% 55% 45%', tone: 'accent-2' },
-  { size: 88, at: [0.62, 0.16], radius: '55% 45% 60% 40% / 45% 55% 40% 60%', tone: 'accent' },
+  {
+    size: 150,
+    at: [0.5, 0.3],
+    wide: [-45, 0.34],
+    radius: '58% 42% 63% 37% / 46% 55% 45% 54%',
+    tone: 'accent',
+  },
+  {
+    size: 96,
+    at: [0.62, 0.56],
+    wide: [-60, 0.62],
+    radius: '45% 55% 40% 60% / 55% 45% 60% 40%',
+    tone: 'accent-2',
+  },
+  {
+    size: 120,
+    at: [0.44, 0.82],
+    wide: [-90, 0.9],
+    wideFromLeft: true,
+    radius: '62% 38% 54% 46% / 40% 60% 42% 58%',
+    tone: 'accent-2',
+  },
+  {
+    size: 74,
+    at: [0.38, 0.5],
+    wide: [340, 0.5],
+    radius: '50% 50% 38% 62% / 58% 42% 58% 42%',
+    tone: 'accent',
+  },
+  {
+    size: 180,
+    at: [0.84, 0.88],
+    wide: [200, 0.9],
+    radius: '42% 58% 48% 52% / 60% 40% 55% 45%',
+    tone: 'accent-2',
+  },
+  {
+    size: 88,
+    at: [0.62, 0.16],
+    wide: [70, 0.17],
+    radius: '55% 45% 60% 40% / 45% 55% 40% 60%',
+    tone: 'accent',
+  },
 ]
+
+/** From here the hero's text and photo sit side by side (Tailwind's lg). */
+const WIDE_FROM_PX = 1024
+// The hero's geometry, as laid out by .page-container and HeroSection: the
+// content column, its gutter, the photo (w-80), the gap before it (gap-12)
+// and the widest a paragraph gets (.hero-copy p).
+const CONTENT_MAX_PX = 1160
+const GUTTER_PX = 20
+const PHOTO_PX = 320
+const PHOTO_GAP_PX = 48
+const TEXT_MAX_PX = 700
+/** Air kept between the last letter of a line and a shape. */
+const TEXT_CLEARANCE_PX = 8
 
 /** Apple's scroll deceleration, per millisecond: a throw coasts, then settles. */
 const DECELERATION = 0.998
@@ -85,19 +152,40 @@ export function PlaygroundBackground({ local, positions }: PlaygroundBackgroundP
     let width = window.innerWidth
     let height = window.innerHeight
 
+    const content = Math.min(CONTENT_MAX_PX, width - GUTTER_PX * 2)
+    const contentLeft = (width - content) / 2
+    // On the home page the text column is measured: on a narrow laptop it
+    // runs wider than the figures above say, the photo giving way to it.
+    // Elsewhere (a project, the journal) the same band is kept, from them.
+    const copy = document.querySelector('.hero-copy')?.getBoundingClientRect()
+    const copyRight = copy && copy.width > 0 ? copy.right : null
+    const photoLeft = Math.max(
+      contentLeft + content - PHOTO_PX,
+      copyRight === null ? 0 : copyRight + PHOTO_GAP_PX,
+    )
+    const textRight = Math.min(contentLeft + TEXT_MAX_PX, copyRight ?? photoLeft - PHOTO_GAP_PX)
+
     const bodies: Body[] = elements.map((el, index) => {
       const spec = SHAPES[index]!
       // Measured, not taken from the spec: phones draw the shapes smaller.
       const r = el.offsetWidth / 2
-      const [fx, fy] = positions?.[index] ?? spec.at
-      const x = fx * width
+      const custom = positions?.[index]
+      const sideBySide = !custom && width >= WIDE_FROM_PX
+      const [fx, fy] = custom ?? (sideBySide ? spec.wide : spec.at)
+      // Right of the text whatever the width (on a narrow laptop the band is
+      // thinner than a shape, which then tucks behind the photo), and never
+      // past the screen's edge.
+      const x = sideBySide
+        ? Math.min(Math.max(photoLeft + fx, textRight + TEXT_CLEARANCE_PX + r), width - r)
+        : fx * width
       const y = fy * height
 
       // On load each shape glides in from off screen and settles in place —
       // a first hint that these things have weight.
       // Each glides in from the nearer side edge, so none crosses the
       // screen through the others on its way to its spot.
-      const startX = fx < 0.5 ? -r * 2 : width + r * 2
+      const fromLeft = x < width / 2 || (sideBySide && spec.wideFromLeft)
+      const startX = fromLeft ? -r * 2 : width + r * 2
 
       return reduceMotion
         ? { angle: 0, el, r, vx: 0, vy: 0, x, y }

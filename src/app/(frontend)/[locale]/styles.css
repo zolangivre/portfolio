@@ -442,7 +442,11 @@
     .playground-layer {
       --playground-scale: 0.6;
     }
+  }
 
+  /* Faded for as long as the hero is stacked (below lg), tablets included:
+   at full strength a shape behind a paragraph took words with it. */
+  @media (max-width: 1023px) {
     /* Scoped through the layer to outrank the base rules further down. */
     .playground-layer .playground-shape,
     :root.dark .playground-layer .playground-shape {
