@@ -5,6 +5,7 @@ import { ViewTransition } from 'react'
 
 import { AdjacentNav } from '@/components/ui/AdjacentNav'
 import { AnimatedTitle } from '@/components/ui/AnimatedTitle'
+import { buttonClassName } from '@/components/ui/Button'
 import { presentTechnologies, TechChip } from '@/components/ui/TechChip'
 import { Container } from '@/components/ui/Container'
 import { DeviceMockup } from '@/components/ui/DeviceMockup'
@@ -126,6 +127,11 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
     ? (dictionary.projects.statusLabels[project.status] ?? project.status)
     : null
   const technologies = presentTechnologies(project.technologies)
+  // The live site first: when a project is online, that is the link to follow.
+  const externalLinks = [
+    { href: project.liveUrl, label: dictionary.projects.liveLabel },
+    { href: project.githubUrl, label: dictionary.projects.githubLabel },
+  ].flatMap((link) => (link.href ? [{ href: link.href, label: link.label }] : []))
   // Both collections can be dropped in the same gallery, and their ids are
   // independent sequences — so the key has to carry the collection too, or a
   // media and a video that happen to share an id collide in the React list.
@@ -232,6 +238,25 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                     {project.shortDescription}
                   </p>
                 ) : null}
+                {/* The way out to the real thing sits with the title, not
+                  under the whole write-up: it's the first thing a visitor
+                  wants from a project that is online. The first link is the
+                  page's one primary action. */}
+                {externalLinks.length > 0 ? (
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    {externalLinks.map((link, index) => (
+                      <a
+                        className={buttonClassName(index === 0 ? 'primary' : 'secondary')}
+                        href={link.href}
+                        key={link.href}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        {link.label}
+                      </a>
+                    ))}
+                  </div>
+                ) : null}
               </div>
               {mockupFrame && mockupUrl ? (
                 <span className="hidden shrink-0 self-center sm:block">
@@ -315,33 +340,6 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                   />
                 ))}
               </ul>
-            </Reveal>
-          ) : null}
-
-          {project.githubUrl || project.liveUrl ? (
-            <Reveal>
-              <div className="mt-8 flex flex-wrap gap-4">
-                {project.githubUrl ? (
-                  <a
-                    className="link-underline text-sm font-medium text-fg transition hover:text-accent"
-                    href={project.githubUrl}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    {dictionary.projects.githubLabel}
-                  </a>
-                ) : null}
-                {project.liveUrl ? (
-                  <a
-                    className="link-underline text-sm font-medium text-fg transition hover:text-accent"
-                    href={project.liveUrl}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    {dictionary.projects.liveLabel}
-                  </a>
-                ) : null}
-              </div>
             </Reveal>
           ) : null}
 
