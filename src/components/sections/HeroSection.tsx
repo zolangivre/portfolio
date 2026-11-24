@@ -60,10 +60,12 @@ export function HeroSection({ fallbackTitle, hero, settings }: HeroSectionProps)
   return (
     <section className="hero-section" aria-labelledby="hero-title">
       <Container
-        // Below lg it reads name → photo → the rest: the text column is
-        // dissolved (`contents`) so the photo can slot in under the name,
-        // ordered with `order`; kept small so the name and the opening of
-        // the text still fit on the first screen. The identity — title,
+        // Below lg it reads name → photo → buttons → the rest: the text
+        // column is dissolved (`contents`) so the photo can slot in under
+        // the name, ordered with `order`; kept small so the name, the photo
+        // and the buttons fit on the first screen. The buttons come before
+        // the paragraphs there: under three paragraphs they sat two screens
+        // down a phone. The identity — title,
         // name, photo — is centred like a contact card, with the buttons;
         // the paragraphs stay left-aligned, as long text reads best. From
         // lg they sit side by side, text on the left.
@@ -103,12 +105,12 @@ export function HeroSection({ fallbackTitle, hero, settings }: HeroSectionProps)
             </span>
           </motion.h1>
           {hero?.description ? (
-            <motion.div className="order-2 lg:order-none" variants={heroItemVariants}>
+            <motion.div className="order-3 lg:order-none" variants={heroItemVariants}>
               <RichText content={hero.description} />
             </motion.div>
           ) : null}
           <motion.div
-            className="order-2 mt-8 flex flex-wrap justify-center gap-3 lg:order-none lg:justify-start"
+            className="order-2 mb-8 flex flex-wrap justify-center gap-3 lg:order-none lg:mt-8 lg:mb-0 lg:justify-start"
             variants={heroItemVariants}
           >
             {primaryCta?.label && primaryCta?.href ? (
@@ -129,7 +131,7 @@ export function HeroSection({ fallbackTitle, hero, settings }: HeroSectionProps)
           </motion.div>
           {highlights.length > 0 ? (
             <motion.div
-              className="hero-highlights dot-list order-2 mt-8 justify-center gap-y-2 text-sm text-fg-muted lg:order-none lg:justify-start"
+              className="hero-highlights dot-list order-3 mt-8 justify-center gap-y-2 text-sm text-fg-muted lg:order-none lg:justify-start"
               variants={heroItemVariants}
             >
               {highlights.map((item, index) => (
