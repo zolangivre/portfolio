@@ -7,6 +7,7 @@ import { AdjacentNav } from '@/components/ui/AdjacentNav'
 import { AnimatedTitle } from '@/components/ui/AnimatedTitle'
 import { buttonClassName } from '@/components/ui/Button'
 import { presentTechnologies, TechChip } from '@/components/ui/TechChip'
+import { ContactCta } from '@/components/ui/ContactCta'
 import { Container } from '@/components/ui/Container'
 import { DeviceMockup } from '@/components/ui/DeviceMockup'
 import { Divider } from '@/components/ui/Divider'
@@ -364,6 +365,21 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
                 />
               </Reveal>
             </>
+          ) : null}
+
+          {/* Before previous / next: someone who read to here has the way to
+            reach out first, then the way to keep browsing. Not when the
+            contact section is hidden — the button would lead nowhere. */}
+          {sections?.contact !== false ? (
+            <Reveal className="mt-12">
+              <ContactCta
+                buttonLabel={dictionary.contact.endCta.buttonLabel}
+                eyebrow={dictionary.contact.eyebrow}
+                href={`/${locale}#contact`}
+                text={dictionary.contact.endCta.projectText}
+                title={dictionary.contact.endCta.projectTitle}
+              />
+            </Reveal>
           ) : null}
 
           {previous || next ? (

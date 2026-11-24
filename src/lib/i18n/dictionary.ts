@@ -109,6 +109,14 @@ export interface Dictionary {
       emailFormat: string
       message: string
     }
+    /** The invitation to get in touch at the end of a project or a journal entry. */
+    endCta: {
+      buttonLabel: string
+      projectTitle: string
+      projectText: string
+      journalTitle: string
+      journalText: string
+    }
   }
   journal: {
     eyebrow: string
@@ -254,6 +262,14 @@ const dictionaries: Record<Locale, Dictionary> = {
         emailFormat: 'Cette adresse email ne semble pas valide.',
         message: 'Merci d’écrire votre message.',
       },
+      endCta: {
+        buttonLabel: 'Prendre contact',
+        projectTitle: 'Un projet en tête ?',
+        projectText:
+          'Un site, une application ou une idée encore floue : écrivez-moi, j’en discute volontiers.',
+        journalTitle: 'Envie d’échanger ?',
+        journalText: 'Un mot sur ce récit, une opportunité ou simplement un bonjour : écrivez-moi.',
+      },
     },
     journal: {
       eyebrow: 'En dehors du code',
@@ -396,6 +412,14 @@ const dictionaries: Record<Locale, Dictionary> = {
         email: 'Please enter your email.',
         emailFormat: 'This email address doesn’t look right.',
         message: 'Please write your message.',
+      },
+      endCta: {
+        buttonLabel: 'Get in touch',
+        projectTitle: 'Have a project in mind?',
+        projectText:
+          'A website, an app or an idea still taking shape: write to me, I’d be glad to talk it through.',
+        journalTitle: 'Want to talk?',
+        journalText: 'A word about this story, an opportunity or just a hello: write to me.',
       },
     },
     journal: {
