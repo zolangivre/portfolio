@@ -2373,55 +2373,52 @@
   }
 
   /*
- * Timeline details (TimelineDetails.tsx): on phones an entry's description
- * is folded under its opening paragraph, fading out, with a button to open
- * the rest. The height animation itself is driven from JS (a spring); this
- * is only the resting fold. From 720px everything shows and the button is
- * gone.
+ * Timeline details (TimelineDetails.tsx): an entry's description is folded
+ * under its opening paragraph, fading out, with a button to open the rest.
+ * The height animation itself is driven from JS (a spring); this is only
+ * the resting fold. Short descriptions aren't folded at all (data-foldable).
  */
   .timeline-details-toggle {
     display: none;
   }
 
-  @media (max-width: 719px) {
-    .timeline-details-body {
-      overflow: hidden;
-      position: relative;
-    }
+  .timeline-details-body {
+    overflow: hidden;
+    position: relative;
+  }
 
-    .timeline-details[data-foldable='true'] .timeline-details-body[data-folded='true'] {
-      mask-image: linear-gradient(to bottom, #000 calc(100% - 2.5rem), transparent);
-      max-height: var(--fold-height, 7rem);
-    }
+  .timeline-details[data-foldable='true'] .timeline-details-body[data-folded='true'] {
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 2.5rem), transparent);
+    max-height: var(--fold-height, 7rem);
+  }
 
-    .timeline-details[data-foldable='true'] .timeline-details-toggle {
-      align-items: center;
-      background: none;
-      border: none;
-      color: var(--accent);
-      cursor: pointer;
-      display: inline-flex;
-      font-size: var(--text-caption);
-      font-weight: 600;
-      gap: 0.35rem;
-      margin-top: 0.5rem;
-      min-height: 44px;
-      padding: 0;
-      transition: scale var(--duration-ui) var(--ease-bounce);
-    }
+  .timeline-details[data-foldable='true'] .timeline-details-toggle {
+    align-items: center;
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: var(--text-caption);
+    font-weight: 600;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+    min-height: 44px;
+    padding: 0;
+    transition: scale var(--duration-ui) var(--ease-bounce);
+  }
 
-    .timeline-details-toggle:active {
-      scale: 0.94;
-      transition-duration: 100ms;
-    }
+  .timeline-details-toggle:active {
+    scale: 0.94;
+    transition-duration: 100ms;
+  }
 
-    .timeline-details-toggle svg {
-      transition: rotate var(--duration-ui) var(--ease-out-premium);
-    }
+  .timeline-details-toggle svg {
+    transition: rotate var(--duration-ui) var(--ease-out-premium);
+  }
 
-    .timeline-details-toggle[aria-expanded='true'] svg {
-      rotate: 180deg;
-    }
+  .timeline-details-toggle[aria-expanded='true'] svg {
+    rotate: 180deg;
   }
 
   /* The About cards (judo, way of working…): a shelf on phones (above), a
