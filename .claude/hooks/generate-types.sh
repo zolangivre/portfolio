@@ -2,6 +2,10 @@
 # PostToolUse (Edit|Write): regenerates src/payload-types.ts after a schema
 # edit, so the CI typecheck never runs against stale types. Only fires for
 # files that feed the Payload config.
+# Off in GitHub Actions: the agents there (security-sweep, claude-review) hold
+# write tokens, and this hook would run node_modules and repo code next to
+# them. CI runs its own checks.
+[ "${GITHUB_ACTIONS:-}" = "true" ] && exit 0
 file=$(jq -r '.tool_input.file_path // empty')
 
 case "$file" in

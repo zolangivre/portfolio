@@ -1,6 +1,7 @@
 import {
   Forbidden,
   getPayload,
+  handleEndpoints,
   NotFound,
   ValidationError,
   type CollectionSlug,
@@ -10,6 +11,7 @@ import {
 } from 'payload'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
+import { MAX_ANONYMOUS_CONDITIONS, MAX_ANONYMOUS_LIMIT } from '@/hooks/limitAnonymousQueries'
 import { textToLexicalParagraphs } from '@/lib/richText'
 import configPromise from '@/payload.config'
 
@@ -45,7 +47,8 @@ const collectionPolicy: Record<CollectionSlug, { read: ReadPolicy; create: 'anyo
     imports: { read: 'editors', create: 'editors' },
     journal: { read: 'published-only', create: 'editors' },
     media: { read: 'editors', create: 'editors' },
-    messages: { read: 'editors', create: 'anyone' },
+    // Visitors write through the contact form's server action, not the API.
+    messages: { read: 'editors', create: 'editors' },
     'payload-folders': { read: 'editors', create: 'editors' },
     'payload-jobs': { read: 'editors', create: 'editors' },
     'payload-kv': { read: 'editors', create: 'editors' },
@@ -304,12 +307,11 @@ describe.each(Object.keys(draftable) as (keyof typeof draftable)[])(
 )
 
 /**
- * `messages` is the one collection a visitor can write to, and the REST
- * endpoint skips everything the contact form's server action checks (the
- * honeypot, the length limits). The collection's own validation is all that
- * stands in the way there.
+ * A visitor's message, as the contact form's server action creates it: the
+ * Local API with access overridden and no user. The collection's validation
+ * and hooks are what hold there, whatever the action lets through.
  */
-describe('anonymous message submissions', () => {
+describe('messages from visitors', () => {
   // 254 characters is the RFC 5321 ceiling the collection enforces. Built from
   // short labels so no other email rule (64-char local part, 63-char labels)
   // is what rejects it.
@@ -320,15 +322,30 @@ describe('anonymous message submissions', () => {
 
   const valid = { email: 'visitor@example.com', message: 'Hello!', name: 'Visitor' }
 
-  const submit = async (data: Partial<typeof valid> & { read?: boolean }) => {
+  const submit = async (
+    data: Partial<typeof valid> & { createdAt?: string; read?: boolean; updatedAt?: string },
+  ) => {
     const doc = await payload.create({
       collection: 'messages',
       data: { ...valid, ...data },
-      overrideAccess: false,
     })
 
     return track('messages', doc)
   }
+
+  // The API skipped the server action's honeypot; scripts posted there.
+  it('can no longer be posted to /api/messages', async () => {
+    const response = await handleEndpoints({
+      config,
+      request: new Request('http://localhost:3000/api/messages', {
+        body: JSON.stringify(valid),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      }),
+    })
+
+    expect(response.status).toBe(403)
+  })
 
   it('accepts a valid message', async () => {
     await expect(submit({})).resolves.toMatchObject(valid)
@@ -349,5 +366,269 @@ describe('anonymous message submissions', () => {
     const doc = await submit({ read: true })
 
     expect(doc.read).toBe(false)
+  })
+
+  // A custom `validate` replaces Payload's email check: these all passed the
+  // length-only rule before.
+  it.each([
+    ['empty', ''],
+    ['not an address', 'not-an-address'],
+    ['two addresses', 'a@example.com, b@example.com'],
+    ['a header smuggled in', 'a@example.com\r\nBcc: b@example.com'],
+  ])('refuses an email that is %s', async (_, email) => {
+    await expect(submit({ email })).rejects.toMatchObject({
+      data: { errors: [expect.objectContaining({ path: 'email' })] },
+    })
+  })
+
+  it('dates the message itself', async () => {
+    const doc = await submit({
+      createdAt: '9999-12-31T00:00:00.000Z',
+      updatedAt: '9999-12-31T00:00:00.000Z',
+    })
+
+    expect(new Date(doc.createdAt).getFullYear()).toBeLessThan(9999)
+    expect(new Date(doc.updatedAt).getFullYear()).toBeLessThan(9999)
+  })
+
+  it('still lets an editor mark an older message with a malformed address as read', async () => {
+    // Written straight to the database, as a visitor could before the check.
+    const legacy = track(
+      'messages',
+      await payload.db.create({
+        collection: 'messages',
+        data: { email: 'not-an-address', message: 'Old spam', name: 'Spam', read: false },
+      }),
+    )
+
+    await expect(
+      payload.update({
+        collection: 'messages',
+        data: { read: true },
+        id: legacy.id,
+        overrideAccess: false,
+        user: editor,
+      }),
+    ).resolves.toMatchObject({ read: true })
+  })
+})
+
+/**
+ * Rich text may point at public content only, and the reference stays an id.
+ * By default Lexical let a link or relationship block point at a contact
+ * message or an account, and the site's queries (access overridden) filled it
+ * in with the whole document — straight into the page's HTML.
+ */
+describe('references in rich text', () => {
+  const withNode = (node: Record<string, unknown>) => ({
+    root: {
+      children: [node],
+      direction: null,
+      format: '' as const,
+      indent: 0,
+      type: 'root',
+      version: 1,
+    },
+  })
+
+  const relationshipTo = (relationTo: string, value: number) =>
+    withNode({ format: '', relationTo, type: 'relationship', value, version: 2 })
+
+  const internalLinkTo = (relationTo: string, value: number) =>
+    withNode({
+      children: [
+        { detail: 0, format: 0, mode: 'normal', style: '', text: 'link', type: 'text', version: 1 },
+      ],
+      direction: null,
+      fields: { doc: { relationTo, value }, linkType: 'internal', newTab: false },
+      format: '',
+      indent: 0,
+      type: 'link',
+      version: 3,
+    })
+
+  let messageId: number
+  let categoryId: number
+  let projectId: number
+
+  const publishEntry = async (slug: string, ...nodes: ReturnType<typeof withNode>[]) =>
+    track(
+      'journal',
+      await payload.create({
+        collection: 'journal',
+        data: {
+          _status: 'published',
+          category: categoryId,
+          content: {
+            root: { ...nodes[0]!.root, children: nodes.flatMap((node) => node.root.children) },
+          } as never,
+          date: '2026-01-01T00:00:00.000Z',
+          shortDescription: 'Short description.',
+          slug,
+          title: slug,
+        },
+        overrideAccess: false,
+        user: editor,
+      }),
+    )
+
+  beforeAll(async () => {
+    messageId = track(
+      'messages',
+      await payload.create({
+        collection: 'messages',
+        data: { email: 'private@example.com', message: 'Private.', name: 'Private' },
+      }),
+    ).id
+
+    categoryId = (
+      await payload.find({
+        collection: 'categories',
+        limit: 1,
+        where: { slug: { equals: 'access-journal' } },
+      })
+    ).docs[0]!.id
+
+    projectId = (
+      await payload.find({
+        collection: 'projects',
+        limit: 1,
+        where: { slug: { equals: 'access-published-project' } },
+      })
+    ).docs[0]!.id
+  })
+
+  it.each([
+    ['a message', () => relationshipTo('messages', messageId)],
+    ['an account', () => relationshipTo('users', editor.id as number)],
+  ])('cannot publish a relationship block to %s', async (_, node) => {
+    await expect(publishEntry('access-private-block', node())).rejects.toMatchObject({
+      data: { errors: [expect.objectContaining({ path: 'content' })] },
+    })
+  })
+
+  // Payload doesn't check an internal link's target against the allowed list
+  // (3.92), so such a link can still be saved. What matters is that nobody
+  // reads the document behind it: the reference stays an id.
+  it.each([
+    ['a message', 'messages', () => messageId],
+    ['an account', 'users', () => editor.id as number],
+  ])('never fills in an internal link to %s', async (label, relationTo, id) => {
+    const entry = await publishEntry(
+      `access-private-link-${relationTo}`,
+      internalLinkTo(relationTo, id()),
+    )
+
+    // The site's own read: Local API, access overridden, depth 2.
+    const read = await payload.findByID({ collection: 'journal', depth: 2, id: entry.id })
+    const [link] = (read.content as unknown as ReturnType<typeof withNode>).root.children as {
+      fields: { doc: { value: unknown } }
+    }[]
+
+    expect(link!.fields.doc.value, label).toBe(id())
+    expect(JSON.stringify(read)).not.toContain('private@example.com')
+  })
+
+  it('keeps a reference to public content as a bare id', async () => {
+    const entry = await publishEntry(
+      'access-references-entry',
+      relationshipTo('projects', projectId),
+      internalLinkTo('projects', projectId),
+    )
+
+    // The site's own read: Local API, access overridden, depth 2.
+    const read = await payload.findByID({ collection: 'journal', depth: 2, id: entry.id })
+    const [block, link] = (read.content as unknown as ReturnType<typeof withNode>).root
+      .children as {
+      fields?: { doc: { value: unknown } }
+      value?: unknown
+    }[]
+
+    expect(block!.value).toBe(projectId)
+    expect(link!.fields!.doc.value).toBe(projectId)
+  })
+})
+
+/**
+ * What one anonymous REST read may ask of the database
+ * (hooks/limitAnonymousQueries.ts). Each condition on a relationship adds
+ * joins to a single SQL statement, and Payload caps neither the conditions
+ * nor the page size.
+ */
+describe('anonymous REST queries', () => {
+  const get = async (query: string) => {
+    const response = await handleEndpoints({
+      config,
+      request: new Request(`http://localhost:3000/api/projects?${query}`, { method: 'GET' }),
+    })
+
+    return { body: (await response.json()) as { limit?: number }, status: response.status }
+  }
+
+  const conditions = (count: number) =>
+    Array.from(
+      { length: count },
+      (_, i) => `where[or][${i}][category.slug][equals]=access-${i}`,
+    ).join('&')
+
+  it(`accepts up to ${MAX_ANONYMOUS_CONDITIONS} conditions`, async () => {
+    expect((await get(conditions(MAX_ANONYMOUS_CONDITIONS))).status).toBe(200)
+  })
+
+  it('refuses more, before any query runs', async () => {
+    expect((await get(conditions(MAX_ANONYMOUS_CONDITIONS + 1))).status).toBe(400)
+  })
+
+  // Payload reads `OR` as `or`: the cap has to as well.
+  it('refuses more under an upper-case OR', async () => {
+    const upper = conditions(MAX_ANONYMOUS_CONDITIONS + 1).replaceAll('where[or]', 'where[OR]')
+
+    expect((await get(upper)).status).toBe(400)
+  })
+
+  it.each([
+    ['a huge limit', 'limit=1000000'],
+    ['limit=0 (every row)', 'limit=0'],
+  ])(`caps %s at ${MAX_ANONYMOUS_LIMIT}`, async (_, query) => {
+    const { body, status } = await get(query)
+
+    expect(status).toBe(200)
+    expect(body.limit).toBe(MAX_ANONYMOUS_LIMIT)
+  })
+
+  it('keeps pagination on', async () => {
+    const { body } = await get('pagination=false')
+
+    expect(body.limit).toBeGreaterThan(0)
+  })
+
+  it('leaves the site’s own queries alone', async () => {
+    const where = { or: Array.from({ length: 30 }, (_, i) => ({ slug: { equals: `x-${i}` } })) }
+
+    await expect(
+      payload.find({ collection: 'projects', limit: 0, pagination: false, where }),
+    ).resolves.toBeDefined()
+  })
+})
+
+/** Endpoints the site never uses, so nobody needs them open. */
+describe('unused endpoints', () => {
+  it('disables GraphQL', () => {
+    expect(config.graphQL.disable).toBe(true)
+  })
+
+  it('removes the import preview, which parsed an uploaded file for anyone', async () => {
+    const csv = Buffer.from('title\nx\n').toString('base64')
+    const response = await handleEndpoints({
+      config,
+      request: new Request('http://localhost:3000/api/imports/preview-data', {
+        body: JSON.stringify({ collectionSlug: 'projects', fileData: csv, format: 'csv' }),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      }),
+    })
+
+    expect(response.status).toBeGreaterThanOrEqual(400)
+    expect(await response.text()).not.toContain('"docs"')
   })
 })

@@ -121,6 +121,14 @@ automated security reviews, and CodeQL, shaped them:
 - **Tokens kept apart.** `SECURITY_ALERTS_TOKEN` is only used by the fetch
   step, never by Claude. No token is left in `.git/config`.
   `GITHUB_TOKEN` is read-only by default (`permissions: contents: read`).
+  Reading `.git/` is denied all the same.
+- **No code run on the side.** pnpm runs a pnpmfile named with
+  `--config.pnpmfile`, for `pnpm why` too, and the sweep may edit `src/`:
+  the sweep step sets `npm_config_ignore_pnpmfile` and denies `*pnpmfile*`.
+  The project's hooks that run code (`format`, `generate-types`,
+  `turn-checks`) exit at once under `GITHUB_ACTIONS`; the guards
+  (`guard-git`, `protect-files`) still apply. The review also deletes any
+  `.claude/` a PR nests below the root before restoring staging's.
 - **Third-party text cleaned** (printable ASCII, no markup, cut short) and
   treated as data, never as instructions.
 - **Every action pinned to a commit**, since a tag can be moved to any code.

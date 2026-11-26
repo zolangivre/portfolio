@@ -442,7 +442,11 @@
     .playground-layer {
       --playground-scale: 0.6;
     }
+  }
 
+  /* Faded for as long as the hero is stacked (below lg), tablets included:
+   at full strength a shape behind a paragraph took words with it. */
+  @media (max-width: 1023px) {
     /* Scoped through the layer to outrank the base rules further down. */
     .playground-layer .playground-shape,
     :root.dark .playground-layer .playground-shape {
@@ -2214,6 +2218,29 @@
     margin: 0;
   }
 
+  /* The footer's links: the CMS ones, then the email and the profiles. */
+  .site-footer-links,
+  .site-footer-contact {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+  }
+
+  .site-footer-contact {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .site-footer-contact a {
+    align-items: center;
+    display: inline-flex;
+    gap: 0.4rem;
+    /* A long address wraps inside the footer instead of widening the page. */
+    overflow-wrap: anywhere;
+  }
+
   /*
  * Phones: a grid of parallel items — the projects, the skill categories,
  * the About cards — becomes a shelf you swipe through (App Store style),
@@ -2259,7 +2286,19 @@
       display: none;
     }
 
-    .shelf > * {
+    /* A group of cards inside the row (the featured projects, then the
+     others) dissolves into it: its cards are the row's own items, and a
+     heading between groups has no place in a row you swipe. */
+    .shelf .shelf-group {
+      display: contents;
+    }
+
+    .shelf .project-others-title {
+      display: none;
+    }
+
+    .shelf > *,
+    .shelf > .shelf-group > * {
       /* Sized off the screen rather than a percentage of the scroller: the
        gutter on the left, then ~2rem of the next card showing on the right. */
       flex: 0 0 calc(100vw - 4.25rem);
@@ -2334,55 +2373,52 @@
   }
 
   /*
- * Timeline details (TimelineDetails.tsx): on phones an entry's description
- * is folded under its opening paragraph, fading out, with a button to open
- * the rest. The height animation itself is driven from JS (a spring); this
- * is only the resting fold. From 720px everything shows and the button is
- * gone.
+ * Timeline details (TimelineDetails.tsx): an entry's description is folded
+ * under its opening paragraph, fading out, with a button to open the rest.
+ * The height animation itself is driven from JS (a spring); this is only
+ * the resting fold. Short descriptions aren't folded at all (data-foldable).
  */
   .timeline-details-toggle {
     display: none;
   }
 
-  @media (max-width: 719px) {
-    .timeline-details-body {
-      overflow: hidden;
-      position: relative;
-    }
+  .timeline-details-body {
+    overflow: hidden;
+    position: relative;
+  }
 
-    .timeline-details[data-foldable='true'] .timeline-details-body[data-folded='true'] {
-      mask-image: linear-gradient(to bottom, #000 calc(100% - 2.5rem), transparent);
-      max-height: var(--fold-height, 7rem);
-    }
+  .timeline-details[data-foldable='true'] .timeline-details-body[data-folded='true'] {
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 2.5rem), transparent);
+    max-height: var(--fold-height, 7rem);
+  }
 
-    .timeline-details[data-foldable='true'] .timeline-details-toggle {
-      align-items: center;
-      background: none;
-      border: none;
-      color: var(--accent);
-      cursor: pointer;
-      display: inline-flex;
-      font-size: var(--text-caption);
-      font-weight: 600;
-      gap: 0.35rem;
-      margin-top: 0.5rem;
-      min-height: 44px;
-      padding: 0;
-      transition: scale var(--duration-ui) var(--ease-bounce);
-    }
+  .timeline-details[data-foldable='true'] .timeline-details-toggle {
+    align-items: center;
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: var(--text-caption);
+    font-weight: 600;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+    min-height: 44px;
+    padding: 0;
+    transition: scale var(--duration-ui) var(--ease-bounce);
+  }
 
-    .timeline-details-toggle:active {
-      scale: 0.94;
-      transition-duration: 100ms;
-    }
+  .timeline-details-toggle:active {
+    scale: 0.94;
+    transition-duration: 100ms;
+  }
 
-    .timeline-details-toggle svg {
-      transition: rotate var(--duration-ui) var(--ease-out-premium);
-    }
+  .timeline-details-toggle svg {
+    transition: rotate var(--duration-ui) var(--ease-out-premium);
+  }
 
-    .timeline-details-toggle[aria-expanded='true'] svg {
-      rotate: 180deg;
-    }
+  .timeline-details-toggle[aria-expanded='true'] svg {
+    rotate: 180deg;
   }
 
   /* The About cards (judo, way of working…): a shelf on phones (above), a
@@ -2495,6 +2531,28 @@
     }
   }
 
+  /* The projects section (ProjectsSection.tsx): the featured projects one
+   under the other, each across the section, then a heading and the grid
+   of the others. On phones the list is the shelf instead (below). */
+  @media (min-width: 720px) {
+    .project-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+  }
+
+  .project-featured {
+    display: grid;
+    gap: 1.1rem;
+  }
+
+  .project-others-title {
+    color: var(--fg);
+    font-size: 1.25rem;
+    margin: 1.9rem 0 0.3rem;
+  }
+
   @media (max-width: 639px) {
     .site-footer-inner {
       align-items: flex-start;
@@ -2590,6 +2648,16 @@
 
   .rich-text a:hover {
     color: var(--accent-strong);
+  }
+
+  /* "Inline code" in the editor (a package name, a command): set apart by
+   weight, in the text's own face. The browser's default is monospace, which
+   the site doesn't use anywhere. */
+  .rich-text code {
+    color: var(--fg);
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: 600;
   }
 
   .rich-text ul,

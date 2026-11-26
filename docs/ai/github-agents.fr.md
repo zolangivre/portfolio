@@ -134,7 +134,16 @@ revues de sécurité automatisées, et CodeQL, les ont façonnés :
 - **Des jetons séparés.** `SECURITY_ALERTS_TOKEN` ne sert qu'à l'étape de
   récupération, jamais à Claude. Aucun jeton n'est laissé dans
   `.git/config`. `GITHUB_TOKEN` est en lecture seule par défaut
-  (`permissions: contents: read`).
+  (`permissions: contents: read`). La lecture de `.git/` est interdite quand
+  même.
+- **Aucun code lancé en douce.** pnpm exécute un pnpmfile passé par
+  `--config.pnpmfile`, pour `pnpm why` aussi, et le balayage peut modifier
+  `src/` : l'étape du balayage définit `npm_config_ignore_pnpmfile` et
+  interdit `*pnpmfile*`. Les hooks du projet qui lancent du code (`format`,
+  `generate-types`, `turn-checks`) s'arrêtent aussitôt sous
+  `GITHUB_ACTIONS` ; les garde-fous (`guard-git`, `protect-files`)
+  s'appliquent toujours. La revue supprime aussi tout `.claude/` qu'une PR
+  place sous la racine avant de restaurer celui de staging.
 - **Le texte tiers nettoyé** (ASCII imprimable, sans balisage, coupé court)
   et traité comme une donnée, jamais comme une instruction.
 - **Chaque action figée sur un commit**, puisqu'un tag peut être déplacé

@@ -92,9 +92,11 @@ export function JournalCard({ dictionary, entry, locale }: JournalCardProps) {
             {readingTime ? ` · ${readingTime}` : null}
           </p>
           <h3 className="mt-2 text-xl font-semibold text-fg">{entry.title}</h3>
-          <p className="mt-3 line-clamp-3 flex-1 text-sm leading-7 text-fg-muted">
-            {entry.shortDescription}
-          </p>
+          {/* The wrapper takes the card's spare height, not the text: a
+              stretched line-clamp box shows a fourth line under the "…". */}
+          <div className="mt-3 flex-1">
+            <p className="line-clamp-3 text-sm leading-7 text-fg-muted">{entry.shortDescription}</p>
+          </div>
 
           {tags.length > 0 ? (
             <ul className="mt-5 flex flex-wrap gap-2" aria-label={dictionary.journal.tagsAriaLabel}>

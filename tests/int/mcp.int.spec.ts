@@ -271,3 +271,63 @@ describe('reordering through MCP', () => {
     expect((await payload.findByID({ collection: 'projects', id: project.id }))._order).toBe(before)
   })
 })
+
+describe('reading excluded collections through MCP', () => {
+  // The key has no tool on messages or users, yet rich text in an allowed
+  // global could point at one: an update with `depth` sent the whole
+  // document back, filled in as the key's owner.
+  it('cannot read a contact message through a reference in the hero', async () => {
+    const message = await payload.create({
+      collection: 'messages',
+      data: { email: 'mcp-private@example.com', message: 'Not for MCP.', name: 'Private' },
+    })
+    // The reference this test plants can't be published, so it must not stay
+    // in the hero's latest draft for the files that publish the hero later.
+    const { description } = await payload.findGlobal({ draft: true, slug: 'hero' })
+
+    try {
+      const text = { detail: 0, format: 0, mode: 'normal', style: '', text: 'x', type: 'text' }
+      const result = await callTool('updateHero', {
+        depth: 1,
+        description: {
+          root: {
+            children: [
+              {
+                format: '',
+                relationTo: 'messages',
+                type: 'relationship',
+                value: message.id,
+                version: 2,
+              },
+              {
+                children: [{ ...text, version: 1 }],
+                direction: null,
+                fields: {
+                  doc: { relationTo: 'messages', value: message.id },
+                  linkType: 'internal',
+                  newTab: false,
+                },
+                format: '',
+                indent: 0,
+                type: 'link',
+                version: 3,
+              },
+            ],
+            direction: null,
+            format: '',
+            indent: 0,
+            type: 'root',
+            version: 1,
+          },
+        },
+      })
+
+      const reply = JSON.stringify(result)
+      expect(reply).not.toContain('mcp-private@example.com')
+      expect(reply).not.toContain('Not for MCP.')
+    } finally {
+      await payload.updateGlobal({ data: { description }, draft: true, slug: 'hero' })
+      await payload.delete({ collection: 'messages', id: message.id })
+    }
+  })
+})

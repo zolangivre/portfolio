@@ -28,6 +28,10 @@ export const Users: CollectionConfig = {
   admin: {
     description: 'Comptes autorisés à se connecter à cet espace d’administration.',
     useAsTitle: 'email',
+    // An account is never something rich text may point at: a reference would
+    // fill in the user's email and sessions wherever it's read.
+    enableRichTextLink: false,
+    enableRichTextRelationship: false,
   },
   auth: true,
   hooks: {

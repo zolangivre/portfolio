@@ -46,6 +46,30 @@ const fetchAllProjects = unstable_cache(
   { revalidate: FALLBACK_REVALIDATE, tags: PROJECT_TAGS },
 )
 
+/**
+ * The slugs a visitor can open, in one cache entry. A page asked for an
+ * unknown slug checks this list before looking the slug up on its own: that
+ * lookup is cached per slug, and the slugs come from whoever asks, so each
+ * one a bot tried left one more entry.
+ */
+const fetchPublishedProjectSlugs = unstable_cache(
+  async (): Promise<string[]> => {
+    const payload = await getPayloadClient()
+
+    const { docs } = await payload.find({
+      collection: 'projects',
+      depth: 0,
+      pagination: false,
+      select: { slug: true },
+      where: { _status: { equals: 'published' as const } },
+    })
+
+    return docs.map((doc) => doc.slug)
+  },
+  ['projects:slugs'],
+  { revalidate: FALLBACK_REVALIDATE, tags: [cacheTags.projects] },
+)
+
 const fetchProject = unstable_cache(
   async (slug: string, locale: Locale, draft: boolean): Promise<Project | null> => {
     const payload = await getPayloadClient()
@@ -85,7 +109,12 @@ export const getAllProjects = cache(async (locale: Locale = defaultLocale): Prom
 export const getProject = cache(
   async (slug: string, locale: Locale = defaultLocale): Promise<Project | null> => {
     try {
-      return await fetchProject(slug, locale, await isPreview())
+      const draft = await isPreview()
+
+      // Drafts aren't in the list: the preview looks every slug up.
+      if (!draft && !(await fetchPublishedProjectSlugs()).includes(slug)) return null
+
+      return await fetchProject(slug, locale, draft)
     } catch (error) {
       console.error('Failed to load project from Payload.', error)
 

@@ -6,7 +6,7 @@ import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { fr } from '@payloadcms/translations/languages/fr'
 import { s3Storage } from '@payloadcms/storage-s3'
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { LinkFeature, lexicalEditor, RelationshipFeature } from '@payloadcms/richtext-lexical'
 import { attachDatabasePool } from '@vercel/functions'
 import path from 'path'
 import { buildConfig, type CollectionSlug } from 'payload'
@@ -29,6 +29,7 @@ import { Messages } from './collections/Messages'
 import { Journal } from './collections/Journal'
 import { redirectsConfig } from './collections/Redirects'
 import { refuseGlobalUnpublishSchedule } from './collections/drafts'
+import { limitAnonymousQueries } from './hooks/limitAnonymousQueries'
 import { canRunJobs } from './lib/access'
 import { parseSender } from './lib/emailSender'
 import { previewPath, previewURL } from './lib/preview'
@@ -41,6 +42,33 @@ import { Navigation } from './globals/Navigation'
 import { Footer } from './globals/Footer'
 import { SectionsVisibility } from './globals/SectionsVisibility'
 import { SectionsContent } from './globals/SectionsContent'
+import { withVerifiedTls } from './lib/databaseUrl'
+
+/**
+ * What a rich-text internal link or relationship block may point at: the
+ * collections a visitor can read anyway. By default Lexical offers every
+ * collection, `messages` and `users` included, and fills each reference in
+ * with the whole document when it's read — with access overridden on the
+ * site's own queries, and as the key's owner over MCP. A reference in the
+ * hero then put a contact message into the page's HTML, or into an MCP
+ * reply, though neither may read messages.
+ *
+ * `maxDepth: 0` keeps references as bare ids: the site renders no
+ * relationship block and builds no link from a referenced document, so
+ * nothing needs them filled in.
+ */
+const richTextTargets: CollectionSlug[] = [
+  'projects',
+  'journal',
+  'experiences',
+  'education',
+  'testimonials',
+  'skills',
+  'technologies',
+  'categories',
+  'companies',
+  'schools',
+]
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -197,6 +225,9 @@ export default buildConfig({
         }),
     },
   },
+  // Every collection bounds what an anonymous REST read may ask of the
+  // database (hooks/limitAnonymousQueries.ts), here once rather than in
+  // each file, so a new collection can't forget it.
   collections: [
     Users,
     Media,
@@ -212,7 +243,13 @@ export default buildConfig({
     Testimonials,
     Messages,
     Journal,
-  ],
+  ].map((collection) => ({
+    ...collection,
+    hooks: {
+      ...collection.hooks,
+      beforeOperation: [...(collection.hooks?.beforeOperation ?? []), limitAnonymousQueries],
+    },
+  })),
   // The folders media and videos are sorted into (`folders: true` on each).
   // Payload builds the folder collection itself, with English labels; this
   // only translates them. Deleting a folder deletes its subfolders and moves
@@ -241,7 +278,26 @@ export default buildConfig({
     SectionsVisibility,
     SectionsContent,
   ],
-  editor: lexicalEditor(),
+  editor: lexicalEditor({
+    // Swapped in place, so the toolbar keeps its order.
+    features: ({ defaultFeatures }) =>
+      defaultFeatures.map((feature) => {
+        if (feature.key === 'link') {
+          return LinkFeature({ enabledCollections: richTextTargets, maxDepth: 0 })
+        }
+        if (feature.key === 'relationship') {
+          return RelationshipFeature({ enabledCollections: richTextTargets, maxDepth: 0 })
+        }
+        return feature
+      }),
+  }),
+  // Nothing on the site or in the admin queries GraphQL, and the endpoint
+  // let an anonymous request run hundreds of aliased finds at once. Disabled,
+  // /api/graphql answers 404; the generated route files stay as Payload
+  // writes them.
+  graphQL: {
+    disable: true,
+  },
   // The admin panel is French-only — separate from the site's content locales
   // below, which translate the values editors type in. Listing `fr` alone is
   // what pins it: Payload picks the request's Accept-Language whenever that
@@ -297,7 +353,7 @@ export default buildConfig({
     // from detecting a schema drift and hanging on an interactive prompt.
     push: process.env.PAYLOAD_DB_PUSH !== 'false',
     pool: {
-      connectionString: process.env.DATABASE_URL || '',
+      connectionString: withVerifiedTls(process.env.DATABASE_URL || ''),
     },
   }),
   // Vercel freezes a function between requests, which also stops the pool's
@@ -447,9 +503,13 @@ export default buildConfig({
         export: { disableJobsQueue: true, disableSave: true },
         import: false,
       })),
+      // The collection's endpoints go too: its /preview-data parses an
+      // uploaded file with no check on who sends it, and a crafted CSV header
+      // could make it allocate an array of any size.
       overrideImportCollection: ({ collection }) => ({
         ...collection,
         access: { ...collection.access, create: () => false },
+        endpoints: [],
       }),
     }),
     // Falls back to local disk storage when R2 credentials are unset (local

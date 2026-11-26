@@ -1,20 +1,23 @@
 name: Production check
 
-# Every 3 hours, and by hand: checks that the live site still has its content
+# Twice a day, and by hand: checks that the live site still has its content
 # (production-check.sh). When it doesn't, the run fails and an issue assigned
 # to the owner says what's wrong, which is what sends the email: GitHub only
 # mails a failed scheduled run to whoever last edited its cron line. The issue
 # stays open during the outage, so one outage is one email, and the first run
 # that passes closes it.
 #
-# Every 3 hours rather than more often: each run wakes the Neon compute, and
-# the free plan counts the time it stays awake. Off the hour, where GitHub
-# delays scheduled runs the most (they can still start late). GitHub turns off
-# schedules after 60 days without activity in the repository.
+# Twice a day rather than more often: each run wakes the Neon compute, which
+# the free plan counts for the time it stays awake, and the API it reads isn't
+# cached, so each run is also a cold start of a Vercel function, which spends
+# the free plan's Fluid Active CPU. Morning and evening in Paris, off the
+# hour, where GitHub delays scheduled runs the most (they can still start
+# late). GitHub turns off schedules after 60 days without activity in the
+# repository.
 
 on:
   schedule:
-    - cron: '23 */3 * * *'
+    - cron: '23 6,18 * * *'
   workflow_dispatch:
 
 permissions:

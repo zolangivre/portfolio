@@ -5,6 +5,20 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 /** More cards than this, and the dots give way to a "3 / 24" counter. */
 const MAX_DOTS = 10
 
+/**
+ * The cards of the row, as laid out: a group that dissolves into it
+ * (`display: contents`, .shelf-group) gives its own children, and what the
+ * row hides (a heading only shown in the grid) isn't one.
+ */
+function shelfItems(row: HTMLElement): HTMLElement[] {
+  return Array.from(row.children)
+    .flatMap((child) =>
+      getComputedStyle(child).display === 'contents' ? Array.from(child.children) : [child],
+    )
+    .filter((item): item is HTMLElement => item instanceof HTMLElement)
+    .filter((item) => item.getClientRects().length > 0)
+}
+
 type ShelfProps = {
   /** The `.shelf` row — a grid that becomes a swipeable row on phones. */
   children: ReactNode
@@ -48,8 +62,9 @@ export function Shelf({ children, className, navLabel, titles }: ShelfProps) {
       const snapLine = row.getBoundingClientRect().left + snapPadding
       let nearest = 0
       let distance = Infinity
+      const items = shelfItems(row)
 
-      Array.from(row.children).forEach((child, index) => {
+      items.forEach((child, index) => {
         const gap = Math.abs(child.getBoundingClientRect().left - snapLine)
 
         if (gap < distance) {
@@ -62,7 +77,7 @@ export function Shelf({ children, className, navLabel, titles }: ShelfProps) {
       // so the end of the row counts as being on it.
       const atEnd = row.scrollLeft >= row.scrollWidth - row.clientWidth - 2
 
-      setActive(atEnd ? row.children.length - 1 : nearest)
+      setActive(atEnd ? items.length - 1 : nearest)
     }
 
     const onScroll = () => {
@@ -80,7 +95,8 @@ export function Shelf({ children, className, navLabel, titles }: ShelfProps) {
   }, [])
 
   function goTo(index: number) {
-    const card = scroller()?.children[index]
+    const row = scroller()
+    const card = row ? shelfItems(row)[index] : undefined
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     card?.scrollIntoView({

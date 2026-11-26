@@ -224,19 +224,18 @@ describe('the trash of a public collection without drafts', () => {
 })
 
 describe('a message sent through the contact form', () => {
+  // As the server action creates it: the Local API, access overridden, no
+  // user. (/api/messages is closed to visitors.)
   it('cannot be created straight into the trash by a visitor', async () => {
-    const response = await rest('/messages', {
-      body: JSON.stringify({
+    const doc = await payload.create({
+      collection: 'messages',
+      data: {
         deletedAt: '2026-01-01T00:00:00.000Z',
         email: 'visitor@test.local',
         message: 'Hello from a visitor trying to hide this.',
         name: 'Trash visitor',
-      }),
-      headers: { 'Content-Type': 'application/json' },
-      method: 'POST',
+      },
     })
-    expect(response.status).toBe(201)
-    const { doc } = (await response.json()) as { doc: { id: number } }
 
     const stored = await payload.findByID({ collection: 'messages', id: doc.id, trash: true })
     expect(stored.deletedAt ?? null).toBeNull()

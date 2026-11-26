@@ -57,11 +57,13 @@ export function SkillsSection({ content, dictionary, skills }: SkillsSectionProp
               {skillGroups.map(({ category, skills: categorySkills }) => (
                 <article className="skill-group @container" key={category?.id ?? 'uncategorized'}>
                   <h3 className="text-fg">{category?.name ?? dictionary.skills.eyebrow}</h3>
-                  {/* Two tiles to a row only where a name like "TypeScript"
-                      fits beside its icon: a 320px phone, or a large text
-                      size, gets one. Measured on the card, so it holds in
-                      the phone shelf and the desktop grid alike. */}
-                  <ul className="mt-4 grid grid-cols-1 gap-3 @min-[17.5rem]:grid-cols-2">
+                  {/* Two tiles to a row only where the longest names
+                      ("TailwindCSS", "PostgreSQL") fit beside their icon and
+                      the link arrow without breaking mid-word: 24rem of
+                      card. A phone, a tablet's half-width card or a large
+                      text size gets one. Measured on the card, so it holds
+                      in the phone shelf and the desktop grid alike. */}
+                  <ul className="mt-4 grid grid-cols-1 gap-3 @min-[24rem]:grid-cols-2">
                     {/* No idle bobbing: a few dozen tiles drifting on a 5s loop
                       (0.2 Hz, the rate most likely to unsettle) pulled at the
                       eye while reading. They still answer the pointer. */}
