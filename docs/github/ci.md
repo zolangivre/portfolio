@@ -29,7 +29,7 @@ flowchart LR
 | E2E tests          | `pnpm test:e2e`: Chromium and `mobile-safari` (iPhone 15, WebKit) against the seeded production build | yes, seeded    | ~4 min  |
 | Lighthouse         | [`pnpm lighthouse`](#lighthouse): performance budgets on the same seeded build, warnings only         | yes, seeded    | ~4 min  |
 
-Every job runs on Ubuntu with Node 24 and `pnpm install --frozen-lockfile`.
+Every job runs on Ubuntu with Node 26 and `pnpm install --frozen-lockfile`.
 The first six are required checks of the [ruleset](README.md#ruleset) (their
 names must match it). Lighthouse isn't: a shared runner's timings are too
 noisy to block a merge.

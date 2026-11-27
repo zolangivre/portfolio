@@ -22,7 +22,7 @@ Portfolio de développeur bilingue (FR/EN), entièrement piloté par un CMS : co
 
 ## Démarrage rapide
 
-Prérequis : Node 24+, pnpm, PostgreSQL (ou Docker).
+Prérequis : Node 26, pnpm, PostgreSQL (ou Docker).
 
 ```bash
 git clone <repo>
