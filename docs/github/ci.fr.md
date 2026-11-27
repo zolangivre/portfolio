@@ -30,7 +30,7 @@ flowchart LR
 | E2E tests          | `pnpm test:e2e` : Chromium et `mobile-safari` (iPhone 15, WebKit) sur le build de production avec contenu de test | oui, rempli | ~4 min   |
 | Lighthouse         | [`pnpm lighthouse`](#lighthouse) : budgets de performance sur le même build, en simple avertissement              | oui, rempli | ~4 min   |
 
-Chaque job tourne sur Ubuntu avec Node 24 et `pnpm install --frozen-lockfile`.
+Chaque job tourne sur Ubuntu avec Node 26 et `pnpm install --frozen-lockfile`.
 Les six premiers sont des vérifications obligatoires du
 [ruleset](README.fr.md#ruleset) (leurs noms doivent y correspondre). Pas
 Lighthouse : les temps d'un runner partagé varient trop pour bloquer un merge.

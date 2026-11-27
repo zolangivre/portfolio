@@ -22,7 +22,7 @@ Bilingual (FR/EN) developer portfolio fully driven by a CMS: content, sections, 
 
 ## Quick start
 
-Requirements: Node 24+, pnpm, PostgreSQL (or Docker).
+Requirements: Node 26, pnpm, PostgreSQL (or Docker).
 
 ```bash
 git clone <repo>

@@ -52,7 +52,7 @@ scope se désignent par `@scope*` : la forme `@scope/*` ne trouvait rien ici
 | aucun                | toutes les autres majeures                                                                                                  | Une à la fois : chacune peut changer un comportement                                                                                                   |
 
 **Ignorées** : les majeures de `@types/node`. Elles suivent la version de
-Node sur laquelle tourne le site (24.x sur Vercel et en CI) : des types d'une
+Node sur laquelle tourne le site (26.x sur Vercel et en CI) : des types d'une
 majeure plus récente accepteraient des API qui plantent en production. Cette
 majeure se monte à la main, avec le runtime.
 

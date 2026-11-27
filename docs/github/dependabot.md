@@ -51,7 +51,7 @@ matched with `@scope*`: the `@scope/*` form matched nothing here (#51 bumped
 | none                 | every other major                                                                                                           | One at a time: each can change behaviour                                                                                               |
 
 **Ignored**: `@types/node` majors. They follow the Node version the site
-runs on (24.x on Vercel and in CI): types for a newer major would accept APIs
+runs on (26.x on Vercel and in CI): types for a newer major would accept APIs
 that crash in production. Bump that major by hand with the runtime.
 
 ## What to do with a Dependabot PR

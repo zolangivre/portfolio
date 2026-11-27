@@ -23,7 +23,7 @@ updates:
     commit-message:
       prefix: chore
       include: scope
-    # @types/node follows the Node version the site runs on (24.x on Vercel
+    # @types/node follows the Node version the site runs on (26.x on Vercel
     # and in CI): types for a newer major would accept APIs that crash in
     # production. Its major is bumped by hand along with the runtime.
     ignore:
